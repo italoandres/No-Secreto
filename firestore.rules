@@ -1,0 +1,381 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para usuários
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Permitir leitura para busca de usuários
+    }
+    
+    // Regras para convites de parceria
+    match /purpose_invites/{inviteId} {
+      allow create: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+      allow read, update: if request.auth != null && 
+        (request.auth.uid == resource.data.fromUserId || 
+         request.auth.uid == resource.data.toUserId);
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+    }
+    
+    // Regras para parcerias estabelecidas
+    match /purpose_partnerships/{partnershipId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id);
+      allow create: if request.auth != null;
+    }
+    
+    // Regras para chats compartilhados do propósito
+    match /purpose_chats/{chatId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.participantIds;
+      allow create: if request.auth != null;
+    }
+    
+    // Regras para mensagens dos chats compartilhados
+    match /purpose_chats/{chatId}/messages/{messageId} {
+      allow read: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/purpose_chats/$(chatId)).data.participantIds;
+      allow create: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/purpose_chats/$(chatId)).data.participantIds &&
+        request.auth.uid == request.resource.data.senderId;
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.senderId;
+    }
+    
+    // Regras para lista de usuários bloqueados
+    match /blocked_users/{blockId} {
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.blockerUserId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.blockerUserId || 
+         request.auth.uid == resource.data.blockedUserId);
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.blockerUserId;
+    }
+    
+    // Regras para chats existentes (manter compatibilidade)
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /chats/{chatId}/messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regras para stories
+    match /stories/{storyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Regras para notificações
+    match /notifications/{notificationId} {
+      // Usuário só pode ler suas próprias notificações
+      allow read: if request.auth != null && 
+                     request.auth.uid == resource.data.userId;
+      
+      // Usuário só pode marcar suas notificações como lidas
+      // Permitir atualização de 'isRead' OU 'read' (ambos os campos são usados)
+      allow update: if request.auth != null && 
+                       request.auth.uid == resource.data.userId &&
+                       (request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['isRead']) ||
+                       request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['read', 'readAt']) ||
+                       request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['read']));
+      
+      // Sistema pode criar notificações (qualquer usuário autenticado)
+      allow create: if request.auth != null;
+      
+      // Usuário pode deletar suas próprias notificações
+      allow delete: if request.auth != null && 
+                       request.auth.uid == resource.data.userId;
+    }
+    
+    // Regras para usuários (corrigir nome da coleção)
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ===== REGRAS PARA SISTEMA DE MATCHES =====
+    
+    // Regras para matches
+    match /matches/{matchId} {
+      // Usuário pode ler matches onde é participante
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id);
+      
+      // Usuário pode criar match (sistema de convites)
+      allow create: if request.auth != null && 
+        (request.auth.uid == request.resource.data.user1Id || 
+         request.auth.uid == request.resource.data.user2Id) &&
+        request.resource.data.keys().hasAll(['user1Id', 'user2Id', 'matchedAt', 'chatExpiresAt']) &&
+        request.resource.data.isActive == true &&
+        request.resource.data.chatEnabled == true;
+      
+      // Usuário pode atualizar match (última mensagem, status de leitura, etc.)
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id) &&
+        // Não pode alterar IDs dos usuários ou data do match
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['user1Id', 'user2Id', 'matchedAt']);
+      
+      // Usuário pode desativar match (reportar/bloquear)
+      allow delete: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id);
+    }
+    
+    // Regras para chats de matches
+    match /match_chats/{chatId} {
+      // Usuário pode ler chat se for participante do match
+      allow read: if request.auth != null && 
+        isMatchParticipant(resource.data.matchId, request.auth.uid);
+      
+      // Sistema pode criar chat automaticamente
+      allow create: if request.auth != null && 
+        request.resource.data.keys().hasAll(['matchId', 'createdAt']) &&
+        isMatchParticipant(request.resource.data.matchId, request.auth.uid);
+      
+      // Participantes podem atualizar metadados do chat
+      allow update: if request.auth != null && 
+        isMatchParticipant(resource.data.matchId, request.auth.uid) &&
+        // Não pode alterar matchId
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['matchId']);
+    }
+    
+    // Regras para mensagens de matches
+    match /match_messages/{messageId} {
+      // Usuário pode ler mensagens se for participante do chat
+      allow read: if request.auth != null && 
+        isChatParticipant(resource.data.chatId, request.auth.uid);
+      
+      // Usuário pode enviar mensagem se for participante e remetente
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.senderId &&
+        isChatParticipant(request.resource.data.chatId, request.auth.uid) &&
+        request.resource.data.keys().hasAll(['chatId', 'senderId', 'content', 'sentAt']) &&
+        request.resource.data.content is string &&
+        request.resource.data.content.size() > 0 &&
+        request.resource.data.content.size() <= 1000; // Limite de 1000 caracteres
+      
+      // Usuário pode atualizar apenas suas próprias mensagens (soft delete)
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.senderId &&
+        // Só pode marcar como deletada
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isDeleted', 'deletedAt', 'content']) &&
+        request.resource.data.isDeleted == true;
+      
+      // Usuário não pode deletar mensagens (apenas soft delete via update)
+      allow delete: if false;
+    }
+    
+    // Regras para interesses mútuos (compatibilidade com sistema antigo)
+    match /mutual_interests/{interestId} {
+      // Usuário pode ler se for participante
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id);
+      
+      // Usuário pode criar interesse mútuo
+      allow create: if request.auth != null && 
+        (request.auth.uid == request.resource.data.user1Id || 
+         request.auth.uid == request.resource.data.user2Id);
+      
+      // Usuário pode atualizar status
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.user1Id || 
+         request.auth.uid == resource.data.user2Id);
+    }
+    
+    // Regras para notificações agendadas (sistema de expiração)
+    match /scheduled_notifications/{notificationId} {
+      // Apenas sistema pode gerenciar notificações agendadas
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regras para perfis espirituais
+    match /spiritual_profiles/{profileId} {
+      // Qualquer usuário autenticado pode ler e escrever perfis
+      allow read, write: if request.auth != null;
+    }
+    
+    // ===== REGRAS PARA SISTEMA DE SINAIS (RECOMENDAÇÕES SEMANAIS) =====
+    
+    // Regras para perfis públicos
+    match /profiles/{profileId} {
+      // Qualquer usuário autenticado pode ler perfis
+      allow read: if request.auth != null;
+      
+      // Usuário pode criar/atualizar seu próprio perfil
+      allow create, update: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      
+      // Usuário pode deletar seu próprio perfil
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Regras para recomendações semanais
+    match /weeklyRecommendations/{docId} {
+      // Usuário pode ler suas próprias recomendações
+      // docId formato: userId_weekKey
+      allow read: if request.auth != null && 
+        docId.matches('^' + request.auth.uid + '_.*');
+      
+      // Sistema pode criar/atualizar recomendações
+      allow create, update: if request.auth != null && 
+        docId.matches('^' + request.auth.uid + '_.*');
+      
+      // Usuário pode deletar suas próprias recomendações
+      allow delete: if request.auth != null && 
+        docId.matches('^' + request.auth.uid + '_.*');
+    }
+    
+    // Regras para interesses demonstrados
+    match /interests/{interestId} {
+      // Usuário pode ler interesses onde é participante
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.fromUserId || 
+         request.auth.uid == resource.data.toUserId);
+      
+      // Usuário pode criar interesse (demonstrar interesse em alguém)
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.fromUserId &&
+        request.resource.data.keys().hasAll(['fromUserId', 'toUserId', 'timestamp', 'status']);
+      
+      // Sistema pode atualizar status (quando vira match)
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.fromUserId || 
+         request.auth.uid == resource.data.toUserId);
+    }
+    
+    // Regras para matches (sistema de Sinais)
+    match /matches/{matchId} {
+      // Usuário pode ler matches onde é participante
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.users;
+      
+      // Sistema pode criar match quando há interesse mútuo
+      allow create: if request.auth != null && 
+        request.auth.uid in request.resource.data.users &&
+        request.resource.data.keys().hasAll(['users', 'createdAt', 'status']);
+      
+      // Participantes podem atualizar match (marcar como visualizado)
+      allow update: if request.auth != null && 
+        request.auth.uid in resource.data.users;
+    }
+    
+    // Regras para filtros de busca do usuário
+    match /searchFilters/{userId} {
+      // Usuário pode ler seus próprios filtros
+      allow read: if request.auth != null && 
+        request.auth.uid == userId;
+      
+      // Usuário pode criar/atualizar seus próprios filtros
+      allow create, update: if request.auth != null && 
+        request.auth.uid == userId;
+      
+      // Usuário pode deletar seus próprios filtros
+      allow delete: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // ===== REGRAS PARA SISTEMA DE CERTIFICAÇÕES =====
+    
+    // Regras para solicitações de certificação espiritual (collection antiga)
+    match /spiritual_certifications/{certificationId} {
+      // Qualquer usuário autenticado pode ler e escrever
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regras para solicitações de certificação espiritual (collection nova)
+    match /certification_requests/{certificationId} {
+      // Qualquer usuário autenticado pode ler todas as certificações
+      // (necessário para exibir selo no perfil público)
+      allow read: if request.auth != null;
+      
+      // Usuário pode criar sua própria solicitação
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      
+      // Apenas admins podem atualizar (aprovar/reprovar)
+      allow update: if request.auth != null && 
+        isAdmin(request.auth.uid);
+      
+      // Apenas admins podem deletar
+      allow delete: if request.auth != null && 
+        isAdmin(request.auth.uid);
+    }
+    
+    // Regras para log de auditoria de certificações
+    match /certification_audit_log/{logId} {
+      // Apenas admins podem ler logs
+      allow read: if request.auth != null && 
+        isAdmin(request.auth.uid);
+      
+      // Apenas sistema pode criar logs (via Cloud Functions)
+      // Usuários autenticados podem criar para permitir Cloud Functions
+      allow create: if request.auth != null &&
+        request.resource.data.keys().hasAll(['certificationId', 'userId', 'action', 'performedBy', 'performedAt', 'method']) &&
+        request.resource.data.action in ['approved', 'rejected', 'token_invalid', 'token_expired'] &&
+        request.resource.data.method in ['email', 'panel', 'api'];
+      
+      // Ninguém pode atualizar ou deletar logs (imutáveis)
+      allow update, delete: if false;
+    }
+    
+    // Regras para tokens de aprovação/reprovação
+    match /certification_tokens/{tokenId} {
+      // Apenas sistema pode criar tokens (via Cloud Functions)
+      allow create: if request.auth != null;
+      
+      // Apenas sistema pode ler tokens (via Cloud Functions)
+      allow read: if request.auth != null;
+      
+      // Apenas sistema pode marcar token como usado
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['used', 'usedAt']);
+      
+      // Tokens não podem ser deletados (manter histórico)
+      allow delete: if false;
+    }
+    
+    
+    // ===== REGRA TEMPORÁRIA PARA TESTES (REMOVER EM PRODUÇÃO) =====
+    // ATENÇÃO: Esta regra permite acesso total para usuários autenticados
+    // Use APENAS para desenvolvimento e testes
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ===== FUNÇÕES AUXILIARES =====
+    
+    // Verifica se usuário é admin
+    function isAdmin(userId) {
+      let userDoc = get(/databases/$(database)/documents/users/$(userId));
+      return userDoc.data.isAdmin == true;
+    }
+    
+    // Verifica se usuário é participante de um match
+    function isMatchParticipant(matchId, userId) {
+      let matchDoc = get(/databases/$(database)/documents/matches/$(matchId));
+      return userId == matchDoc.data.user1Id || userId == matchDoc.data.user2Id;
+    }
+    
+    // Verifica se usuário é participante de um chat
+    function isChatParticipant(chatId, userId) {
+      let chatDoc = get(/databases/$(database)/documents/match_chats/$(chatId));
+      return isMatchParticipant(chatDoc.data.matchId, userId);
+    }
+  }
+}
