@@ -24,17 +24,18 @@ class EnhancedInterestNotificationCard extends StatefulWidget {
 class _EnhancedInterestNotificationCardState
     extends State<EnhancedInterestNotificationCard> {
   String? _senderName;
-  bool _isLoadingName = false;
+  int? _senderAge;
+  bool _isLoadingData = false;
   bool _isResponding = false;
 
   @override
   void initState() {
     super.initState();
-    _loadSenderName();
+    _loadSenderData();
   }
 
-  /// Buscar nome do remetente do Firestore se estiver vazio
-  Future<void> _loadSenderName() async {
+  /// Buscar nome e idade do remetente do Firestore
+  Future<void> _loadSenderData() async {
     // Se já tem nome válido, usar
     if (widget.notification.fromUserName != null &&
         widget.notification.fromUserName!.trim().isNotEmpty &&
@@ -42,17 +43,17 @@ class _EnhancedInterestNotificationCardState
       setState(() {
         _senderName = widget.notification.fromUserName;
       });
-      return;
+      // Mas ainda buscar idade
     }
 
     // Buscar do Firestore
     setState(() {
-      _isLoadingName = true;
+      _isLoadingData = true;
     });
 
     try {
       print(
-          '🔍 [CARD] Buscando nome do usuário: ${widget.notification.fromUserId}');
+          '🔍 [CARD] Buscando dados do usuário: ${widget.notification.fromUserId}');
 
       final userDoc = await FirebaseFirestore.instance
           .collection('usuarios')
@@ -62,25 +63,27 @@ class _EnhancedInterestNotificationCardState
       if (userDoc.exists) {
         final userData = userDoc.data()!;
         final name = userData['nome'] ?? userData['username'] ?? 'Usuário Anônimo';
+        final age = userData['idade'] as int?;
 
-        print('✅ [CARD] Nome encontrado: $name');
+        print('✅ [CARD] Dados encontrados: $name, idade: $age');
 
         setState(() {
           _senderName = name;
-          _isLoadingName = false;
+          _senderAge = age;
+          _isLoadingData = false;
         });
       } else {
         print('⚠️ [CARD] Usuário não encontrado no Firestore');
         setState(() {
           _senderName = 'Usuário Anônimo';
-          _isLoadingName = false;
+          _isLoadingData = false;
         });
       }
     } catch (e) {
-      print('❌ [CARD] Erro ao buscar nome: $e');
+      print('❌ [CARD] Erro ao buscar dados: $e');
       setState(() {
         _senderName = 'Usuário Anônimo';
-        _isLoadingName = false;
+        _isLoadingData = false;
       });
     }
   }
@@ -88,30 +91,47 @@ class _EnhancedInterestNotificationCardState
   /// Nome para exibição
   String get displayName =>
       _senderName ?? widget.notification.fromUserName ?? 'Usuário';
+  
+  /// Nome com idade para exibição
+  String get displayNameWithAge {
+    final name = displayName;
+    if (_senderAge != null) {
+      return '$name, $_senderAge';
+    }
+    return name;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isMutualMatch = widget.notification.type == 'mutual_match';
     final isAccepted = widget.notification.status == 'accepted';
     final isRejected = widget.notification.status == 'rejected';
+    final isNew = widget.notification.status == 'new';
+    final isViewed = widget.notification.status == 'viewed';
 
-    return Container(
+    Widget cardContent = Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isMutualMatch
-              ? Colors.purple.withOpacity(0.3)
-              : isAccepted
-                  ? Colors.green.withOpacity(0.3)
-                  : Colors.pink.withOpacity(0.2),
-          width: 2,
+          color: isNew
+              ? Colors.pink.withOpacity(0.6)
+              : isMutualMatch
+                  ? Colors.purple.withOpacity(0.3)
+                  : isAccepted
+                      ? Colors.green.withOpacity(0.3)
+                      : isViewed
+                          ? Colors.grey.withOpacity(0.2)
+                          : Colors.pink.withOpacity(0.2),
+          width: isNew ? 3 : 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
+            color: isNew 
+                ? Colors.pink.withOpacity(0.2)
+                : Colors.black.withOpacity(0.08),
+            blurRadius: isNew ? 16 : 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -130,7 +150,7 @@ class _EnhancedInterestNotificationCardState
                     CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.pink.withOpacity(0.1),
-                      child: _isLoadingName
+                      child: _isLoadingData
                           ? const SizedBox(
                               width: 16,
                               height: 16,
@@ -178,7 +198,7 @@ class _EnhancedInterestNotificationCardState
                         children: [
                           Expanded(
                             child: Text(
-                              '$displayName, 25',
+                              displayNameWithAge,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -257,6 +277,15 @@ class _EnhancedInterestNotificationCardState
         ),
       ),
     );
+
+    // Adicionar efeito pulsante para notificações não lidas
+    if (isNew) {
+      return _PulsingWidget(
+        child: cardContent,
+      );
+    }
+
+    return cardContent;
   }
 
   /// Obter iniciais do nome
@@ -456,6 +485,20 @@ class _EnhancedInterestNotificationCardState
         return;
       }
 
+      // Marcar notificação como "viewed" se estiver como "new"
+      if (widget.notification.status == 'new' && widget.notification.id != null) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('interest_notifications')
+              .doc(widget.notification.id)
+              .update({'status': 'viewed'});
+          
+          print('✅ [CARD] Notificação marcada como viewed: ${widget.notification.id}');
+        } catch (e) {
+          print('⚠️ [CARD] Erro ao marcar como viewed: $e');
+        }
+      }
+
       // Gerar ID do chat
       final sortedIds = [currentUserId, otherUserId]..sort();
       final chatId = 'match_${sortedIds[0]}_${sortedIds[1]}';
@@ -523,5 +566,60 @@ class _EnhancedInterestNotificationCardState
         });
       }
     }
+  }
+}
+
+/// Widget que cria efeito pulsante contínuo
+class _PulsingWidget extends StatefulWidget {
+  final Widget child;
+  
+  const _PulsingWidget({required this.child});
+  
+  @override
+  State<_PulsingWidget> createState() => _PulsingWidgetState();
+}
+
+class _PulsingWidgetState extends State<_PulsingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    
+    _animation = Tween<double>(
+      begin: 1.0,
+      end: 1.03,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+    
+    // Repetir a animação infinitamente
+    _controller.repeat(reverse: true);
+  }
+  
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _animation.value,
+          child: widget.child,
+        );
+      },
+    );
   }
 }

@@ -330,13 +330,13 @@ class InterestsRepository {
     }
   }
 
-  /// Obtém contador de notificações não lidas
+  /// Obtém contador de notificações não lidas (new + pending)
   static Future<int> getUnreadInterestCount(String userId) async {
     try {
       final query = await _firestore
           .collection(_interestsCollection)
           .where('toUserId', isEqualTo: userId)
-          .where('status', isEqualTo: 'pending')
+          .where('status', whereIn: ['new', 'pending'])
           .get();
 
       return query.docs.length;

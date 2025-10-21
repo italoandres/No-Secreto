@@ -149,10 +149,12 @@ class InterestNotificationModel {
   }
 
   // Getters de conveniência
-  bool get isPending => status == 'pending';
+  bool get isPending => status == 'pending' || status == 'new';
   bool get isAccepted => status == 'accepted';
   bool get isRejected => status == 'rejected';
   bool get isInterest => type == 'interest';
+  bool get isNew => status == 'new';
+  bool get isViewed => status == 'viewed';
 
   // Aceitar interesse
   InterestNotificationModel accept() {

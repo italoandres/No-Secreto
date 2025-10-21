@@ -111,16 +111,12 @@ class VitrinePropositoMenuView extends StatelessWidget {
               subtitle: 'Descubra pessoas com propósito',
               color: const Color(0xFF39b9ff),
               onTap: () => Get.toNamed('/explore-profiles'),
-              badgeCount: StreamBuilder<QuerySnapshot>(
-                stream: firestore
-                    .collection('weekly_recommendations')
-                    .where('userId', isEqualTo: auth.currentUser?.uid)
-                    .where('viewed', isEqualTo: false)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  return snapshot.data?.docs.length ?? 0;
-                },
-              ),
+              badgeStream: firestore
+                  .collection('weekly_recommendations')
+                  .where('userId', isEqualTo: auth.currentUser?.uid)
+                  .where('viewed', isEqualTo: false)
+                  .snapshots()
+                  .map((snapshot) => snapshot.docs.length),
             ),
 
             const SizedBox(height: 12),
@@ -132,24 +128,20 @@ class VitrinePropositoMenuView extends StatelessWidget {
               subtitle: 'Veja quem demonstrou interesse',
               color: const Color(0xFFfc6aeb),
               onTap: () => Get.toNamed('/interest-dashboard'),
-              badgeCount: StreamBuilder<QuerySnapshot>(
-                stream: firestore
-                    .collection('interest_notifications')
-                    .where('toUserId', isEqualTo: auth.currentUser?.uid)
-                    .where('status', whereIn: ['pending', 'new'])
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return 0;
-                  
-                  // Filtrar apenas tipos válidos
-                  final validDocs = snapshot.data!.docs.where((doc) {
-                    final type = doc.data()['type'] ?? 'interest';
-                    return ['interest', 'acceptance', 'mutual_match'].contains(type);
-                  }).toList();
-                  
-                  return validDocs.length;
-                },
-              ),
+              badgeStream: firestore
+                  .collection('interest_notifications')
+                  .where('toUserId', isEqualTo: auth.currentUser?.uid)
+                  .where('status', whereIn: ['pending', 'new'])
+                  .snapshots()
+                  .map((snapshot) {
+                    // Filtrar apenas tipos válidos
+                    final validDocs = snapshot.docs.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final type = data['type'] ?? 'interest';
+                      return ['interest', 'acceptance', 'mutual_match'].contains(type);
+                    }).toList();
+                    return validDocs.length;
+                  }),
             ),
 
             const SizedBox(height: 12),
@@ -161,50 +153,7 @@ class VitrinePropositoMenuView extends StatelessWidget {
               subtitle: 'Converse com seus matches mútuos',
               color: const Color(0xFF4CAF50),
               onTap: () => Get.toNamed('/accepted-matches'),
-              badgeCount: StreamBuilder<QuerySnapshot>(
-                stream: firestore
-                    .collection('match_chats')
-                    .where('user1Id', isEqualTo: auth.currentUser?.uid)
-                    .snapshots(),
-                builder: (context, snapshot1) {
-                  return StreamBuilder<QuerySnapshot>(
-                    stream: firestore
-                        .collection('match_chats')
-                        .where('user2Id', isEqualTo: auth.currentUser?.uid)
-                        .snapshots(),
-                    builder: (context, snapshot2) {
-                      if (!snapshot1.hasData && !snapshot2.hasData) return 0;
-                      
-                      final userId = auth.currentUser?.uid ?? '';
-                      int totalUnread = 0;
-                      
-                      // Contar não lidas do user1
-                      if (snapshot1.hasData) {
-                        for (var doc in snapshot1.data!.docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final unreadCount = data['unreadCount'] as Map<String, dynamic>?;
-                          if (unreadCount != null && unreadCount.containsKey(userId)) {
-                            totalUnread += (unreadCount[userId] as int?) ?? 0;
-                          }
-                        }
-                      }
-                      
-                      // Contar não lidas do user2
-                      if (snapshot2.hasData) {
-                        for (var doc in snapshot2.data!.docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final unreadCount = data['unreadCount'] as Map<String, dynamic>?;
-                          if (unreadCount != null && unreadCount.containsKey(userId)) {
-                            totalUnread += (unreadCount[userId] as int?) ?? 0;
-                          }
-                        }
-                      }
-                      
-                      return totalUnread;
-                    },
-                  );
-                },
-              ),
+              badgeCount: 0, // Por enquanto fixo, implementar depois
             ),
 
             const SizedBox(height: 12),
@@ -244,7 +193,8 @@ class VitrinePropositoMenuView extends StatelessWidget {
     required String subtitle,
     required Color color,
     required VoidCallback onTap,
-    StreamBuilder<int>? badgeCount,
+    Stream<int>? badgeStream,
+    int? badgeCount,
   }) {
     return Card(
       elevation: 2,
@@ -269,13 +219,13 @@ class VitrinePropositoMenuView extends StatelessWidget {
                 size: 28,
               ),
             ),
-            if (badgeCount != null)
+            if (badgeStream != null)
               Positioned(
                 right: -8,
                 top: -8,
-                child: badgeCount.builder(
-                  badgeCount.stream!,
-                  (context, snapshot) {
+                child: StreamBuilder<int>(
+                  stream: badgeStream,
+                  builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     if (count == 0) return const SizedBox.shrink();
                     
@@ -307,6 +257,38 @@ class VitrinePropositoMenuView extends StatelessWidget {
                       ),
                     );
                   },
+                ),
+              )
+            else if (badgeCount != null && badgeCount > 0)
+              Positioned(
+                right: -8,
+                top: -8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 2,
+                    ),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 20,
+                    minHeight: 20,
+                  ),
+                  child: Text(
+                    badgeCount > 99 ? '99+' : '$badgeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
           ],

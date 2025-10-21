@@ -279,8 +279,12 @@ class InterestNotificationRepository {
 
       final notification = InterestNotificationModel.fromMap({...notificationDoc.data()!, 'id': notificationDoc.id});
       
+      print('📊 Status da notificação: ${notification.status}');
+      print('📊 isPending: ${notification.isPending}');
+      
       if (!notification.isPending) {
-        throw Exception('Esta notificação já foi respondida');
+        print('⚠️ Notificação não pode ser respondida - Status: ${notification.status}');
+        throw Exception('Esta notificação já foi respondida (status: ${notification.status})');
       }
 
       // Atualizar status da notificação

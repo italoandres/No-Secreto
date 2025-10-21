@@ -4,6 +4,8 @@ import '../utils/create_test_interests_matches.dart';
 import '../utils/update_test_profiles_purpose.dart';
 import '../utils/update_profiles_deus_e_pai.dart';
 import '../utils/update_profiles_hobbies.dart';
+import '../utils/add_age_to_test_profiles.dart';
+import '../utils/create_new_interest_notifications.dart';
 
 /// View de debug para criar/remover perfis de teste
 class DebugTestProfilesView extends StatefulWidget {
@@ -224,6 +226,56 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pink,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Botão Adicionar Idades
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _addAges,
+                  icon: const Icon(Icons.cake),
+                  label: const Text(
+                    'Adicionar Idades aos Perfis',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Botão Criar Notificações "New"
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _createNewNotifications,
+                  icon: const Icon(Icons.notifications_active),
+                  label: const Text(
+                    'Criar Notificações "New" (Pulsantes)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -541,6 +593,52 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
     } catch (e) {
       setState(() {
         _message = '❌ Erro ao criar dados: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _addAges() async {
+    setState(() {
+      _isLoading = true;
+      _message = '';
+    });
+
+    try {
+      await addAgeToTestProfiles();
+      setState(() {
+        _message = '✅ Idades adicionadas aos perfis!\n\n'
+            'Todos os perfis agora têm idades entre 18 e 35 anos.';
+      });
+    } catch (e) {
+      setState(() {
+        _message = '❌ Erro ao adicionar idades: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _createNewNotifications() async {
+    setState(() {
+      _isLoading = true;
+      _message = '';
+    });
+
+    try {
+      await createNewInterestNotifications();
+      setState(() {
+        _message = '✅ Notificações "new" criadas!\n\n'
+            'Agora você deve ver notificações pulsando com borda rosa grossa.';
+      });
+    } catch (e) {
+      setState(() {
+        _message = '❌ Erro ao criar notificações: $e';
       });
     } finally {
       setState(() {
