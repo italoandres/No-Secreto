@@ -36,13 +36,34 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
   late Animation<double> _heartAnimation;
   bool _hasMessages = false;
   bool _isLoading = true;
+  String? _actualPhotoUrl;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
+    _loadUserPhoto();
     _checkForMessages();
     _markMessagesAsRead();
+  }
+
+  /// Carrega a foto do usuário da collection usuarios
+  Future<void> _loadUserPhoto() async {
+    try {
+      final userDoc = await _firestore
+          .collection('usuarios')
+          .doc(widget.otherUserId)
+          .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        setState(() {
+          _actualPhotoUrl = userData?['imgUrl'] as String?;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar foto do usuário: $e');
+    }
   }
 
   void _initializeAnimations() {
@@ -77,6 +98,236 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  /// Manipula ações do menu
+  void _handleMenuAction(String action) {
+    switch (action) {
+      case 'view_profile':
+        _viewProfile();
+        break;
+      case 'send_gift':
+        _sendGift();
+        break;
+      case 'delete_chat':
+        _deleteChat();
+        break;
+      case 'block_user':
+        _blockUser();
+        break;
+    }
+  }
+
+  /// Navega para o perfil do usuário
+  void _viewProfile() {
+    Get.toNamed('/profile-display', arguments: {
+      'userId': widget.otherUserId,
+    });
+  }
+
+  /// Abre tela de enviar presente
+  void _sendGift() {
+    Get.snackbar(
+      '🎁 Enviar Presente',
+      'Funcionalidade em desenvolvimento',
+      backgroundColor: const Color(0xFFfc6aeb).withOpacity(0.2),
+      colorText: Colors.black87,
+      icon: const Icon(Icons.card_giftcard, color: Color(0xFFfc6aeb)),
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  /// Apaga a conversa
+  Future<void> _deleteChat() async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.delete_outline, color: Colors.orange),
+            const SizedBox(width: 12),
+            Text(
+              'Apagar conversa?',
+              style: GoogleFonts.poppins(fontSize: 18),
+            ),
+          ],
+        ),
+        content: Text(
+          'Todas as mensagens desta conversa serão apagadas. Esta ação não pode ser desfeita.',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Apagar',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Apagar todas as mensagens
+        final messages = await _firestore
+            .collection('match_chats')
+            .doc(widget.chatId)
+            .collection('messages')
+            .get();
+
+        final batch = _firestore.batch();
+        for (final doc in messages.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+
+        // Atualizar documento do chat
+        await _firestore.collection('match_chats').doc(widget.chatId).update({
+          'lastMessage': null,
+          'lastMessageAt': null,
+          'unreadCount.${_auth.currentUser?.uid}': 0,
+        });
+
+        Get.snackbar(
+          'Sucesso',
+          'Conversa apagada com sucesso',
+          backgroundColor: Colors.green[100],
+          colorText: Colors.green[800],
+          icon: const Icon(Icons.check_circle, color: Colors.green),
+          snackPosition: SnackPosition.TOP,
+        );
+
+        setState(() {
+          _hasMessages = false;
+        });
+      } catch (e) {
+        Get.snackbar(
+          'Erro',
+          'Não foi possível apagar a conversa',
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[800],
+          icon: const Icon(Icons.error, color: Colors.red),
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    }
+  }
+
+  /// Bloqueia o usuário
+  Future<void> _blockUser() async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.block, color: Colors.red),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Bloquear ${widget.otherUserName}?',
+                style: GoogleFonts.poppins(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Você não receberá mais mensagens desta pessoa e ela não poderá ver seu perfil.',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Bloquear',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final currentUser = _auth.currentUser;
+        if (currentUser == null) return;
+
+        // Buscar perfil espiritual do usuário atual
+        final profileQuery = await _firestore
+            .collection('spiritual_profiles')
+            .where('userId', isEqualTo: currentUser.uid)
+            .limit(1)
+            .get();
+
+        if (profileQuery.docs.isEmpty) {
+          throw Exception('Perfil não encontrado');
+        }
+
+        final profileDoc = profileQuery.docs.first;
+        final currentBlockedUsers = List<String>.from(
+          profileDoc.data()['blockedUsers'] ?? [],
+        );
+
+        if (!currentBlockedUsers.contains(widget.otherUserId)) {
+          currentBlockedUsers.add(widget.otherUserId);
+
+          await _firestore
+              .collection('spiritual_profiles')
+              .doc(profileDoc.id)
+              .update({
+            'blockedUsers': currentBlockedUsers,
+          });
+        }
+
+        Get.back(); // Voltar para tela anterior
+        
+        Get.snackbar(
+          'Usuário bloqueado',
+          '${widget.otherUserName} foi bloqueado com sucesso',
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[800],
+          icon: const Icon(Icons.block, color: Colors.red),
+          snackPosition: SnackPosition.TOP,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'Erro',
+          'Não foi possível bloquear o usuário',
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[800],
+          icon: const Icon(Icons.error, color: Colors.red),
+          snackPosition: SnackPosition.TOP,
+        );
+      }
     }
   }
 
@@ -163,19 +414,19 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: widget.otherUserPhotoUrl == null
+                gradient: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
                     ? const LinearGradient(
                         colors: [Color(0xFF39b9ff), Color(0xFFfc6aeb)],
                       )
                     : null,
-                image: widget.otherUserPhotoUrl != null
+                image: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
                     ? DecorationImage(
-                        image: NetworkImage(widget.otherUserPhotoUrl!),
+                        image: NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!),
                         fit: BoxFit.cover,
                       )
                     : null,
               ),
-              child: widget.otherUserPhotoUrl == null
+              child: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
                   ? Center(
                       child: Text(
                         widget.otherUserName[0].toUpperCase(),
@@ -216,11 +467,67 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
         ],
       ),
       actions: [
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert, color: Colors.black87),
-          onPressed: () {
-            // Menu de opções
-          },
+          onSelected: (value) => _handleMenuAction(value),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'view_profile',
+              child: Row(
+                children: [
+                  const Icon(Icons.person, color: Color(0xFF39b9ff)),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Ver perfil',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'send_gift',
+              child: Row(
+                children: [
+                  const Icon(Icons.card_giftcard, color: Color(0xFFfc6aeb)),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Enviar presente',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'delete_chat',
+              child: Row(
+                children: [
+                  const Icon(Icons.delete_outline, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Apagar conversa',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'block_user',
+              child: Row(
+                children: [
+                  const Icon(Icons.block, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Bloquear ${widget.otherUserName}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -463,10 +770,10 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
           if (!isMe) ...[
             CircleAvatar(
               radius: 16,
-              backgroundImage: widget.otherUserPhotoUrl != null
-                  ? NetworkImage(widget.otherUserPhotoUrl!)
+              backgroundImage: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
+                  ? NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!)
                   : null,
-              child: widget.otherUserPhotoUrl == null
+              child: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
                   ? Text(
                       widget.otherUserName[0].toUpperCase(),
                       style: const TextStyle(fontSize: 12),
