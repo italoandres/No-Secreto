@@ -15,7 +15,7 @@ import '/views/explore_profiles_view.dart';
 import '/views/profile_display_view.dart';
 import '/views/profile_display_vitrine_wrapper.dart';
 import '/views/interest_dashboard_view.dart';
-import '/views/accepted_matches_view.dart';
+import '/views/simple_accepted_matches_view.dart';
 import '/views/romantic_match_chat_view.dart';
 import '/views/vitrine_menu_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -249,7 +249,7 @@ void main() async {
       // Rotas do sistema de matches aceitos
       GetPage(
         name: '/accepted-matches',
-        page: () => const AcceptedMatchesView(),
+        page: () => const SimpleAcceptedMatchesView(),
         transition: Transition.rightToLeft,
         transitionDuration: const Duration(milliseconds: 300),
       ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/accepted_match_model.dart';
 import '../repositories/simple_accepted_matches_repository.dart';
-import '../views/match_chat_view.dart';
+import '../views/romantic_match_chat_view.dart';
 
-/// Versão simplificada da tela de matches aceitos
+/// Tela moderna e elegante de matches aceitos
 class SimpleAcceptedMatchesView extends StatefulWidget {
   const SimpleAcceptedMatchesView({super.key});
 
@@ -14,80 +15,33 @@ class SimpleAcceptedMatchesView extends StatefulWidget {
 }
 
 class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
-  final SimpleAcceptedMatchesRepository _repository = SimpleAcceptedMatchesRepository();
-  List<AcceptedMatchModel> _matches = [];
-  bool _isLoading = true;
-  String? _error;
-
+  final _repository = SimpleAcceptedMatchesRepository();
+  
   @override
   void initState() {
     super.initState();
-    _loadMatches();
-  }
-
-  Future<void> _loadMatches() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('Usuário não está logado');
-      }
-
-      print('🔍 Carregando matches para usuário: ${currentUser.uid}');
-      final matches = await _repository.getAcceptedMatches(currentUser.uid);
-      print('📊 Matches carregados: ${matches.length}');
-
-      if (mounted) {
-        setState(() {
-          _matches = matches;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('❌ Erro ao carregar matches: $e');
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _navigateToChat(AcceptedMatchModel match) {
-    print('🚀 Navegando para chat: ${match.chatId}');
-    Get.to(() => MatchChatView(
-      chatId: match.chatId,
-      otherUserId: match.otherUserId,
-      otherUserName: match.otherUserName,
-      otherUserPhoto: match.otherUserPhoto,
-      daysRemaining: match.daysRemaining,
-    ));
+    debugPrint('🔍 [MATCHES_VIEW] Iniciando stream de matches aceitos');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
+        elevation: 0,
+        title: Text(
           'Matches Aceitos',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
         ),
         backgroundColor: const Color(0xFFFF6B9D),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _isLoading ? null : _loadMatches,
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () => setState(() {}),
+            tooltip: 'Atualizar',
           ),
         ],
       ),
@@ -96,288 +50,485 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
+    final currentUser = FirebaseAuth.instance.currentUser;
+    
+    if (currentUser == null) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('Usuário não autenticado'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => setState(() {}),
+              child: const Text('Tentar Novamente'),
             ),
-            SizedBox(height: 16),
-            Text('Carregando matches...'),
           ],
         ),
       );
     }
 
-    if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red.shade400,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Erro ao Carregar Matches',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.red.shade600,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _loadMatches,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tentar Novamente'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B9D),
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    return StreamBuilder<List<AcceptedMatchModel>>(
+      stream: _repository.getAcceptedMatchesStream(currentUser.uid),
+      builder: (context, snapshot) {
+        // Loading
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-    if (_matches.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6B9D), Color(0xFFFFA8A8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF6B9D).withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+        // Error
+        if (snapshot.hasError) {
+          debugPrint('❌ [MATCHES_VIEW] Erro no stream: ${snapshot.error}');
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Erro ao carregar matches',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(fontSize: 16),
                 ),
-                child: const Icon(
-                  Icons.favorite_border,
-                  size: 48,
-                  color: Colors.white,
+                const SizedBox(height: 8),
+                Text(
+                  '${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Nenhum match aceito ainda',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade700,
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => setState(() {}),
+                  child: const Text('Tentar Novamente'),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Quando alguém aceitar seu interesse,\nvocês poderão conversar aqui!',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.explore),
-                label: const Text('Explorar Perfis'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B9D),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+              ],
+            ),
+          );
+        }
+
+        final matches = snapshot.data ?? [];
+        
+        debugPrint('📊 [MATCHES_VIEW] Matches recebidos: ${matches.length}');
+
+        // Empty
+        if (matches.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum match aceito ainda',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    color: Colors.grey[600],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+                const SizedBox(height: 8),
+                Text(
+                  'Aceite interesses para começar a conversar',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
 
-    return RefreshIndicator(
-      onRefresh: _loadMatches,
-      color: const Color(0xFFFF6B9D),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _matches.length,
-        itemBuilder: (context, index) {
-          final match = _matches[index];
-          return _buildMatchCard(match);
-        },
-      ),
+        // Success - Lista de matches
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: matches.length,
+          itemBuilder: (context, index) {
+            final match = matches[index];
+            
+            debugPrint('🎨 [UI] Exibindo match: ${match.otherUserName}');
+            debugPrint('   nameWithAge: ${match.nameWithAge}');
+            debugPrint('   formattedLocation: ${match.formattedLocation}');
+            
+            return _buildMatchCard(match);
+          },
+        );
+      },
     );
   }
 
   Widget _buildMatchCard(AcceptedMatchModel match) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => _navigateToChat(match),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Linha principal: Avatar + Info + Badge
+            Row(
               children: [
-                // Avatar
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: const Color(0xFFFF6B9D).withOpacity(0.1),
-                  backgroundImage: match.otherUserPhoto != null
-                      ? NetworkImage(match.otherUserPhoto!)
-                      : null,
-                  child: match.otherUserPhoto == null
-                      ? Text(
-                          match.otherUserName.isNotEmpty
-                              ? match.otherUserName[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFFF6B9D),
+                // Avatar com status online e foto real
+                Stack(
+                  children: [
+                    _buildModernAvatar(match),
+                    // Bolinha de status online
+                    Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: _getOnlineStatusColor(),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2.5,
                           ),
-                        )
-                      : null,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                
                 const SizedBox(width: 16),
                 
-                // Informações
+                // Informações principais
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Nome com idade
                       Text(
-                        match.otherUserName,
-                        style: const TextStyle(
+                        match.nameWithAge,
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[900],
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Match em ${_formatDate(match.matchDate)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
+                      
+                      // Cidade (sempre mostrar, mesmo que vazia)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 16,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            match.formattedLocation.isNotEmpty 
+                                ? match.formattedLocation 
+                                : 'Localização não informada',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: match.formattedLocation.isNotEmpty 
+                                  ? Colors.grey[600] 
+                                  : Colors.grey[400],
+                              fontStyle: match.formattedLocation.isEmpty 
+                                  ? FontStyle.italic 
+                                  : FontStyle.normal,
+                            ),
+                          ),
+                        ],
                       ),
-                      if (match.chatExpired) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Chat expirado',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.red.shade600,
-                            fontWeight: FontWeight.bold,
+                      
+                      const SizedBox(height: 4),
+                      
+                      // Data do match + Dias restantes (discreto)
+                      Row(
+                        children: [
+                          Text(
+                            'Match ${match.formattedMatchDate}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
                           ),
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '${match.daysRemaining} dias restantes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.green.shade600,
+                          Text(
+                            ' • ',
+                            style: TextStyle(color: Colors.grey[400]),
                           ),
-                        ),
-                      ],
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 12,
+                            color: _getStatusColor(match),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _getTimeMessage(match),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: _getStatusColor(match),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
                 
-                // Indicadores
-                Column(
-                  children: [
-                    if (match.unreadMessages > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                // Badge de mensagens não lidas
+                if (match.hasUnreadMessages)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF6B9D), Color(0xFFFF8FB3)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF6B9D).withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B9D),
-                          borderRadius: BorderRadius.circular(12),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.message_rounded,
+                          size: 14,
+                          color: Colors.white,
                         ),
-                        child: Text(
-                          match.unreadMessages > 99
-                              ? '99+'
-                              : match.unreadMessages.toString(),
-                          style: const TextStyle(
+                        const SizedBox(width: 4),
+                        Text(
+                          match.unreadText,
+                          style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    const SizedBox(height: 8),
-                    Icon(
-                      Icons.chat_bubble_outline,
-                      color: Colors.grey.shade400,
-                      size: 20,
+                      ],
                     ),
-                  ],
+                  ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Botões de ação
+            Row(
+              children: [
+                // Botão Ver Perfil
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _viewProfile(match),
+                    icon: const Icon(Icons.person_rounded, size: 18),
+                    label: Text(
+                      'Ver Perfil',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFFF6B9D),
+                      elevation: 0,
+                      side: const BorderSide(
+                        color: Color(0xFFFF6B9D),
+                        width: 2,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 12),
+                
+                // Botão Conversar
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: match.chatExpired ? null : () => _openChat(match),
+                    icon: const Icon(Icons.chat_bubble_rounded, size: 18),
+                    label: Text(
+                      'Conversar',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: match.chatExpired 
+                          ? Colors.grey[300] 
+                          : const Color(0xFFFF6B9D),
+                      foregroundColor: Colors.white,
+                      elevation: match.chatExpired ? 0 : 4,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      shadowColor: match.chatExpired 
+                          ? Colors.transparent 
+                          : const Color(0xFFFF6B9D).withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-    
-    if (difference.inDays == 0) {
-      return 'hoje';
-    } else if (difference.inDays == 1) {
-      return 'ontem';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} dias atrás';
+  Widget _buildModernAvatar(AcceptedMatchModel match) {
+    final hasPhoto = match.otherUserPhoto != null && match.otherUserPhoto!.isNotEmpty;
+
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6B9D), Color(0xFFFF8FB3)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF6B9D).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.white,
+          backgroundImage: hasPhoto ? NetworkImage(match.otherUserPhoto!) : null,
+          onBackgroundImageError: hasPhoto
+              ? (exception, stackTrace) {
+                  debugPrint('Erro ao carregar foto: $exception');
+                }
+              : null,
+          child: !hasPhoto
+              ? Text(
+                  match.otherUserName.isNotEmpty
+                      ? match.otherUserName[0].toUpperCase()
+                      : '?',
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFFF6B9D),
+                  ),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Color _getOnlineStatusColor() {
+    // TODO: Implementar lógica real de status online
+    // Por enquanto, retorna verde (online) aleatoriamente
+    return Colors.green; // Verde = online, Amarelo = ausente, Cinza = offline
+  }
+
+  List<Color> _getTimeGradient(AcceptedMatchModel match) {
+    if (match.chatExpired || match.daysRemaining <= 0) {
+      return [const Color(0xFFEF5350), const Color(0xFFE53935)];
+    } else if (match.daysRemaining <= 7) {
+      return [const Color(0xFFFF9800), const Color(0xFFFB8C00)];
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return [const Color(0xFF66BB6A), const Color(0xFF43A047)];
     }
+  }
+
+  IconData _getTimeIcon(AcceptedMatchModel match) {
+    if (match.chatExpired || match.daysRemaining <= 0) {
+      return Icons.error_outline_rounded;
+    } else if (match.daysRemaining <= 7) {
+      return Icons.warning_amber_rounded;
+    } else {
+      return Icons.check_circle_outline_rounded;
+    }
+  }
+
+  String _getTimeMessage(AcceptedMatchModel match) {
+    if (match.chatExpired || match.daysRemaining <= 0) {
+      return 'Chat expirado';
+    } else if (match.daysRemaining == 1) {
+      return 'Falta 1 dia para encerrar';
+    } else {
+      return 'Faltam ${match.daysRemaining} dias para encerrar';
+    }
+  }
+
+  Color _getTimeTextColor(AcceptedMatchModel match) {
+    if (match.chatExpired || match.daysRemaining <= 0) {
+      return Colors.red[600]!;
+    } else if (match.daysRemaining <= 7) {
+      return Colors.orange[600]!;
+    } else {
+      return Colors.grey[600]!;
+    }
+  }
+
+  Color _getStatusColor(AcceptedMatchModel match) {
+    if (match.chatExpired || match.daysRemaining <= 0) {
+      return Colors.red;
+    } else if (match.daysRemaining <= 7) {
+      return Colors.orange;
+    } else {
+      return Colors.green;
+    }
+  }
+
+  void _viewProfile(AcceptedMatchModel match) {
+    Get.toNamed('/profile-display', arguments: {
+      'userId': match.otherUserId,
+      'fromRoute': 'accepted-matches',
+    });
+  }
+
+  void _openChat(AcceptedMatchModel match) {
+    if (match.chatExpired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Este chat expirou'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Get.to(
+      () => RomanticMatchChatView(
+        chatId: match.chatId,
+        otherUserId: match.otherUserId,
+        otherUserName: match.otherUserName,
+        otherUserPhotoUrl: match.otherUserPhoto,
+      ),
+    );
   }
 }

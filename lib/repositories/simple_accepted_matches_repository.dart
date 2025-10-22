@@ -16,24 +16,41 @@ class SimpleAcceptedMatchesRepository {
     try {
       debugPrint('SimpleAcceptedMatchesRepository: Buscando matches aceitos para $userId');
       
-      // Método 1: Buscar todas as notificações do usuário e filtrar no código
-      final allNotifications = await _firestore
+      // Buscar notificações onde o usuário RECEBEU interesse (toUserId)
+      final receivedNotifications = await _firestore
           .collection('interest_notifications')
           .where('toUserId', isEqualTo: userId)
           .get();
       
-      debugPrint('SimpleAcceptedMatchesRepository: Encontradas ${allNotifications.docs.length} notificações totais');
+      // Buscar notificações onde o usuário ENVIOU interesse (fromUserId)
+      final sentNotifications = await _firestore
+          .collection('interest_notifications')
+          .where('fromUserId', isEqualTo: userId)
+          .get();
       
-      // Filtrar apenas as aceitas
-      final acceptedNotifications = allNotifications.docs
+      debugPrint('SimpleAcceptedMatchesRepository: Recebidas: ${receivedNotifications.docs.length}, Enviadas: ${sentNotifications.docs.length}');
+      
+      // Combinar todas as notificações
+      final allDocs = [...receivedNotifications.docs, ...sentNotifications.docs];
+      
+      // Filtrar apenas as aceitas e remover duplicatas
+      final seenIds = <String>{};
+      final acceptedNotifications = allDocs
           .where((doc) {
             final data = doc.data();
+            final id = doc.id;
+            
+            // Remover duplicatas
+            if (seenIds.contains(id)) return false;
+            seenIds.add(id);
+            
+            // Apenas aceitas
             return data['status'] == 'accepted';
           })
           .map((doc) => InterestNotificationModel.fromMap({...doc.data(), 'id': doc.id}))
           .toList();
       
-      debugPrint('SimpleAcceptedMatchesRepository: Encontradas ${acceptedNotifications.length} notificações aceitas');
+      debugPrint('SimpleAcceptedMatchesRepository: Encontradas ${acceptedNotifications.length} notificações aceitas (sem duplicatas)');
       
       // Converter para AcceptedMatchModel
       final matches = <AcceptedMatchModel>[];
@@ -62,17 +79,36 @@ class SimpleAcceptedMatchesRepository {
   }
   
   /// Stream de matches aceitos usando método simples
-  Stream<List<AcceptedMatchModel>> getAcceptedMatchesStream(String userId) {
-    return _firestore
+  Stream<List<AcceptedMatchModel>> getAcceptedMatchesStream(String userId) async* {
+    // Combinar streams de notificações recebidas e enviadas
+    await for (final _ in _firestore
         .collection('interest_notifications')
         .where('toUserId', isEqualTo: userId)
-        .snapshots()
-        .asyncMap((snapshot) async {
+        .snapshots()) {
       
-      // Filtrar apenas as aceitas
-      final acceptedNotifications = snapshot.docs
+      // Buscar ambos os lados
+      final receivedSnapshot = await _firestore
+          .collection('interest_notifications')
+          .where('toUserId', isEqualTo: userId)
+          .get();
+      
+      final sentSnapshot = await _firestore
+          .collection('interest_notifications')
+          .where('fromUserId', isEqualTo: userId)
+          .get();
+      
+      // Combinar e filtrar
+      final allDocs = [...receivedSnapshot.docs, ...sentSnapshot.docs];
+      final seenIds = <String>{};
+      
+      final acceptedNotifications = allDocs
           .where((doc) {
             final data = doc.data();
+            final id = doc.id;
+            
+            if (seenIds.contains(id)) return false;
+            seenIds.add(id);
+            
             return data['status'] == 'accepted';
           })
           .map((doc) => InterestNotificationModel.fromMap({...doc.data(), 'id': doc.id}))
@@ -95,8 +131,8 @@ class SimpleAcceptedMatchesRepository {
       // Ordenar por data de aceitação
       matches.sort((a, b) => b.matchDate.compareTo(a.matchDate));
       
-      return matches;
-    });
+      yield matches;
+    }
   }
   
   /// Conta matches não lidos usando método simples
@@ -140,7 +176,7 @@ class SimpleAcceptedMatchesRepository {
         return null;
       }
       
-      // Buscar dados do outro usuário
+      // Buscar dados do outro usuário da collection usuarios
       final otherUserDoc = await _firestore
           .collection('usuarios')
           .doc(otherUserId)
@@ -152,6 +188,18 @@ class SimpleAcceptedMatchesRepository {
       }
       
       final otherUserData = otherUserDoc.data() as Map<String, dynamic>;
+      
+      // Buscar dados do perfil espiritual para idade e cidade
+      final profileQuery = await _firestore
+          .collection('spiritual_profiles')
+          .where('userId', isEqualTo: otherUserId)
+          .limit(1)
+          .get();
+      
+      Map<String, dynamic>? profileData;
+      if (profileQuery.docs.isNotEmpty) {
+        profileData = profileQuery.docs.first.data();
+      }
       
       // Gerar ID único do chat
       final chatId = _generateChatId(currentUserId, otherUserId);
@@ -178,11 +226,26 @@ class SimpleAcceptedMatchesRepository {
         debugPrint('SimpleAcceptedMatchesRepository: Erro ao buscar mensagens não lidas: $e');
       }
       
+      // Buscar idade e cidade do perfil espiritual (fonte primária)
+      final int? age = profileData?['age'] as int?;
+      final String? city = profileData?['city'] as String?;
+      
+      // Buscar foto do perfil da collection usuarios
+      final String? photo = otherUserData['imgUrl'] as String?;
+      
+      debugPrint('🔍 [MATCH_DATA] Dados extraídos do usuário $otherUserId:');
+      debugPrint('   Nome: ${otherUserData['nome']}');
+      debugPrint('   Foto: $photo');
+      debugPrint('   Idade: $age (de spiritual_profiles)');
+      debugPrint('   Cidade: $city (de spiritual_profiles)');
+      
       return AcceptedMatchModel.fromNotification(
         notificationId: notification.id!,
         otherUserId: otherUserId,
         otherUserName: otherUserData['nome'] ?? 'Usuário',
-        otherUserPhoto: otherUserData['photoURL'],
+        otherUserPhoto: photo,
+        otherUserAge: age,
+        otherUserCity: city,
         matchDate: matchDate,
         chatId: chatId,
         unreadMessages: unreadMessages,

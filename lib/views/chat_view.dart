@@ -42,7 +42,7 @@ import 'package:whatsapp_chat/views/story_favorites_view.dart';
 import 'package:whatsapp_chat/views/username_settings_view.dart';
 import 'package:whatsapp_chat/views/profile_completion_view.dart';
 import 'package:whatsapp_chat/views/fix_button_screen.dart';
-import 'package:whatsapp_chat/views/accepted_matches_view.dart';
+import 'package:whatsapp_chat/views/simple_accepted_matches_view.dart';
 import '../components/matches_button_with_counter.dart';
 import '../utils/test_accepted_matches.dart';
 import 'package:flutter/foundation.dart';

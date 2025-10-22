@@ -72,6 +72,13 @@ class _MatchChatCardState extends State<MatchChatCard>
     final isExpired = widget.match.chatExpired;
     final hasUnreadMessages = widget.match.unreadMessages > 0;
     
+    // Debug: Verificar dados do match
+    debugPrint('🎨 [MATCH_CARD] Exibindo: ${widget.match.otherUserName}');
+    debugPrint('   nameWithAge: ${widget.match.nameWithAge}');
+    debugPrint('   formattedLocation: ${widget.match.formattedLocation}');
+    debugPrint('   otherUserAge: ${widget.match.otherUserAge}');
+    debugPrint('   otherUserCity: ${widget.match.otherUserCity}');
+    
     return Container(
       margin: widget.margin ?? const EdgeInsets.symmetric(
         horizontal: 16,
@@ -119,6 +126,10 @@ class _MatchChatCardState extends State<MatchChatCard>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildUserName(),
+                            if (widget.match.formattedLocation.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              _buildLocation(),
+                            ],
                             const SizedBox(height: 4),
                             _buildMatchInfo(),
                             if (isExpired) ...[
@@ -237,7 +248,7 @@ class _MatchChatCardState extends State<MatchChatCard>
     final isExpired = widget.match.chatExpired;
     
     return Text(
-      widget.match.formattedName,
+      widget.match.nameWithAge,  // MUDADO: Agora exibe nome com idade
       style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.bold,
         color: isExpired
@@ -246,6 +257,35 @@ class _MatchChatCardState extends State<MatchChatCard>
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildLocation() {
+    final theme = Theme.of(context);
+    final isExpired = widget.match.chatExpired;
+    
+    return Row(
+      children: [
+        Icon(
+          Icons.location_on,
+          size: 12,
+          color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
+        ),
+        const SizedBox(width: 2),
+        Expanded(
+          child: Text(
+            widget.match.formattedLocation,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 12,
+              color: isExpired
+                  ? theme.textTheme.bodySmall?.color?.withOpacity(0.4)
+                  : theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 

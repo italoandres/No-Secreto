@@ -4,6 +4,8 @@ class AcceptedMatchModel {
   final String otherUserId;
   final String otherUserName;
   final String? otherUserPhoto;
+  final int? otherUserAge;
+  final String? otherUserCity;
   final DateTime matchDate;
   final String chatId;
   final int unreadMessages;
@@ -15,6 +17,8 @@ class AcceptedMatchModel {
     required this.otherUserId,
     required this.otherUserName,
     this.otherUserPhoto,
+    this.otherUserAge,
+    this.otherUserCity,
     required this.matchDate,
     required this.chatId,
     required this.unreadMessages,
@@ -28,6 +32,8 @@ class AcceptedMatchModel {
     required String otherUserId,
     required String otherUserName,
     String? otherUserPhoto,
+    int? otherUserAge,
+    String? otherUserCity,
     required DateTime matchDate,
     required String chatId,
     int unreadMessages = 0,
@@ -39,6 +45,8 @@ class AcceptedMatchModel {
       otherUserId: otherUserId,
       otherUserName: otherUserName.trim(),
       otherUserPhoto: otherUserPhoto,
+      otherUserAge: otherUserAge,
+      otherUserCity: otherUserCity,
       matchDate: matchDate,
       chatId: chatId,
       unreadMessages: unreadMessages,
@@ -84,6 +92,22 @@ class AcceptedMatchModel {
         ? '${otherUserName.substring(0, 20)}...' 
         : otherUserName;
   }
+  
+  /// Obtém nome com idade para exibição
+  String get nameWithAge {
+    if (otherUserAge != null) {
+      return '$formattedName, $otherUserAge';
+    }
+    return formattedName;
+  }
+  
+  /// Obtém localização formatada
+  String get formattedLocation {
+    if (otherUserCity != null && otherUserCity!.isNotEmpty) {
+      return otherUserCity!;
+    }
+    return '';
+  }
 
   /// Obtém data formatada do match
   String get formattedMatchDate {
@@ -107,6 +131,8 @@ class AcceptedMatchModel {
     String? otherUserId,
     String? otherUserName,
     String? otherUserPhoto,
+    int? otherUserAge,
+    String? otherUserCity,
     DateTime? matchDate,
     String? chatId,
     int? unreadMessages,
@@ -118,6 +144,8 @@ class AcceptedMatchModel {
       otherUserId: otherUserId ?? this.otherUserId,
       otherUserName: otherUserName ?? this.otherUserName,
       otherUserPhoto: otherUserPhoto ?? this.otherUserPhoto,
+      otherUserAge: otherUserAge ?? this.otherUserAge,
+      otherUserCity: otherUserCity ?? this.otherUserCity,
       matchDate: matchDate ?? this.matchDate,
       chatId: chatId ?? this.chatId,
       unreadMessages: unreadMessages ?? this.unreadMessages,
@@ -133,6 +161,8 @@ class AcceptedMatchModel {
       'otherUserId': otherUserId,
       'otherUserName': otherUserName,
       'otherUserPhoto': otherUserPhoto,
+      'otherUserAge': otherUserAge,
+      'otherUserCity': otherUserCity,
       'matchDate': matchDate.toIso8601String(),
       'chatId': chatId,
       'unreadMessages': unreadMessages,
@@ -148,6 +178,8 @@ class AcceptedMatchModel {
       otherUserId: map['otherUserId'] ?? '',
       otherUserName: map['otherUserName'] ?? '',
       otherUserPhoto: map['otherUserPhoto'],
+      otherUserAge: map['otherUserAge'],
+      otherUserCity: map['otherUserCity'],
       matchDate: DateTime.parse(map['matchDate']),
       chatId: map['chatId'] ?? '',
       unreadMessages: map['unreadMessages'] ?? 0,
