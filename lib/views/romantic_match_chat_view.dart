@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:whatsapp_chat/services/online_status_service.dart';
 
 /// View de chat romântico para matches mútuos
 /// Design moderno inspirado nos melhores apps de mensagem
@@ -37,33 +38,24 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
   bool _hasMessages = false;
   bool _isLoading = true;
   String? _actualPhotoUrl;
+  DateTime? _otherUserLastSeen;
+  Stream<DocumentSnapshot>? _userStatusStream;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-    _loadUserPhoto();
+    _initializeUserStatusStream();
     _checkForMessages();
     _markMessagesAsRead();
   }
 
-  /// Carrega a foto do usuário da collection usuarios
-  Future<void> _loadUserPhoto() async {
-    try {
-      final userDoc = await _firestore
-          .collection('usuarios')
-          .doc(widget.otherUserId)
-          .get();
-
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-        setState(() {
-          _actualPhotoUrl = userData?['imgUrl'] as String?;
-        });
-      }
-    } catch (e) {
-      print('Erro ao carregar foto do usuário: $e');
-    }
+  /// Inicializa stream para monitorar status online em tempo real
+  void _initializeUserStatusStream() {
+    _userStatusStream = _firestore
+        .collection('usuarios')
+        .doc(widget.otherUserId)
+        .snapshots();
   }
 
   void _initializeAnimations() {
@@ -121,7 +113,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
 
   /// Navega para o perfil do usuário
   void _viewProfile() {
-    Get.toNamed('/profile-display', arguments: {
+    Get.toNamed('/vitrine-display', arguments: {
       'userId': widget.otherUserId,
     });
   }
@@ -331,6 +323,50 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
     }
   }
 
+  /// Retorna a cor do status online
+  Color _getOnlineStatusColor() {
+    if (_otherUserLastSeen == null) return Colors.grey;
+    
+    final now = DateTime.now();
+    final difference = now.difference(_otherUserLastSeen!);
+    
+    // Online se visto nos últimos 5 minutos
+    if (difference.inMinutes < 5) {
+      return Colors.green;
+    }
+    
+    return Colors.grey;
+  }
+
+  /// Retorna o texto de último login
+  String _getLastSeenText() {
+    if (_otherUserLastSeen == null) return 'Online há muito tempo';
+    
+    final now = DateTime.now();
+    final difference = now.difference(_otherUserLastSeen!);
+    
+    // Online (menos de 5 minutos)
+    if (difference.inMinutes < 5) {
+      return 'Online';
+    }
+    
+    // Minutos (5-59 minutos)
+    if (difference.inMinutes < 60) {
+      final minutes = difference.inMinutes;
+      return 'Online há ${minutes} ${minutes == 1 ? "minuto" : "minutos"}';
+    }
+    
+    // Horas (1-23 horas)
+    if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      return 'Online há ${hours} ${hours == 1 ? "hora" : "horas"}';
+    }
+    
+    // Dias
+    final days = difference.inDays;
+    return 'Online há ${days} ${days == 1 ? "dia" : "dias"}';
+  }
+
   /// Marca mensagens do outro usuário como lidas
   Future<void> _markMessagesAsRead() async {
     try {
@@ -404,67 +440,131 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
         icon: const Icon(Icons.arrow_back, color: Colors.black87),
         onPressed: () => Get.back(),
       ),
-      title: Row(
-        children: [
-          // Foto de perfil
-          Hero(
-            tag: 'chat_profile_${widget.chatId}_${widget.otherUserId}',
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
-                    ? const LinearGradient(
-                        colors: [Color(0xFF39b9ff), Color(0xFFfc6aeb)],
-                      )
-                    : null,
-                image: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
-                    ? DecorationImage(
-                        image: NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+      title: StreamBuilder<DocumentSnapshot>(
+        stream: _userStatusStream,
+        builder: (context, snapshot) {
+          // Atualizar foto e lastSeen quando dados chegarem
+          if (snapshot.hasData && snapshot.data!.exists) {
+            final userData = snapshot.data!.data() as Map<String, dynamic>?;
+            final lastSeenTimestamp = userData?['lastSeen'] as Timestamp?;
+            final photoUrl = userData?['imgUrl'] as String?;
+            
+            // Atualizar estado apenas se mudou
+            if (photoUrl != _actualPhotoUrl) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _actualPhotoUrl = photoUrl;
+                  });
+                }
+              });
+            }
+            
+            // Atualizar lastSeen
+            _otherUserLastSeen = lastSeenTimestamp?.toDate();
+          }
+
+          return Row(
+            children: [
+              // Foto de perfil
+              Hero(
+                tag: 'chat_profile_${widget.chatId}_${widget.otherUserId}',
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
+                        ? const LinearGradient(
+                            colors: [Color(0xFF39b9ff), Color(0xFFfc6aeb)],
+                          )
+                        : null,
+                    image: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
+                        ? DecorationImage(
+                            image: NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
+                      ? Center(
+                          child: Text(
+                            widget.otherUserName[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
               ),
-              child: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
-                  ? Center(
-                      child: Text(
-                        widget.otherUserName[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.otherUserName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
-                    )
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.otherUserName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                    ),
+                    // Match Mútuo + Status Online
+                    Row(
+                      children: [
+                        // Match Mútuo
+                        Text(
+                          'Match Mútuo 💕',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: const Color(0xFFfc6aeb),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Separador
+                        Container(
+                          width: 3,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Status Online
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _getOnlineStatusColor(),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            _getLastSeenText(),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                Text(
-                  'Match Mútuo 💕',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: const Color(0xFFfc6aeb),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
       actions: [
         PopupMenuButton<String>(
@@ -930,6 +1030,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
     try {
       final currentUser = _auth.currentUser;
       if (currentUser == null) return;
+
+      // Atualiza o lastSeen quando envia mensagem
+      OnlineStatusService.updateLastSeen();
 
       // Limpar campo
       _messageController.clear();

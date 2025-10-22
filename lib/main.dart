@@ -26,6 +26,7 @@ import '/utils/dual_collection_debug.dart'; // 🔍 DEBUG DUAS COLEÇÕES
 import '/utils/force_notifications_now.dart'; // 🚀 SOLUÇÃO DEFINITIVA NOTIFICAÇÕES
 import '/utils/fix_timestamp_chat_errors.dart'; // 🔧 CORREÇÃO DE TIMESTAMPS
 import '/services/auto_chat_monitor.dart'; // 🔍 MONITOR AUTOMÁTICO
+import '/services/online_status_service.dart'; // 🟢 STATUS ONLINE
 
 import '/theme.dart';
 import '/token_usuario.dart';
@@ -290,8 +291,51 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({ Key? key }) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Não chama setUserOnline aqui para não causar timeout no login
+    // O status será atualizado automaticamente quando o usuário fizer login
+    // e quando o app voltar do segundo plano (resumed)
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // App voltou ao primeiro plano
+        // Aguardar 2 segundos para garantir que o login foi concluído
+        Future.delayed(const Duration(seconds: 2), () {
+          OnlineStatusService.setUserOnline();
+        });
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        // App foi para segundo plano ou fechado
+        OnlineStatusService.setUserOffline();
+        break;
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context){

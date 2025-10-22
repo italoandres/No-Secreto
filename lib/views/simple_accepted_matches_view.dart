@@ -271,12 +271,16 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                             color: _getStatusColor(match),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            _getTimeMessage(match),
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: _getStatusColor(match),
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              _getTimeMessage(match),
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: _getStatusColor(match),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -505,7 +509,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   }
 
   void _viewProfile(AcceptedMatchModel match) {
-    Get.toNamed('/profile-display', arguments: {
+    Get.toNamed('/vitrine-display', arguments: {
       'userId': match.otherUserId,
       'fromRoute': 'accepted-matches',
     });

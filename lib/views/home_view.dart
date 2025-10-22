@@ -16,6 +16,7 @@ import 'package:whatsapp_chat/views/chat_view.dart';
 import 'package:whatsapp_chat/views/completar_perfil_view.dart';
 import 'package:whatsapp_chat/views/login_view.dart';
 import 'package:whatsapp_chat/views/test_notifications_button_view.dart';
+import 'package:whatsapp_chat/routes.dart';
 import '../utils/emergency_chat_fix_button.dart';
 
 class HomeView extends StatefulWidget {
@@ -84,6 +85,18 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       floatingActionButton: kDebugMode ? Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // Botão de Status Online
+          FloatingActionButton(
+            mini: true,
+            heroTag: 'online_status',
+            onPressed: () {
+              Get.toNamed(PageRoutes.debugOnlineStatus);
+            },
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.wifi, size: 20),
+          ),
+          const SizedBox(height: 8),
+          // Botão de Teste de Notificações
           FloatingActionButton.extended(
             heroTag: 'notif_test',
             onPressed: () {

@@ -474,9 +474,9 @@ class LoginRepository {
       barrierDismissible: false
     );
     
-    // Timeout de 30 segundos para evitar travamento
-    Timer? timeoutTimer = Timer(const Duration(seconds: 30), () {
-      debugPrint('❌ TIMEOUT: Login demorou mais de 30 segundos');
+    // Timeout de 60 segundos para conexões lentas (APK em celular)
+    Timer? timeoutTimer = Timer(const Duration(seconds: 60), () {
+      debugPrint('❌ TIMEOUT: Login demorou mais de 60 segundos');
       if (Get.isDialogOpen == true) {
         Get.back();
         Get.rawSnackbar(

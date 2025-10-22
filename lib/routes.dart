@@ -8,6 +8,7 @@ import 'package:whatsapp_chat/views/vitrine_proposito_menu_view.dart';
 import 'package:whatsapp_chat/views/search_profile_by_username_view.dart';
 import 'package:whatsapp_chat/views/edit_profile_menu_view.dart';
 import 'package:whatsapp_chat/views/store_menu_view.dart';
+import 'package:whatsapp_chat/views/debug_online_status_view.dart';
 
 class PageRoutes {
   static const String initialRoute = '/';
@@ -19,6 +20,7 @@ class PageRoutes {
   static const String searchProfileByUsername = '/search-profile-by-username';
   static const String editProfileMenu = '/edit-profile-menu';
   static const String storeMenu = '/store-menu';
+  static const String debugOnlineStatus = '/debug-online-status';
 
   static Widget getPageFromString(String page) {
     final pages = {
@@ -30,6 +32,7 @@ class PageRoutes {
       searchProfileByUsername: const SearchProfileByUsernameView(),
       editProfileMenu: const EditProfileMenuView(),
       storeMenu: const StoreMenuView(),
+      debugOnlineStatus: const DebugOnlineStatusView(),
     };
 
     return (pages[page] ?? Container(
