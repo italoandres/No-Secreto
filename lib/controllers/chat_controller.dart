@@ -17,6 +17,7 @@ import '/models/emoji_grupo_model.dart';
 import '/models/emoji_model.dart';
 import '/repositories/chat_repository.dart';
 import 'home_controller.dart';
+import 'package:whatsapp_chat/services/online_status_service.dart';
 
 class ChatController {
   static final msgController = TextEditingController();
@@ -68,6 +69,9 @@ class ChatController {
     required bool isFirst
   }) {
     if(msgController.text.trim().isNotEmpty) {
+      // Atualizar status online ao enviar mensagem
+      OnlineStatusService.updateLastSeen();
+      
       ChatRepository.addText(
         msg: msgController.text.trim(),
         linkDescricaoModel: linkDescricaoModel.value

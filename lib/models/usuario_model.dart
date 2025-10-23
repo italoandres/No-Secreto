@@ -16,6 +16,8 @@ class UsuarioModel {
   List<String>? usernameHistory; // Histórico de usernames
   Timestamp? usernameChangedAt; // Última mudança de username
   DateTime? lastSyncAt; // Última sincronização com spiritual_profile
+  Timestamp? lastSeen; // ✨ NOVO: Última vez que usuário foi visto online
+  bool? isOnline; // ✨ NOVO: Se está online agora
 
   UsuarioModel({
     this.id,
@@ -32,6 +34,8 @@ class UsuarioModel {
     this.usernameHistory,
     this.usernameChangedAt,
     this.lastSyncAt,
+    this.lastSeen, // ✨ NOVO
+    this.isOnline, // ✨ NOVO
   });
 
   static UsuarioModel fromJson(Map<String, dynamic> json) {
@@ -54,6 +58,8 @@ class UsuarioModel {
       lastSyncAt: json['lastSyncAt'] != null 
           ? (json['lastSyncAt'] as Timestamp).toDate()
           : null,
+      lastSeen: json['lastSeen'], // ✨ NOVO
+      isOnline: json['isOnline'] ?? false, // ✨ NOVO
     );
   }
 
@@ -73,6 +79,8 @@ class UsuarioModel {
       'usernameHistory': usernameHistory,
       'usernameChangedAt': usernameChangedAt,
       'lastSyncAt': lastSyncAt != null ? Timestamp.fromDate(lastSyncAt!) : null,
+      'lastSeen': lastSeen, // ✨ NOVO
+      'isOnline': isOnline, // ✨ NOVO
     };
   }
 }

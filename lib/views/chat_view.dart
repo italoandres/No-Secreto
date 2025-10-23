@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'dart:async'; // ✨ NOVO: Para Timer
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,10 +67,13 @@ class ChatView extends StatefulWidget {
 class _ChatViewState extends State<ChatView> {
 
   int totMsgs = 0;
+  Timer? _onlineTimer; // ✨ NOVO: Timer para tracking de status online
+  
   @override
   void initState() {
     super.initState();
     initPlatformState();
+    _startOnlineTracking(); // ✨ NOVO: Iniciar tracking
   }
 
   Future<void> initPlatformState() async {
@@ -85,6 +89,62 @@ class _ChatViewState extends State<ChatView> {
       },
     );
     if (!mounted) return;
+  }
+  
+  // ✨ NOVO: Método para iniciar tracking de status online
+  void _startOnlineTracking() {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+    
+    // Marcar como online imediatamente
+    FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .update({
+      'lastSeen': FieldValue.serverTimestamp(),
+      'isOnline': true,
+    }).catchError((e) {
+      debugPrint('⚠️ Erro ao atualizar status online: $e');
+    });
+    
+    // Atualizar a cada 30 segundos
+    _onlineTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) {
+        FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(userId)
+            .update({
+          'lastSeen': FieldValue.serverTimestamp(),
+          'isOnline': true,
+        }).catchError((e) {
+          debugPrint('⚠️ Erro ao atualizar status online: $e');
+        });
+      }
+    });
+  }
+
+  // ✨ NOVO: Método para parar tracking
+  void _stopOnlineTracking() {
+    _onlineTimer?.cancel();
+    
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(userId)
+          .update({
+        'lastSeen': FieldValue.serverTimestamp(),
+        'isOnline': false,
+      }).catchError((e) {
+        debugPrint('⚠️ Erro ao marcar como offline: $e');
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopOnlineTracking(); // ✨ NOVO: Parar tracking ao sair
+    super.dispose();
   }
   
   @override

@@ -21,6 +21,7 @@ class UsuarioRepository {
   // Lista de emails que são automaticamente admin
   static const List<String> adminEmails = [
     'italolior@gmail.com',
+    'deusepaimovement@gmail.com',
   ];
 
   // Helper para verificar se um email é admin

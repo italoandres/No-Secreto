@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/execute_fix_now_direct.dart';
 import '../utils/create_firebase_index.dart';
+import '../utils/force_admin_deusepai.dart';
+import '../utils/fix_admin_deusepai_final.dart';
 
 /// Tela com botão para corrigir o Explorar Perfis
 /// VOCÊ SÓ PRECISA NAVEGAR PARA ESTA TELA E CLICAR NO BOTÃO!
@@ -187,6 +189,53 @@ class _FixButtonScreenState extends State<FixButtonScreen> {
             ),
             
             const SizedBox(height: 30),
+            
+            // BOTÃO PARA FORÇAR ADMIN DEUSEPAIMOVEMENT - VERSÃO FINAL
+            Container(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _statusMessage = '🔧 Forçando admin para deusepaimovement@gmail.com...';
+                  });
+                  
+                  await fixAdminDeusePaiFinal();
+                  
+                  setState(() {
+                    _statusMessage = '✅ Admin forçado! Faça logout e login novamente.';
+                  });
+                  
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('✅ Admin configurado! Faça logout e login novamente.'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 5),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple[600],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                ),
+                child: const Text(
+                  '👑 FORÇAR ADMIN DEUSEPAI FINAL\n(Correção definitiva)',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
             
             // BOTÃO PARA CRIAR ÍNDICE FIREBASE
             Container(

@@ -1,7 +1,9 @@
+import 'dart:async'; // ✨ NOVO: Para StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // ✨ NOVO: Para Timestamp
 import '../models/accepted_match_model.dart';
 import '../repositories/simple_accepted_matches_repository.dart';
 import '../views/romantic_match_chat_view.dart';
@@ -17,10 +19,47 @@ class SimpleAcceptedMatchesView extends StatefulWidget {
 class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   final _repository = SimpleAcceptedMatchesRepository();
   
+  // ✨ NOVO: Mapa para armazenar status online de cada usuário
+  final Map<String, bool> _userOnlineStatus = {};
+  final Map<String, Timestamp?> _userLastSeen = {};
+  final Map<String, StreamSubscription> _statusSubscriptions = {};
+  
   @override
   void initState() {
     super.initState();
     debugPrint('🔍 [MATCHES_VIEW] Iniciando stream de matches aceitos');
+  }
+  
+  @override
+  void dispose() {
+    // ✨ NOVO: Cancelar todas as subscriptions de status
+    for (var subscription in _statusSubscriptions.values) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
+  
+  // ✨ NOVO: Iniciar listener do status de um usuário
+  void _startListeningToUserStatus(String userId) {
+    if (_statusSubscriptions.containsKey(userId)) {
+      return; // Já está ouvindo
+    }
+    
+    final subscription = FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists && mounted) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        setState(() {
+          _userLastSeen[userId] = data['lastSeen'] as Timestamp?;
+          _userOnlineStatus[userId] = data['isOnline'] ?? false;
+        });
+      }
+    });
+    
+    _statusSubscriptions[userId] = subscription;
   }
 
   @override
@@ -162,6 +201,9 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   }
 
   Widget _buildMatchCard(AcceptedMatchModel match) {
+    // ✨ NOVO: Iniciar listener do status deste usuário
+    _startListeningToUserStatus(match.otherUserId);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -186,7 +228,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                 Stack(
                   children: [
                     _buildModernAvatar(match),
-                    // Bolinha de status online
+                    // ✨ NOVO: Bolinha de status online (verde/cinza)
                     Positioned(
                       right: 2,
                       bottom: 2,
@@ -194,7 +236,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: _getOnlineStatusColor(),
+                          color: _getOnlineStatusColor(match.otherUserId),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: Colors.white,
@@ -452,10 +494,25 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
     );
   }
 
-  Color _getOnlineStatusColor() {
-    // TODO: Implementar lógica real de status online
-    // Por enquanto, retorna verde (online) aleatoriamente
-    return Colors.green; // Verde = online, Amarelo = ausente, Cinza = offline
+  // ✨ NOVO: Calcular cor do status online (copiado do ChatView)
+  Color _getOnlineStatusColor(String userId) {
+    final lastSeen = _userLastSeen[userId];
+    
+    if (lastSeen == null) return Colors.grey; // Sem dados = offline
+    
+    final now = DateTime.now();
+    final lastSeenDate = lastSeen.toDate();
+    final difference = now.difference(lastSeenDate);
+    
+    final isOnline = _userOnlineStatus[userId] ?? false;
+    
+    // Online: verde (se isOnline = true E lastSeen < 5 minutos)
+    if (isOnline && difference.inMinutes < 5) {
+      return Colors.green;
+    }
+    
+    // Offline: cinza
+    return Colors.grey;
   }
 
   List<Color> _getTimeGradient(AcceptedMatchModel match) {

@@ -114,15 +114,32 @@ class AcceptedMatchModel {
     final now = DateTime.now();
     final difference = now.difference(matchDate);
     
-    if (difference.inDays > 30) {
-      return '${(difference.inDays / 30).floor()} mês${difference.inDays > 60 ? 'es' : ''} atrás';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays} dia${difference.inDays > 1 ? 's' : ''} atrás';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} hora${difference.inHours > 1 ? 's' : ''} atrás';
-    } else {
-      return 'Agora mesmo';
+    // Normalizar datas para comparação (ignorar hora)
+    final today = DateTime(now.year, now.month, now.day);
+    final matchDay = DateTime(matchDate.year, matchDate.month, matchDate.day);
+    final daysDifference = today.difference(matchDay).inDays;
+    
+    // Hoje (mesmo dia, independente da hora)
+    if (daysDifference == 0) {
+      if (difference.inHours == 0) {
+        return 'agora mesmo';
+      }
+      return 'hoje';
     }
+    
+    // Ontem (1 dia atrás)
+    if (daysDifference == 1) {
+      return 'ontem';
+    }
+    
+    // 2-30 dias atrás
+    if (daysDifference <= 30) {
+      return '$daysDifference dia${daysDifference > 1 ? 's' : ''} atrás';
+    }
+    
+    // Mais de 30 dias (meses)
+    final months = (daysDifference / 30).floor();
+    return '$months mês${months > 1 ? 'es' : ''} atrás';
   }
 
   /// Cria cópia com campos atualizados
