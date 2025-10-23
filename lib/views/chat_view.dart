@@ -35,7 +35,6 @@ import 'package:whatsapp_chat/views/nosso_proposito_view.dart';
 import 'package:whatsapp_chat/views/select_language_view.dart';
 import 'package:whatsapp_chat/views/sinais_isaque_view.dart';
 import 'package:whatsapp_chat/views/sinais_rebeca_view.dart';
-import 'package:whatsapp_chat/views/sinais_view.dart';
 import 'package:whatsapp_chat/views/stories_view.dart';
 import 'package:whatsapp_chat/utils/debug_user_state.dart';
 import 'package:whatsapp_chat/views/enhanced_stories_viewer_view.dart';
@@ -43,8 +42,6 @@ import 'package:whatsapp_chat/views/story_favorites_view.dart';
 import 'package:whatsapp_chat/views/username_settings_view.dart';
 import 'package:whatsapp_chat/views/profile_completion_view.dart';
 import 'package:whatsapp_chat/views/fix_button_screen.dart';
-import 'package:whatsapp_chat/views/simple_accepted_matches_view.dart';
-import '../components/matches_button_with_counter.dart';
 import '../utils/test_accepted_matches.dart';
 import 'package:flutter/foundation.dart';
 import 'firebase_index_setup_view.dart';
@@ -222,11 +219,6 @@ class _ChatViewState extends State<ChatView> {
                                       ),
                                     ),
                                   ),
-
-                                  // Botão de Matches Aceitos (Chats) com contador
-                                  const MatchesButtonWithCounter(),
-                                  
-
                                   
                                   // BOTÃO DE CORREÇÃO - CLIQUE AQUI PARA CORRIGIR!
                                   Container(
@@ -293,19 +285,6 @@ class _ChatViewState extends State<ChatView> {
                               ),
                               Row(
                                 children: [
-                                  // BOTÃO NOVA ABA SINAIS (TESTE)
-                                  Container(
-                                    width: 50, height: 50,
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        backgroundColor: const Color(0xFF4169E1)
-                                      ),
-                                      onPressed: () => Get.to(() => const SinaisView()),
-                                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
-                                    ),
-                                  ),
                                   // Botão 🤵 apenas para usuários do sexo feminino
                                   if(user.sexo == UserSexo.feminino)
                                   Container(

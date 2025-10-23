@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:whatsapp_chat/services/online_status_service.dart';
+import 'package:whatsapp_chat/services/chat_status_service.dart';
 
 /// View de chat romântico para matches mútuos
 /// Design moderno inspirado nos melhores apps de mensagem
@@ -323,48 +324,18 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
     }
   }
 
-  /// Retorna a cor do status online
+  /// Retorna a cor do status online (usando serviço compartilhado)
   Color _getOnlineStatusColor() {
     if (_otherUserLastSeen == null) return Colors.grey;
-    
-    final now = DateTime.now();
-    final difference = now.difference(_otherUserLastSeen!);
-    
-    // Online se visto nos últimos 5 minutos
-    if (difference.inMinutes < 5) {
-      return Colors.green;
-    }
-    
-    return Colors.grey;
+    final timestamp = Timestamp.fromDate(_otherUserLastSeen!);
+    return ChatStatusService.getStatusColor(timestamp);
   }
 
-  /// Retorna o texto de último login
+  /// Retorna o texto de último login (usando serviço compartilhado)
   String _getLastSeenText() {
-    if (_otherUserLastSeen == null) return 'Online há muito tempo';
-    
-    final now = DateTime.now();
-    final difference = now.difference(_otherUserLastSeen!);
-    
-    // Online (menos de 5 minutos)
-    if (difference.inMinutes < 5) {
-      return 'Online';
-    }
-    
-    // Minutos (5-59 minutos)
-    if (difference.inMinutes < 60) {
-      final minutes = difference.inMinutes;
-      return 'Online há ${minutes} ${minutes == 1 ? "minuto" : "minutos"}';
-    }
-    
-    // Horas (1-23 horas)
-    if (difference.inHours < 24) {
-      final hours = difference.inHours;
-      return 'Online há ${hours} ${hours == 1 ? "hora" : "horas"}';
-    }
-    
-    // Dias
-    final days = difference.inDays;
-    return 'Online há ${days} ${days == 1 ? "dia" : "dias"}';
+    if (_otherUserLastSeen == null) return 'Offline';
+    final timestamp = Timestamp.fromDate(_otherUserLastSeen!);
+    return ChatStatusService.getLastSeenText(timestamp);
   }
 
   /// Marca mensagens do outro usuário como lidas
