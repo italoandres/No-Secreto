@@ -7,7 +7,11 @@ class InterestsRepository {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _interestsCollection = 'interests';
 
-  /// Obtém todas as notificações de interesse para um usuário
+  // ============================================================================
+  // 🚀 OTIMIZADO: Removido N+1 query problem
+  // ============================================================================
+
+  /// Obtém todas as notificações de interesse para um usuário - OTIMIZADO
   static Future<List<Map<String, dynamic>>> getInterestNotifications(String userId) async {
     try {
       EnhancedLogger.info('Loading interest notifications', 
@@ -21,20 +25,51 @@ class InterestsRepository {
           .where('toUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'pending')
           .orderBy('createdAt', descending: true)
+          .limit(50) // ✅ OTIMIZAÇÃO: Adicionar limit
           .get();
+
+      if (query.docs.isEmpty) {
+        return [];
+      }
+
+      // ✅ OTIMIZAÇÃO: Buscar TODOS os interesses mútuos de UMA VEZ
+      final fromUserIds = query.docs
+          .map((doc) => doc.data()['fromUserId'] as String)
+          .toSet() // Remove duplicados
+          .toList();
+
+      // Buscar interesses mútuos em lotes de 10 (limite do whereIn)
+      final mutualInterestsMap = <String, bool>{};
+      
+      for (int i = 0; i < fromUserIds.length; i += 10) {
+        final batch = fromUserIds.skip(i).take(10).toList();
+        
+        final mutualQuery = await _firestore
+            .collection(_interestsCollection)
+            .where('fromUserId', isEqualTo: userId)
+            .where('toUserId', whereIn: batch)
+            .where('status', isEqualTo: 'pending')
+            .get();
+        
+        for (final doc in mutualQuery.docs) {
+          final toUserId = doc.data()['toUserId'] as String;
+          mutualInterestsMap[toUserId] = true;
+        }
+      }
 
       final notifications = <Map<String, dynamic>>[];
 
       for (final doc in query.docs) {
         try {
           final data = doc.data();
+          final fromUserId = data['fromUserId'] as String;
           
           // Calcular tempo decorrido
           final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
           final timeAgo = _formatTimeAgo(createdAt);
           
-          // Verificar se o usuário atual também demonstrou interesse (interesse mútuo)
-          final hasUserInterest = await _checkMutualInterest(userId, data['fromUserId']);
+          // ✅ Verificar interesse mútuo do Map (não faz query!)
+          final hasUserInterest = mutualInterestsMap[fromUserId] ?? false;
           
           // Criar perfil a partir dos dados salvos
           final fromProfile = data['fromProfile'] as Map<String, dynamic>?;
@@ -42,7 +77,7 @@ class InterestsRepository {
           
           if (fromProfile != null) {
             profile = SpiritualProfileModel(
-              userId: data['fromUserId'],
+              userId: fromUserId,
               displayName: fromProfile['displayName'],
               username: fromProfile['username'],
               age: fromProfile['age'],
@@ -58,7 +93,7 @@ class InterestsRepository {
               'hasUserInterest': hasUserInterest,
               'timeAgo': timeAgo,
               'interestId': doc.id,
-              'isSimulated': data['fromUserId'] == 'itala_user_id_simulation',
+              'isSimulated': fromUserId == 'itala_user_id_simulation',
               'createdAt': createdAt,
             });
           }
@@ -76,6 +111,7 @@ class InterestsRepository {
         data: {
           'userId': userId,
           'notificationsCount': notifications.length,
+          'mutualInterestsChecked': fromUserIds.length,
         }
       );
 
@@ -90,7 +126,7 @@ class InterestsRepository {
     }
   }
 
-  /// Stream de notificações de interesse em tempo real
+  /// Stream de notificações de interesse em tempo real - OTIMIZADO
   static Stream<List<Map<String, dynamic>>> getInterestNotificationsStream(String userId) {
     try {
       EnhancedLogger.info('Starting interest notifications stream', 
@@ -103,28 +139,58 @@ class InterestsRepository {
           .where('toUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'pending')
           .orderBy('createdAt', descending: true)
+          .limit(50) // ✅ OTIMIZAÇÃO: Adicionar limit
           .snapshots()
           .asyncMap((snapshot) async {
+        
+        if (snapshot.docs.isEmpty) {
+          return <Map<String, dynamic>>[];
+        }
+
+        // ✅ OTIMIZAÇÃO: Buscar interesses mútuos de uma vez
+        final fromUserIds = snapshot.docs
+            .map((doc) => doc.data()['fromUserId'] as String)
+            .toSet()
+            .toList();
+
+        // Buscar interesses mútuos em lotes
+        final mutualInterestsMap = <String, bool>{};
+        
+        for (int i = 0; i < fromUserIds.length; i += 10) {
+          final batch = fromUserIds.skip(i).take(10).toList();
+          
+          final mutualQuery = await _firestore
+              .collection(_interestsCollection)
+              .where('fromUserId', isEqualTo: userId)
+              .where('toUserId', whereIn: batch)
+              .where('status', isEqualTo: 'pending')
+              .get();
+          
+          for (final doc in mutualQuery.docs) {
+            final toUserId = doc.data()['toUserId'] as String;
+            mutualInterestsMap[toUserId] = true;
+          }
+        }
+
         final notifications = <Map<String, dynamic>>[];
 
         for (final doc in snapshot.docs) {
           try {
             final data = doc.data();
+            final fromUserId = data['fromUserId'] as String;
             
-            // Calcular tempo decorrido
             final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
             final timeAgo = _formatTimeAgo(createdAt);
             
-            // Verificar interesse mútuo
-            final hasUserInterest = await _checkMutualInterest(userId, data['fromUserId']);
+            // ✅ Usar Map ao invés de query
+            final hasUserInterest = mutualInterestsMap[fromUserId] ?? false;
             
-            // Criar perfil
             final fromProfile = data['fromProfile'] as Map<String, dynamic>?;
             SpiritualProfileModel? profile;
             
             if (fromProfile != null) {
               profile = SpiritualProfileModel(
-                userId: data['fromUserId'],
+                userId: fromUserId,
                 displayName: fromProfile['displayName'],
                 username: fromProfile['username'],
                 age: fromProfile['age'],
@@ -140,7 +206,7 @@ class InterestsRepository {
                 'hasUserInterest': hasUserInterest,
                 'timeAgo': timeAgo,
                 'interestId': doc.id,
-                'isSimulated': data['fromUserId'] == 'itala_user_id_simulation',
+                'isSimulated': fromUserId == 'itala_user_id_simulation',
                 'createdAt': createdAt,
               });
             }
@@ -165,19 +231,8 @@ class InterestsRepository {
     }
   }
 
-  /// Verifica se há interesse mútuo entre dois usuários
-  static Future<bool> _checkMutualInterest(String userId, String otherUserId) async {
-    try {
-      final doc = await _firestore
-          .collection(_interestsCollection)
-          .doc('${userId}_$otherUserId')
-          .get();
-
-      return doc.exists && doc.data()?['status'] == 'pending';
-    } catch (e) {
-      return false;
-    }
-  }
+  // ✅ REMOVIDO: _checkMutualInterest() não é mais necessário!
+  // O método foi substituído pela busca em lote acima
 
   /// Formata tempo decorrido em string legível
   static String _formatTimeAgo(DateTime dateTime) {

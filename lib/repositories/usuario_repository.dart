@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -107,20 +106,106 @@ class UsuarioRepository {
     });
   }
 
-  static Future<List<UsuarioModel>> getAll() async {
-
+  // ============================================================================
+  // 🚀 OTIMIZADO: getAll() com limit e pagination
+  // ============================================================================
+  
+  /// Busca usuários com limit e pagination
+  /// 
+  /// [limit] - Número máximo de usuários a retornar (padrão: 20)
+  /// [lastDocument] - Último documento da página anterior (para pagination)
+  /// [orderByField] - Campo para ordenar (padrão: 'nome')
+  /// [descending] - Ordem descendente (padrão: false)
+  static Future<List<UsuarioModel>> getAll({
+    int limit = 20,
+    DocumentSnapshot? lastDocument,
+    String orderByField = 'nome',
+    bool descending = false,
+  }) async {
     List<UsuarioModel> all = [];
 
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection('usuarios')
+          .orderBy(orderByField, descending: descending)
+          .limit(limit);
 
-    final query = await FirebaseFirestore.instance.collection('usuarios').get();
-    for (var element in query.docs) {
-      UsuarioModel u = UsuarioModel.fromJson(element.data());
-      u.id = element.id;
-      all.add(u);
+      // Pagination: começar depois do último documento
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      final snapshot = await query.get();
+      
+      for (var element in snapshot.docs) {
+        try {
+          UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
+          u.id = element.id;
+          all.add(u);
+        } catch (e) {
+          debugPrint('Erro ao processar usuário ${element.id}: $e');
+        }
+      }
+
+      debugPrint('UsuarioRepository: ${all.length} usuários carregados (limit: $limit)');
+
+      return all;
+    } catch (e) {
+      debugPrint('UsuarioRepository: Erro ao buscar usuários: $e');
+      return [];
     }
-
-    return all;
   }
+
+  /// Busca usuários com filtro de sexo (para explore profiles)
+  static Future<List<UsuarioModel>> getUsersBySexo({
+    required UserSexo sexo,
+    int limit = 20,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    List<UsuarioModel> all = [];
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('sexo', isEqualTo: sexo.name)
+          .where('perfilIsComplete', isEqualTo: true)
+          .orderBy('nome')
+          .limit(limit);
+
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      final snapshot = await query.get();
+      
+      for (var element in snapshot.docs) {
+        try {
+          UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
+          u.id = element.id;
+          all.add(u);
+        } catch (e) {
+          debugPrint('Erro ao processar usuário: $e');
+        }
+      }
+
+      debugPrint('UsuarioRepository: ${all.length} usuários (sexo: ${sexo.name}) carregados');
+
+      return all;
+    } catch (e) {
+      debugPrint('UsuarioRepository: Erro ao buscar usuários por sexo: $e');
+      return [];
+    }
+  }
+
+  /// Busca próxima página de usuários
+  static Future<List<UsuarioModel>> getNextPage(DocumentSnapshot lastDocument) async {
+    return getAll(
+      limit: 20,
+      lastDocument: lastDocument,
+    );
+  }
+
+  // ============================================================================
 
   static Future<bool> validateSenha(String senha) async {
 
