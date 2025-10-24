@@ -14,8 +14,11 @@ import '../views/login_view.dart';
 import '../models/usuario_model.dart';
 import '../services/data_migration_service.dart';
 import '../utils/enhanced_logger.dart';
+import '../services/user_profile_cache_service.dart';
 
 class UsuarioRepository {
+  // ==================== CACHE SERVICE ====================
+  static final UserProfileCacheService _cacheService = UserProfileCacheService();
 
   // Lista de emails que são automaticamente admin
   static const List<String> adminEmails = [
@@ -101,6 +104,9 @@ class UsuarioRepository {
         'email': u.email,
         'hasPhoto': u.imgUrl != null,
       });
+
+      // 💾 Salvar no cache quando receber atualização
+      await _cacheService.saveUser(u);
       
       return u;
     });
@@ -142,6 +148,9 @@ class UsuarioRepository {
           UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
           u.id = element.id;
           all.add(u);
+          
+          // 💾 Salvar no cache
+          await _cacheService.saveUser(u);
         } catch (e) {
           debugPrint('Erro ao processar usuário ${element.id}: $e');
         }
@@ -183,6 +192,9 @@ class UsuarioRepository {
           UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
           u.id = element.id;
           all.add(u);
+          
+          // 💾 Salvar no cache
+          await _cacheService.saveUser(u);
         } catch (e) {
           debugPrint('Erro ao processar usuário: $e');
         }
@@ -285,6 +297,9 @@ class UsuarioRepository {
       'sexo': sexo.name
     });
     
+    // 🗑️ Invalidar cache após completar perfil
+    _cacheService.invalidateUser(FirebaseAuth.instance.currentUser!.uid);
+    
     await _navigateAfterAuth();
   }
 
@@ -310,6 +325,9 @@ class UsuarioRepository {
         .collection('usuarios')
         .doc(userId)
         .update(data);
+    
+    // 🗑️ Invalidar cache após atualização
+    _cacheService.invalidateUser(userId);
   }
   
   /// Sincroniza o status de admin de todos os usuários baseado na lista de emails admin
@@ -333,6 +351,9 @@ class UsuarioRepository {
           await doc.reference.update({'isAdmin': shouldBeAdmin});
           updatedCount++;
           debugPrint('UsuarioRepository: Updated admin status for $email to $shouldBeAdmin');
+          
+          // 🗑️ Invalidar cache do usuário
+          _cacheService.invalidateUser(doc.id);
         }
       }
       
@@ -342,9 +363,20 @@ class UsuarioRepository {
     }
   }
 
-  /// Obtém dados de um usuário específico por ID
+  /// ⚡ COM CACHE: Obtém dados de um usuário específico por ID
   static Future<UsuarioModel?> getUserById(String userId) async {
     try {
+      print('🔍 Buscando usuario: $userId');
+
+      // 1️⃣ Tentar buscar do cache
+      final cachedUser = await _cacheService.getUser(userId);
+      if (cachedUser != null) {
+        print('✅ Usuario $userId carregado do CACHE');
+        return cachedUser;
+      }
+
+      // 2️⃣ Se não está no cache, buscar do Firebase
+      print('🌐 Buscando usuario $userId do Firebase...');
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(userId)
@@ -353,13 +385,37 @@ class UsuarioRepository {
       if (doc.exists) {
         UsuarioModel user = UsuarioModel.fromJson(doc.data() as Map<String, dynamic>);
         user.id = doc.id;
+        
+        // 3️⃣ Salvar no cache
+        await _cacheService.saveUser(user);
+        print('💾 Usuario $userId salvo no cache');
+        
         return user;
       }
       
       return null;
     } catch (e) {
-      print('DEBUG USUARIO: Erro ao buscar usuário por ID: $e');
+      print('❌ Erro ao buscar usuário por ID: $e');
       return null;
     }
+  }
+
+  // ==================== MÉTODOS DE CACHE ====================
+
+  /// Limpa todo o cache
+  static Future<void> clearCache() async {
+    await _cacheService.clearAll();
+    print('🗑️ Todo o cache foi limpo');
+  }
+
+  /// Invalida o cache de um usuário específico
+  static Future<void> invalidateUserCache(String userId) async {
+    await _cacheService.invalidateUser(userId);
+    print('🗑️ Cache do usuario $userId invalidado');
+  }
+
+  /// Obtém estatísticas do cache
+  static Future<Map<String, dynamic>> getCacheStats() async {
+    return await _cacheService.getStats();
   }
 }
