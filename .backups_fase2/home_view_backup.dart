@@ -15,6 +15,7 @@ import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/views/chat_view.dart';
 import 'package:whatsapp_chat/views/completar_perfil_view.dart';
 import 'package:whatsapp_chat/views/login_view.dart';
+import 'package:whatsapp_chat/views/test_notifications_button_view.dart';
 import 'package:whatsapp_chat/routes.dart';
 import '../utils/emergency_chat_fix_button.dart';
 
@@ -95,21 +96,21 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
             child: const Icon(Icons.wifi, size: 20),
           ),
           const SizedBox(height: 8),
-          // REMOVIDO FASE 2: Botão de Teste de Notificações
-          // FloatingActionButton.extended(
-          //   heroTag: 'notif_test',
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => const TestNotificationsButtonView(),
-          //       ),
-          //     );
-          //   },
-          //   icon: const Icon(Icons.science),
-          //   label: const Text('🧪 Teste'),
-          //   backgroundColor: Colors.orange,
-          // ),
+          // Botão de Teste de Notificações
+          FloatingActionButton.extended(
+            heroTag: 'notif_test',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TestNotificationsButtonView(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.science),
+            label: const Text('🧪 Teste'),
+            backgroundColor: Colors.orange,
+          ),
         ],
       ) : null,
       body: StreamBuilder<UsuarioModel?>(

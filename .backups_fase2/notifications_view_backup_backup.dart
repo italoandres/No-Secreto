@@ -5,6 +5,8 @@ import 'package:whatsapp_chat/models/notification_model.dart';
 import 'package:whatsapp_chat/services/notification_service.dart';
 import 'package:whatsapp_chat/components/notification_item_component.dart';
 import 'package:whatsapp_chat/views/story_favorites_view.dart';
+import 'package:whatsapp_chat/utils/test_notifications.dart';
+
 class NotificationsView extends StatefulWidget {
   final String? contexto; // Contexto de onde foi chamada (principal, sinais_rebeca, sinais_isaque)
   

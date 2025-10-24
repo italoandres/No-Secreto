@@ -36,10 +36,12 @@ import 'package:whatsapp_chat/views/select_language_view.dart';
 import 'package:whatsapp_chat/views/sinais_isaque_view.dart';
 import 'package:whatsapp_chat/views/sinais_rebeca_view.dart';
 import 'package:whatsapp_chat/views/stories_view.dart';
+import 'package:whatsapp_chat/utils/debug_user_state.dart';
 import 'package:whatsapp_chat/views/enhanced_stories_viewer_view.dart';
 import 'package:whatsapp_chat/views/story_favorites_view.dart';
 import 'package:whatsapp_chat/views/username_settings_view.dart';
 import 'package:whatsapp_chat/views/profile_completion_view.dart';
+import 'package:whatsapp_chat/views/fix_button_screen.dart';
 import '../utils/test_accepted_matches.dart';
 import 'package:flutter/foundation.dart';
 import 'firebase_index_setup_view.dart';
@@ -229,7 +231,7 @@ class _ChatViewState extends State<ChatView> {
                                       ),
                                       onPressed: () {
                                         // Navegar para a tela de correção
-                                        // REMOVIDO: Get.to(() => const FixButtonScreen());
+                                        Get.to(() => const FixButtonScreen());
                                       },
                                       child: const Icon(
                                         Icons.build,
@@ -1259,8 +1261,8 @@ class _ChatViewState extends State<ChatView> {
                 leading: const Icon(Icons.settings),
                 onTap: () async {
                   Get.back();
-                  // REMOVIDO: await DebugUserState.printCurrentUserState();
-                  // REMOVIDO: await DebugUserState.fixUserSexo();
+                  await DebugUserState.printCurrentUserState();
+                  await DebugUserState.fixUserSexo();
                   
                   Get.snackbar(
                     'Debug',
