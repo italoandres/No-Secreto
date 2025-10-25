@@ -15,8 +15,6 @@ import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/views/chat_view.dart';
 import 'package:whatsapp_chat/views/completar_perfil_view.dart';
 import 'package:whatsapp_chat/views/login_view.dart';
-import 'package:whatsapp_chat/routes.dart';
-import '../utils/emergency_chat_fix_button.dart';
 
 class HomeView extends StatefulWidget {
 const HomeView({ Key? key }) : super(key: key);
@@ -81,37 +79,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     
     return Scaffold(
-      floatingActionButton: kDebugMode ? Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Botão de Status Online
-          FloatingActionButton(
-            mini: true,
-            heroTag: 'online_status',
-            onPressed: () {
-              Get.toNamed(PageRoutes.debugOnlineStatus);
-            },
-            backgroundColor: Colors.green,
-            child: const Icon(Icons.wifi, size: 20),
-          ),
-          const SizedBox(height: 8),
-          // REMOVIDO FASE 2: Botão de Teste de Notificações
-          // FloatingActionButton.extended(
-          //   heroTag: 'notif_test',
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => const TestNotificationsButtonView(),
-          //       ),
-          //     );
-          //   },
-          //   icon: const Icon(Icons.science),
-          //   label: const Text('🧪 Teste'),
-          //   backgroundColor: Colors.orange,
-          // ),
-        ],
-      ) : null,
+      floatingActionButton: null,
       body: StreamBuilder<UsuarioModel?>(
         stream: UsuarioRepository.getUser(),
         builder: (context, snapshot) {
@@ -128,8 +96,6 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
           return Stack(
             children: [
               const ChatView(),
-              // Botão de emergência para correção de chat
-              if (kDebugMode) FloatingEmergencyFixButton(),
               Obx(() => showSenha.value == false || (kIsWeb ? true : !Platform.isAndroid) ? const SizedBox() : SingleChildScrollView(
                 child: Container(
                   color: Colors.white,

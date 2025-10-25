@@ -40,10 +40,6 @@ import 'package:whatsapp_chat/views/enhanced_stories_viewer_view.dart';
 import 'package:whatsapp_chat/views/story_favorites_view.dart';
 import 'package:whatsapp_chat/views/username_settings_view.dart';
 import 'package:whatsapp_chat/views/profile_completion_view.dart';
-import '../utils/test_accepted_matches.dart';
-import 'package:flutter/foundation.dart';
-import 'firebase_index_setup_view.dart';
-import 'certification_approval_panel_view.dart';
 import 'simple_certification_panel.dart';
 
 import '../components/editar_capa_component.dart';
@@ -217,68 +213,6 @@ class _ChatViewState extends State<ChatView> {
                                       ),
                                     ),
                                   ),
-                                  
-                                  // BOTÃO DE CORREÇÃO - CLIQUE AQUI PARA CORRIGIR!
-                                  Container(
-                                    width: 50, height: 50,
-                                    margin: const EdgeInsets.only(left: 8),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        backgroundColor: Colors.red.shade600
-                                      ),
-                                      onPressed: () {
-                                        // Navegar para a tela de correção
-                                        // REMOVIDO: Get.to(() => const FixButtonScreen());
-                                      },
-                                      child: const Icon(
-                                        Icons.build,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
-
-                                  // BOTÃO FIREBASE SETUP - CONFIGURAR ÍNDICES
-                                  Container(
-                                    width: 50, height: 50,
-                                    margin: const EdgeInsets.only(left: 8),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        backgroundColor: Colors.blue.shade600
-                                      ),
-                                      onPressed: () {
-                                        Get.to(() => const FirebaseIndexSetupView());
-                                      },
-                                      child: const Icon(
-                                        Icons.cloud_upload,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
-
-                                  // BOTÃO DE TESTE MATCHES - APENAS PARA DEBUG
-                                  if (kDebugMode)
-                                    Container(
-                                      width: 50, height: 50,
-                                      margin: const EdgeInsets.only(left: 8),
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.all(0),
-                                          backgroundColor: Colors.purple.shade600
-                                        ),
-                                        onPressed: () {
-                                          TestAcceptedMatches.showTestDialog(context);
-                                        },
-                                        child: const Icon(
-                                          Icons.science,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
                               Row(
