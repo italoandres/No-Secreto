@@ -11,7 +11,7 @@ class UniversityCoursesData {
     'Meteorologia',
     'Astronomia',
     'Estatística',
-    
+
     // Ciências Biológicas
     'Biologia',
     'Biomedicina',
@@ -19,7 +19,7 @@ class UniversityCoursesData {
     'Ciências Biológicas',
     'Ecologia',
     'Genética',
-    
+
     // Engenharias
     'Engenharia Civil',
     'Engenharia Mecânica',
@@ -41,7 +41,7 @@ class UniversityCoursesData {
     'Engenharia de Software',
     'Engenharia Biomédica',
     'Engenharia de Telecomunicações',
-    
+
     // Ciências da Saúde
     'Medicina',
     'Enfermagem',
@@ -56,13 +56,13 @@ class UniversityCoursesData {
     'Educação Física',
     'Radiologia',
     'Análises Clínicas',
-    
+
     // Ciências Agrárias
     'Agronomia',
     'Zootecnia',
     'Engenharia de Pesca',
     'Recursos Pesqueiros',
-    
+
     // Ciências Sociais Aplicadas
     'Direito',
     'Administração',
@@ -85,7 +85,7 @@ class UniversityCoursesData {
     'Gestão Financeira',
     'Processos Gerenciais',
     'Gestão Pública',
-    
+
     // Ciências Humanas
     'Filosofia',
     'Sociologia',
@@ -94,7 +94,7 @@ class UniversityCoursesData {
     'Pedagogia',
     'Teologia',
     'Arqueologia',
-    
+
     // Linguística, Letras e Artes
     'Letras',
     'Linguística',
@@ -110,7 +110,7 @@ class UniversityCoursesData {
     'Design de Moda',
     'Artes Plásticas',
     'Fotografia',
-    
+
     // Tecnologia da Informação
     'Ciência da Computação',
     'Sistemas de Informação',
@@ -121,7 +121,7 @@ class UniversityCoursesData {
     'Gestão da Tecnologia da Informação',
     'Jogos Digitais',
     'Inteligência Artificial',
-    
+
     // Educação
     'Licenciatura em Matemática',
     'Licenciatura em Física',
@@ -134,7 +134,7 @@ class UniversityCoursesData {
     'Licenciatura em Artes',
     'Licenciatura em Música',
     'Educação Especial',
-    
+
     // Outros Cursos Tecnológicos
     'Estética e Cosmética',
     'Gastronomia',
@@ -144,14 +144,14 @@ class UniversityCoursesData {
     'Biblioteconomia',
     'Arquivologia',
     'Museologia',
-    
+
     // Cursos Específicos
     'Atuária',
     'Meteorologia',
     'Geofísica',
     'Optometria',
     'Ortóptica',
-    
+
     // Outros
     'Outro',
   ];
@@ -159,9 +159,9 @@ class UniversityCoursesData {
   /// Busca cursos que correspondem ao termo de busca
   static List<String> searchCourses(String query) {
     if (query.isEmpty) return [];
-    
+
     final lowerQuery = query.toLowerCase();
-    
+
     return courses.where((course) {
       return course.toLowerCase().contains(lowerQuery);
     }).toList();
@@ -175,12 +175,8 @@ class UniversityCoursesData {
   /// Verifica se um nível de educação requer curso superior
   static bool requiresUniversityCourse(String? education) {
     if (education == null) return false;
-    
-    return [
-      'ensino_superior',
-      'pos_graduacao', 
-      'mestrado',
-      'doutorado'
-    ].contains(education);
+
+    return ['ensino_superior', 'pos_graduacao', 'mestrado', 'doutorado']
+        .contains(education);
   }
 }

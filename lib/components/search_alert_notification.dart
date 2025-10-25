@@ -18,7 +18,8 @@ class SearchAlertNotification extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SearchAlertNotification> createState() => _SearchAlertNotificationState();
+  State<SearchAlertNotification> createState() =>
+      _SearchAlertNotificationState();
 }
 
 class _SearchAlertNotificationState extends State<SearchAlertNotification> {
@@ -54,14 +55,13 @@ class _SearchAlertNotificationState extends State<SearchAlertNotification> {
     _displayedAlerts.add(alert);
     _showAlertOverlay(alert);
 
-    EnhancedLogger.info('Alert notification displayed', 
-      tag: 'SEARCH_ALERT_NOTIFICATION',
-      data: {
-        'alertId': alert.id,
-        'type': alert.type,
-        'severity': alert.severity.toString(),
-      }
-    );
+    EnhancedLogger.info('Alert notification displayed',
+        tag: 'SEARCH_ALERT_NOTIFICATION',
+        data: {
+          'alertId': alert.id,
+          'type': alert.type,
+          'severity': alert.severity.toString(),
+        });
   }
 
   void _showAlertOverlay(SearchAlert alert) {
@@ -332,8 +332,10 @@ class _AlertBadgeState extends State<_AlertBadge> {
 
   void _updateAlertCount() {
     final alerts = widget.alertService.getActiveAlerts();
-    final criticalAlerts = widget.alertService.getAlertsBySeverity(AlertSeverity.critical);
-    final warningAlerts = widget.alertService.getAlertsBySeverity(AlertSeverity.warning);
+    final criticalAlerts =
+        widget.alertService.getAlertsBySeverity(AlertSeverity.critical);
+    final warningAlerts =
+        widget.alertService.getAlertsBySeverity(AlertSeverity.warning);
 
     AlertSeverity? severity;
     if (criticalAlerts.isNotEmpty) {

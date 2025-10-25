@@ -14,7 +14,8 @@ class HeightSelectorComponent extends StatefulWidget {
   });
 
   @override
-  State<HeightSelectorComponent> createState() => _HeightSelectorComponentState();
+  State<HeightSelectorComponent> createState() =>
+      _HeightSelectorComponentState();
 }
 
 class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
@@ -30,13 +31,13 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
   // Gerar lista de alturas de 1.40m a 2.20m
   List<String> _generateHeights() {
     List<String> heights = [];
-    
+
     // Adicionar alturas de 140cm a 220cm
     for (int cm = 140; cm <= 220; cm++) {
       double meters = cm / 100.0;
       heights.add('${meters.toStringAsFixed(2)}m');
     }
-    
+
     return heights;
   }
 
@@ -58,7 +59,9 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: _showHeightGrid ? widget.primaryColor : Colors.grey.shade300,
+                color: _showHeightGrid
+                    ? widget.primaryColor
+                    : Colors.grey.shade300,
                 width: _showHeightGrid ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(12),
@@ -75,19 +78,23 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
                     _selectedHeight ?? 'Selecione sua altura',
                     style: TextStyle(
                       fontSize: 16,
-                      color: _selectedHeight != null ? Colors.black87 : Colors.grey,
+                      color: _selectedHeight != null
+                          ? Colors.black87
+                          : Colors.grey,
                     ),
                   ),
                 ),
                 Icon(
-                  _showHeightGrid ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  _showHeightGrid
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   color: widget.primaryColor,
                 ),
               ],
             ),
           ),
         ),
-        
+
         // Grid de seleção de altura
         if (_showHeightGrid) ...[
           const SizedBox(height: 16),
@@ -110,14 +117,14 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Opção "Prefiro não dizer"
                 _buildHeightOption('Prefiro não dizer', isSpecial: true),
-                
+
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                
+
                 // Grid de alturas
                 GridView.builder(
                   shrinkWrap: true,
@@ -145,7 +152,7 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
 
   Widget _buildHeightOption(String height, {bool isSpecial = false}) {
     final isSelected = _selectedHeight == height;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -157,12 +164,12 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? widget.primaryColor.withOpacity(0.1)
               : (isSpecial ? Colors.orange.shade50 : Colors.white),
           border: Border.all(
-            color: isSelected 
-                ? widget.primaryColor 
+            color: isSelected
+                ? widget.primaryColor
                 : (isSpecial ? Colors.orange.shade300 : Colors.grey.shade300),
             width: isSelected ? 2 : 1,
           ),
@@ -174,8 +181,8 @@ class _HeightSelectorComponentState extends State<HeightSelectorComponent> {
             style: TextStyle(
               fontSize: isSpecial ? 14 : 16,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected 
-                  ? widget.primaryColor 
+              color: isSelected
+                  ? widget.primaryColor
                   : (isSpecial ? Colors.orange.shade700 : Colors.black87),
             ),
             textAlign: TextAlign.center,

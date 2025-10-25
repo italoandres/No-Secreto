@@ -16,7 +16,7 @@ class EnhancedImagePicker extends StatefulWidget {
   final double size;
   final bool allowRemove;
   final String imageType;
-  
+
   const EnhancedImagePicker({
     super.key,
     required this.userId,
@@ -67,7 +67,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
             // Imagem principal
             Positioned.fill(
               child: ClipOval(
-                child: _isUploading 
+                child: _isUploading
                     ? _buildUploadingWidget()
                     : EnhancedImageManager.buildRobustImage(
                         widget.currentImageUrl,
@@ -78,7 +78,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                       ),
               ),
             ),
-            
+
             // Overlay de edição
             if (!_isUploading)
               Positioned.fill(
@@ -94,7 +94,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                   ),
                 ),
               ),
-            
+
             // Indicador de progresso
             if (_isUploading)
               Positioned.fill(
@@ -113,7 +113,8 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                           child: CircularProgressIndicator(
                             value: _uploadProgress,
                             strokeWidth: 3,
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white),
                             backgroundColor: Colors.white.withOpacity(0.3),
                           ),
                         ),
@@ -198,7 +199,8 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
           label: 'Câmera',
           onTap: () => _pickImage(ImageSource.camera),
         ),
-        if (widget.allowRemove && widget.currentImageUrl?.isNotEmpty == true) ...[
+        if (widget.allowRemove &&
+            widget.currentImageUrl?.isNotEmpty == true) ...[
           const SizedBox(width: 12),
           _buildActionButton(
             icon: Icons.delete,
@@ -218,7 +220,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
     Color? color,
   }) {
     final buttonColor = color ?? Colors.blue[600]!;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -279,7 +281,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
               ),
             ),
             const SizedBox(height: 20),
-            
             _buildBottomSheetOption(
               icon: Icons.photo_library,
               title: 'Galeria',
@@ -289,7 +290,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                 _pickImage(ImageSource.gallery);
               },
             ),
-            
             _buildBottomSheetOption(
               icon: Icons.camera_alt,
               title: 'Câmera',
@@ -299,8 +299,8 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                 _pickImage(ImageSource.camera);
               },
             ),
-            
-            if (widget.allowRemove && widget.currentImageUrl?.isNotEmpty == true)
+            if (widget.allowRemove &&
+                widget.currentImageUrl?.isNotEmpty == true)
               _buildBottomSheetOption(
                 icon: Icons.delete,
                 title: 'Remover Foto',
@@ -311,9 +311,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
                 },
                 color: Colors.red,
               ),
-            
             const SizedBox(height: 10),
-            
             TextButton(
               onPressed: () => Get.back(),
               child: const Text('Cancelar'),
@@ -332,7 +330,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
     Color? color,
   }) {
     final optionColor = color ?? Colors.blue[600]!;
-    
+
     return ListTile(
       leading: Container(
         width: 48,
@@ -366,48 +364,55 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
   Future<void> _pickImage(ImageSource source) async {
     await ErrorHandler.safeExecute(
       () async {
-        EnhancedLogger.info('Starting image selection', tag: 'IMAGE_PICKER', data: {
-          'source': source.name,
-          'userId': widget.userId,
-          'imageType': widget.imageType,
-        });
-        
+        EnhancedLogger.info('Starting image selection',
+            tag: 'IMAGE_PICKER',
+            data: {
+              'source': source.name,
+              'userId': widget.userId,
+              'imageType': widget.imageType,
+            });
+
         final XFile? image = await _picker.pickImage(
           source: source,
           maxWidth: 1200,
           maxHeight: 1200,
           imageQuality: 90,
         );
-        
+
         if (image == null) {
           EnhancedLogger.info('Image selection cancelled', tag: 'IMAGE_PICKER');
           return;
         }
-        
+
         // Validar tamanho do arquivo
         final fileSize = await image.length();
-        if (fileSize > 10 * 1024 * 1024) { // 10MB
-          ErrorHandler.showWarning('Imagem muito grande. Escolha uma imagem menor que 10MB.');
+        if (fileSize > 10 * 1024 * 1024) {
+          // 10MB
+          ErrorHandler.showWarning(
+              'Imagem muito grande. Escolha uma imagem menor que 10MB.');
           return;
         }
-        
+
         // Ler dados da imagem
         final imageData = await image.readAsBytes();
-        
+
         // Validar se é uma imagem válida
         if (!EnhancedImageManager.isValidImageData(imageData)) {
-          ErrorHandler.showWarning('Arquivo selecionado não é uma imagem válida.');
+          ErrorHandler.showWarning(
+              'Arquivo selecionado não é uma imagem válida.');
           return;
         }
-        
+
         // Obter informações da imagem
         final imageInfo = EnhancedImageManager.getImageInfo(imageData);
         EnhancedLogger.debug('Image selected', tag: 'IMAGE_PICKER', data: {
           'size': imageInfo?.sizeFormatted ?? 'unknown',
-          'dimensions': imageInfo != null ? '${imageInfo.width}x${imageInfo.height}' : 'unknown',
+          'dimensions': imageInfo != null
+              ? '${imageInfo.width}x${imageInfo.height}'
+              : 'unknown',
           'format': imageInfo?.format ?? 'unknown',
         });
-        
+
         // Iniciar upload
         await _uploadImage(imageData);
       },
@@ -425,7 +430,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
     try {
       // Simular progresso (o Firebase não fornece progresso real para putData)
       _simulateProgress();
-      
+
       final imageUrl = await EnhancedImageManager.uploadProfileImage(
         imageData,
         widget.userId,
@@ -436,29 +441,30 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
         setState(() {
           _uploadProgress = 1.0;
         });
-        
+
         // Aguardar um pouco para mostrar 100%
         await Future.delayed(const Duration(milliseconds: 500));
-        
+
         if (widget.onImageUploaded != null) {
           widget.onImageUploaded!(imageUrl);
         }
-        
-        EnhancedLogger.success('Image upload completed', tag: 'IMAGE_PICKER', data: {
-          'userId': widget.userId,
-          'imageType': widget.imageType,
-          'url': imageUrl,
-        });
+
+        EnhancedLogger.success('Image upload completed',
+            tag: 'IMAGE_PICKER',
+            data: {
+              'userId': widget.userId,
+              'imageType': widget.imageType,
+              'url': imageUrl,
+            });
       } else {
         throw Exception('Failed to get image URL');
       }
     } catch (e) {
-      EnhancedLogger.error('Image upload failed', 
-        tag: 'IMAGE_PICKER', 
-        error: e,
-        data: {'userId': widget.userId, 'imageType': widget.imageType}
-      );
-      
+      EnhancedLogger.error('Image upload failed',
+          tag: 'IMAGE_PICKER',
+          error: e,
+          data: {'userId': widget.userId, 'imageType': widget.imageType});
+
       ErrorHandler.showWarning('Falha no upload da imagem. Tente novamente.');
     } finally {
       if (mounted) {
@@ -474,19 +480,19 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
     // Simular progresso de upload
     const duration = Duration(milliseconds: 100);
     const increment = 0.1;
-    
+
     void updateProgress() {
       if (!mounted || !_isUploading) return;
-      
+
       setState(() {
         _uploadProgress = (_uploadProgress + increment).clamp(0.0, 0.9);
       });
-      
+
       if (_uploadProgress < 0.9) {
         Future.delayed(duration, updateProgress);
       }
     }
-    
+
     Future.delayed(duration, updateProgress);
   }
 
@@ -494,7 +500,8 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Remover Foto'),
-        content: const Text('Tem certeza que deseja remover sua foto de perfil?'),
+        content:
+            const Text('Tem certeza que deseja remover sua foto de perfil?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
@@ -518,24 +525,23 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker> {
         if (widget.currentImageUrl?.isNotEmpty == true) {
           await EnhancedImageManager.deleteImage(widget.currentImageUrl!);
         }
-        
+
         if (widget.onImageRemoved != null) {
           widget.onImageRemoved!();
         }
-        
+
         EnhancedLogger.info('Image removed', tag: 'IMAGE_PICKER', data: {
           'userId': widget.userId,
           'imageType': widget.imageType,
         });
-        
+
         ErrorHandler.showSuccess('Foto removida com sucesso!');
       } catch (e) {
-        EnhancedLogger.error('Failed to remove image', 
-          tag: 'IMAGE_PICKER', 
-          error: e,
-          data: {'userId': widget.userId, 'imageType': widget.imageType}
-        );
-        
+        EnhancedLogger.error('Failed to remove image',
+            tag: 'IMAGE_PICKER',
+            error: e,
+            data: {'userId': widget.userId, 'imageType': widget.imageType});
+
         ErrorHandler.showWarning('Erro ao remover foto. Tente novamente.');
       }
     }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Seção que exibe informações de educação e carreira do perfil
-/// 
+///
 /// Exibe formação acadêmica, universidade, status e profissão
 class EducationInfoSection extends StatelessWidget {
   final String? education;
@@ -112,7 +112,8 @@ class EducationInfoSection extends StatelessWidget {
                   ],
                   if (courseStatus?.isNotEmpty == true) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.blue[50],
                         borderRadius: BorderRadius.circular(20),
@@ -128,9 +129,10 @@ class EducationInfoSection extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (occupation?.isNotEmpty == true) const SizedBox(height: 20),
+                  if (occupation?.isNotEmpty == true)
+                    const SizedBox(height: 20),
                 ],
-                
+
                 // Profissão
                 if (occupation?.isNotEmpty == true) ...[
                   Row(
@@ -184,8 +186,8 @@ class EducationInfoSection extends StatelessWidget {
   /// Verifica se há informações acadêmicas
   bool _hasAcademicInfo() {
     return education?.isNotEmpty == true ||
-           universityCourse?.isNotEmpty == true ||
-           university?.isNotEmpty == true ||
-           courseStatus?.isNotEmpty == true;
+        universityCourse?.isNotEmpty == true ||
+        university?.isNotEmpty == true ||
+        courseStatus?.isNotEmpty == true;
   }
 }

@@ -62,7 +62,8 @@ class ProfileCompletionView extends StatelessWidget {
               _buildTasksList(controller),
               // Seção condicional baseado no status do perfil
               Obx(() {
-                final isComplete = controller.profile.value?.isProfileComplete == true;
+                final isComplete =
+                    controller.profile.value?.isProfileComplete == true;
                 if (isComplete) {
                   // Seção para perfis completos
                   return Column(
@@ -110,21 +111,25 @@ class ProfileCompletionView extends StatelessWidget {
             future: UsuarioRepository.getUser().first,
             builder: (context, snapshot) {
               final user = snapshot.data;
-              debugPrint('🔍 DEBUG: User data - Nome: ${user?.nome}, Username: ${user?.username}');
-              
+              debugPrint(
+                  '🔍 DEBUG: User data - Nome: ${user?.nome}, Username: ${user?.username}');
+
               return Row(
                 children: [
                   // User photo or default avatar
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    backgroundImage: (controller.profile.value?.mainPhotoUrl?.isNotEmpty ?? false)
+                    backgroundImage: (controller
+                                .profile.value?.mainPhotoUrl?.isNotEmpty ??
+                            false)
                         ? NetworkImage(controller.profile.value!.mainPhotoUrl!)
                         : (user?.imgUrl?.isNotEmpty ?? false)
                             ? NetworkImage(user!.imgUrl!)
                             : null,
-                    child: (controller.profile.value?.mainPhotoUrl?.isEmpty ?? true) && 
-                           (user?.imgUrl?.isEmpty ?? true)
+                    child: (controller.profile.value?.mainPhotoUrl?.isEmpty ??
+                                true) &&
+                            (user?.imgUrl?.isEmpty ?? true)
                         ? const Icon(
                             Icons.person,
                             color: Colors.white,
@@ -145,7 +150,8 @@ class ProfileCompletionView extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (user?.username != null && user!.username!.isNotEmpty) ...[
+                        if (user?.username != null &&
+                            user!.username!.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
                             '@${user.username}',
@@ -223,18 +229,22 @@ class ProfileCompletionView extends StatelessWidget {
                   const SizedBox(width: 8),
                   if (userId != null)
                     FutureBuilder<bool>(
-                      future: CertificationStatusHelper.hasApprovedCertification(userId),
+                      future:
+                          CertificationStatusHelper.hasApprovedCertification(
+                              userId),
                       builder: (context, snapshot) {
                         final hasApproved = snapshot.data ?? false;
                         return Tooltip(
-                          message: hasApproved 
-                              ? 'Certificação Espiritual Aprovada' 
+                          message: hasApproved
+                              ? 'Certificação Espiritual Aprovada'
                               : 'Certificação Espiritual (Opcional)',
                           child: Icon(
                             Icons.verified,
-                            color: hasApproved 
-                                ? Colors.amber[700]  // 🟡 Dourado quando aprovado
-                                : Colors.grey[400],   // ⚪ Cinza quando não aprovado
+                            color: hasApproved
+                                ? Colors
+                                    .amber[700] // 🟡 Dourado quando aprovado
+                                : Colors
+                                    .grey[400], // ⚪ Cinza quando não aprovado
                             size: 24,
                           ),
                         );
@@ -243,7 +253,8 @@ class ProfileCompletionView extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: isComplete ? Colors.green[100] : Colors.orange[100],
                   borderRadius: BorderRadius.circular(20),
@@ -301,7 +312,8 @@ class ProfileCompletionView extends StatelessWidget {
       {
         'key': 'photos',
         'title': '📸 Fotos do Perfil',
-        'subtitle': 'Adicione sua foto principal (obrigatória) e até 2 secundárias',
+        'subtitle':
+            'Adicione sua foto principal (obrigatória) e até 2 secundárias',
         'icon': Icons.photo_camera,
         'color': Colors.purple,
       },
@@ -329,7 +341,8 @@ class ProfileCompletionView extends StatelessWidget {
       {
         'key': 'certification',
         'title': '🏆 Certificação Espiritual',
-        'subtitle': 'Adicione seu selo "Preparado(a) para os Sinais" (opcional)',
+        'subtitle':
+            'Adicione seu selo "Preparado(a) para os Sinais" (opcional)',
         'icon': Icons.verified,
         'color': Colors.amber,
       },
@@ -380,9 +393,10 @@ class ProfileCompletionView extends StatelessWidget {
     Color color,
   ) {
     final userId = controller.profile.value?.userId;
-    
+
     if (userId == null) {
-      return _buildTaskCard(controller, 'certification', title, subtitle, icon, color);
+      return _buildTaskCard(
+          controller, 'certification', title, subtitle, icon, color);
     }
 
     return FutureBuilder<String>(
@@ -390,7 +404,7 @@ class ProfileCompletionView extends StatelessWidget {
       builder: (context, snapshot) {
         final status = snapshot.data ?? 'Destaque seu Perfil';
         final isApproved = status == 'Aprovado';
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           child: Material(
@@ -409,7 +423,9 @@ class ProfileCompletionView extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: isApproved ? Colors.green[100] : color.withOpacity(0.1),
+                        color: isApproved
+                            ? Colors.green[100]
+                            : color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -428,7 +444,9 @@ class ProfileCompletionView extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: isApproved ? Colors.green[700] : Colors.grey[800],
+                              color: isApproved
+                                  ? Colors.green[700]
+                                  : Colors.grey[800],
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -443,15 +461,19 @@ class ProfileCompletionView extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isApproved ? Colors.green[100] : Colors.amber[100],
+                        color:
+                            isApproved ? Colors.green[100] : Colors.amber[100],
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         status,
                         style: TextStyle(
-                          color: isApproved ? Colors.green[700] : Colors.amber[700],
+                          color: isApproved
+                              ? Colors.green[700]
+                              : Colors.amber[700],
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
@@ -481,7 +503,8 @@ class ProfileCompletionView extends StatelessWidget {
     IconData icon,
     Color color,
   ) {
-    final isCompleted = controller.profile.value?.completionTasks[taskKey] ?? false;
+    final isCompleted =
+        controller.profile.value?.completionTasks[taskKey] ?? false;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -501,7 +524,9 @@ class ProfileCompletionView extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isCompleted ? Colors.green[100] : color.withOpacity(0.1),
+                    color: isCompleted
+                        ? Colors.green[100]
+                        : color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -520,7 +545,9 @@ class ProfileCompletionView extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isCompleted ? Colors.green[700] : Colors.grey[800],
+                          color: isCompleted
+                              ? Colors.green[700]
+                              : Colors.grey[800],
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -535,7 +562,8 @@ class ProfileCompletionView extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isCompleted ? Colors.green[100] : Colors.grey[100],
                     borderRadius: BorderRadius.circular(20),
@@ -655,13 +683,13 @@ class ProfileCompletionView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // Username Editor
           FutureBuilder<UsuarioModel?>(
             future: controller.getCurrentUserData(),
             builder: (context, snapshot) {
               final user = snapshot.data;
-              
+
               if (user == null) {
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -678,7 +706,7 @@ class ProfileCompletionView extends StatelessWidget {
                   ),
                 );
               }
-              
+
               return UsernameEditorComponent(
                 userId: user.id!,
                 currentUsername: user.username,
@@ -690,17 +718,18 @@ class ProfileCompletionView extends StatelessWidget {
               );
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Display Name (read-only, synced from "Editar Perfil")
           FutureBuilder<UsuarioModel?>(
             future: controller.getCurrentUserData(),
             builder: (context, snapshot) {
               final user = snapshot.data;
-              
+
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
                   borderRadius: BorderRadius.circular(12),
@@ -738,7 +767,8 @@ class ProfileCompletionView extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.blue[50],
                         borderRadius: BorderRadius.circular(6),
@@ -758,9 +788,9 @@ class ProfileCompletionView extends StatelessWidget {
               );
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Info about sync
           Container(
             padding: const EdgeInsets.all(12),
@@ -851,10 +881,9 @@ class ProfileCompletionView extends StatelessWidget {
     );
   }
 
-
-
   /// Força a exibição da confirmação da vitrine
-  Future<void> _forceShowVitrineConfirmation(ProfileCompletionController controller) async {
+  Future<void> _forceShowVitrineConfirmation(
+      ProfileCompletionController controller) async {
     // Usar o método do controller para navegar diretamente
     await controller.forceNavigateToVitrine();
   }

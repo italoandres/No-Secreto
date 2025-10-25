@@ -16,8 +16,9 @@ class SpiritualCertificationRequestView extends StatefulWidget {
 
 class _SpiritualCertificationRequestViewState
     extends State<SpiritualCertificationRequestView> {
-  final SpiritualCertificationService _service = SpiritualCertificationService();
-  
+  final SpiritualCertificationService _service =
+      SpiritualCertificationService();
+
   bool _isLoading = false;
   double _uploadProgress = 0.0;
   bool _showProgress = false;
@@ -64,9 +65,10 @@ class _SpiritualCertificationRequestViewState
   }
 
   /// Submeter solicitação
-  Future<void> _submitRequest(String purchaseEmail, PlatformFile proofFile) async {
+  Future<void> _submitRequest(
+      String purchaseEmail, PlatformFile proofFile) async {
     if (!_mounted || !mounted) return;
-    
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (_mounted && mounted) {
@@ -102,9 +104,11 @@ class _SpiritualCertificationRequestViewState
 
       if (_mounted && mounted) {
         if (result.success) {
-          _showSuccessDialog(result.message ?? 'Solicitação enviada com sucesso!');
+          _showSuccessDialog(
+              result.message ?? 'Solicitação enviada com sucesso!');
         } else {
-          _showErrorDialog('Erro', result.message ?? 'Erro ao enviar solicitação');
+          _showErrorDialog(
+              'Erro', result.message ?? 'Erro ao enviar solicitação');
         }
       }
     } catch (e) {
@@ -121,7 +125,7 @@ class _SpiritualCertificationRequestViewState
   /// Mostrar diálogo de sucesso
   void _showSuccessDialog(String message) {
     if (!_mounted || !mounted) return;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -210,7 +214,7 @@ class _SpiritualCertificationRequestViewState
   /// Mostrar diálogo de erro
   void _showErrorDialog(String title, String message) {
     if (!_mounted || !mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -333,7 +337,7 @@ class _SpiritualCertificationRequestViewState
                   ],
                 ),
               ),
-              
+
               // Conteúdo
               Expanded(
                 child: SingleChildScrollView(
@@ -369,9 +373,9 @@ class _SpiritualCertificationRequestViewState
                                 color: Colors.amber.shade700,
                               ),
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Título
                             Text(
                               'Selo de Certificação',
@@ -381,9 +385,9 @@ class _SpiritualCertificationRequestViewState
                                 color: Colors.amber.shade900,
                               ),
                             ),
-                            
+
                             const SizedBox(height: 8),
-                            
+
                             // Descrição
                             Text(
                               'Comprove que você concluiu a mentoria "Sinais de meu Isaque e de minha Rebeca" e receba o selo dourado em seu perfil.',
@@ -394,9 +398,9 @@ class _SpiritualCertificationRequestViewState
                                 height: 1.5,
                               ),
                             ),
-                            
+
                             const SizedBox(height: 20),
-                            
+
                             // Selo de verificado verde
                             Container(
                               padding: const EdgeInsets.all(16),
@@ -439,19 +443,23 @@ class _SpiritualCertificationRequestViewState
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  _buildBenefit('Seu perfil será destacado para outros usuários'),
-                                  _buildBenefit('Outros podem filtrar e encontrar pessoas com preparação espiritual'),
-                                  _buildBenefit('Demonstra seu comprometimento com os ensinamentos'),
-                                  _buildBenefit('Facilita conexões com pessoas do mesmo nível espiritual'),
+                                  _buildBenefit(
+                                      'Seu perfil será destacado para outros usuários'),
+                                  _buildBenefit(
+                                      'Outros podem filtrar e encontrar pessoas com preparação espiritual'),
+                                  _buildBenefit(
+                                      'Demonstra seu comprometimento com os ensinamentos'),
+                                  _buildBenefit(
+                                      'Facilita conexões com pessoas do mesmo nível espiritual'),
                                 ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Formulário
                       Container(
                         padding: const EdgeInsets.all(20),
@@ -471,13 +479,13 @@ class _SpiritualCertificationRequestViewState
                           enabled: !_isLoading,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
                     ],
                   ),
                 ),
               ),
-              
+
               // Barra de progresso de upload
               if (_showProgress)
                 Container(

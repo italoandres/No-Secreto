@@ -30,7 +30,8 @@ class EnhancedStoriesViewerView extends StatefulWidget {
   });
 
   @override
-  State<EnhancedStoriesViewerView> createState() => _EnhancedStoriesViewerViewState();
+  State<EnhancedStoriesViewerView> createState() =>
+      _EnhancedStoriesViewerViewState();
 }
 
 class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
@@ -43,47 +44,54 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   AnimationController? progressController;
   VideoPlayerController? videoController;
   PageController pageController = PageController();
-  
+
   // Interactions controller
   late StoryInteractionsController interactionsController;
-  
+
   // Auto-close controller
   late AdvancedStoryAutoCloseController autoCloseController;
-  
+
   // Animation controllers for interactions
   AnimationController? likeAnimationController;
   Animation<double>? likeAnimation;
-  
+
   // Estado para controlar expansão da descrição
   bool isDescriptionExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Validar contexto no início
-    final normalizedContext = ContextValidator.normalizeContext(widget.contexto);
-    if (!ContextValidator.validateAndLog(widget.contexto, 'EnhancedStoriesViewer_initState')) {
-      ContextDebug.logCriticalError('EnhancedStoriesViewer', 'Contexto inválido no initState', normalizedContext);
+    final normalizedContext =
+        ContextValidator.normalizeContext(widget.contexto);
+    if (!ContextValidator.validateAndLog(
+        widget.contexto, 'EnhancedStoriesViewer_initState')) {
+      ContextDebug.logCriticalError('EnhancedStoriesViewer',
+          'Contexto inválido no initState', normalizedContext);
     }
-    
+
     // Validar stories iniciais se fornecidos
     if (widget.initialStories != null) {
-      final validInitialStories = StoryContextFilter.filterByContext(widget.initialStories!, normalizedContext);
-      final hasLeaks = StoryContextFilter.detectContextLeaks(widget.initialStories!, normalizedContext);
-      
+      final validInitialStories = StoryContextFilter.filterByContext(
+          widget.initialStories!, normalizedContext);
+      final hasLeaks = StoryContextFilter.detectContextLeaks(
+          widget.initialStories!, normalizedContext);
+
       if (hasLeaks) {
-        ContextDebug.logCriticalError('EnhancedStoriesViewer', 'VAZAMENTO DETECTADO nos stories iniciais', normalizedContext);
+        ContextDebug.logCriticalError('EnhancedStoriesViewer',
+            'VAZAMENTO DETECTADO nos stories iniciais', normalizedContext);
       }
-      
-      ContextDebug.logSummary('EnhancedStoriesViewer_initState', normalizedContext, {
+
+      ContextDebug.logSummary(
+          'EnhancedStoriesViewer_initState', normalizedContext, {
         'initialStoriesProvided': widget.initialStories!.length,
         'validInitialStories': validInitialStories.length,
         'initialIndex': widget.initialIndex,
         'hasLeaks': hasLeaks
       });
     }
-    
+
     interactionsController = Get.put(StoryInteractionsController());
     autoCloseController = AdvancedStoryAutoCloseController();
     _setupAnimations();
@@ -94,42 +102,42 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   @override
   void dispose() {
     print('DEBUG VIEWER: Disposing viewer');
-    
+
     // Para todos os timers primeiro
     autoAdvanceTimer?.cancel();
-    
+
     // Limpa todos os recursos
     _cleanupPreviousStory();
-    
+
     // Dispose dos controladores
     try {
       autoCloseController.dispose();
     } catch (e) {
       print('Erro ao fazer dispose do autoCloseController: $e');
     }
-    
+
     likeAnimationController?.dispose();
     pageController.dispose();
     progressController?.dispose();
-    
+
     // Para e libera vídeo
     videoController?.pause();
     videoController?.dispose();
-    
+
     // Remove controller apenas se foi criado aqui
     if (Get.isRegistered<StoryInteractionsController>()) {
       Get.delete<StoryInteractionsController>();
     }
-    
+
     super.dispose();
   }
-  
+
   void _setupAnimations() {
     likeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1500), // Mais lenta
       vsync: this,
     );
-    
+
     likeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -150,30 +158,41 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     try {
       // Se stories iniciais foram fornecidos (ex: favoritos), usar eles
       if (widget.initialStories != null) {
-        final normalizedContext = ContextValidator.normalizeContext(widget.contexto);
-        
-        ContextDebug.logSummary('EnhancedStoriesViewer_useInitialStories', normalizedContext, {
+        final normalizedContext =
+            ContextValidator.normalizeContext(widget.contexto);
+
+        ContextDebug.logSummary(
+            'EnhancedStoriesViewer_useInitialStories', normalizedContext, {
           'initialStoriesCount': widget.initialStories!.length,
           'initialIndex': widget.initialIndex
         });
-        
+
         // VALIDAÇÃO CRÍTICA: Filtrar stories iniciais por contexto
-        final validInitialStories = StoryContextFilter.filterByContext(widget.initialStories!, normalizedContext);
-        
+        final validInitialStories = StoryContextFilter.filterByContext(
+            widget.initialStories!, normalizedContext);
+
         // Detectar vazamentos nos stories iniciais
-        final hasLeaks = StoryContextFilter.detectContextLeaks(widget.initialStories!, normalizedContext);
+        final hasLeaks = StoryContextFilter.detectContextLeaks(
+            widget.initialStories!, normalizedContext);
         if (hasLeaks) {
-          ContextDebug.logCriticalError('EnhancedStoriesViewer', 'VAZAMENTO CRÍTICO nos stories iniciais fornecidos', normalizedContext);
+          ContextDebug.logCriticalError(
+              'EnhancedStoriesViewer',
+              'VAZAMENTO CRÍTICO nos stories iniciais fornecidos',
+              normalizedContext);
         }
-        
-        ContextDebug.logFilter(normalizedContext, widget.initialStories!.length, validInitialStories.length, 'EnhancedStoriesViewer_useInitialStories');
-        
+
+        ContextDebug.logFilter(
+            normalizedContext,
+            widget.initialStories!.length,
+            validInitialStories.length,
+            'EnhancedStoriesViewer_useInitialStories');
+
         setState(() {
           stories = validInitialStories; // USAR STORIES VALIDADOS
           currentIndex = widget.initialIndex ?? 0;
           isLoading = false;
         });
-        
+
         if (stories.isNotEmpty) {
           // Ajustar pageController para o índice inicial
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -185,41 +204,51 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         }
         return;
       }
-      
+
       // Validar contexto antes de carregar stories
-      final normalizedContext = ContextValidator.normalizeContext(widget.contexto);
-      if (!ContextValidator.validateAndLog(widget.contexto, 'EnhancedStoriesViewer_loadStories')) {
-        ContextDebug.logCriticalError('EnhancedStoriesViewer', 'Contexto inválido, usando contexto normalizado', normalizedContext);
+      final normalizedContext =
+          ContextValidator.normalizeContext(widget.contexto);
+      if (!ContextValidator.validateAndLog(
+          widget.contexto, 'EnhancedStoriesViewer_loadStories')) {
+        ContextDebug.logCriticalError(
+            'EnhancedStoriesViewer',
+            'Contexto inválido, usando contexto normalizado',
+            normalizedContext);
       }
-      
-      ContextDebug.logSummary('EnhancedStoriesViewer_loadStories', normalizedContext, {
+
+      ContextDebug.logSummary(
+          'EnhancedStoriesViewer_loadStories', normalizedContext, {
         'originalContext': widget.contexto,
         'normalizedContext': normalizedContext,
         'userSexo': widget.userSexo?.name,
         'operation': 'LOAD_STORIES_FOR_VIEWER'
       });
-      
+
       final loadedStories = await StoriesRepository.getStoriesByContexto(
         normalizedContext, // USAR CONTEXTO NORMALIZADO
         widget.userSexo,
       );
-      
+
       // VALIDAÇÃO ADICIONAL: Filtrar stories que não pertencem ao contexto esperado
-      final validStories = StoryContextFilter.filterByContext(loadedStories, normalizedContext);
-      
+      final validStories =
+          StoryContextFilter.filterByContext(loadedStories, normalizedContext);
+
       // Detectar vazamentos de contexto
-      final hasLeaks = StoryContextFilter.detectContextLeaks(loadedStories, normalizedContext);
+      final hasLeaks = StoryContextFilter.detectContextLeaks(
+          loadedStories, normalizedContext);
       if (hasLeaks) {
-        ContextDebug.logCriticalError('EnhancedStoriesViewer', 'VAZAMENTO DE CONTEXTO DETECTADO no viewer', normalizedContext);
+        ContextDebug.logCriticalError('EnhancedStoriesViewer',
+            'VAZAMENTO DE CONTEXTO DETECTADO no viewer', normalizedContext);
       }
-      
-      ContextDebug.logFilter(normalizedContext, loadedStories.length, validStories.length, 'EnhancedStoriesViewer_loadStories');
-      
+
+      ContextDebug.logFilter(normalizedContext, loadedStories.length,
+          validStories.length, 'EnhancedStoriesViewer_loadStories');
+
       setState(() {
         stories = validStories; // USAR STORIES VALIDADOS
         isLoading = false;
       });
-      
+
       if (stories.isNotEmpty) {
         _initializeCurrentStory();
       }
@@ -233,37 +262,40 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   void _initializeCurrentStory() {
     if (currentIndex >= stories.length) return;
-    
+
     final currentStory = stories[currentIndex];
-    debugPrint('🎬 VIEWER: Inicializando story ${currentStory.id} (${currentIndex + 1}/${stories.length})');
-    debugPrint('🎬 VIEWER: Tipo: ${currentStory.fileType?.name}, URL: ${currentStory.fileUrl}');
-    
+    debugPrint(
+        '🎬 VIEWER: Inicializando story ${currentStory.id} (${currentIndex + 1}/${stories.length})');
+    debugPrint(
+        '🎬 VIEWER: Tipo: ${currentStory.fileType?.name}, URL: ${currentStory.fileUrl}');
+
     // Limpa recursos do story anterior
     _cleanupPreviousStory();
-    
+
     // Initialize interactions for current story
-    interactionsController.initializeStory(currentStory.id!, contexto: widget.contexto);
-    
+    interactionsController.initializeStory(currentStory.id!,
+        contexto: widget.contexto);
+
     // Marcar story como visto ao inicializar
     _markCurrentStoryAsViewed();
-    
+
     // Iniciar auto-close baseado no tipo de mídia
     _startAutoCloseForCurrentStory(currentStory);
-    
+
     if (currentStory.fileType == StorieFileType.video) {
       _initializeVideo(currentStory.fileUrl!);
     } else {
       _startImageTimer();
     }
   }
-  
+
   void _cleanupPreviousStory() {
     // Para timers
     autoAdvanceTimer?.cancel();
     autoCloseController.cancelAutoClose();
     progressController?.dispose();
     progressController = null;
-    
+
     // Para e libera vídeo anterior
     videoController?.pause();
     videoController?.dispose();
@@ -272,7 +304,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   void _initializeVideo(String videoUrl) {
     print('DEBUG VIDEO: Inicializando vídeo: $videoUrl');
-    
+
     videoController = VideoPlayerController.networkUrl(
       Uri.parse(videoUrl),
       videoPlayerOptions: VideoPlayerOptions(
@@ -280,13 +312,13 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         allowBackgroundPlayback: false,
       ),
     );
-    
+
     videoController!.initialize().then((_) {
       if (mounted && videoController != null) {
         setState(() {});
         videoController!.play();
         videoController!.setLooping(true);
-        
+
         // Start progress animation apenas se necessário
         progressController ??= AnimationController(
           duration: videoController!.value.duration,
@@ -305,9 +337,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       duration: const Duration(seconds: 10), // 10 segundos para imagens
       vsync: this,
     );
-    
+
     progressController!.forward();
-    
+
     autoAdvanceTimer?.cancel();
     autoAdvanceTimer = Timer(const Duration(seconds: 10), () {
       _nextStory();
@@ -319,7 +351,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     if (currentIndex < stories.length) {
       _markCurrentStoryAsViewed();
     }
-    
+
     if (currentIndex < stories.length - 1) {
       setState(() {
         currentIndex++;
@@ -333,7 +365,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       _handleEndOfStories();
     }
   }
-  
+
   /// Lida com o fim dos stories - carrega mais ou fecha
   Future<void> _handleEndOfStories() async {
     // Se são stories favoritos, não carrega mais - apenas fecha
@@ -341,42 +373,52 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       Get.back();
       return;
     }
-    
+
     try {
       // Validar contexto antes de carregar mais stories
-      final normalizedContext = ContextValidator.normalizeContext(widget.contexto);
-      
-      ContextDebug.logSummary('EnhancedStoriesViewer_loadMoreStories', normalizedContext, {
+      final normalizedContext =
+          ContextValidator.normalizeContext(widget.contexto);
+
+      ContextDebug.logSummary(
+          'EnhancedStoriesViewer_loadMoreStories', normalizedContext, {
         'currentStoriesCount': stories.length,
         'operation': 'LOAD_MORE_STORIES'
       });
-      
+
       // Tentar carregar mais stories do mesmo contexto
       final moreStories = await StoriesRepository.getStoriesByContexto(
         normalizedContext, // USAR CONTEXTO NORMALIZADO
         widget.userSexo,
       );
-      
+
       // VALIDAÇÃO ADICIONAL: Filtrar stories que não pertencem ao contexto esperado
-      final validMoreStories = StoryContextFilter.filterByContext(moreStories, normalizedContext);
-      
+      final validMoreStories =
+          StoryContextFilter.filterByContext(moreStories, normalizedContext);
+
       // Detectar vazamentos de contexto
-      final hasLeaks = StoryContextFilter.detectContextLeaks(moreStories, normalizedContext);
+      final hasLeaks =
+          StoryContextFilter.detectContextLeaks(moreStories, normalizedContext);
       if (hasLeaks) {
-        ContextDebug.logCriticalError('EnhancedStoriesViewer', 'VAZAMENTO DE CONTEXTO DETECTADO ao carregar mais stories', normalizedContext);
+        ContextDebug.logCriticalError(
+            'EnhancedStoriesViewer',
+            'VAZAMENTO DE CONTEXTO DETECTADO ao carregar mais stories',
+            normalizedContext);
       }
-      
+
       // Filtrar stories que já foram exibidos
       final currentIds = stories.map((s) => s.id).toSet();
-      final newStories = validMoreStories.where((s) => !currentIds.contains(s.id)).toList(); // USAR STORIES VALIDADOS
-      
+      final newStories = validMoreStories
+          .where((s) => !currentIds.contains(s.id))
+          .toList(); // USAR STORIES VALIDADOS
+
       if (newStories.isNotEmpty) {
-        print('DEBUG VIEWER: Carregando ${newStories.length} stories adicionais');
+        print(
+            'DEBUG VIEWER: Carregando ${newStories.length} stories adicionais');
         setState(() {
           stories.addAll(newStories);
           currentIndex++;
         });
-        
+
         pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -390,12 +432,13 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       Get.back();
     }
   }
-  
+
   /// Recomeça os stories do início ou fecha
   void _restartStoriesOrClose() {
     // Para contexto principal, recomeçar do início para conteúdo infinito
     if (widget.contexto == 'principal' && stories.isNotEmpty) {
-      print('DEBUG VIEWER: Recomeçando stories do início para conteúdo infinito');
+      print(
+          'DEBUG VIEWER: Recomeçando stories do início para conteúdo infinito');
       setState(() {
         currentIndex = 0;
       });
@@ -409,27 +452,27 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       Get.back();
     }
   }
-  
+
   /// Marca o story atual como visto
   void _markCurrentStoryAsViewed() {
     if (currentIndex < stories.length && stories[currentIndex].id != null) {
-      StoriesRepository.addVisto(
-        stories[currentIndex].id!, 
-        contexto: widget.contexto
-      );
-      print('DEBUG VIEWER: Story ${stories[currentIndex].id} marcado como visto');
-      
+      StoriesRepository.addVisto(stories[currentIndex].id!,
+          contexto: widget.contexto);
+      print(
+          'DEBUG VIEWER: Story ${stories[currentIndex].id} marcado como visto');
+
       // Forçar atualização do estado do chat para atualizar o círculo verde
       _notifyStoryViewed();
     }
   }
-  
+
   /// Notifica que um story foi visto para atualizar a UI do chat
   void _notifyStoryViewed() {
     // Usar um pequeno delay para garantir que o Firestore foi atualizado
     Future.delayed(const Duration(milliseconds: 500), () {
       // Força rebuild dos streams no chat
-      print('DEBUG VIEWER: Notificando que story foi visto para atualizar círculo verde');
+      print(
+          'DEBUG VIEWER: Notificando que story foi visto para atualizar círculo verde');
     });
   }
 
@@ -464,7 +507,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     setState(() {
       isPaused = !isPaused;
     });
-    
+
     if (isPaused) {
       print('⏸️ PAUSE: Pausando story');
       // Pausa o timer de auto-advance
@@ -484,7 +527,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       // Retoma vídeo se existir
       videoController?.play();
     }
-    
+
     print('🎮 PAUSE: Novo estado: $isPaused');
   }
 
@@ -506,7 +549,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     interactionsController.toggleLike();
     _showLikeAnimation();
   }
-  
+
   void _showLikeAnimation() {
     print('✨ LIKE: Iniciando animação');
     likeAnimationController!.reset();
@@ -526,9 +569,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       isScrollControlled: true,
     );
   }
-  
 
-  
   /// Mostra modal com descrição completa estilo TikTok
   void _showDescriptionModal(StorieFileModel story) {
     Get.bottomSheet(
@@ -553,7 +594,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             // Content
             Expanded(
               child: Padding(
@@ -573,7 +614,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                       ),
                       const SizedBox(height: 12),
                     ],
-                    
+
                     // Descrição completa
                     Expanded(
                       child: SingleChildScrollView(
@@ -598,8 +639,6 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       backgroundColor: Colors.transparent,
     );
   }
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -660,7 +699,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               return _buildStoryContent(stories[index]);
             },
           ),
-          
+
           // Progress indicators com indicação de pause
           Positioned(
             top: 50,
@@ -672,23 +711,29 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 (index) => Expanded(
                   child: Container(
                     height: 3,
-                    margin: EdgeInsets.only(right: index < stories.length - 1 ? 4 : 0),
+                    margin: EdgeInsets.only(
+                        right: index < stories.length - 1 ? 4 : 0),
                     decoration: BoxDecoration(
                       color: index < currentIndex
                           ? Colors.white
                           : index == currentIndex
-                              ? (isPaused ? Colors.orange : Colors.white.withOpacity(0.5))
+                              ? (isPaused
+                                  ? Colors.orange
+                                  : Colors.white.withOpacity(0.5))
                               : Colors.white.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
-                    child: index == currentIndex && progressController != null && !isPaused
+                    child: index == currentIndex &&
+                            progressController != null &&
+                            !isPaused
                         ? AnimatedBuilder(
                             animation: progressController!,
                             builder: (context, child) {
                               return LinearProgressIndicator(
                                 value: progressController!.value,
                                 backgroundColor: Colors.transparent,
-                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
                               );
                             },
                           )
@@ -698,7 +743,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               ),
             ),
           ),
-          
+
           // Botões superiores (pause e close)
           Positioned(
             top: 50,
@@ -739,13 +784,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                       // Fecha o viewer
                       Navigator.of(context).pop();
                     },
-                    icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                    icon:
+                        const Icon(Icons.close, color: Colors.white, size: 24),
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // Tap areas for navigation (excluindo área dos botões superiores)
           Positioned(
             top: 100, // Abaixo dos botões superiores
@@ -786,7 +832,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               ],
             ),
           ),
-          
+
           // Botão de pause no centro (visível apenas quando pausado)
           if (isPaused)
             Center(
@@ -807,16 +853,16 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 ),
               ),
             ),
-          
+
           // Story info overlay removido para evitar duplicação
-          
+
           // Interactions panel
           if (stories.isNotEmpty)
             StoryInteractionsComponent(
               storyId: stories[currentIndex].id!,
               onCommentTap: _showComments,
             ),
-          
+
           // Like animation overlay - APENAS quando animando (invisível por padrão)
           if (likeAnimation!.isAnimating)
             Center(
@@ -828,15 +874,18 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                     children: [
                       // Partículas de luz subindo
                       ...List.generate(8, (index) {
-                        final angle = (index * 45.0) * (3.14159 / 180); // Converter para radianos
+                        final angle = (index * 45.0) *
+                            (3.14159 / 180); // Converter para radianos
                         final distance = likeAnimation!.value * 100;
                         return Transform.translate(
                           offset: Offset(
                             distance * cos(angle),
-                            -distance * sin(angle) - (likeAnimation!.value * 50),
+                            -distance * sin(angle) -
+                                (likeAnimation!.value * 50),
                           ),
                           child: Opacity(
-                            opacity: (1.0 - likeAnimation!.value).clamp(0.0, 1.0),
+                            opacity:
+                                (1.0 - likeAnimation!.value).clamp(0.0, 1.0),
                             child: Container(
                               width: 4,
                               height: 4,
@@ -855,10 +904,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                           ),
                         );
                       }),
-                      
+
                       // Emoji principal com efeito crescente
                       Transform.scale(
-                        scale: 0.5 + (likeAnimation!.value * 1.5), // Cresce de 0.5x para 2x
+                        scale: 0.5 +
+                            (likeAnimation!.value *
+                                1.5), // Cresce de 0.5x para 2x
                         child: Opacity(
                           opacity: (1.0 - likeAnimation!.value).clamp(0.0, 1.0),
                           child: Container(
@@ -892,9 +943,10 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   Widget _buildStoryContent(StorieFileModel story) {
-    debugPrint('🖼️ VIEWER: Construindo conteúdo do story ${story.id} - Tipo: ${story.fileType?.name}');
+    debugPrint(
+        '🖼️ VIEWER: Construindo conteúdo do story ${story.id} - Tipo: ${story.fileType?.name}');
     debugPrint('🖼️ VIEWER: URL da imagem: ${story.fileUrl}');
-    
+
     if (story.fileType == StorieFileType.video) {
       return _buildVideoContent(story);
     } else {
@@ -923,7 +975,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   Widget _buildImageContent(StorieFileModel story) {
     debugPrint('🖼️ VIEWER: Construindo imagem para story ${story.id}');
     debugPrint('🖼️ VIEWER: URL completa: ${story.fileUrl}');
-    
+
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -934,16 +986,18 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
           Positioned.fill(
             child: _buildImageWithFallbacks(story),
           ),
-          
+
           // Overlay com informações do story (parte inferior) - RESTAURADO
-          if (story.titulo?.isNotEmpty == true || story.descricao?.isNotEmpty == true)
+          if (story.titulo?.isNotEmpty == true ||
+              story.descricao?.isNotEmpty == true)
             Positioned(
               bottom: 120, // Acima dos botões de interação
               left: 16,
               right: 100, // Espaço para botões laterais
               child: GestureDetector(
                 onTap: () {
-                  if (story.descricao?.isNotEmpty == true && story.descricao!.length > 100) {
+                  if (story.descricao?.isNotEmpty == true &&
+                      story.descricao!.length > 100) {
                     _showDescriptionModal(story);
                   }
                 },
@@ -985,7 +1039,8 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                             ],
                           ),
                         ),
-                      if (story.titulo?.isNotEmpty == true && story.descricao?.isNotEmpty == true)
+                      if (story.titulo?.isNotEmpty == true &&
+                          story.descricao?.isNotEmpty == true)
                         const SizedBox(height: 8),
                       if (story.descricao?.isNotEmpty == true)
                         Column(
@@ -1037,7 +1092,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 ),
               ),
             ),
-          
+
           // Botão de pause/play mais visível
           if (isPaused)
             Positioned(
@@ -1067,7 +1122,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 ),
               ),
             ),
-          
+
           // Indicador de pause sutil quando pausado
           if (isPaused)
             Positioned(
@@ -1076,7 +1131,8 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(20),
@@ -1098,13 +1154,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   Widget _buildImageWithFallbacks(StorieFileModel story) {
-    debugPrint('🖼️ VIEWER: Construindo imagem com proxy para story ${story.id}');
+    debugPrint(
+        '🖼️ VIEWER: Construindo imagem com proxy para story ${story.id}');
     debugPrint('🖼️ VIEWER: URL original: ${story.fileUrl}');
-    
+
     if (story.fileUrl == null || story.fileUrl!.isEmpty) {
       return _buildFallbackContent(story, 'URL da imagem não disponível');
     }
-    
+
     return EnhancedImageLoader.buildCachedImage(
       imageUrl: story.fileUrl!,
       width: double.infinity,
@@ -1124,7 +1181,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       errorWidget: _buildFallbackContent(story, 'Erro ao carregar imagem'),
     );
   }
-  
+
   Widget _buildFallbackContent(StorieFileModel story, String errorMessage) {
     return Container(
       width: double.infinity,
@@ -1157,9 +1214,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                 color: Colors.blue,
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Mensagem de erro
             Container(
               padding: const EdgeInsets.all(16),

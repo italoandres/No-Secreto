@@ -12,12 +12,11 @@ class InterestsRepository {
   // ============================================================================
 
   /// Obtém todas as notificações de interesse para um usuário - OTIMIZADO
-  static Future<List<Map<String, dynamic>>> getInterestNotifications(String userId) async {
+  static Future<List<Map<String, dynamic>>> getInterestNotifications(
+      String userId) async {
     try {
-      EnhancedLogger.info('Loading interest notifications', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('Loading interest notifications',
+          tag: 'INTERESTS_REPOSITORY', data: {'userId': userId});
 
       // Buscar interesses onde o usuário é o destinatário
       final query = await _firestore
@@ -40,17 +39,17 @@ class InterestsRepository {
 
       // Buscar interesses mútuos em lotes de 10 (limite do whereIn)
       final mutualInterestsMap = <String, bool>{};
-      
+
       for (int i = 0; i < fromUserIds.length; i += 10) {
         final batch = fromUserIds.skip(i).take(10).toList();
-        
+
         final mutualQuery = await _firestore
             .collection(_interestsCollection)
             .where('fromUserId', isEqualTo: userId)
             .where('toUserId', whereIn: batch)
             .where('status', isEqualTo: 'pending')
             .get();
-        
+
         for (final doc in mutualQuery.docs) {
           final toUserId = doc.data()['toUserId'] as String;
           mutualInterestsMap[toUserId] = true;
@@ -63,18 +62,19 @@ class InterestsRepository {
         try {
           final data = doc.data();
           final fromUserId = data['fromUserId'] as String;
-          
+
           // Calcular tempo decorrido
-          final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+          final createdAt =
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
           final timeAgo = _formatTimeAgo(createdAt);
-          
+
           // ✅ Verificar interesse mútuo do Map (não faz query!)
           final hasUserInterest = mutualInterestsMap[fromUserId] ?? false;
-          
+
           // Criar perfil a partir dos dados salvos
           final fromProfile = data['fromProfile'] as Map<String, dynamic>?;
           SpiritualProfileModel? profile;
-          
+
           if (fromProfile != null) {
             profile = SpiritualProfileModel(
               userId: fromUserId,
@@ -98,41 +98,33 @@ class InterestsRepository {
             });
           }
         } catch (e) {
-          EnhancedLogger.error('Failed to parse interest notification', 
-            tag: 'INTERESTS_REPOSITORY',
-            error: e,
-            data: {'docId': doc.id}
-          );
+          EnhancedLogger.error('Failed to parse interest notification',
+              tag: 'INTERESTS_REPOSITORY', error: e, data: {'docId': doc.id});
         }
       }
 
-      EnhancedLogger.success('Interest notifications loaded', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {
-          'userId': userId,
-          'notificationsCount': notifications.length,
-          'mutualInterestsChecked': fromUserIds.length,
-        }
-      );
+      EnhancedLogger.success('Interest notifications loaded',
+          tag: 'INTERESTS_REPOSITORY',
+          data: {
+            'userId': userId,
+            'notificationsCount': notifications.length,
+            'mutualInterestsChecked': fromUserIds.length,
+          });
 
       return notifications;
     } catch (e) {
-      EnhancedLogger.error('Failed to load interest notifications', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Failed to load interest notifications',
+          tag: 'INTERESTS_REPOSITORY', error: e, data: {'userId': userId});
       return [];
     }
   }
 
   /// Stream de notificações de interesse em tempo real - OTIMIZADO
-  static Stream<List<Map<String, dynamic>>> getInterestNotificationsStream(String userId) {
+  static Stream<List<Map<String, dynamic>>> getInterestNotificationsStream(
+      String userId) {
     try {
-      EnhancedLogger.info('Starting interest notifications stream', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('Starting interest notifications stream',
+          tag: 'INTERESTS_REPOSITORY', data: {'userId': userId});
 
       return _firestore
           .collection(_interestsCollection)
@@ -142,7 +134,6 @@ class InterestsRepository {
           .limit(50) // ✅ OTIMIZAÇÃO: Adicionar limit
           .snapshots()
           .asyncMap((snapshot) async {
-        
         if (snapshot.docs.isEmpty) {
           return <Map<String, dynamic>>[];
         }
@@ -155,17 +146,17 @@ class InterestsRepository {
 
         // Buscar interesses mútuos em lotes
         final mutualInterestsMap = <String, bool>{};
-        
+
         for (int i = 0; i < fromUserIds.length; i += 10) {
           final batch = fromUserIds.skip(i).take(10).toList();
-          
+
           final mutualQuery = await _firestore
               .collection(_interestsCollection)
               .where('fromUserId', isEqualTo: userId)
               .where('toUserId', whereIn: batch)
               .where('status', isEqualTo: 'pending')
               .get();
-          
+
           for (final doc in mutualQuery.docs) {
             final toUserId = doc.data()['toUserId'] as String;
             mutualInterestsMap[toUserId] = true;
@@ -178,16 +169,17 @@ class InterestsRepository {
           try {
             final data = doc.data();
             final fromUserId = data['fromUserId'] as String;
-            
-            final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+
+            final createdAt =
+                (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
             final timeAgo = _formatTimeAgo(createdAt);
-            
+
             // ✅ Usar Map ao invés de query
             final hasUserInterest = mutualInterestsMap[fromUserId] ?? false;
-            
+
             final fromProfile = data['fromProfile'] as Map<String, dynamic>?;
             SpiritualProfileModel? profile;
-            
+
             if (fromProfile != null) {
               profile = SpiritualProfileModel(
                 userId: fromUserId,
@@ -211,22 +203,19 @@ class InterestsRepository {
               });
             }
           } catch (e) {
-            EnhancedLogger.error('Failed to parse interest notification in stream', 
-              tag: 'INTERESTS_REPOSITORY',
-              error: e,
-              data: {'docId': doc.id}
-            );
+            EnhancedLogger.error(
+                'Failed to parse interest notification in stream',
+                tag: 'INTERESTS_REPOSITORY',
+                error: e,
+                data: {'docId': doc.id});
           }
         }
 
         return notifications;
       });
     } catch (e) {
-      EnhancedLogger.error('Failed to create interest notifications stream', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Failed to create interest notifications stream',
+          tag: 'INTERESTS_REPOSITORY', error: e, data: {'userId': userId});
       return Stream.value([]);
     }
   }
@@ -259,13 +248,12 @@ class InterestsRepository {
     required Map<String, dynamic> fromProfile,
   }) async {
     try {
-      EnhancedLogger.info('Expressing interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {
-          'fromUserId': fromUserId,
-          'toUserId': toUserId,
-        }
-      );
+      EnhancedLogger.info('Expressing interest',
+          tag: 'INTERESTS_REPOSITORY',
+          data: {
+            'fromUserId': fromUserId,
+            'toUserId': toUserId,
+          });
 
       final interestData = {
         'fromUserId': fromUserId,
@@ -281,19 +269,17 @@ class InterestsRepository {
           .doc('${fromUserId}_$toUserId')
           .set(interestData);
 
-      EnhancedLogger.success('Interest expressed successfully', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': '${fromUserId}_$toUserId'}
-      );
+      EnhancedLogger.success('Interest expressed successfully',
+          tag: 'INTERESTS_REPOSITORY',
+          data: {'interestId': '${fromUserId}_$toUserId'});
     } catch (e) {
-      EnhancedLogger.error('Failed to express interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {
-          'fromUserId': fromUserId,
-          'toUserId': toUserId,
-        }
-      );
+      EnhancedLogger.error('Failed to express interest',
+          tag: 'INTERESTS_REPOSITORY',
+          error: e,
+          data: {
+            'fromUserId': fromUserId,
+            'toUserId': toUserId,
+          });
       rethrow;
     }
   }
@@ -301,29 +287,21 @@ class InterestsRepository {
   /// Rejeita um interesse
   static Future<void> rejectInterest(String interestId) async {
     try {
-      EnhancedLogger.info('Rejecting interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.info('Rejecting interest',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
 
-      await _firestore
-          .collection(_interestsCollection)
-          .doc(interestId)
-          .update({
+      await _firestore.collection(_interestsCollection).doc(interestId).update({
         'status': 'rejected',
         'rejectedAt': FieldValue.serverTimestamp(),
       });
 
-      EnhancedLogger.success('Interest rejected successfully', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.success('Interest rejected successfully',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
     } catch (e) {
-      EnhancedLogger.error('Failed to reject interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.error('Failed to reject interest',
+          tag: 'INTERESTS_REPOSITORY',
+          error: e,
+          data: {'interestId': interestId});
       rethrow;
     }
   }
@@ -331,29 +309,21 @@ class InterestsRepository {
   /// Aceita um interesse (marca como aceito)
   static Future<void> acceptInterest(String interestId) async {
     try {
-      EnhancedLogger.info('Accepting interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.info('Accepting interest',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
 
-      await _firestore
-          .collection(_interestsCollection)
-          .doc(interestId)
-          .update({
+      await _firestore.collection(_interestsCollection).doc(interestId).update({
         'status': 'accepted',
         'acceptedAt': FieldValue.serverTimestamp(),
       });
 
-      EnhancedLogger.success('Interest accepted successfully', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.success('Interest accepted successfully',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
     } catch (e) {
-      EnhancedLogger.error('Failed to accept interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.error('Failed to accept interest',
+          tag: 'INTERESTS_REPOSITORY',
+          error: e,
+          data: {'interestId': interestId});
       rethrow;
     }
   }
@@ -361,26 +331,21 @@ class InterestsRepository {
   /// Remove um interesse (delete)
   static Future<void> removeInterest(String interestId) async {
     try {
-      EnhancedLogger.info('Removing interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.info('Removing interest',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
 
       await _firestore
           .collection(_interestsCollection)
           .doc(interestId)
           .delete();
 
-      EnhancedLogger.success('Interest removed successfully', 
-        tag: 'INTERESTS_REPOSITORY',
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.success('Interest removed successfully',
+          tag: 'INTERESTS_REPOSITORY', data: {'interestId': interestId});
     } catch (e) {
-      EnhancedLogger.error('Failed to remove interest', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'interestId': interestId}
-      );
+      EnhancedLogger.error('Failed to remove interest',
+          tag: 'INTERESTS_REPOSITORY',
+          error: e,
+          data: {'interestId': interestId});
       rethrow;
     }
   }
@@ -391,16 +356,12 @@ class InterestsRepository {
       final query = await _firestore
           .collection(_interestsCollection)
           .where('toUserId', isEqualTo: userId)
-          .where('status', whereIn: ['new', 'pending'])
-          .get();
+          .where('status', whereIn: ['new', 'pending']).get();
 
       return query.docs.length;
     } catch (e) {
-      EnhancedLogger.error('Failed to get unread interest count', 
-        tag: 'INTERESTS_REPOSITORY',
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Failed to get unread interest count',
+          tag: 'INTERESTS_REPOSITORY', error: e, data: {'userId': userId});
       return 0;
     }
   }

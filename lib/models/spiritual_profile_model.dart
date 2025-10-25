@@ -4,24 +4,24 @@ import 'additional_location_model.dart';
 class SpiritualProfileModel {
   String? id;
   String? userId;
-  
+
   // Profile Completion Status
   bool isProfileComplete;
   Map<String, bool> completionTasks;
   DateTime? profileCompletedAt;
   bool? hasBeenShown; // Se a tela de parabéns já foi mostrada
-  
+
   // Additional Locations for Match (max 2)
   List<AdditionalLocation>? additionalLocations;
-  
+
   // Search Filters
   Map<String, dynamic>? searchFilters;
-  
+
   // Photos (up to 3)
   String? mainPhotoUrl; // Required
   String? secondaryPhoto1Url; // Optional
   String? secondaryPhoto2Url; // Optional
-  
+
   // Spiritual Identity
   String? city; // "São Paulo - SP"
   String? state; // "SP", "RJ", etc.
@@ -38,47 +38,48 @@ class SpiritualProfileModel {
   String? smokingStatus; // Status de fumante
   String? drinkingStatus; // Status de consumo de álcool
   List<String>? hobbies; // Hobbies e interesses
-  
+
   // Biography Questions
   String? purpose; // "Qual é o seu propósito?" (300 chars)
   bool? isDeusEPaiMember; // "Você faz parte do movimento Deus é Pai?"
   RelationshipStatus? relationshipStatus; // Solteiro/Comprometido
-  bool? readyForPurposefulRelationship; // "Disposto a viver relacionamento com propósito?"
+  bool?
+      readyForPurposefulRelationship; // "Disposto a viver relacionamento com propósito?"
   String? nonNegotiableValue; // "Qual valor é inegociável?"
   String? faithPhrase; // "Uma frase que representa sua fé"
   String? aboutMe; // "Algo que gostaria que soubessem" (optional)
-  
+
   // Spiritual Certification
   bool? hasSinaisPreparationSeal; // "Preparado(a) para os Sinais"
   DateTime? sealObtainedAt;
-  
+
   // Family and Relationship History
   bool? hasChildren; // "Você tem filhos?"
   String? childrenDetails; // "2 filhos" ou "Sem filhos"
   bool? isVirgin; // "Você é virgem?" (optional/private)
   bool? wasPreviouslyMarried; // "Você já foi casado(a)?"
-  
+
   // Interaction Settings
   bool allowInteractions; // Can receive "Tenho Interesse"
   List<String> blockedUsers;
-  
+
   // Sync fields with usuario collection
   String? displayName; // Synced with usuario.nome
   String? username; // Synced with usuario.username
   DateTime? lastSyncAt; // Last sync with usuario collection
-  
+
   // Additional fields for compatibility
   bool? isVerified;
   bool? hasCompletedCourse;
   String? bio;
   List<String>? interests;
-  
+
   // Search and profile type fields
   String? profileType; // 'spiritual' or 'vitrine'
   List<String>? searchKeywords;
   String? photoUrl; // Alias for mainPhotoUrl
   bool? isActive;
-  
+
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -153,10 +154,9 @@ class SpiritualProfileModel {
     return SpiritualProfileModel(
       id: json['id'],
       userId: json['userId'],
-      isProfileComplete: json['isProfileComplete'] is bool 
-          ? json['isProfileComplete'] 
-          : false,
-      completionTasks: json['completionTasks'] != null 
+      isProfileComplete:
+          json['isProfileComplete'] is bool ? json['isProfileComplete'] : false,
+      completionTasks: json['completionTasks'] != null
           ? Map<String, bool>.from(json['completionTasks'])
           : {
               'photos': false,
@@ -169,7 +169,8 @@ class SpiritualProfileModel {
       hasBeenShown: json['hasBeenShown'] is bool ? json['hasBeenShown'] : false,
       additionalLocations: json['additionalLocations'] != null
           ? (json['additionalLocations'] as List)
-              .map((loc) => AdditionalLocation.fromJson(loc as Map<String, dynamic>))
+              .map((loc) =>
+                  AdditionalLocation.fromJson(loc as Map<String, dynamic>))
               .toList()
           : null,
       searchFilters: json['searchFilters'] != null
@@ -182,7 +183,7 @@ class SpiritualProfileModel {
       state: json['state'],
       fullLocation: json['fullLocation'],
       country: json['country'],
-      languages: json['languages'] != null 
+      languages: json['languages'] != null
           ? List<String>.from(json['languages'])
           : null,
       age: json['age'],
@@ -194,55 +195,54 @@ class SpiritualProfileModel {
       university: json['university'],
       smokingStatus: json['smokingStatus'],
       drinkingStatus: json['drinkingStatus'],
-      hobbies: json['hobbies'] != null 
-          ? List<String>.from(json['hobbies'])
-          : null,
+      hobbies:
+          json['hobbies'] != null ? List<String>.from(json['hobbies']) : null,
       purpose: json['purpose'],
-      isDeusEPaiMember: json['isDeusEPaiMember'] is bool 
-          ? json['isDeusEPaiMember'] 
+      isDeusEPaiMember: json['isDeusEPaiMember'] is bool
+          ? json['isDeusEPaiMember']
           : (json['isDeusEPaiMember'] != null ? true : null),
       relationshipStatus: json['relationshipStatus'] != null
           ? RelationshipStatus.values.byName(json['relationshipStatus'])
           : null,
-      readyForPurposefulRelationship: json['readyForPurposefulRelationship'] is bool 
-          ? json['readyForPurposefulRelationship'] 
-          : (json['readyForPurposefulRelationship'] != null ? true : null),
+      readyForPurposefulRelationship:
+          json['readyForPurposefulRelationship'] is bool
+              ? json['readyForPurposefulRelationship']
+              : (json['readyForPurposefulRelationship'] != null ? true : null),
       nonNegotiableValue: json['nonNegotiableValue'],
       faithPhrase: json['faithPhrase'],
       aboutMe: json['aboutMe'],
-      hasSinaisPreparationSeal: json['hasSinaisPreparationSeal'] is bool 
-          ? json['hasSinaisPreparationSeal'] 
+      hasSinaisPreparationSeal: json['hasSinaisPreparationSeal'] is bool
+          ? json['hasSinaisPreparationSeal']
           : (json['hasSinaisPreparationSeal'] != null ? true : false),
       sealObtainedAt: json['sealObtainedAt']?.toDate(),
-      hasChildren: json['hasChildren'] is bool 
-          ? json['hasChildren'] 
+      hasChildren: json['hasChildren'] is bool
+          ? json['hasChildren']
           : (json['hasChildren'] != null ? true : null),
       childrenDetails: json['childrenDetails'],
-      isVirgin: json['isVirgin'] is bool 
-          ? json['isVirgin'] 
+      isVirgin: json['isVirgin'] is bool
+          ? json['isVirgin']
           : (json['isVirgin'] != null ? true : null),
-      wasPreviouslyMarried: json['wasPreviouslyMarried'] is bool 
-          ? json['wasPreviouslyMarried'] 
+      wasPreviouslyMarried: json['wasPreviouslyMarried'] is bool
+          ? json['wasPreviouslyMarried']
           : (json['wasPreviouslyMarried'] != null ? true : null),
-      allowInteractions: json['allowInteractions'] is bool 
-          ? json['allowInteractions'] 
-          : true,
-      blockedUsers: json['blockedUsers'] != null 
+      allowInteractions:
+          json['allowInteractions'] is bool ? json['allowInteractions'] : true,
+      blockedUsers: json['blockedUsers'] != null
           ? List<String>.from(json['blockedUsers'])
           : [],
       displayName: json['displayName'],
       username: json['username'],
-      lastSyncAt: json['lastSyncAt'] != null 
+      lastSyncAt: json['lastSyncAt'] != null
           ? (json['lastSyncAt'] as Timestamp).toDate()
           : null,
       isVerified: json['isVerified'] as bool?,
       hasCompletedCourse: json['hasCompletedCourse'] as bool?,
       bio: json['bio'] as String?,
-      interests: json['interests'] != null 
+      interests: json['interests'] != null
           ? List<String>.from(json['interests'])
           : null,
       profileType: json['profileType'] as String?,
-      searchKeywords: json['searchKeywords'] != null 
+      searchKeywords: json['searchKeywords'] != null
           ? List<String>.from(json['searchKeywords'])
           : null,
       photoUrl: json['photoUrl'] as String?,
@@ -258,11 +258,12 @@ class SpiritualProfileModel {
       'userId': userId,
       'isProfileComplete': isProfileComplete,
       'completionTasks': completionTasks,
-      'profileCompletedAt': profileCompletedAt != null 
+      'profileCompletedAt': profileCompletedAt != null
           ? Timestamp.fromDate(profileCompletedAt!)
           : null,
       'hasBeenShown': hasBeenShown ?? false,
-      'additionalLocations': additionalLocations?.map((loc) => loc.toJson()).toList(),
+      'additionalLocations':
+          additionalLocations?.map((loc) => loc.toJson()).toList(),
       'searchFilters': searchFilters,
       'mainPhotoUrl': mainPhotoUrl,
       'secondaryPhoto1Url': secondaryPhoto1Url,
@@ -290,9 +291,8 @@ class SpiritualProfileModel {
       'faithPhrase': faithPhrase,
       'aboutMe': aboutMe,
       'hasSinaisPreparationSeal': hasSinaisPreparationSeal,
-      'sealObtainedAt': sealObtainedAt != null 
-          ? Timestamp.fromDate(sealObtainedAt!)
-          : null,
+      'sealObtainedAt':
+          sealObtainedAt != null ? Timestamp.fromDate(sealObtainedAt!) : null,
       'hasChildren': hasChildren,
       'childrenDetails': childrenDetails,
       'isVirgin': isVirgin,
@@ -301,45 +301,40 @@ class SpiritualProfileModel {
       'blockedUsers': blockedUsers,
       'displayName': displayName,
       'username': username,
-      'lastSyncAt': lastSyncAt != null 
-          ? Timestamp.fromDate(lastSyncAt!)
-          : null,
+      'lastSyncAt': lastSyncAt != null ? Timestamp.fromDate(lastSyncAt!) : null,
       'isVerified': isVerified,
       'hasCompletedCourse': hasCompletedCourse,
       'bio': bio,
       'interests': interests,
-      'createdAt': createdAt != null 
-          ? Timestamp.fromDate(createdAt!)
-          : null,
-      'updatedAt': updatedAt != null 
-          ? Timestamp.fromDate(updatedAt!)
-          : null,
+      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
   }
 
   // Helper methods
   double get completionPercentage {
     if (completionTasks.isEmpty) return 0.0;
-    
+
     // Certificação é OPCIONAL - não conta no progresso
     final requiredTasks = Map<String, bool>.from(completionTasks);
     requiredTasks.remove('certification'); // Remove certificação do cálculo
-    
+
     if (requiredTasks.isEmpty) return 0.0;
-    
-    int completedTasks = requiredTasks.values.where((completed) => completed).length;
+
+    int completedTasks =
+        requiredTasks.values.where((completed) => completed).length;
     return completedTasks / requiredTasks.length;
   }
 
   bool get hasRequiredPhotos => mainPhotoUrl?.isNotEmpty == true;
 
-  bool get hasBasicInfo => 
-      city?.isNotEmpty == true && 
+  bool get hasBasicInfo =>
+      city?.isNotEmpty == true &&
       age != null &&
       hasChildren != null &&
       wasPreviouslyMarried != null;
 
-  bool get hasBiography => 
+  bool get hasBiography =>
       purpose?.isNotEmpty == true &&
       isDeusEPaiMember != null &&
       relationshipStatus != null &&
@@ -349,7 +344,7 @@ class SpiritualProfileModel {
 
   List<String> get missingRequiredFields {
     List<String> missing = [];
-    
+
     if (!hasRequiredPhotos) missing.add('Foto principal');
     if (city?.isEmpty == true) missing.add('Cidade');
     if (age == null) missing.add('Idade');
@@ -358,22 +353,26 @@ class SpiritualProfileModel {
     if (purpose?.isEmpty == true) missing.add('Propósito');
     if (isDeusEPaiMember == null) missing.add('Movimento Deus é Pai');
     if (relationshipStatus == null) missing.add('Status de relacionamento');
-    if (readyForPurposefulRelationship == null) missing.add('Relacionamento com propósito');
+    if (readyForPurposefulRelationship == null)
+      missing.add('Relacionamento com propósito');
     if (nonNegotiableValue?.isEmpty == true) missing.add('Valor inegociável');
     if (faithPhrase?.isEmpty == true) missing.add('Frase de fé');
-    
+
     return missing;
   }
 
-  bool get canShowPublicProfile => isProfileComplete && missingRequiredFields.isEmpty;
+  bool get canShowPublicProfile =>
+      isProfileComplete && missingRequiredFields.isEmpty;
 
   // New validation methods for enhanced fields
-  bool get hasLocationInfo => city?.isNotEmpty == true || fullLocation?.isNotEmpty == true;
-  
+  bool get hasLocationInfo =>
+      city?.isNotEmpty == true || fullLocation?.isNotEmpty == true;
+
   bool get hasFamilyInfo => hasChildren != null;
-  
-  String get displayLocation => fullLocation ?? city ?? 'Localização não informada';
-  
+
+  String get displayLocation =>
+      fullLocation ?? city ?? 'Localização não informada';
+
   String get childrenStatusText {
     if (hasChildren == null) return 'Não informado';
     if (hasChildren == true) {
@@ -381,12 +380,12 @@ class SpiritualProfileModel {
     }
     return 'Sem filhos';
   }
-  
+
   String get marriageHistoryText {
     if (wasPreviouslyMarried == null) return 'Não informado';
     return wasPreviouslyMarried! ? 'Já foi casado(a)' : 'Nunca foi casado(a)';
   }
-  
+
   // Privacy-aware getters
   String? get virginityStatusText {
     if (isVirgin == null) return null; // Private/not shared
@@ -469,11 +468,13 @@ class SpiritualProfileModel {
       purpose: purpose ?? this.purpose,
       isDeusEPaiMember: isDeusEPaiMember ?? this.isDeusEPaiMember,
       relationshipStatus: relationshipStatus ?? this.relationshipStatus,
-      readyForPurposefulRelationship: readyForPurposefulRelationship ?? this.readyForPurposefulRelationship,
+      readyForPurposefulRelationship:
+          readyForPurposefulRelationship ?? this.readyForPurposefulRelationship,
       nonNegotiableValue: nonNegotiableValue ?? this.nonNegotiableValue,
       faithPhrase: faithPhrase ?? this.faithPhrase,
       aboutMe: aboutMe ?? this.aboutMe,
-      hasSinaisPreparationSeal: hasSinaisPreparationSeal ?? this.hasSinaisPreparationSeal,
+      hasSinaisPreparationSeal:
+          hasSinaisPreparationSeal ?? this.hasSinaisPreparationSeal,
       sealObtainedAt: sealObtainedAt ?? this.sealObtainedAt,
       hasChildren: hasChildren ?? this.hasChildren,
       childrenDetails: childrenDetails ?? this.childrenDetails,
@@ -593,16 +594,15 @@ class MutualInterestModel {
       'user2Id': user2Id,
       'matchedAt': Timestamp.fromDate(matchedAt),
       'chatEnabled': chatEnabled,
-      'chatExpiresAt': chatExpiresAt != null 
-          ? Timestamp.fromDate(chatExpiresAt!)
-          : null,
+      'chatExpiresAt':
+          chatExpiresAt != null ? Timestamp.fromDate(chatExpiresAt!) : null,
       'movedToNossoProposito': movedToNossoProposito,
     };
   }
 
-  bool get isChatExpired => 
+  bool get isChatExpired =>
       chatExpiresAt != null && DateTime.now().isAfter(chatExpiresAt!);
 
-  Duration? get timeUntilExpiration => 
+  Duration? get timeUntilExpiration =>
       chatExpiresAt?.difference(DateTime.now());
 }

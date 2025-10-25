@@ -24,12 +24,12 @@ class StoryNotificationItem extends StatelessWidget {
 
     return Card(
       elevation: isUnread ? 3 : 1,
-      color: isMention 
-          ? Colors.purple.shade50 
+      color: isMention
+          ? Colors.purple.shade50
           : (isUnread ? Colors.white : Colors.grey.shade50),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isMention 
+        side: isMention
             ? BorderSide(color: Colors.purple.shade200, width: 2)
             : BorderSide.none,
       ),
@@ -44,7 +44,7 @@ class StoryNotificationItem extends StatelessWidget {
               // Avatar do usuário
               _buildAvatar(),
               const SizedBox(width: 12),
-              
+
               // Conteúdo
               Expanded(
                 child: Column(
@@ -53,19 +53,20 @@ class StoryNotificationItem extends StatelessWidget {
                     // Nome do usuário + ação
                     _buildHeader(),
                     const SizedBox(height: 4),
-                    
+
                     // Preview do conteúdo (se houver)
-                    if (notification.message != null && notification.message!.isNotEmpty)
+                    if (notification.message != null &&
+                        notification.message!.isNotEmpty)
                       _buildPreview(),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Timestamp
                     _buildTimestamp(),
                   ],
                 ),
               ),
-              
+
               // Ícone do tipo + indicador de não lida
               Column(
                 children: [
@@ -76,7 +77,7 @@ class StoryNotificationItem extends StatelessWidget {
                   ],
                 ],
               ),
-              
+
               // Botão de deletar (se fornecido)
               if (onDelete != null)
                 IconButton(
@@ -105,7 +106,7 @@ class StoryNotificationItem extends StatelessWidget {
               : null,
           child: notification.fromUserAvatar.isEmpty
               ? Text(
-                  notification.fromUserName.isNotEmpty 
+                  notification.fromUserName.isNotEmpty
                       ? notification.fromUserName[0].toUpperCase()
                       : '?',
                   style: TextStyle(
@@ -116,7 +117,7 @@ class StoryNotificationItem extends StatelessWidget {
                 )
               : null,
         ),
-        
+
         // Badge com emoji do tipo
         Positioned(
           right: -2,
@@ -129,7 +130,8 @@ class StoryNotificationItem extends StatelessWidget {
               border: Border.all(color: Colors.white, width: 2),
             ),
             child: Text(
-              NotificationItemFactory.getStoryNotificationEmoji(notification.type),
+              NotificationItemFactory.getStoryNotificationEmoji(
+                  notification.type),
               style: const TextStyle(fontSize: 12),
             ),
           ),
@@ -141,7 +143,7 @@ class StoryNotificationItem extends StatelessWidget {
   /// Constrói header com nome e ação
   Widget _buildHeader() {
     final isMention = notification.type == 'mention';
-    
+
     return RichText(
       text: TextSpan(
         style: const TextStyle(fontSize: 14, color: Colors.black87),
@@ -152,16 +154,17 @@ class StoryNotificationItem extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const TextSpan(text: ' '),
-          
+
           // Ação
           TextSpan(
-            text: NotificationItemFactory.getStoryNotificationAction(notification.type),
+            text: NotificationItemFactory.getStoryNotificationAction(
+                notification.type),
             style: TextStyle(
               color: Colors.grey.shade700,
               fontWeight: isMention ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
-          
+
           // Badge de menção
           if (isMention) ...[
             const TextSpan(text: ' '),
@@ -213,7 +216,7 @@ class StoryNotificationItem extends StatelessWidget {
   Widget _buildTimestamp() {
     final timestamp = notification.timestamp;
     final timeAgo = timeago.format(timestamp, locale: 'pt_BR');
-    
+
     return Text(
       timeAgo,
       style: TextStyle(
@@ -228,13 +231,16 @@ class StoryNotificationItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: NotificationItemFactory.getStoryNotificationColor(notification.type).withOpacity(0.1),
+        color:
+            NotificationItemFactory.getStoryNotificationColor(notification.type)
+                .withOpacity(0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(
         NotificationItemFactory.getStoryNotificationIcon(notification.type),
         size: 16,
-        color: NotificationItemFactory.getStoryNotificationColor(notification.type),
+        color: NotificationItemFactory.getStoryNotificationColor(
+            notification.type),
       ),
     );
   }

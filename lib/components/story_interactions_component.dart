@@ -10,7 +10,7 @@ import '../utils/enhanced_image_loader.dart';
 class StoryInteractionsComponent extends StatelessWidget {
   final String storyId;
   final VoidCallback? onCommentTap;
-  
+
   const StoryInteractionsComponent({
     super.key,
     required this.storyId,
@@ -22,7 +22,7 @@ class StoryInteractionsComponent extends StatelessWidget {
     // TODO: Implementar detecção real do gênero do usuário
     // Por enquanto, simulando lógica baseada no contexto atual
     final userGender = _getUserGender(); // Função para detectar gênero
-    
+
     Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
@@ -45,7 +45,7 @@ class StoryInteractionsComponent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             // Header
             Padding(
               padding: const EdgeInsets.all(16),
@@ -68,12 +68,12 @@ class StoryInteractionsComponent extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Opções de resposta baseadas no gênero
             Column(
               children: _buildReplyOptionsForUser(userGender),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
@@ -81,7 +81,7 @@ class StoryInteractionsComponent extends StatelessWidget {
       isScrollControlled: true,
     );
   }
-  
+
   /// Constrói uma opção de resposta
   Widget _buildReplyOption({
     required IconData icon,
@@ -110,18 +110,18 @@ class StoryInteractionsComponent extends StatelessWidget {
       onTap: onTap,
     );
   }
-  
+
   /// Detecta o gênero do usuário (simulado por enquanto)
   String _getUserGender() {
     // TODO: Implementar detecção real do gênero do usuário
     // Por enquanto retorna 'masculino' como padrão
     return 'masculino'; // ou 'feminino'
   }
-  
+
   /// Constrói opções de resposta baseadas no gênero do usuário
   List<Widget> _buildReplyOptionsForUser(String userGender) {
     List<Widget> options = [];
-    
+
     // Chat Principal - sempre disponível
     options.add(_buildReplyOption(
       icon: Icons.chat,
@@ -130,7 +130,7 @@ class StoryInteractionsComponent extends StatelessWidget {
       subtitle: 'Responder no chat geral',
       onTap: () => _replyToChat('principal'),
     ));
-    
+
     // Opções baseadas no gênero
     if (userGender == 'masculino') {
       options.add(_buildReplyOption(
@@ -149,7 +149,7 @@ class StoryInteractionsComponent extends StatelessWidget {
         onTap: () => _replyToChat('sinais_isaque'),
       ));
     }
-    
+
     // Nosso Propósito - sempre disponível
     options.add(_buildReplyOption(
       icon: Icons.favorite,
@@ -158,18 +158,18 @@ class StoryInteractionsComponent extends StatelessWidget {
       subtitle: 'Chat especial (em breve)',
       onTap: () => _replyToChat('nosso_proposito'),
     ));
-    
+
     return options;
   }
-  
+
   /// Responde o story no chat especificado
   void _replyToChat(String chatType) {
     Get.back(); // Fecha o modal
-    
+
     // Navegar para o chat com story pré-carregado
     _navigateToChatWithStory(chatType, storyId);
   }
-  
+
   /// Navega para o chat especificado com story pré-carregado
   void _navigateToChatWithStory(String chatType, String storyId) {
     // Primeiro, buscar os dados do story
@@ -196,35 +196,37 @@ class StoryInteractionsComponent extends StatelessWidget {
       }
     });
   }
-  
+
   /// Busca dados do story
   Future<Map<String, dynamic>?> _getStoryData(String storyId) async {
     try {
       // Buscar story real do repository
       final story = await StoriesRepository.getStoryById(storyId);
-      
+
       if (story != null) {
         return {
           'id': story.id,
           'mediaUrl': story.fileUrl,
-          'mediaType': story.fileType == StorieFileType.video ? 'video' : 'image',
+          'mediaType':
+              story.fileType == StorieFileType.video ? 'video' : 'image',
           'titulo': story.titulo ?? 'Story',
           'descricao': story.descricao ?? '',
           'videoThumbnail': story.videoThumbnail,
         };
       }
-      
+
       return null;
     } catch (e) {
       print('Erro ao buscar dados do story: $e');
       return null;
     }
   }
-  
+
   /// Abre o chat com story pré-carregado
-  void _openChatWithPreloadedStory(String chatType, Map<String, dynamic> storyData) {
+  void _openChatWithPreloadedStory(
+      String chatType, Map<String, dynamic> storyData) {
     final TextEditingController commentController = TextEditingController();
-    
+
     // Mostrar modal de composição de mensagem com story
     Get.bottomSheet(
       Container(
@@ -242,7 +244,8 @@ class StoryInteractionsComponent extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+                border:
+                    Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
               ),
               child: Row(
                 children: [
@@ -260,7 +263,7 @@ class StoryInteractionsComponent extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Preview do story
             Container(
               margin: const EdgeInsets.all(16),
@@ -291,10 +294,12 @@ class StoryInteractionsComponent extends StatelessWidget {
                                     width: 60,
                                     height: 60,
                                     fit: BoxFit.cover,
-                                    errorWidget: const Icon(Icons.video_library, color: Colors.grey),
+                                    errorWidget: const Icon(Icons.video_library,
+                                        color: Colors.grey),
                                   )
                                 else
-                                  const Icon(Icons.video_library, color: Colors.grey),
+                                  const Icon(Icons.video_library,
+                                      color: Colors.grey),
                                 const Center(
                                   child: Icon(
                                     Icons.play_circle_outline,
@@ -309,13 +314,14 @@ class StoryInteractionsComponent extends StatelessWidget {
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
-                              errorWidget: const Icon(Icons.image, color: Colors.grey),
+                              errorWidget:
+                                  const Icon(Icons.image, color: Colors.grey),
                             ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Informações do story
                   Expanded(
                     child: Column(
@@ -346,7 +352,7 @@ class StoryInteractionsComponent extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Campo de comentário
             Expanded(
               child: Padding(
@@ -361,14 +367,15 @@ class StoryInteractionsComponent extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     Expanded(
                       child: TextField(
                         controller: commentController,
                         decoration: const InputDecoration(
-                          hintText: 'Escreva seu comentário sobre este story...',
+                          hintText:
+                              'Escreva seu comentário sobre este story...',
                           border: OutlineInputBorder(),
                           alignLabelWithHint: true,
                         ),
@@ -377,9 +384,9 @@ class StoryInteractionsComponent extends StatelessWidget {
                         textAlignVertical: TextAlignVertical.top,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Botão de enviar
                     SizedBox(
                       width: double.infinity,
@@ -387,7 +394,7 @@ class StoryInteractionsComponent extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () async {
                           final comment = commentController.text.trim();
-                          
+
                           if (comment.isEmpty) {
                             Get.rawSnackbar(
                               message: 'Digite um comentário antes de enviar',
@@ -395,18 +402,21 @@ class StoryInteractionsComponent extends StatelessWidget {
                             );
                             return;
                           }
-                          
+
                           try {
                             // Preparar mensagem com story
-                            final messageText = _buildStoryMessage(storyData, comment);
-                            
+                            final messageText =
+                                _buildStoryMessage(storyData, comment);
+
                             // Enviar para o chat apropriado
-                            bool success = await _sendToChat(chatType, messageText);
-                            
+                            bool success =
+                                await _sendToChat(chatType, messageText);
+
                             if (success) {
                               Get.back();
                               Get.rawSnackbar(
-                                message: 'Mensagem enviada para ${_getChatDisplayName(chatType)}!',
+                                message:
+                                    'Mensagem enviada para ${_getChatDisplayName(chatType)}!',
                                 backgroundColor: Colors.green,
                               );
                             } else {
@@ -445,23 +455,23 @@ class StoryInteractionsComponent extends StatelessWidget {
       isScrollControlled: true,
     );
   }
-  
+
   /// Constrói a mensagem com informações do story
   String _buildStoryMessage(Map<String, dynamic> storyData, String comment) {
     final titulo = storyData['titulo'] ?? 'Story';
     final descricao = storyData['descricao'] ?? '';
-    
+
     String message = '📱 Respondendo ao story: "$titulo"';
-    
+
     if (descricao.isNotEmpty) {
       message += '\n📝 $descricao';
     }
-    
+
     message += '\n\n💬 $comment';
-    
+
     return message;
   }
-  
+
   /// Envia mensagem para o chat especificado
   Future<bool> _sendToChat(String chatType, String message) async {
     try {
@@ -492,7 +502,7 @@ class StoryInteractionsComponent extends StatelessWidget {
       rethrow;
     }
   }
-  
+
   /// Retorna o nome de exibição do chat
   String _getChatDisplayName(String chatType) {
     switch (chatType) {
@@ -512,7 +522,7 @@ class StoryInteractionsComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StoryInteractionsController>();
-    
+
     return Positioned(
       right: 16,
       bottom: 100,
@@ -521,59 +531,66 @@ class StoryInteractionsComponent extends StatelessWidget {
           // Botão de Curtir (Oração) - Emoji 🙏 com animação de tremor
           _buildInteractionButton(
             icon: Obx(() => TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 300),
-              tween: Tween(begin: 0.0, end: controller.isLiked.value ? 1.0 : 0.0),
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(
-                    value * 2 * sin(value * 20), // Tremor horizontal
-                    0,
-                  ),
-                  child: Transform.scale(
-                    scale: 1.0 + (value * 0.3), // Cresce quando curtido
-                    child: Container(
-                      decoration: controller.isLiked.value ? BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.orange.withOpacity(0.6),
-                            blurRadius: 15,
-                            spreadRadius: 3,
-                          ),
-                        ],
-                      ) : null,
-                      child: Text(
-                        '🙏',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: controller.isLiked.value ? Colors.orange : Colors.white,
-                          shadows: controller.isLiked.value ? [
-                            Shadow(
-                              color: Colors.orange.withOpacity(0.8),
-                              blurRadius: 10,
-                              offset: const Offset(0, 0),
+                  duration: const Duration(milliseconds: 300),
+                  tween: Tween(
+                      begin: 0.0, end: controller.isLiked.value ? 1.0 : 0.0),
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(
+                        value * 2 * sin(value * 20), // Tremor horizontal
+                        0,
+                      ),
+                      child: Transform.scale(
+                        scale: 1.0 + (value * 0.3), // Cresce quando curtido
+                        child: Container(
+                          decoration: controller.isLiked.value
+                              ? BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(0.6),
+                                      blurRadius: 15,
+                                      spreadRadius: 3,
+                                    ),
+                                  ],
+                                )
+                              : null,
+                          child: Text(
+                            '🙏',
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: controller.isLiked.value
+                                  ? Colors.orange
+                                  : Colors.white,
+                              shadows: controller.isLiked.value
+                                  ? [
+                                      Shadow(
+                                        color: Colors.orange.withOpacity(0.8),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 0),
+                                      ),
+                                    ]
+                                  : null,
                             ),
-                          ] : null,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            )),
+                    );
+                  },
+                )),
             label: Obx(() => Text(
-              controller.likesCount.value.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
+                  controller.likesCount.value.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
             onTap: controller.toggleLike,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Botão de Comentar
           _buildInteractionButton(
             icon: const Icon(
@@ -582,25 +599,29 @@ class StoryInteractionsComponent extends StatelessWidget {
               size: 32,
             ),
             label: Obx(() => Text(
-              controller.comments.length.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
+                  controller.comments.length.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
             onTap: onCommentTap ?? () {},
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Botão de Favoritar
           _buildInteractionButton(
             icon: Obx(() => Icon(
-              controller.isFavorited.value ? Icons.bookmark : Icons.bookmark_border,
-              color: controller.isFavorited.value ? Colors.yellow : Colors.white,
-              size: 32,
-            )),
+                  controller.isFavorited.value
+                      ? Icons.bookmark
+                      : Icons.bookmark_border,
+                  color: controller.isFavorited.value
+                      ? Colors.yellow
+                      : Colors.white,
+                  size: 32,
+                )),
             label: const Text(
               'Salvar',
               style: TextStyle(
@@ -611,9 +632,9 @@ class StoryInteractionsComponent extends StatelessWidget {
             ),
             onTap: controller.toggleFavorite,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Botão de Compartilhar
           _buildInteractionButton(
             icon: const Icon(
@@ -631,9 +652,9 @@ class StoryInteractionsComponent extends StatelessWidget {
             ),
             onTap: () => controller.shareStory(),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Botão de Responder
           _buildInteractionButton(
             icon: const Icon(
@@ -655,7 +676,7 @@ class StoryInteractionsComponent extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInteractionButton({
     required Widget icon,
     required Widget label,

@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Modelo para logs de auditoria de certificações
-/// 
+///
 /// Registra todas as ações relacionadas a certificações espirituais
 class CertificationAuditLogModel {
   final String id;
-  final String action; // 'approval', 'rejection', 'invalid_token_attempt', 'unauthorized_access', 'proof_view'
+  final String
+      action; // 'approval', 'rejection', 'invalid_token_attempt', 'unauthorized_access', 'proof_view'
   final String? certificationId;
   final String? userId;
   final String? userName;
@@ -98,8 +99,8 @@ class CertificationAuditLogModel {
       if (viewedByEmail != null) 'viewedByEmail': viewedByEmail,
       if (ipAddress != null) 'ipAddress': ipAddress,
       if (userAgent != null) 'userAgent': userAgent,
-      'timestamp': timestamp != null 
-          ? Timestamp.fromDate(timestamp!) 
+      'timestamp': timestamp != null
+          ? Timestamp.fromDate(timestamp!)
           : FieldValue.serverTimestamp(),
     };
   }

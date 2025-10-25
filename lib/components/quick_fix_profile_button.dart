@@ -19,7 +19,7 @@ class _QuickFixProfileButtonState extends State<QuickFixProfileButton> {
       margin: const EdgeInsets.all(8),
       child: ElevatedButton.icon(
         onPressed: _isLoading ? null : _fixProfile,
-        icon: _isLoading 
+        icon: _isLoading
             ? const SizedBox(
                 width: 16,
                 height: 16,
@@ -27,9 +27,9 @@ class _QuickFixProfileButtonState extends State<QuickFixProfileButton> {
               )
             : Icon(_isFixed ? Icons.check_circle : Icons.build_circle),
         label: Text(
-          _isLoading 
+          _isLoading
               ? 'Corrigindo...'
-              : _isFixed 
+              : _isFixed
                   ? 'Perfil Corrigido!'
                   : 'Corrigir Perfil 🔍',
         ),
@@ -50,7 +50,7 @@ class _QuickFixProfileButtonState extends State<QuickFixProfileButton> {
     try {
       // Executar correção completa
       await FixExistingProfileForExploration.runCompleteCheck();
-      
+
       setState(() {
         _isFixed = true;
       });

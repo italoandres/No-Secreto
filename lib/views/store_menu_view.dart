@@ -164,7 +164,8 @@ class StoreMenuView extends StatelessWidget {
                     'Você será avisado quando a loja estiver disponível',
                     backgroundColor: Colors.green.shade100,
                     colorText: Colors.green.shade800,
-                    icon: Icon(Icons.check_circle, color: Colors.green.shade800),
+                    icon:
+                        Icon(Icons.check_circle, color: Colors.green.shade800),
                     snackPosition: SnackPosition.BOTTOM,
                     duration: const Duration(seconds: 3),
                   );

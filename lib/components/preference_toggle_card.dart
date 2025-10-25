@@ -61,7 +61,8 @@ class PreferenceToggleCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isEnabled ? const Color(0xFF333333) : Colors.grey[700],
+                    color:
+                        isEnabled ? const Color(0xFF333333) : Colors.grey[700],
                     height: 1.3,
                   ),
                 ),
@@ -111,7 +112,8 @@ class PreferenceToggleCard extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4169E1).withOpacity(0.15),
+                                color:
+                                    const Color(0xFF4169E1).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(

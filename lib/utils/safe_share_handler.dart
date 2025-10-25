@@ -30,11 +30,12 @@ class SafeShareHandler {
           );
         }
       });
-      
+
       print('✅ SHARE_HANDLER: Inicializado com sucesso');
     } catch (e) {
       print('❌ SHARE_HANDLER: Erro ao inicializar: $e');
-      print('ℹ️ SHARE_HANDLER: Continuando sem funcionalidade de compartilhamento');
+      print(
+          'ℹ️ SHARE_HANDLER: Continuando sem funcionalidade de compartilhamento');
       // Não propaga o erro - permite que o app continue funcionando
     }
   }
@@ -63,7 +64,8 @@ class SafeShareHandler {
               onFileReceived?.call(file, extension, fileName);
               break;
             default:
-              print('⚠️ SHARE_HANDLER: Tipo de arquivo não suportado: ${element.type}');
+              print(
+                  '⚠️ SHARE_HANDLER: Tipo de arquivo não suportado: ${element.type}');
           }
         } catch (e) {
           print('❌ SHARE_HANDLER: Erro ao processar anexo: $e');

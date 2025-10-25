@@ -15,7 +15,6 @@ class EditarCapaComponent extends StatefulWidget {
 }
 
 class _EditarCapaComponentState extends State<EditarCapaComponent> {
-
   @override
   void initState() {
     CompletarPerfilController.imgBgPath.value = '';
@@ -24,8 +23,9 @@ class _EditarCapaComponentState extends State<EditarCapaComponent> {
     CompletarPerfilController.imgData = null;
     super.initState();
   }
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -43,48 +43,55 @@ class _EditarCapaComponentState extends State<EditarCapaComponent> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(Get.width)
-                          ),
+                              border: Border.all(color: Colors.black12),
+                              borderRadius: BorderRadius.circular(Get.width)),
                           width: 120,
                           height: 120,
-                          margin: const EdgeInsets.only(bottom: 35/2.5),
+                          margin: const EdgeInsets.only(bottom: 35 / 2.5),
                           child: InkWell(
                             onTap: () => CompletarPerfilController.changeImg(),
                             borderRadius: BorderRadius.circular(Get.width),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(Get.width),
-                              child: Obx(() => CompletarPerfilController.imgPath.value.isEmpty ? (
-                                widget.user.imgUrl == null ? Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Image.asset('lib/assets/img/user.png', color: Colors.black12),
-                                ) : ClipRRect(
-                                  borderRadius: BorderRadius.circular(1000),
-                                  child: Image.network(
-                                    widget.user.imgUrl!, 
-                                    fit: BoxFit.cover, 
-                                    width: 120,
-                                    height: 120,
-                                  )
-                                )
-                              ) : Image.memory(CompletarPerfilController.imgData!, fit: BoxFit.cover))
-                            ),
+                                borderRadius: BorderRadius.circular(Get.width),
+                                child: Obx(() => CompletarPerfilController
+                                        .imgPath.value.isEmpty
+                                    ? (widget.user.imgUrl == null
+                                        ? Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: Image.asset(
+                                                'lib/assets/img/user.png',
+                                                color: Colors.black12),
+                                          )
+                                        : ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(1000),
+                                            child: Image.network(
+                                              widget.user.imgUrl!,
+                                              fit: BoxFit.cover,
+                                              width: 120,
+                                              height: 120,
+                                            )))
+                                    : Image.memory(
+                                        CompletarPerfilController.imgData!,
+                                        fit: BoxFit.cover))),
                           ),
                         ),
                         Positioned(
                           bottom: 0,
-                          left: (120 / 2) - (35/2),
+                          left: (120 / 2) - (35 / 2),
                           child: SizedBox(
-                            width: 35, height: 35,
+                            width: 35,
+                            height: 35,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(Get.width)
-                                ),
-                                padding: const EdgeInsets.all(0)
-                              ),
-                              onPressed: () => CompletarPerfilController.changeImg(),
-                              child: const Icon(Icons.edit, size: 15, color: Colors.white),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(Get.width)),
+                                  padding: const EdgeInsets.all(0)),
+                              onPressed: () =>
+                                  CompletarPerfilController.changeImg(),
+                              child: const Icon(Icons.edit,
+                                  size: 15, color: Colors.white),
                             ),
                           ),
                         )
@@ -93,21 +100,33 @@ class _EditarCapaComponentState extends State<EditarCapaComponent> {
                   ],
                 ),
               ),
-              Text('${AppLanguage.lang('ola')}, ${widget.user.nome?.split(' ')[0]}!', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17)),
-              Text(AppLanguage.lang('msg_editar_papel'), textAlign: TextAlign.center),
+              Text(
+                  '${AppLanguage.lang('ola')}, ${widget.user.nome?.split(' ')[0]}!',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w500, fontSize: 17)),
+              Text(AppLanguage.lang('msg_editar_papel'),
+                  textAlign: TextAlign.center),
               const SizedBox(height: 12),
               Container(
                 margin: const EdgeInsets.only(bottom: 32),
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Obx(() => CompletarPerfilController.imgBgPath.value.isEmpty ? (
-                          widget.user.imgBgUrl == null ? Opacity(opacity: 0.3, child: Image.asset('lib/assets/img/bg_wallpaper.jpg', fit: BoxFit.cover)) : Image.network(widget.user.imgBgUrl!, fit: BoxFit.cover)
-                        ) : Image.memory(CompletarPerfilController.imgBgData!, fit: BoxFit.cover)),
-                      )
-                    ),
+                        child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Obx(() => CompletarPerfilController
+                              .imgBgPath.value.isEmpty
+                          ? (widget.user.imgBgUrl == null
+                              ? Opacity(
+                                  opacity: 0.3,
+                                  child: Image.asset(
+                                      'lib/assets/img/bg_wallpaper.jpg',
+                                      fit: BoxFit.cover))
+                              : Image.network(widget.user.imgBgUrl!,
+                                  fit: BoxFit.cover))
+                          : Image.memory(CompletarPerfilController.imgBgData!,
+                              fit: BoxFit.cover)),
+                    )),
                     InkWell(
                       onTap: () => CompletarPerfilController.changeImgBg(),
                       borderRadius: BorderRadius.circular(8),
@@ -115,13 +134,12 @@ class _EditarCapaComponentState extends State<EditarCapaComponent> {
                         width: Get.width - 32,
                         height: (Get.width - 32) / 2,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black12),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black12
-                        ),
+                            border: Border.all(color: Colors.black12),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black12),
                         child: Center(
                           child: Container(
-                            height: 50,  
+                            height: 50,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(Get.width),
                               color: Colors.white10,
@@ -149,10 +167,9 @@ class _EditarCapaComponentState extends State<EditarCapaComponent> {
                   onPressed: () {
                     Get.back();
                     UsuarioRepository.completarPerfil(
-                      imgBgData: CompletarPerfilController.imgBgData,
-                      imgData: CompletarPerfilController.imgData,
-                      sexo: widget.user.sexo!
-                    );
+                        imgBgData: CompletarPerfilController.imgBgData,
+                        imgData: CompletarPerfilController.imgData,
+                        sexo: widget.user.sexo!);
                   },
                   child: Text(AppLanguage.lang('salvar')),
                 ),

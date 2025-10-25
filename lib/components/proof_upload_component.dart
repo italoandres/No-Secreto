@@ -159,7 +159,7 @@ class _ProofUploadComponentState extends State<ProofUploadComponent> {
   Future<void> _pickImageFromCamera() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
@@ -181,7 +181,7 @@ class _ProofUploadComponentState extends State<ProofUploadComponent> {
   Future<void> _pickImageFromGallery() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1920,
@@ -203,7 +203,7 @@ class _ProofUploadComponentState extends State<ProofUploadComponent> {
   Future<void> _pickPdfFile() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
@@ -237,7 +237,6 @@ class _ProofUploadComponentState extends State<ProofUploadComponent> {
           _buildUploadButton()
         else
           _buildFilePreview(),
-        
         if (widget.errorMessage != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -261,9 +260,7 @@ class _ProofUploadComponentState extends State<ProofUploadComponent> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           border: Border.all(
-            color: widget.errorMessage != null 
-                ? Colors.red 
-                : Colors.grey[300]!,
+            color: widget.errorMessage != null ? Colors.red : Colors.grey[300]!,
             width: 2,
             style: BorderStyle.solid,
           ),

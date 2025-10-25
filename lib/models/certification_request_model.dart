@@ -65,13 +65,15 @@ class CertificationRequestModel {
     data['id'] = doc.id;
     return CertificationRequestModel.fromMap(data);
   }
-  
+
   /// Criar modelo a partir de Map
   factory CertificationRequestModel.fromMap(Map<String, dynamic> data) {
     // Suportar ambos os formatos (transição)
-    final createdAtTimestamp = data['createdAt'] as Timestamp? ?? data['requestedAt'] as Timestamp?;
-    final processedAtTimestamp = data['processedAt'] as Timestamp? ?? data['reviewedAt'] as Timestamp?;
-    
+    final createdAtTimestamp =
+        data['createdAt'] as Timestamp? ?? data['requestedAt'] as Timestamp?;
+    final processedAtTimestamp =
+        data['processedAt'] as Timestamp? ?? data['reviewedAt'] as Timestamp?;
+
     return CertificationRequestModel(
       id: data['id'] as String? ?? '',
       userId: data['userId'] as String? ?? '',
@@ -99,7 +101,8 @@ class CertificationRequestModel {
       'proofFileName': proofFileName,
       'status': status.name,
       'createdAt': Timestamp.fromDate(createdAt),
-      'processedAt': processedAt != null ? Timestamp.fromDate(processedAt!) : null,
+      'processedAt':
+          processedAt != null ? Timestamp.fromDate(processedAt!) : null,
       'reviewedBy': reviewedBy,
       'rejectionReason': rejectionReason,
     };

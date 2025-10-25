@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 /// Classe para definir as cores do app
@@ -11,26 +10,25 @@ class AppColors {
   static const Color info = Color(0xFF2196F3);
   static const Color warning = Color(0xFFffc107);
   static const Color error = Color(0xFFdc3545);
-  
+
   // Gradiente principal
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFFE91E63), Color(0xFF2196F3)], // Rosa para Azul
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
+
   static const Color background = Colors.white;
   static const Color surface = Colors.white;
-  
+
   static const Color textPrimary = Color(0xFF212529);
   static const Color textSecondary = Color(0xFF6c757d);
   static const Color textLight = Colors.white;
-  
+
   static const Color inactive = Color(0xFF6c757d);
 }
 
 class AppTheme {
-
   static Map<int, Color> color = {
     50: const Color(0x22E91E63),
     100: const Color(0x33E91E63),
@@ -55,49 +53,43 @@ class AppTheme {
   );
   static Color scaffoldBackgroundColor = Colors.white;
   static ThemeData theme = ThemeData(
-    primarySwatch: materialColor,
-    brightness: Brightness.light,
-    scaffoldBackgroundColor: scaffoldBackgroundColor,
-    useMaterial3: false,
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50),
+      primarySwatch: materialColor,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      useMaterial3: false,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              elevation: 0)),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              elevation: 0)),
+      inputDecorationTheme: InputDecorationTheme(
+        enabledBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          borderSide:
+              BorderSide(width: 1, color: AppTheme.materialColor.shade300),
         ),
-        elevation: 0
-      )
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50),
-        ),
-        elevation: 0
-      )
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      enabledBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        borderSide: BorderSide(width: 1,color: AppTheme.materialColor.shade300),
+        border: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            borderSide:
+                BorderSide(width: 1, color: AppTheme.materialColor.shade300)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            borderSide:
+                BorderSide(width: 1, color: AppTheme.materialColor.shade300)),
+        filled: true,
+        fillColor: Colors.white,
       ),
-      border: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        borderSide: BorderSide(width: 1, color: AppTheme.materialColor.shade300)
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        borderSide: BorderSide(width: 1, color: AppTheme.materialColor.shade300)
-      ),
-      filled: true,
-      fillColor: Colors.white,
-    ),
-    appBarTheme: AppBarTheme(
-      elevation: 0,
-      centerTitle: true,
-      backgroundColor: scaffoldBackgroundColor,
-      iconTheme: IconThemeData(
-        color: materialColor
-      ),
-    )
-  );
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: scaffoldBackgroundColor,
+        iconTheme: IconThemeData(color: materialColor),
+      ));
 }

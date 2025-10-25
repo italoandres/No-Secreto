@@ -44,19 +44,19 @@ class PurposeChatModel extends ChatModel {
     String? mentionedUserId,
     LinkDescricaoModel? linkDescricaoModel,
   }) : this(
-    chatId: chatId,
-    participantIds: participantIds,
-    messagePosition: 'left',
-    autorNome: autorNome,
-    autorSexo: autorSexo,
-    mentionedUserId: mentionedUserId,
-    idDe: autorId,
-    orginemAdmin: false,
-    text: text,
-    tipo: ChatType.text,
-    dataCadastro: Timestamp.now(),
-    linkDescricaoModel: linkDescricaoModel,
-  );
+          chatId: chatId,
+          participantIds: participantIds,
+          messagePosition: 'left',
+          autorNome: autorNome,
+          autorSexo: autorSexo,
+          mentionedUserId: mentionedUserId,
+          idDe: autorId,
+          orginemAdmin: false,
+          text: text,
+          tipo: ChatType.text,
+          dataCadastro: Timestamp.now(),
+          linkDescricaoModel: linkDescricaoModel,
+        );
 
   // Construtor para mensagem de admin (lado direito)
   PurposeChatModel.adminMessage({
@@ -65,17 +65,17 @@ class PurposeChatModel extends ChatModel {
     required String text,
     LinkDescricaoModel? linkDescricaoModel,
   }) : this(
-    chatId: chatId,
-    participantIds: participantIds,
-    messagePosition: 'right',
-    autorNome: 'Pai',
-    idDe: 'admin',
-    orginemAdmin: true,
-    text: text,
-    tipo: ChatType.text,
-    dataCadastro: Timestamp.now(),
-    linkDescricaoModel: linkDescricaoModel,
-  );
+          chatId: chatId,
+          participantIds: participantIds,
+          messagePosition: 'right',
+          autorNome: 'Pai',
+          idDe: 'admin',
+          orginemAdmin: true,
+          text: text,
+          tipo: ChatType.text,
+          dataCadastro: Timestamp.now(),
+          linkDescricaoModel: linkDescricaoModel,
+        );
 
   // Converter para Map para Firebase
   Map<String, dynamic> toMap() {
@@ -95,19 +95,21 @@ class PurposeChatModel extends ChatModel {
       'videoThumbnail': videoThumbnail,
       'dataCadastro': dataCadastro,
       'tipo': tipo?.name,
-      'linkDescricaoModel': linkDescricaoModel != null ? LinkDescricaoModel.toJson(linkDescricaoModel!) : null,
+      'linkDescricaoModel': linkDescricaoModel != null
+          ? LinkDescricaoModel.toJson(linkDescricaoModel!)
+          : null,
     };
   }
 
   // Criar objeto a partir do Firebase
   factory PurposeChatModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     return PurposeChatModel(
       id: doc.id,
       chatId: data['chatId'],
-      participantIds: data['participantIds'] != null 
-          ? List<String>.from(data['participantIds']) 
+      participantIds: data['participantIds'] != null
+          ? List<String>.from(data['participantIds'])
           : null,
       messagePosition: data['messagePosition'],
       mentionedUserId: data['mentionedUserId'],
@@ -122,8 +124,8 @@ class PurposeChatModel extends ChatModel {
       videoThumbnail: data['videoThumbnail'],
       dataCadastro: data['dataCadastro'],
       tipo: data['tipo'] != null ? ChatType.values.byName(data['tipo']) : null,
-      linkDescricaoModel: data['linkDescricaoModel'] != null 
-          ? LinkDescricaoModel.fromJson(data['linkDescricaoModel']) 
+      linkDescricaoModel: data['linkDescricaoModel'] != null
+          ? LinkDescricaoModel.fromJson(data['linkDescricaoModel'])
           : null,
     );
   }
@@ -133,8 +135,8 @@ class PurposeChatModel extends ChatModel {
     return PurposeChatModel(
       id: map['id'],
       chatId: map['chatId'],
-      participantIds: map['participantIds'] != null 
-          ? List<String>.from(map['participantIds']) 
+      participantIds: map['participantIds'] != null
+          ? List<String>.from(map['participantIds'])
           : null,
       messagePosition: map['messagePosition'],
       mentionedUserId: map['mentionedUserId'],
@@ -148,8 +150,8 @@ class PurposeChatModel extends ChatModel {
       videoThumbnail: map['videoThumbnail'],
       dataCadastro: map['dataCadastro'],
       tipo: map['tipo'] != null ? ChatType.values.byName(map['tipo']) : null,
-      linkDescricaoModel: map['linkDescricaoModel'] != null 
-          ? LinkDescricaoModel.fromJson(map['linkDescricaoModel']) 
+      linkDescricaoModel: map['linkDescricaoModel'] != null
+          ? LinkDescricaoModel.fromJson(map['linkDescricaoModel'])
           : null,
     );
   }
@@ -174,11 +176,11 @@ class PurposeChatModel extends ChatModel {
 
   // Validações
   bool get isValid {
-    return chatId != null && 
-           participantIds != null && 
-           participantIds!.isNotEmpty &&
-           messagePosition != null &&
-           (messagePosition == 'left' || messagePosition == 'right');
+    return chatId != null &&
+        participantIds != null &&
+        participantIds!.isNotEmpty &&
+        messagePosition != null &&
+        (messagePosition == 'left' || messagePosition == 'right');
   }
 
   bool get isFromCouple => messagePosition == 'left';
@@ -196,7 +198,7 @@ class PurposeChatModel extends ChatModel {
     if (!newParticipants.contains(userId)) {
       newParticipants.add(userId);
     }
-    
+
     return PurposeChatModel(
       id: id,
       chatId: chatId,

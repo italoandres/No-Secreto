@@ -6,7 +6,8 @@ class ProfileVisibilityBanner extends StatefulWidget {
   const ProfileVisibilityBanner({Key? key}) : super(key: key);
 
   @override
-  State<ProfileVisibilityBanner> createState() => _ProfileVisibilityBannerState();
+  State<ProfileVisibilityBanner> createState() =>
+      _ProfileVisibilityBannerState();
 }
 
 class _ProfileVisibilityBannerState extends State<ProfileVisibilityBanner> {
@@ -22,7 +23,8 @@ class _ProfileVisibilityBannerState extends State<ProfileVisibilityBanner> {
 
   Future<void> _checkVisibility() async {
     try {
-      final isVisible = await FixExistingProfileForExploration.checkProfileVisibility();
+      final isVisible =
+          await FixExistingProfileForExploration.checkProfileVisibility();
       if (mounted) {
         setState(() {
           _isVisible = isVisible;
@@ -84,7 +86,7 @@ class _ProfileVisibilityBannerState extends State<ProfileVisibilityBanner> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _isLoading ? null : _fixProfile,
-              icon: _isLoading 
+              icon: _isLoading
                   ? const SizedBox(
                       width: 16,
                       height: 16,
@@ -112,7 +114,7 @@ class _ProfileVisibilityBannerState extends State<ProfileVisibilityBanner> {
 
     try {
       await FixExistingProfileForExploration.runCompleteCheck();
-      
+
       setState(() {
         _isFixed = true;
       });

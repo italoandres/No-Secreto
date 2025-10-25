@@ -29,16 +29,14 @@ class LanguagesPreferenceToggleCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isEnabled 
-                        ? Colors.blue.shade50 
-                        : Colors.grey.shade100,
+                    color:
+                        isEnabled ? Colors.blue.shade50 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isEnabled ? Icons.check_circle : Icons.language,
-                    color: isEnabled 
-                        ? Colors.blue.shade600 
-                        : Colors.grey.shade400,
+                    color:
+                        isEnabled ? Colors.blue.shade600 : Colors.grey.shade400,
                     size: 24,
                   ),
                 ),
@@ -60,8 +58,8 @@ class LanguagesPreferenceToggleCard extends StatelessWidget {
                         isEnabled ? 'Ativado' : 'Desativado',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isEnabled 
-                              ? Colors.blue.shade600 
+                          color: isEnabled
+                              ? Colors.blue.shade600
                               : Colors.grey.shade500,
                           fontWeight: FontWeight.w500,
                         ),

@@ -8,7 +8,8 @@ class SearchAnalyticsDashboard extends StatefulWidget {
   const SearchAnalyticsDashboard({Key? key}) : super(key: key);
 
   @override
-  State<SearchAnalyticsDashboard> createState() => _SearchAnalyticsDashboardState();
+  State<SearchAnalyticsDashboard> createState() =>
+      _SearchAnalyticsDashboardState();
 }
 
 class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
@@ -30,29 +31,26 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
       });
 
       final data = SearchAnalyticsService.instance.getAnalyticsReport();
-      
+
       setState(() {
         _analyticsData = data;
         _isLoading = false;
       });
 
-      EnhancedLogger.info('Analytics dashboard loaded successfully', 
-        tag: 'SEARCH_ANALYTICS_DASHBOARD',
-        data: {
-          'totalEvents': data['summary']['totalEvents'],
-          'insightsCount': (data['insights'] as List).length,
-        }
-      );
+      EnhancedLogger.info('Analytics dashboard loaded successfully',
+          tag: 'SEARCH_ANALYTICS_DASHBOARD',
+          data: {
+            'totalEvents': data['summary']['totalEvents'],
+            'insightsCount': (data['insights'] as List).length,
+          });
     } catch (e) {
       setState(() {
         _error = e.toString();
         _isLoading = false;
       });
 
-      EnhancedLogger.error('Failed to load analytics dashboard', 
-        tag: 'SEARCH_ANALYTICS_DASHBOARD',
-        error: e
-      );
+      EnhancedLogger.error('Failed to load analytics dashboard',
+          tag: 'SEARCH_ANALYTICS_DASHBOARD', error: e);
     }
   }
 
@@ -142,15 +140,15 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
 
   Widget _buildSummaryCards() {
     final summary = _analyticsData!['summary'] as Map<String, dynamic>;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Resumo Geral',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -191,7 +189,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+      String title, String value, IconData icon, Color color) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -208,9 +207,9 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -226,7 +225,7 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
 
   Widget _buildPerformanceChart() {
     final performanceTrends = _analyticsData!['performanceTrends'] as List;
-    
+
     if (performanceTrends.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -237,8 +236,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
         Text(
           'Tendências de Performance',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -276,7 +275,7 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
 
   Widget _buildInsights() {
     final insights = _analyticsData!['insights'] as List;
-    
+
     if (insights.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -287,8 +286,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
         Text(
           'Insights Automáticos',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         ...insights.map((insight) => _buildInsightCard(insight)).toList(),
@@ -335,8 +334,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
                   child: Text(
                     insight['message'] as String,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
               ],
@@ -346,25 +345,27 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
               Text(
                 'Recomendações:',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
               const SizedBox(height: 4),
-              ...(insight['recommendations'] as List).map((rec) => Padding(
-                padding: const EdgeInsets.only(left: 16, top: 2),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('• '),
-                    Expanded(
-                      child: Text(
-                        rec as String,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              )).toList(),
+              ...(insight['recommendations'] as List)
+                  .map((rec) => Padding(
+                        padding: const EdgeInsets.only(left: 16, top: 2),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• '),
+                            Expanded(
+                              child: Text(
+                                rec as String,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
             ],
           ],
         ),
@@ -374,7 +375,7 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
 
   Widget _buildUsagePatterns() {
     final usagePatterns = _analyticsData!['usagePatterns'] as List;
-    
+
     if (usagePatterns.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -385,8 +386,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
         Text(
           'Padrões de Uso',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         ...usagePatterns.map((pattern) => _buildPatternCard(pattern)).toList(),
@@ -409,12 +410,13 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
                   child: Text(
                     pattern['description'] as String,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -422,9 +424,9 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
                   child: Text(
                     '${(pattern['confidence'] * 100).toStringAsFixed(0)}% confiança',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.blue[700],
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
               ],
@@ -467,8 +469,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
               Text(
                 '${percentage.toStringAsFixed(1)}%',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -479,7 +481,7 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
 
   Widget _buildTopQueries() {
     final topQueries = _analyticsData!['topQueries'] as List;
-    
+
     if (topQueries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -490,8 +492,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
         Text(
           'Queries Mais Populares',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -517,9 +519,9 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
                       Text(
                         '$count (${percentage.toStringAsFixed(1)}%)',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue[700],
-                        ),
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[700],
+                            ),
                       ),
                     ],
                   ),
@@ -533,8 +535,9 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
   }
 
   Widget _buildStrategyUsage() {
-    final strategyUsage = _analyticsData!['strategyUsage'] as Map<String, dynamic>;
-    
+    final strategyUsage =
+        _analyticsData!['strategyUsage'] as Map<String, dynamic>;
+
     if (strategyUsage.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -545,8 +548,8 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
         Text(
           'Uso por Estratégia',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -573,9 +576,9 @@ class _SearchAnalyticsDashboardState extends State<SearchAnalyticsDashboard> {
                       Text(
                         '$count (${percentage.toStringAsFixed(1)}%)',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green[700],
-                        ),
+                              fontWeight: FontWeight.w500,
+                              color: Colors.green[700],
+                            ),
                       ),
                     ],
                   ),

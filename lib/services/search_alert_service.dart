@@ -6,24 +6,25 @@ import 'search_analytics_service.dart';
 /// Detecta anomalias e problemas em tempo real
 class SearchAlertService {
   static SearchAlertService? _instance;
-  static SearchAlertService get instance => _instance ??= SearchAlertService._();
-  
+  static SearchAlertService get instance =>
+      _instance ??= SearchAlertService._();
+
   SearchAlertService._() {
     _initialize();
   }
 
   /// Alertas ativos
   final List<SearchAlert> _activeAlerts = [];
-  
+
   /// Configurações de thresholds
   final Map<String, AlertThreshold> _thresholds = {};
-  
+
   /// Timer para verificação periódica
   Timer? _monitoringTimer;
-  
+
   /// Callbacks para notificações
   final List<Function(SearchAlert)> _alertCallbacks = [];
-  
+
   /// Configurações padrão
   static const Duration monitoringInterval = Duration(minutes: 1);
   static const int maxActiveAlerts = 50;
@@ -32,15 +33,14 @@ class SearchAlertService {
   void _initialize() {
     _setupDefaultThresholds();
     _startMonitoring();
-    
-    EnhancedLogger.info('Search alert service initialized', 
-      tag: 'SEARCH_ALERT_SERVICE',
-      data: {
-        'monitoringInterval': monitoringInterval.inMinutes,
-        'maxActiveAlerts': maxActiveAlerts,
-        'thresholdsCount': _thresholds.length,
-      }
-    );
+
+    EnhancedLogger.info('Search alert service initialized',
+        tag: 'SEARCH_ALERT_SERVICE',
+        data: {
+          'monitoringInterval': monitoringInterval.inMinutes,
+          'maxActiveAlerts': maxActiveAlerts,
+          'thresholdsCount': _thresholds.length,
+        });
   }
 
   /// Para o serviço de alertas
@@ -49,10 +49,9 @@ class SearchAlertService {
     _activeAlerts.clear();
     _thresholds.clear();
     _alertCallbacks.clear();
-    
-    EnhancedLogger.info('Search alert service disposed', 
-      tag: 'SEARCH_ALERT_SERVICE'
-    );
+
+    EnhancedLogger.info('Search alert service disposed',
+        tag: 'SEARCH_ALERT_SERVICE');
   }
 
   /// Configura thresholds padrão
@@ -118,25 +117,22 @@ class SearchAlertService {
     try {
       // Versão simplificada - não verifica analytics por enquanto
       _cleanupOldAlerts();
-      
-      EnhancedLogger.debug('Alert monitoring completed', 
-        tag: 'SEARCH_ALERT_SERVICE',
-        data: {
-          'activeAlerts': _activeAlerts.length,
-          'thresholdsChecked': _thresholds.length,
-        }
-      );
+
+      EnhancedLogger.debug('Alert monitoring completed',
+          tag: 'SEARCH_ALERT_SERVICE',
+          data: {
+            'activeAlerts': _activeAlerts.length,
+            'thresholdsChecked': _thresholds.length,
+          });
     } catch (e) {
-      EnhancedLogger.error('Alert monitoring failed', 
-        tag: 'SEARCH_ALERT_SERVICE',
-        error: e
-      );
+      EnhancedLogger.error('Alert monitoring failed',
+          tag: 'SEARCH_ALERT_SERVICE', error: e);
     }
   }
 
   /// Avalia se um threshold foi violado
   bool _evaluateThreshold(
-    AlertThreshold threshold, 
+    AlertThreshold threshold,
     Map<String, dynamic> summary,
     List performanceTrends,
   ) {
@@ -144,26 +140,27 @@ class SearchAlertService {
       case 'Tempo de Execução Alto':
         final avgTime = summary['avgExecutionTime'] as double;
         return avgTime > threshold.threshold;
-        
+
       case 'Taxa de Sucesso Baixa':
         final successRate = summary['successRate'] as double;
         return successRate < threshold.threshold;
-        
+
       case 'Uso Excessivo de Fallback':
         // Implementar lógica para detectar uso excessivo de fallback
         return _checkFallbackUsage() > threshold.threshold;
-        
+
       case 'Taxa de Cache Baixa':
         final cacheHitRate = summary['cacheHitRate'] as double;
         return cacheHitRate < threshold.threshold;
-        
+
       case 'Taxa de Erro Alta':
         // Implementar lógica para calcular taxa de erro
         return _calculateErrorRate() > threshold.threshold;
-        
+
       case 'Degradação de Performance':
-        return _checkPerformanceDegradation(performanceTrends) > threshold.threshold;
-        
+        return _checkPerformanceDegradation(performanceTrends) >
+            threshold.threshold;
+
       default:
         return false;
     }
@@ -173,12 +170,12 @@ class SearchAlertService {
   double _checkFallbackUsage() {
     final analytics = SearchAnalyticsService.instance.getAnalyticsReport();
     final strategyUsage = analytics['strategyUsage'] as Map<String, dynamic>;
-    
+
     if (strategyUsage.containsKey('fallback')) {
       final fallbackData = strategyUsage['fallback'] as Map<String, dynamic>;
       return (fallbackData['percentage'] as double) / 100.0;
     }
-    
+
     return 0.0;
   }
 
@@ -192,15 +189,16 @@ class SearchAlertService {
   /// Verifica degradação de performance
   double _checkPerformanceDegradation(List performanceTrends) {
     if (performanceTrends.length < 2) return 0.0;
-    
+
     final recent = performanceTrends.last as Map<String, dynamic>;
-    final previous = performanceTrends[performanceTrends.length - 2] as Map<String, dynamic>;
-    
+    final previous =
+        performanceTrends[performanceTrends.length - 2] as Map<String, dynamic>;
+
     final recentTime = recent['avgExecutionTime'] as double;
     final previousTime = previous['avgExecutionTime'] as double;
-    
+
     if (previousTime == 0) return 0.0;
-    
+
     return recentTime / previousTime;
   }
 
@@ -208,8 +206,9 @@ class SearchAlertService {
   void _createAlert(AlertThreshold threshold, Map<String, dynamic> summary) {
     // Verificar se já existe alerta similar ativo
     final existingAlert = _activeAlerts.firstWhere(
-      (alert) => alert.type == threshold.name && 
-                 DateTime.now().difference(alert.timestamp).inMinutes < 30,
+      (alert) =>
+          alert.type == threshold.name &&
+          DateTime.now().difference(alert.timestamp).inMinutes < 30,
       orElse: () => SearchAlert(
         id: '',
         type: '',
@@ -219,12 +218,12 @@ class SearchAlertService {
         data: {},
       ),
     );
-    
+
     if (existingAlert.id.isNotEmpty) {
       // Alerta similar já existe, não criar duplicado
       return;
     }
-    
+
     final alert = SearchAlert(
       id: _generateAlertId(),
       type: threshold.name,
@@ -237,60 +236,58 @@ class SearchAlertService {
         'summary': summary,
       },
     );
-    
+
     _activeAlerts.add(alert);
-    
+
     // Limitar número de alertas ativos
     if (_activeAlerts.length > maxActiveAlerts) {
       _activeAlerts.removeAt(0);
     }
-    
+
     // Notificar callbacks
     for (final callback in _alertCallbacks) {
       try {
         callback(alert);
       } catch (e) {
-        EnhancedLogger.error('Alert callback failed', 
-          tag: 'SEARCH_ALERT_SERVICE',
-          error: e
-        );
+        EnhancedLogger.error('Alert callback failed',
+            tag: 'SEARCH_ALERT_SERVICE', error: e);
       }
     }
-    
-    EnhancedLogger.warning('Search alert created', 
-      tag: 'SEARCH_ALERT_SERVICE',
-      data: {
-        'alertId': alert.id,
-        'type': alert.type,
-        'severity': alert.severity.toString(),
-        'message': alert.message,
-      }
-    );
+
+    EnhancedLogger.warning('Search alert created',
+        tag: 'SEARCH_ALERT_SERVICE',
+        data: {
+          'alertId': alert.id,
+          'type': alert.type,
+          'severity': alert.severity.toString(),
+          'message': alert.message,
+        });
   }
 
   /// Gera mensagem de alerta
-  String _generateAlertMessage(AlertThreshold threshold, Map<String, dynamic> summary) {
+  String _generateAlertMessage(
+      AlertThreshold threshold, Map<String, dynamic> summary) {
     final currentValue = _getCurrentValue(threshold.name, summary);
-    
+
     switch (threshold.name) {
       case 'Tempo de Execução Alto':
         return 'Tempo médio de execução está em ${currentValue.toStringAsFixed(0)}ms (limite: ${threshold.threshold.toStringAsFixed(0)}ms)';
-        
+
       case 'Taxa de Sucesso Baixa':
         return 'Taxa de sucesso está em ${(currentValue * 100).toStringAsFixed(1)}% (mínimo: ${(threshold.threshold * 100).toStringAsFixed(1)}%)';
-        
+
       case 'Uso Excessivo de Fallback':
         return 'Fallback sendo usado em ${(currentValue * 100).toStringAsFixed(1)}% das buscas (máximo: ${(threshold.threshold * 100).toStringAsFixed(1)}%)';
-        
+
       case 'Taxa de Cache Baixa':
         return 'Taxa de cache hit está em ${(currentValue * 100).toStringAsFixed(1)}% (mínimo: ${(threshold.threshold * 100).toStringAsFixed(1)}%)';
-        
+
       case 'Taxa de Erro Alta':
         return 'Taxa de erro está em ${(currentValue * 100).toStringAsFixed(1)}% (máximo: ${(threshold.threshold * 100).toStringAsFixed(1)}%)';
-        
+
       case 'Degradação de Performance':
         return 'Performance degradou ${((currentValue - 1) * 100).toStringAsFixed(1)}% (limite: ${((threshold.threshold - 1) * 100).toStringAsFixed(1)}%)';
-        
+
       default:
         return threshold.description;
     }
@@ -353,25 +350,22 @@ class SearchAlertService {
   /// Marca alerta como resolvido
   void resolveAlert(String alertId) {
     _activeAlerts.removeWhere((alert) => alert.id == alertId);
-    
-    EnhancedLogger.info('Alert resolved', 
-      tag: 'SEARCH_ALERT_SERVICE',
-      data: {'alertId': alertId}
-    );
+
+    EnhancedLogger.info('Alert resolved',
+        tag: 'SEARCH_ALERT_SERVICE', data: {'alertId': alertId});
   }
 
   /// Configura threshold personalizado
   void setThreshold(String name, AlertThreshold threshold) {
     _thresholds[name] = threshold;
-    
-    EnhancedLogger.info('Alert threshold updated', 
-      tag: 'SEARCH_ALERT_SERVICE',
-      data: {
-        'name': name,
-        'threshold': threshold.threshold,
-        'severity': threshold.severity.toString(),
-      }
-    );
+
+    EnhancedLogger.info('Alert threshold updated',
+        tag: 'SEARCH_ALERT_SERVICE',
+        data: {
+          'name': name,
+          'threshold': threshold.threshold,
+          'severity': threshold.severity.toString(),
+        });
   }
 
   /// Obtém configurações de threshold
@@ -387,10 +381,8 @@ class SearchAlertService {
   /// Limpa todos os alertas
   void clearAllAlerts() {
     _activeAlerts.clear();
-    
-    EnhancedLogger.info('All alerts cleared', 
-      tag: 'SEARCH_ALERT_SERVICE'
-    );
+
+    EnhancedLogger.info('All alerts cleared', tag: 'SEARCH_ALERT_SERVICE');
   }
 }
 

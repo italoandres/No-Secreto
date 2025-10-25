@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 enum NotificationCategory {
   /// Notificações de stories (curtidas, comentários, menções, respostas)
   stories,
-  
+
   /// Notificações de interesse e matches mútuos
   interest,
-  
+
   /// Notificações do sistema (certificação, atualizações, avisos)
   system;
 

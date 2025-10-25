@@ -12,17 +12,19 @@ import '../utils/error_handler.dart';
 
 class ProfileDisplayController extends GetxController {
   final String userId;
-  
-  final Rx<SpiritualProfileModel?> spiritualProfile = Rx<SpiritualProfileModel?>(null);
+
+  final Rx<SpiritualProfileModel?> spiritualProfile =
+      Rx<SpiritualProfileModel?>(null);
   final Rx<UsuarioModel?> user = Rx<UsuarioModel?>(null);
   final RxBool isLoading = true.obs;
   final RxString errorMessage = ''.obs;
-  
+
   // Interaction states
   final RxBool hasExpressedInterest = false.obs;
   final RxBool hasMutualInterest = false.obs;
   final RxBool isProcessingInterest = false.obs;
-  final Rx<MutualInterestModel?> mutualInterestData = Rx<MutualInterestModel?>(null);
+  final Rx<MutualInterestModel?> mutualInterestData =
+      Rx<MutualInterestModel?>(null);
 
   ProfileDisplayController(this.userId);
 
@@ -37,23 +39,25 @@ class ProfileDisplayController extends GetxController {
       () async {
         isLoading.value = true;
         errorMessage.value = '';
-        
-        EnhancedLogger.info('Loading public profile', tag: 'PROFILE_DISPLAY', data: {'userId': userId});
-        
+
+        EnhancedLogger.info('Loading public profile',
+            tag: 'PROFILE_DISPLAY', data: {'userId': userId});
+
         // Check if trying to view own profile
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser?.uid == userId) {
-          errorMessage.value = 'Você não pode visualizar seu próprio perfil aqui.\nUse "Vitrine de Propósito" para editar.';
+          errorMessage.value =
+              'Você não pode visualizar seu próprio perfil aqui.\nUse "Vitrine de Propósito" para editar.';
           return;
         }
-        
+
         // Load user basic info
         final userDoc = await UsuarioRepository.getUserById(userId);
         if (userDoc == null) {
           errorMessage.value = 'Usuário não encontrado.';
           return;
         }
-        
+
         EnhancedLogger.debug('User data loaded', tag: 'PROFILE_DISPLAY', data: {
           'userId': userId,
           'nome': userDoc.nome,
@@ -61,52 +65,60 @@ class ProfileDisplayController extends GetxController {
           'email': userDoc.email,
           'hasPhoto': userDoc.imgUrl != null,
         });
-        
+
         user.value = userDoc;
-        
+
         // Load spiritual profile
-        final profile = await SpiritualProfileRepository.getProfileByUserId(userId);
+        final profile =
+            await SpiritualProfileRepository.getProfileByUserId(userId);
         if (profile == null) {
-          errorMessage.value = 'Este usuário ainda não criou sua vitrine de propósito.';
+          errorMessage.value =
+              'Este usuário ainda não criou sua vitrine de propósito.';
           return;
         }
-        
-        EnhancedLogger.info('Spiritual profile loaded', tag: 'PROFILE_DISPLAY', data: {
-          'profileId': profile.id,
-          'isComplete': profile.isProfileComplete,
-          'canShowPublic': profile.canShowPublicProfile,
-        });
-        
+
+        EnhancedLogger.info('Spiritual profile loaded',
+            tag: 'PROFILE_DISPLAY',
+            data: {
+              'profileId': profile.id,
+              'isComplete': profile.isProfileComplete,
+              'canShowPublic': profile.canShowPublicProfile,
+            });
+
         // Check if profile is complete and public
         if (!profile.canShowPublicProfile) {
-          errorMessage.value = 'Este usuário ainda está completando sua vitrine de propósito.';
+          errorMessage.value =
+              'Este usuário ainda está completando sua vitrine de propósito.';
           return;
         }
-        
+
         // Check if user is blocked
-        final isBlocked = await SpiritualProfileRepository.isUserBlocked(userId);
+        final isBlocked =
+            await SpiritualProfileRepository.isUserBlocked(userId);
         if (isBlocked) {
           errorMessage.value = 'Você não pode visualizar este perfil.';
           return;
         }
-        
+
         spiritualProfile.value = profile;
-        
+
         // Load interaction states if current user is authenticated
         if (currentUser != null) {
           await _loadInteractionStates();
         }
-        
-        EnhancedLogger.success('Profile loaded successfully', tag: 'PROFILE_DISPLAY', data: {
-          'profileId': profile.id,
-          'hasInteractions': profile.allowInteractions,
-        });
+
+        EnhancedLogger.success('Profile loaded successfully',
+            tag: 'PROFILE_DISPLAY',
+            data: {
+              'profileId': profile.id,
+              'hasInteractions': profile.allowInteractions,
+            });
       },
       context: 'ProfileDisplayController.loadProfile',
       showUserMessage: false, // Vamos mostrar nossa própria mensagem de erro
       maxRetries: 2,
     );
-    
+
     isLoading.value = false;
   }
 
@@ -114,25 +126,26 @@ class ProfileDisplayController extends GetxController {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
+
       debugPrint('🔄 Carregando estados de interação...');
-      
+
       // Check if current user has expressed interest
-      final expressedInterest = await SpiritualProfileRepository.hasExpressedInterest(userId);
+      final expressedInterest =
+          await SpiritualProfileRepository.hasExpressedInterest(userId);
       hasExpressedInterest.value = expressedInterest;
-      
+
       // Check for mutual interest
-      final mutualInterest = await SpiritualProfileRepository.getMutualInterest(currentUser.uid, userId);
+      final mutualInterest = await SpiritualProfileRepository.getMutualInterest(
+          currentUser.uid, userId);
       if (mutualInterest != null) {
         hasMutualInterest.value = true;
         mutualInterestData.value = mutualInterest;
         debugPrint('💕 Interesse mútuo detectado: ${mutualInterest.id}');
       }
-      
+
       debugPrint('✅ Estados de interação carregados');
       debugPrint('   - Interesse expressado: $expressedInterest');
       debugPrint('   - Interesse mútuo: ${hasMutualInterest.value}');
-      
     } catch (e) {
       debugPrint('❌ Erro ao carregar estados de interação: $e');
     }
@@ -151,10 +164,12 @@ class ProfileDisplayController extends GetxController {
         );
         return;
       }
-      
+
       // Check if current user has a complete profile
-      final currentUserProfile = await SpiritualProfileRepository.getCurrentUserProfile();
-      if (currentUserProfile == null || !currentUserProfile.canShowPublicProfile) {
+      final currentUserProfile =
+          await SpiritualProfileRepository.getCurrentUserProfile();
+      if (currentUserProfile == null ||
+          !currentUserProfile.canShowPublicProfile) {
         Get.snackbar(
           'Complete seu Perfil',
           'Complete sua vitrine de propósito antes de demonstrar interesse.',
@@ -165,10 +180,12 @@ class ProfileDisplayController extends GetxController {
         );
         return;
       }
-      
+
       // Check if both users are single
-      if (currentUserProfile.relationshipStatus != RelationshipStatus.solteiro ||
-          spiritualProfile.value?.relationshipStatus != RelationshipStatus.solteiro) {
+      if (currentUserProfile.relationshipStatus !=
+              RelationshipStatus.solteiro ||
+          spiritualProfile.value?.relationshipStatus !=
+              RelationshipStatus.solteiro) {
         Get.snackbar(
           'Não Disponível',
           'Demonstrações de interesse são apenas para usuários solteiros.',
@@ -178,18 +195,18 @@ class ProfileDisplayController extends GetxController {
         );
         return;
       }
-      
+
       isProcessingInterest.value = true;
       debugPrint('💝 Expressando interesse em: $userId');
-      
+
       final success = await SpiritualProfileRepository.expressInterest(userId);
-      
+
       if (success) {
         hasExpressedInterest.value = true;
-        
+
         // Check if this created a mutual interest
         await _loadInteractionStates();
-        
+
         if (hasMutualInterest.value) {
           Get.snackbar(
             '💕 Interesse Mútuo!',
@@ -210,7 +227,6 @@ class ProfileDisplayController extends GetxController {
           );
         }
       }
-      
     } catch (e) {
       debugPrint('❌ Erro ao expressar interesse: $e');
       Get.snackbar(
@@ -228,7 +244,7 @@ class ProfileDisplayController extends GetxController {
   Future<void> startTemporaryChat() async {
     try {
       debugPrint('💬 Iniciando chat temporário...');
-      
+
       final mutualInterest = mutualInterestData.value;
       if (mutualInterest == null) {
         Get.snackbar(
@@ -240,14 +256,17 @@ class ProfileDisplayController extends GetxController {
         );
         return;
       }
-      
+
       // Check if temporary chat already exists
-      var existingChat = await TemporaryChatRepository.getChatByMutualInterestId(mutualInterest.id!);
-      
+      var existingChat =
+          await TemporaryChatRepository.getChatByMutualInterestId(
+              mutualInterest.id!);
+
       if (existingChat == null) {
         // Create new temporary chat
-        existingChat = await TemporaryChatRepository.createTemporaryChat(mutualInterest);
-        
+        existingChat =
+            await TemporaryChatRepository.createTemporaryChat(mutualInterest);
+
         Get.snackbar(
           '💬 Chat Criado!',
           'Seu chat temporário de 7 dias foi criado. Conversem com respeito e propósito!',
@@ -257,11 +276,11 @@ class ProfileDisplayController extends GetxController {
           duration: const Duration(seconds: 4),
         );
       }
-      
+
       // Navigate to temporary chat
       // TODO: Temporariamente comentado devido a erro de build
       // Get.to(() => TemporaryChatView(chatRoomId: existingChat!.chatRoomId));
-      
+
       // Mensagem temporária até resolver o problema de build
       Get.snackbar(
         'Chat Temporário',
@@ -271,7 +290,6 @@ class ProfileDisplayController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );
-      
     } catch (e) {
       debugPrint('❌ Erro ao iniciar chat temporário: $e');
       Get.snackbar(
@@ -287,9 +305,9 @@ class ProfileDisplayController extends GetxController {
   Future<void> blockUser() async {
     try {
       debugPrint('🚫 Bloqueando usuário: $userId');
-      
+
       await SpiritualProfileRepository.blockUser(userId);
-      
+
       Get.snackbar(
         'Usuário Bloqueado',
         'Este usuário foi bloqueado e não poderá mais interagir com você.',
@@ -297,10 +315,9 @@ class ProfileDisplayController extends GetxController {
         colorText: Colors.orange[800],
         snackPosition: SnackPosition.BOTTOM,
       );
-      
+
       // Return to previous screen
       Get.back();
-      
     } catch (e) {
       debugPrint('❌ Erro ao bloquear usuário: $e');
       Get.snackbar(
@@ -316,7 +333,7 @@ class ProfileDisplayController extends GetxController {
   Future<void> reportUser() async {
     try {
       debugPrint('🚨 Reportando usuário: $userId');
-      
+
       // For now, show a placeholder message
       // In the future, this will integrate with a reporting system
       Get.snackbar(
@@ -326,13 +343,12 @@ class ProfileDisplayController extends GetxController {
         colorText: Colors.orange[800],
         snackPosition: SnackPosition.BOTTOM,
       );
-      
+
       // TODO: Implement user reporting system
       // This should:
       // 1. Create a report record
       // 2. Notify administrators
       // 3. Track report history
-      
     } catch (e) {
       debugPrint('❌ Erro ao reportar usuário: $e');
       Get.snackbar(
@@ -349,9 +365,9 @@ class ProfileDisplayController extends GetxController {
   bool get canInteract {
     final profile = spiritualProfile.value;
     if (profile == null) return false;
-    
-    return profile.allowInteractions && 
-           profile.relationshipStatus == RelationshipStatus.solteiro;
+
+    return profile.allowInteractions &&
+        profile.relationshipStatus == RelationshipStatus.solteiro;
   }
 
   bool get isProfileComplete {
@@ -361,7 +377,7 @@ class ProfileDisplayController extends GetxController {
   String get profileCompletionStatus {
     final profile = spiritualProfile.value;
     if (profile == null) return 'Perfil não encontrado';
-    
+
     if (profile.canShowPublicProfile) {
       return 'Perfil completo';
     } else {

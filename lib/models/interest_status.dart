@@ -2,13 +2,13 @@
 enum InterestStatus {
   /// Interesse aceito - cria chat
   accepted,
-  
+
   /// Interesse rejeitado
   rejected,
-  
+
   /// Interesse pendente (ainda não respondido)
   pending,
-  
+
   /// Notificação apenas visualizada
   viewed,
 }
@@ -27,7 +27,7 @@ extension InterestStatusExtension on InterestStatus {
         return 'viewed';
     }
   }
-  
+
   /// Criar enum a partir de string
   static InterestStatus fromString(String value) {
     switch (value.toLowerCase()) {

@@ -26,7 +26,7 @@ class SpiritualInfoSection extends StatelessWidget {
           // Section Title
           _buildSectionTitle('Informações Espirituais'),
           const SizedBox(height: 16),
-          
+
           // Purpose
           if (purpose?.isNotEmpty == true) ...[
             _buildSpiritualCard(
@@ -38,7 +38,7 @@ class SpiritualInfoSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Faith Phrase
           if (faithPhrase?.isNotEmpty == true) ...[
             _buildSpiritualCard(
@@ -50,13 +50,13 @@ class SpiritualInfoSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Relationship Readiness
           if (readyForPurposefulRelationship != null) ...[
             _buildReadinessIndicator(),
             const SizedBox(height: 16),
           ],
-          
+
           // Non-negotiable Value
           if (nonNegotiableValue?.isNotEmpty == true) ...[
             _buildSpiritualCard(
@@ -140,7 +140,7 @@ class SpiritualInfoSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Content
           if (isQuote) ...[
             Container(
@@ -182,7 +182,7 @@ class SpiritualInfoSection extends StatelessWidget {
 
   Widget _buildReadinessIndicator() {
     bool isReady = readyForPurposefulRelationship == true;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -202,7 +202,9 @@ class SpiritualInfoSection extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isReady ? const Color(0xFF4CAF50).withOpacity(0.3) : Colors.grey[300]!,
+          color: isReady
+              ? const Color(0xFF4CAF50).withOpacity(0.3)
+              : Colors.grey[300]!,
           width: 1,
         ),
       ),
@@ -235,7 +237,7 @@ class SpiritualInfoSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isReady 
+                  isReady
                       ? 'Disposto(a) a viver um relacionamento com propósito'
                       : 'Não está buscando relacionamento no momento',
                   style: TextStyle(

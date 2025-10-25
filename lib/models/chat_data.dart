@@ -42,7 +42,8 @@ class ChatData {
       'chatId': chatId,
       'participants': participants,
       'createdAt': Timestamp.fromDate(createdAt),
-      'lastMessageAt': lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
+      'lastMessageAt':
+          lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
       'lastMessage': lastMessage,
       'unreadCount': unreadCount,
       'isActive': isActive,
@@ -108,10 +109,10 @@ class ChatData {
   /// Obtém o tempo desde a última mensagem
   String get timeSinceLastMessage {
     if (lastMessageAt == null) return 'Sem mensagens';
-    
+
     final now = DateTime.now();
     final difference = now.difference(lastMessageAt!);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora mesmo';
     } else if (difference.inHours < 1) {

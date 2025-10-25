@@ -12,8 +12,7 @@ class OperationResult {
   final String? message;
   final String? data;
 
-  OperationResult.success({this.message, this.data})
-      : success = true;
+  OperationResult.success({this.message, this.data}) : success = true;
 
   OperationResult.error(this.message)
       : success = false,
@@ -60,12 +59,13 @@ class SpiritualCertificationService {
       );
 
       if (!uploadResult.success) {
-        return OperationResult.error(uploadResult.error ?? 'Erro ao enviar arquivo');
+        return OperationResult.error(
+            uploadResult.error ?? 'Erro ao enviar arquivo');
       }
 
       // 3. Criar solicitação no Firestore
       print('🔍 [CERT_SERVICE] Criando solicitação no Firestore...');
-      
+
       final request = CertificationRequestModel(
         id: '', // Será gerado pelo Firestore
         userId: userId,
@@ -78,10 +78,11 @@ class SpiritualCertificationService {
         createdAt: DateTime.now(),
       );
 
-      print('📊 [CERT_SERVICE] Request criado: userId=$userId, email=$userEmail');
-      
+      print(
+          '📊 [CERT_SERVICE] Request criado: userId=$userId, email=$userEmail');
+
       final requestId = await _repository.createRequest(request);
-      
+
       print('✅ [CERT_SERVICE] Solicitação salva com ID: $requestId');
 
       // 4. Enviar email para admin
@@ -99,7 +100,8 @@ class SpiritualCertificationService {
       }
 
       return OperationResult.success(
-        message: 'Solicitação enviada com sucesso! Você receberá resposta em até 3 dias úteis.',
+        message:
+            'Solicitação enviada com sucesso! Você receberá resposta em até 3 dias úteis.',
         data: requestId,
       );
     } catch (e) {

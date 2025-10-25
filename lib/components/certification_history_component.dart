@@ -30,14 +30,14 @@ class CertificationHistoryComponent extends StatelessWidget {
           child: Text(
             'Histórico de Solicitações',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.amber.shade800,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.amber.shade800,
+                ),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Lista de solicitações
         ...requests.map((request) => _buildRequestCard(context, request)),
       ],
@@ -83,7 +83,8 @@ class CertificationHistoryComponent extends StatelessWidget {
   }
 
   /// Card de solicitação
-  Widget _buildRequestCard(BuildContext context, CertificationRequestModel request) {
+  Widget _buildRequestCard(
+      BuildContext context, CertificationRequestModel request) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -120,9 +121,9 @@ class CertificationHistoryComponent extends StatelessWidget {
                   style: const TextStyle(fontSize: 24),
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Status e data
               Expanded(
                 child: Column(
@@ -147,10 +148,11 @@ class CertificationHistoryComponent extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Badge de status
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _getStatusColor(request.status),
                   borderRadius: BorderRadius.circular(20),
@@ -166,7 +168,7 @@ class CertificationHistoryComponent extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Informações adicionais
           if (request.reviewedAt != null) ...[
             const SizedBox(height: 12),
@@ -190,7 +192,7 @@ class CertificationHistoryComponent extends StatelessWidget {
               ],
             ),
           ],
-          
+
           // Motivo da rejeição
           if (request.isRejected && request.rejectionReason != null) ...[
             const SizedBox(height: 12),
@@ -234,9 +236,11 @@ class CertificationHistoryComponent extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Botão de reenvio
-          if (request.canResubmit && showResubmitButton && onResubmit != null) ...[
+          if (request.canResubmit &&
+              showResubmitButton &&
+              onResubmit != null) ...[
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -255,7 +259,7 @@ class CertificationHistoryComponent extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Mensagem de aguardo
           if (request.isPending) ...[
             const SizedBox(height: 12),
@@ -287,7 +291,7 @@ class CertificationHistoryComponent extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Mensagem de aprovação
           if (request.isApproved) ...[
             const SizedBox(height: 12),

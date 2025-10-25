@@ -8,9 +8,9 @@ class WelcomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(WelcomeController());
-    
+
     print('WelcomeView: Construindo view de boas-vindas');
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -73,7 +73,7 @@ class WelcomeView extends StatelessWidget {
               },
             ),
           ),
-          
+
           // Toque em qualquer lugar para continuar
           Positioned.fill(
             child: GestureDetector(
@@ -83,69 +83,69 @@ class WelcomeView extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Seta moderna no canto inferior direito
           Positioned(
             bottom: 50,
             right: 30,
             child: Obx(() => AnimatedOpacity(
-              opacity: controller.showArrow.value ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: controller.showArrow.value
-                ? AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: GestureDetector(
-                      onTap: controller.finishWelcome,
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                  opacity: controller.showArrow.value ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: controller.showArrow.value
+                      ? AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: GestureDetector(
+                            onTap: controller.finishWelcome,
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Color(0xFF22bc88),
+                                size: 24,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Color(0xFF22bc88),
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-            )),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                )),
           ),
-          
+
           // Texto "Toque para continuar" no canto inferior esquerdo
           Positioned(
             bottom: 60,
             left: 30,
             child: Obx(() => AnimatedOpacity(
-              opacity: controller.showArrow.value ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: Text(
-                'Toque para continuar',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
+                  opacity: controller.showArrow.value ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: Text(
+                    'Toque para continuar',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )),
+                  ),
+                )),
           ),
         ],
       ),

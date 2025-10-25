@@ -8,12 +8,10 @@ class DebugSearchProfiles {
   static Future<void> debugProfileStructure() async {
     try {
       print('🔍 DEBUG: Verificando estrutura dos perfis...');
-      
+
       // Buscar alguns perfis para análise
-      final snapshot = await _firestore
-          .collection('spiritual_profiles')
-          .limit(3)
-          .get();
+      final snapshot =
+          await _firestore.collection('spiritual_profiles').limit(3).get();
 
       print('📊 Total de perfis encontrados: ${snapshot.docs.length}');
 
@@ -24,7 +22,8 @@ class DebugSearchProfiles {
         print('   - username: ${data['username']}');
         print('   - isActive: ${data['isActive']}');
         print('   - isVerified: ${data['isVerified']}');
-        print('   - hasCompletedSinaisCourse: ${data['hasCompletedSinaisCourse']}');
+        print(
+            '   - hasCompletedSinaisCourse: ${data['hasCompletedSinaisCourse']}');
         print('   - searchKeywords: ${data['searchKeywords']}');
         print('   - age: ${data['age']}');
         print('   - city: ${data['city']}');
@@ -38,13 +37,11 @@ class DebugSearchProfiles {
   static Future<void> debugSimpleSearch(String query) async {
     try {
       print('\n🔍 DEBUG: Testando busca simples por "$query"...');
-      
+
       // Teste 1: Busca sem filtros
       print('\n1️⃣ Teste sem filtros:');
-      final snapshot1 = await _firestore
-          .collection('spiritual_profiles')
-          .limit(10)
-          .get();
+      final snapshot1 =
+          await _firestore.collection('spiritual_profiles').limit(10).get();
       print('   Resultados: ${snapshot1.docs.length}');
 
       // Teste 2: Busca só com isActive
@@ -78,7 +75,6 @@ class DebugSearchProfiles {
           .limit(10)
           .get();
       print('   Resultados: ${snapshot4.docs.length}');
-
     } catch (e) {
       print('❌ Erro no debug de busca: $e');
     }
@@ -88,11 +84,9 @@ class DebugSearchProfiles {
   static Future<void> debugSpecificFields() async {
     try {
       print('\n🔍 DEBUG: Verificando campos específicos...');
-      
-      final snapshot = await _firestore
-          .collection('spiritual_profiles')
-          .limit(5)
-          .get();
+
+      final snapshot =
+          await _firestore.collection('spiritual_profiles').limit(5).get();
 
       int activeCount = 0;
       int verifiedCount = 0;
@@ -101,7 +95,7 @@ class DebugSearchProfiles {
 
       for (var doc in snapshot.docs) {
         final data = doc.data();
-        
+
         if (data['isActive'] == true) activeCount++;
         if (data['isVerified'] == true) verifiedCount++;
         if (data['hasCompletedSinaisCourse'] == true) courseCount++;
@@ -113,7 +107,6 @@ class DebugSearchProfiles {
       print('   - isVerified: $verifiedCount');
       print('   - hasCompletedSinaisCourse: $courseCount');
       print('   - tem searchKeywords: $keywordsCount');
-
     } catch (e) {
       print('❌ Erro no debug de campos: $e');
     }
@@ -122,11 +115,11 @@ class DebugSearchProfiles {
   /// Executar todos os debugs
   static Future<void> runAllDebug() async {
     print('🚀 INICIANDO DEBUG COMPLETO DA BUSCA...\n');
-    
+
     await debugProfileStructure();
     await debugSpecificFields();
     await debugSimpleSearch('italo');
-    
+
     print('\n✅ DEBUG COMPLETO FINALIZADO!');
   }
 }

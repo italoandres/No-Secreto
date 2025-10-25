@@ -17,7 +17,7 @@ class EnhancedInterestHandler {
     Map<String, dynamic>? metadata,
   }) async {
     print('💕 [ENHANCED_INTEREST_HANDLER] Enviando interesse para $toUserId');
-    
+
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Usuário não autenticado');
@@ -45,9 +45,8 @@ class EnhancedInterestHandler {
       };
 
       // Salvar interesse no Firestore
-      final interestDoc = await _firestore
-          .collection('interests')
-          .add(interestData);
+      final interestDoc =
+          await _firestore.collection('interests').add(interestData);
 
       print('✅ [ENHANCED_INTEREST_HANDLER] Interesse salvo: ${interestDoc.id}');
 
@@ -69,10 +68,9 @@ class EnhancedInterestHandler {
       );
 
       await NotificationOrchestrator.createNotification(notification);
-      
+
       print('✅ [ENHANCED_INTEREST_HANDLER] Notificação de interesse enviada');
       return interestDoc.id;
-
     } catch (e) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao enviar interesse: $e');
       return null;
@@ -86,8 +84,9 @@ class EnhancedInterestHandler {
     required String action, // 'accepted' ou 'rejected'
     String? responseMessage,
   }) async {
-    print('🔄 [ENHANCED_INTEREST_HANDLER] Processando resposta: $action para interesse $interestId');
-    
+    print(
+        '🔄 [ENHANCED_INTEREST_HANDLER] Processando resposta: $action para interesse $interestId');
+
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Usuário não autenticado');
@@ -96,13 +95,12 @@ class EnhancedInterestHandler {
 
     try {
       // Buscar o interesse original
-      final interestDoc = await _firestore
-          .collection('interests')
-          .doc(interestId)
-          .get();
+      final interestDoc =
+          await _firestore.collection('interests').doc(interestId).get();
 
       if (!interestDoc.exists) {
-        print('❌ [ENHANCED_INTEREST_HANDLER] Interesse não encontrado: $interestId');
+        print(
+            '❌ [ENHANCED_INTEREST_HANDLER] Interesse não encontrado: $interestId');
         return;
       }
 
@@ -112,73 +110,82 @@ class EnhancedInterestHandler {
 
       // Verificar se o usuário atual é o destinatário do interesse
       if (currentUser.uid != toUserId) {
-        print('❌ [ENHANCED_INTEREST_HANDLER] Usuário não autorizado a responder este interesse');
+        print(
+            '❌ [ENHANCED_INTEREST_HANDLER] Usuário não autorizado a responder este interesse');
         return;
       }
 
       // Verificar se já foi respondido
       if (interestData['status'] != 'pending') {
-        print('ℹ️ [ENHANCED_INTEREST_HANDLER] Interesse já foi respondido anteriormente');
+        print(
+            'ℹ️ [ENHANCED_INTEREST_HANDLER] Interesse já foi respondido anteriormente');
         // Não gerar erro, apenas ignorar silenciosamente
         return;
       }
 
       // Atualizar status do interesse
-      await _firestore
-          .collection('interests')
-          .doc(interestId)
-          .update({
-            'status': action,
-            'dataResposta': Timestamp.now(),
-            'responseMessage': responseMessage,
-          });
+      await _firestore.collection('interests').doc(interestId).update({
+        'status': action,
+        'dataResposta': Timestamp.now(),
+        'responseMessage': responseMessage,
+      });
 
-      print('✅ [ENHANCED_INTEREST_HANDLER] Status do interesse atualizado para: $action');
+      print(
+          '✅ [ENHANCED_INTEREST_HANDLER] Status do interesse atualizado para: $action');
 
       // Atualizar status da notificação
-      await NotificationOrchestrator.handleNotificationResponse(notificationId, action);
+      await NotificationOrchestrator.handleNotificationResponse(
+          notificationId, action);
 
       // Se foi aceito, verificar match mútuo
       if (action == 'accepted') {
-        print('💕 [ENHANCED_INTEREST_HANDLER] Interesse aceito, verificando match mútuo...');
-        
+        print(
+            '💕 [ENHANCED_INTEREST_HANDLER] Interesse aceito, verificando match mútuo...');
+
         // Verificar se há match mútuo
-        final hasMutualMatch = await MutualMatchDetector.checkMutualMatch(fromUserId, toUserId);
-        
+        final hasMutualMatch =
+            await MutualMatchDetector.checkMutualMatch(fromUserId, toUserId);
+
         if (hasMutualMatch) {
           print('🎉 [ENHANCED_INTEREST_HANDLER] MATCH MÚTUO DETECTADO!');
-          
+
           // Verificar se já foi processado para evitar duplicatas
-          final alreadyProcessed = await MutualMatchDetector.isMatchAlreadyProcessed(fromUserId, toUserId);
-          
+          final alreadyProcessed =
+              await MutualMatchDetector.isMatchAlreadyProcessed(
+                  fromUserId, toUserId);
+
           if (!alreadyProcessed) {
             // Criar notificações de match mútuo para ambos
-            await MutualMatchDetector.createMutualMatchNotifications(fromUserId, toUserId);
-            
+            await MutualMatchDetector.createMutualMatchNotifications(
+                fromUserId, toUserId);
+
             // Criar chat automaticamente
             await MutualMatchDetector.triggerChatCreation(fromUserId, toUserId);
-            
-            print('🎉 [ENHANCED_INTEREST_HANDLER] Fluxo de match mútuo concluído com sucesso!');
-            
+
+            print(
+                '🎉 [ENHANCED_INTEREST_HANDLER] Fluxo de match mútuo concluído com sucesso!');
+
             // IMPORTANTE: Retornar aqui para não criar notificação de interesse aceito
             return;
           } else {
-            print('ℹ️ [ENHANCED_INTEREST_HANDLER] Match mútuo já foi processado anteriormente');
+            print(
+                'ℹ️ [ENHANCED_INTEREST_HANDLER] Match mútuo já foi processado anteriormente');
             return;
           }
         } else {
-          print('ℹ️ [ENHANCED_INTEREST_HANDLER] Interesse aceito, mas ainda não é mútuo');
-          
+          print(
+              'ℹ️ [ENHANCED_INTEREST_HANDLER] Interesse aceito, mas ainda não é mútuo');
+
           // Criar notificação de interesse aceito para o remetente
-          await _createInterestAcceptedNotification(fromUserId, toUserId, responseMessage);
+          await _createInterestAcceptedNotification(
+              fromUserId, toUserId, responseMessage);
         }
       } else {
         print('💔 [ENHANCED_INTEREST_HANDLER] Interesse rejeitado');
-        
+
         // Opcionalmente, criar notificação de rejeição (ou não, dependendo da UX desejada)
         // await _createInterestRejectedNotification(fromUserId, toUserId);
       }
-
     } catch (e) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao processar resposta: $e');
       throw Exception('Erro ao processar resposta ao interesse: $e');
@@ -186,7 +193,8 @@ class EnhancedInterestHandler {
   }
 
   /// Busca interesses enviados por um usuário
-  static Future<List<Map<String, dynamic>>> getSentInterests(String userId) async {
+  static Future<List<Map<String, dynamic>>> getSentInterests(
+      String userId) async {
     try {
       final query = await _firestore
           .collection('interests')
@@ -201,17 +209,19 @@ class EnhancedInterestHandler {
         };
       }).toList();
 
-      print('📋 [ENHANCED_INTEREST_HANDLER] ${interests.length} interesses enviados encontrados');
+      print(
+          '📋 [ENHANCED_INTEREST_HANDLER] ${interests.length} interesses enviados encontrados');
       return interests;
-
     } catch (e) {
-      print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar interesses enviados: $e');
+      print(
+          '❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar interesses enviados: $e');
       return [];
     }
   }
 
   /// Busca interesses recebidos por um usuário
-  static Future<List<Map<String, dynamic>>> getReceivedInterests(String userId) async {
+  static Future<List<Map<String, dynamic>>> getReceivedInterests(
+      String userId) async {
     try {
       final query = await _firestore
           .collection('interests')
@@ -226,17 +236,19 @@ class EnhancedInterestHandler {
         };
       }).toList();
 
-      print('📋 [ENHANCED_INTEREST_HANDLER] ${interests.length} interesses recebidos encontrados');
+      print(
+          '📋 [ENHANCED_INTEREST_HANDLER] ${interests.length} interesses recebidos encontrados');
       return interests;
-
     } catch (e) {
-      print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar interesses recebidos: $e');
+      print(
+          '❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar interesses recebidos: $e');
       return [];
     }
   }
 
   /// Verifica se já existe interesse entre dois usuários
-  static Future<Map<String, dynamic>?> checkExistingInterest(String fromUserId, String toUserId) async {
+  static Future<Map<String, dynamic>?> checkExistingInterest(
+      String fromUserId, String toUserId) async {
     try {
       final query = await _firestore
           .collection('interests')
@@ -253,9 +265,9 @@ class EnhancedInterestHandler {
       }
 
       return null;
-
     } catch (e) {
-      print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao verificar interesse existente: $e');
+      print(
+          '❌ [ENHANCED_INTEREST_HANDLER] Erro ao verificar interesse existente: $e');
       return null;
     }
   }
@@ -299,7 +311,6 @@ class EnhancedInterestHandler {
       }
 
       return stats;
-
     } catch (e) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao obter estatísticas: $e');
       return {};
@@ -307,7 +318,8 @@ class EnhancedInterestHandler {
   }
 
   /// Cria notificação de interesse aceito (mas não mútuo)
-  static Future<void> _createInterestAcceptedNotification(String toUserId, String fromUserId, String? responseMessage) async {
+  static Future<void> _createInterestAcceptedNotification(
+      String toUserId, String fromUserId, String? responseMessage) async {
     try {
       final userData = await _getUserData(fromUserId);
       if (userData == null) return;
@@ -329,10 +341,11 @@ class EnhancedInterestHandler {
       );
 
       await NotificationOrchestrator.createNotification(notification);
-      print('✅ [ENHANCED_INTEREST_HANDLER] Notificação de interesse aceito criada');
-
+      print(
+          '✅ [ENHANCED_INTEREST_HANDLER] Notificação de interesse aceito criada');
     } catch (e) {
-      print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao criar notificação de aceite: $e');
+      print(
+          '❌ [ENHANCED_INTEREST_HANDLER] Erro ao criar notificação de aceite: $e');
     }
   }
 
@@ -340,25 +353,20 @@ class EnhancedInterestHandler {
   static Future<Map<String, dynamic>?> _getUserData(String userId) async {
     try {
       // Tentar na coleção usuarios primeiro
-      final userDoc = await _firestore
-          .collection('usuarios')
-          .doc(userId)
-          .get();
-      
+      final userDoc = await _firestore.collection('usuarios').doc(userId).get();
+
       if (userDoc.exists) {
         return userDoc.data();
       }
-      
+
       // Fallback para coleção users
-      final fallbackDoc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .get();
-      
+      final fallbackDoc =
+          await _firestore.collection('users').doc(userId).get();
+
       return fallbackDoc.exists ? fallbackDoc.data() : null;
-      
     } catch (e) {
-      print('❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar dados do usuário $userId: $e');
+      print(
+          '❌ [ENHANCED_INTEREST_HANDLER] Erro ao buscar dados do usuário $userId: $e');
       return null;
     }
   }
@@ -367,22 +375,22 @@ class EnhancedInterestHandler {
   static Future<void> cleanupOldInterests() async {
     try {
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-      
+
       final oldInterests = await _firestore
           .collection('interests')
           .where('status', isEqualTo: 'pending')
           .where('dataCriacao', isLessThan: Timestamp.fromDate(thirtyDaysAgo))
           .get();
-      
+
       final batch = _firestore.batch();
       for (final doc in oldInterests.docs) {
         batch.update(doc.reference, {'status': 'expired'});
       }
-      
+
       await batch.commit();
-      
-      print('🧹 [ENHANCED_INTEREST_HANDLER] ${oldInterests.docs.length} interesses antigos marcados como expirados');
-      
+
+      print(
+          '🧹 [ENHANCED_INTEREST_HANDLER] ${oldInterests.docs.length} interesses antigos marcados como expirados');
     } catch (e) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Erro na limpeza de interesses: $e');
     }
@@ -391,16 +399,16 @@ class EnhancedInterestHandler {
   /// Testa o handler de interesses
   static Future<void> testEnhancedInterestHandler() async {
     print('🧪 [ENHANCED_INTEREST_HANDLER] Testando handler de interesses...');
-    
+
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Usuário não autenticado');
       return;
     }
-    
+
     try {
       const testUserId = 'test_interest_user';
-      
+
       // Teste 1: Enviar interesse
       final interestId = await sendInterest(
         toUserId: testUserId,
@@ -408,21 +416,21 @@ class EnhancedInterestHandler {
         metadata: {'testMode': true},
       );
       print('✅ Teste 1 - Interesse enviado: $interestId');
-      
+
       // Teste 2: Buscar interesses enviados
       final sentInterests = await getSentInterests(currentUser.uid);
       print('✅ Teste 2 - Interesses enviados: ${sentInterests.length}');
-      
+
       // Teste 3: Verificar interesse existente
-      final existingInterest = await checkExistingInterest(currentUser.uid, testUserId);
+      final existingInterest =
+          await checkExistingInterest(currentUser.uid, testUserId);
       print('✅ Teste 3 - Interesse existente: ${existingInterest != null}');
-      
+
       // Teste 4: Obter estatísticas
       final stats = await getInterestStats(currentUser.uid);
       print('✅ Teste 4 - Estatísticas: $stats');
-      
+
       print('🎉 [ENHANCED_INTEREST_HANDLER] Todos os testes passaram!');
-      
     } catch (e) {
       print('❌ [ENHANCED_INTEREST_HANDLER] Erro nos testes: $e');
     }

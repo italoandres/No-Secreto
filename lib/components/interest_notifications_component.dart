@@ -14,8 +14,7 @@ class InterestNotificationsComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<List<InterestNotificationModel>>(
       stream: InterestNotificationRepository.getUserInterestNotifications(
-        FirebaseAuth.instance.currentUser!.uid
-      ),
+          FirebaseAuth.instance.currentUser!.uid),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox();
@@ -71,7 +70,8 @@ class InterestNotificationsComponent extends StatelessWidget {
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -161,7 +161,8 @@ class InterestNotificationsComponent extends StatelessWidget {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Text(
-              notification.message ?? 'Tem interesse em conhecer seu perfil melhor',
+              notification.message ??
+                  'Tem interesse em conhecer seu perfil melhor',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -175,7 +176,8 @@ class InterestNotificationsComponent extends StatelessWidget {
               // Botão Não Tenho
               Expanded(
                 child: TextButton(
-                  onPressed: () => _respondToNotification(notification, 'rejected'),
+                  onPressed: () =>
+                      _respondToNotification(notification, 'rejected'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.grey.shade600,
                   ),
@@ -197,7 +199,8 @@ class InterestNotificationsComponent extends StatelessWidget {
               // Botão Também Tenho
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => _respondToNotification(notification, 'accepted'),
+                  onPressed: () =>
+                      _respondToNotification(notification, 'accepted'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFfc6aeb),
                   ),
@@ -214,7 +217,8 @@ class InterestNotificationsComponent extends StatelessWidget {
     );
   }
 
-  void _respondToNotification(InterestNotificationModel notification, String action) async {
+  void _respondToNotification(
+      InterestNotificationModel notification, String action) async {
     // Implementação idêntica ao _respondToInvite dos convites
     try {
       Get.dialog(
@@ -256,7 +260,7 @@ class InterestNotificationsComponent extends StatelessWidget {
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      
+
       Get.snackbar(
         'Erro',
         e.toString().replaceAll('Exception: ', ''),
@@ -271,7 +275,8 @@ class InterestNotificationsComponent extends StatelessWidget {
   void _viewProfile(InterestNotificationModel notification) async {
     try {
       // Buscar dados do usuário interessado
-      final user = await InterestNotificationRepository.getUserById(notification.fromUserId!);
+      final user = await InterestNotificationRepository.getUserById(
+          notification.fromUserId!);
       if (user == null) {
         Get.snackbar(
           'Erro',
@@ -286,7 +291,7 @@ class InterestNotificationsComponent extends StatelessWidget {
       // Navegar para o perfil do usuário interessado
       // Implementar navegação baseada na estrutura existente
       // Por exemplo: Get.toNamed('/profile', arguments: user);
-      
+
       // Por enquanto, mostrar informações básicas
       Get.dialog(
         AlertDialog(
@@ -322,7 +327,6 @@ class InterestNotificationsComponent extends StatelessWidget {
           ],
         ),
       );
-      
     } catch (e) {
       Get.snackbar(
         'Erro',
@@ -337,11 +341,11 @@ class InterestNotificationsComponent extends StatelessWidget {
   String _formatDate(Timestamp? timestamp) {
     // Mesma implementação do PurposeInvitesComponent
     if (timestamp == null) return '';
-    
+
     final date = timestamp.toDate();
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora';
     } else if (difference.inHours < 1) {

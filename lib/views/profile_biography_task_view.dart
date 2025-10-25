@@ -15,7 +15,8 @@ class ProfileBiographyTaskView extends StatefulWidget {
   });
 
   @override
-  State<ProfileBiographyTaskView> createState() => _ProfileBiographyTaskViewState();
+  State<ProfileBiographyTaskView> createState() =>
+      _ProfileBiographyTaskViewState();
 }
 
 class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
@@ -24,7 +25,7 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
   final _faithPhraseController = TextEditingController();
   final _aboutMeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   bool? _isDeusEPaiMember;
   RelationshipStatus? _relationshipStatus;
   bool? _readyForPurposefulRelationship;
@@ -41,13 +42,15 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
 
   void _initializeFields() {
     _purposeController.text = widget.profile.purpose ?? '';
-    _nonNegotiableValueController.text = widget.profile.nonNegotiableValue ?? '';
+    _nonNegotiableValueController.text =
+        widget.profile.nonNegotiableValue ?? '';
     _faithPhraseController.text = widget.profile.faithPhrase ?? '';
     _aboutMeController.text = widget.profile.aboutMe ?? '';
-    
+
     _isDeusEPaiMember = widget.profile.isDeusEPaiMember;
     _relationshipStatus = widget.profile.relationshipStatus;
-    _readyForPurposefulRelationship = widget.profile.readyForPurposefulRelationship;
+    _readyForPurposefulRelationship =
+        widget.profile.readyForPurposefulRelationship;
     _hasChildren = widget.profile.hasChildren;
     _isVirgin = widget.profile.isVirgin;
     _wasPreviouslyMarried = widget.profile.wasPreviouslyMarried;
@@ -160,7 +163,7 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Purpose question
           TextFormField(
             controller: _purposeController,
@@ -184,9 +187,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               return null;
             },
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Deus é Pai movement
           _buildDropdownField(
             'Você faz parte do movimento Deus é Pai? *',
@@ -198,9 +201,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
             (value) => setState(() => _isDeusEPaiMember = value),
             'Selecione uma opção',
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Relationship status
           FutureBuilder<String?>(
             future: _getUserGender(),
@@ -214,20 +217,21 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
                   ),
                 );
               }
-              
+
               final sexo = snapshot.data;
               final isMale = sexo == 'masculino'; // minúsculo!
-              
+
               print('🔍 Sexo loaded: $sexo, isMale: $isMale');
-              
+
               // Obtém as opções válidas para o gênero
               final options = _getRelationshipStatusOptions(isMale);
-              
+
               // Verifica se o valor atual é válido para as opções disponíveis
-              final validValue = options.any((item) => item.value == _relationshipStatus)
-                  ? _relationshipStatus
-                  : null;
-              
+              final validValue =
+                  options.any((item) => item.value == _relationshipStatus)
+                      ? _relationshipStatus
+                      : null;
+
               return _buildDropdownField(
                 'Você está solteiro(a)? *',
                 validValue,
@@ -237,23 +241,24 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               );
             },
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Ready for purposeful relationship
           _buildDropdownField(
             'Está disposto(a) a viver um relacionamento com propósito? *',
             _readyForPurposefulRelationship,
             [
               const DropdownMenuItem(value: true, child: Text('Sim')),
-              const DropdownMenuItem(value: false, child: Text('Ainda não sei')),
+              const DropdownMenuItem(
+                  value: false, child: Text('Ainda não sei')),
             ],
             (value) => setState(() => _readyForPurposefulRelationship = value),
             'Selecione uma opção',
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Non-negotiable value
           TextFormField(
             controller: _nonNegotiableValueController,
@@ -275,9 +280,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               return null;
             },
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Faith phrase
           TextFormField(
             controller: _faithPhraseController,
@@ -299,9 +304,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               return null;
             },
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Children question
           _buildDropdownField(
             'Você tem filhos? *',
@@ -313,9 +318,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
             (value) => setState(() => _hasChildren = value),
             'Selecione uma opção',
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Previous marriage question
           _buildDropdownField(
             'Você já foi casado(a)? *',
@@ -327,9 +332,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
             (value) => setState(() => _wasPreviouslyMarried = value),
             'Selecione uma opção',
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Virginity question (optional/private)
           Container(
             padding: const EdgeInsets.all(16),
@@ -362,7 +367,8 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
                   [
                     const DropdownMenuItem(value: true, child: Text('Sim')),
                     const DropdownMenuItem(value: false, child: Text('Não')),
-                    const DropdownMenuItem(value: null, child: Text('Prefiro não responder')),
+                    const DropdownMenuItem(
+                        value: null, child: Text('Prefiro não responder')),
                   ],
                   (value) => setState(() => _isVirgin = value),
                   'Opcional - Você pode escolher não responder',
@@ -380,15 +386,16 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // About me (optional)
           TextFormField(
             controller: _aboutMeController,
             maxLines: 3,
             decoration: InputDecoration(
-              labelText: 'Algo que gostaria que soubessem sobre você (opcional)',
+              labelText:
+                  'Algo que gostaria que soubessem sobre você (opcional)',
               hintText: 'Compartilhe algo especial sobre você...',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -437,12 +444,14 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
               borderSide: BorderSide(color: Colors.green[700]!),
             ),
           ),
-          validator: isRequired ? (value) {
-            if (value == null) {
-              return 'Este campo é obrigatório';
-            }
-            return null;
-          } : null,
+          validator: isRequired
+              ? (value) {
+                  if (value == null) {
+                    return 'Este campo é obrigatório';
+                  }
+                  return null;
+                }
+              : null,
         ),
       ],
     );
@@ -506,8 +515,8 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
         'readyForPurposefulRelationship': _readyForPurposefulRelationship,
         'nonNegotiableValue': _nonNegotiableValueController.text.trim(),
         'faithPhrase': _faithPhraseController.text.trim(),
-        'aboutMe': _aboutMeController.text.trim().isEmpty 
-            ? null 
+        'aboutMe': _aboutMeController.text.trim().isEmpty
+            ? null
             : _aboutMeController.text.trim(),
         // New fields
         'hasChildren': _hasChildren,
@@ -515,8 +524,9 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
         'wasPreviouslyMarried': _wasPreviouslyMarried,
       };
 
-      await SpiritualProfileRepository.updateProfile(widget.profile.id!, updates);
-      
+      await SpiritualProfileRepository.updateProfile(
+          widget.profile.id!, updates);
+
       // Mark task as completed
       await SpiritualProfileRepository.updateTaskCompletion(
         widget.profile.id!,
@@ -535,7 +545,6 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-
     } catch (e) {
       Get.snackbar(
         'Erro',
@@ -555,35 +564,36 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
   Future<String?> _getUserGender() async {
     try {
       print('🔍 Buscando gênero para userId: ${widget.profile.userId}');
-      
+
       final userDoc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(widget.profile.userId)
           .get();
-      
+
       if (!userDoc.exists) {
         print('❌ Documento do usuário não encontrado');
         return null;
       }
-      
+
       final data = userDoc.data();
       print('📄 Dados do usuário: $data');
-      
+
       // O campo é 'sexo' e retorna 'masculino' ou 'feminino'
       final sexo = data?['sexo'] as String?;
       print('✅ Sexo encontrado: $sexo');
-      
+
       return sexo;
     } catch (e) {
       print('❌ Erro ao buscar gênero: $e');
       return null;
     }
   }
-  
+
   /// Retorna as opções de status de relacionamento baseadas no gênero
-  List<DropdownMenuItem<RelationshipStatus>> _getRelationshipStatusOptions(bool isMale) {
+  List<DropdownMenuItem<RelationshipStatus>> _getRelationshipStatusOptions(
+      bool isMale) {
     final options = <DropdownMenuItem<RelationshipStatus>>[];
-    
+
     // Adiciona opção de solteiro/solteira baseado no gênero
     if (isMale) {
       options.add(const DropdownMenuItem(
@@ -604,13 +614,13 @@ class _ProfileBiographyTaskViewState extends State<ProfileBiographyTaskView> {
         child: Text('Comprometida'),
       ));
     }
-    
+
     // Adiciona opção de não informar
     options.add(const DropdownMenuItem(
       value: RelationshipStatus.naoInformado,
       child: Text('Prefiro não informar'),
     ));
-    
+
     return options;
   }
 

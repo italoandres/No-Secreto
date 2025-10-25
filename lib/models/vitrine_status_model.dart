@@ -1,12 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Enum para representar os diferentes status da vitrine
-enum VitrineStatus {
-  active,
-  inactive,
-  pending,
-  suspended
-}
+enum VitrineStatus { active, inactive, pending, suspended }
 
 /// Extensão para conversão de string para enum
 extension VitrineStatusExtension on VitrineStatus {
@@ -22,7 +17,7 @@ extension VitrineStatusExtension on VitrineStatus {
         return 'suspended';
     }
   }
-  
+
   static VitrineStatus fromString(String value) {
     switch (value.toLowerCase()) {
       case 'active':
@@ -46,7 +41,7 @@ class VitrineStatusInfo {
   final DateTime lastUpdated;
   final String? reason;
   final Map<String, dynamic>? metadata;
-  
+
   const VitrineStatusInfo({
     required this.userId,
     required this.status,
@@ -54,16 +49,16 @@ class VitrineStatusInfo {
     this.reason,
     this.metadata,
   });
-  
+
   /// Verifica se a vitrine está publicamente visível
   bool get isPubliclyVisible => status == VitrineStatus.active;
-  
+
   /// Verifica se a vitrine pode ser compartilhada
   bool get canBeShared => status == VitrineStatus.active;
-  
+
   /// Verifica se o status permite edição
   bool get canBeEdited => status != VitrineStatus.suspended;
-  
+
   /// Converte para formato do Firestore
   Map<String, dynamic> toFirestore() {
     final data = {
@@ -71,18 +66,18 @@ class VitrineStatusInfo {
       'status': status.value,
       'lastUpdated': Timestamp.fromDate(lastUpdated),
     };
-    
+
     if (reason != null) {
       data['reason'] = reason!;
     }
-    
+
     if (metadata != null) {
       data['metadata'] = metadata!;
     }
-    
+
     return data;
   }
-  
+
   /// Cria instância a partir de dados do Firestore
   factory VitrineStatusInfo.fromFirestore(Map<String, dynamic> data) {
     return VitrineStatusInfo(
@@ -93,7 +88,7 @@ class VitrineStatusInfo {
       metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
-  
+
   /// Cria cópia com valores atualizados
   VitrineStatusInfo copyWith({
     String? userId,
@@ -110,33 +105,33 @@ class VitrineStatusInfo {
       metadata: metadata ?? this.metadata,
     );
   }
-  
+
   @override
   String toString() {
     return 'VitrineStatusInfo('
-           'userId: $userId, '
-           'status: ${status.value}, '
-           'lastUpdated: $lastUpdated, '
-           'reason: $reason'
-           ')';
+        'userId: $userId, '
+        'status: ${status.value}, '
+        'lastUpdated: $lastUpdated, '
+        'reason: $reason'
+        ')';
   }
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is VitrineStatusInfo &&
-           other.userId == userId &&
-           other.status == status &&
-           other.lastUpdated == lastUpdated &&
-           other.reason == reason;
+        other.userId == userId &&
+        other.status == status &&
+        other.lastUpdated == lastUpdated &&
+        other.reason == reason;
   }
-  
+
   @override
   int get hashCode {
     return userId.hashCode ^
-           status.hashCode ^
-           lastUpdated.hashCode ^
-           reason.hashCode;
+        status.hashCode ^
+        lastUpdated.hashCode ^
+        reason.hashCode;
   }
 }

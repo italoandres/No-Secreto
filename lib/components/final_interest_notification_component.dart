@@ -10,13 +10,12 @@ class FinalInterestNotificationComponent extends StatefulWidget {
   const FinalInterestNotificationComponent({super.key});
 
   @override
-  State<FinalInterestNotificationComponent> createState() => 
+  State<FinalInterestNotificationComponent> createState() =>
       _FinalInterestNotificationComponentState();
 }
 
-class _FinalInterestNotificationComponentState 
+class _FinalInterestNotificationComponentState
     extends State<FinalInterestNotificationComponent> {
-  
   int _unreadCount = 0;
   bool _isLoading = true;
   StreamSubscription<QuerySnapshot>? _subscription;
@@ -56,8 +55,7 @@ class _FinalInterestNotificationComponentState
         // Filtrar manualmente para evitar problemas de índice
         final interestNotifications = snapshot.docs.where((doc) {
           final data = doc.data();
-          return data['type'] == 'interest_match' && 
-                 data['isRead'] == false;
+          return data['type'] == 'interest_match' && data['isRead'] == false;
         }).toList();
 
         setState(() {
@@ -80,7 +78,7 @@ class _FinalInterestNotificationComponentState
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 16),
       child: ElevatedButton(
@@ -114,7 +112,7 @@ class _FinalInterestNotificationComponentState
                 size: 24,
               ),
             ),
-            
+
             // Badge sempre visível se houver notificações
             if (_unreadCount > 0)
               Positioned(
@@ -145,7 +143,7 @@ class _FinalInterestNotificationComponentState
                   ),
                 ),
               ),
-            
+
             // Indicador de carregamento
             if (_isLoading)
               Positioned(
@@ -174,7 +172,7 @@ class EmergencyInterestNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 16),
       child: ElevatedButton(
@@ -202,12 +200,12 @@ class EmergencyInterestNotificationComponent extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Simulação de notificações
                   _buildNotificationItem('Maria Silva', 'há 2 horas'),
                   _buildNotificationItem('Ana Costa', 'há 1 dia'),
                   _buildNotificationItem('Julia Santos', 'há 2 dias'),
-                  
+
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => Get.back(),
@@ -233,7 +231,7 @@ class EmergencyInterestNotificationComponent extends StatelessWidget {
                 size: 24,
               ),
             ),
-            
+
             // Badge sempre visível
             Positioned(
               right: 6,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Card para exibir estatísticas de logs de auditoria
-/// 
+///
 /// Mostra:
 /// - Título da seção
 /// - Lista de estatísticas com valores
@@ -45,14 +45,14 @@ class AuditStatsCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Lista de estatísticas
             ...stats.entries.map((entry) {
               final color = colors?[entry.key] ?? Colors.blue;
               final percentage = maxValue > 0 ? entry.value / maxValue : 0.0;
-              
+
               return Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Column(
@@ -91,9 +91,9 @@ class AuditStatsCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 6),
-                    
+
                     // Barra de progresso
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),

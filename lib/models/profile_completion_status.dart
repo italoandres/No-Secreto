@@ -5,7 +5,7 @@ class ProfileCompletionStatus {
   final List<String> missingTasks;
   final DateTime? completedAt;
   final bool hasBeenShown; // Flag para evitar mostrar múltiplas vezes
-  
+
   const ProfileCompletionStatus({
     required this.isComplete,
     required this.completionPercentage,
@@ -28,7 +28,7 @@ class ProfileCompletionStatus {
     final percentage = profile.completionPercentage ?? 0.0;
     final missingTasks = profile.missingRequiredFields ?? <String>[];
     final hasBeenShown = profile.hasBeenShown ?? false;
-    
+
     return ProfileCompletionStatus(
       isComplete: isComplete,
       completionPercentage: percentage,
@@ -72,8 +72,8 @@ class ProfileCompletionStatus {
       isComplete: map['isComplete'] ?? false,
       completionPercentage: (map['completionPercentage'] ?? 0.0).toDouble(),
       missingTasks: List<String>.from(map['missingTasks'] ?? []),
-      completedAt: map['completedAt'] != null 
-          ? DateTime.parse(map['completedAt']) 
+      completedAt: map['completedAt'] != null
+          ? DateTime.parse(map['completedAt'])
           : null,
       hasBeenShown: map['hasBeenShown'] ?? false,
     );
@@ -82,27 +82,27 @@ class ProfileCompletionStatus {
   @override
   String toString() {
     return 'ProfileCompletionStatus(isComplete: $isComplete, '
-           'percentage: ${(completionPercentage * 100).toInt()}%, '
-           'missingTasks: ${missingTasks.length}, '
-           'hasBeenShown: $hasBeenShown)';
+        'percentage: ${(completionPercentage * 100).toInt()}%, '
+        'missingTasks: ${missingTasks.length}, '
+        'hasBeenShown: $hasBeenShown)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is ProfileCompletionStatus &&
-      other.isComplete == isComplete &&
-      other.completionPercentage == completionPercentage &&
-      other.missingTasks.length == missingTasks.length &&
-      other.hasBeenShown == hasBeenShown;
+        other.isComplete == isComplete &&
+        other.completionPercentage == completionPercentage &&
+        other.missingTasks.length == missingTasks.length &&
+        other.hasBeenShown == hasBeenShown;
   }
 
   @override
   int get hashCode {
     return isComplete.hashCode ^
-      completionPercentage.hashCode ^
-      missingTasks.length.hashCode ^
-      hasBeenShown.hashCode;
+        completionPercentage.hashCode ^
+        missingTasks.length.hashCode ^
+        hasBeenShown.hashCode;
   }
 }

@@ -22,17 +22,17 @@ class CachedInterestNotificationsComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CachedInterestNotificationsComponent> createState() => 
+  State<CachedInterestNotificationsComponent> createState() =>
       _CachedInterestNotificationsComponentState();
 }
 
-class _CachedInterestNotificationsComponentState 
+class _CachedInterestNotificationsComponentState
     extends State<CachedInterestNotificationsComponent> {
-  
   final InterestSystemIntegrator _integrator = InterestSystemIntegrator();
   final InterestCacheService _cacheService = InterestCacheService();
-  final ProfileNavigationService _navigationService = ProfileNavigationService();
-  
+  final ProfileNavigationService _navigationService =
+      ProfileNavigationService();
+
   List<InterestNotificationModel> _notifications = [];
   bool _isLoading = true;
   bool _isLoadingFromCache = true;
@@ -48,19 +48,17 @@ class _CachedInterestNotificationsComponentState
     try {
       // 1. Carregar do cache primeiro (resposta rápida)
       await _loadFromCache();
-      
+
       // 2. Verificar se precisa sincronizar
       final isStale = await _cacheService.isCacheStale();
-      
+
       if (isStale) {
         // 3. Sincronizar com Firebase se necessário
         await _syncWithFirebase();
       }
-      
     } catch (e) {
-      EnhancedLogger.error('Erro ao carregar notificações: $e', 
-        tag: 'CACHED_NOTIFICATIONS'
-      );
+      EnhancedLogger.error('Erro ao carregar notificações: $e',
+          tag: 'CACHED_NOTIFICATIONS');
       setState(() {
         _errorMessage = 'Erro ao carregar notificações';
         _isLoading = false;
@@ -72,24 +70,21 @@ class _CachedInterestNotificationsComponentState
   Future<void> _loadFromCache() async {
     try {
       final cachedNotifications = await _cacheService.getCachedNotifications();
-      
+
       if (mounted) {
         setState(() {
-          _notifications = cachedNotifications
-              .take(widget.maxNotifications)
-              .toList();
+          _notifications =
+              cachedNotifications.take(widget.maxNotifications).toList();
           _isLoadingFromCache = false;
         });
       }
-      
-      EnhancedLogger.info('Notificações carregadas do cache', 
-        tag: 'CACHED_NOTIFICATIONS',
-        data: {'count': cachedNotifications.length}
-      );
+
+      EnhancedLogger.info('Notificações carregadas do cache',
+          tag: 'CACHED_NOTIFICATIONS',
+          data: {'count': cachedNotifications.length});
     } catch (e) {
-      EnhancedLogger.error('Erro ao carregar do cache: $e', 
-        tag: 'CACHED_NOTIFICATIONS'
-      );
+      EnhancedLogger.error('Erro ao carregar do cache: $e',
+          tag: 'CACHED_NOTIFICATIONS');
     }
   }
 
@@ -107,22 +102,17 @@ class _CachedInterestNotificationsComponentState
 
       if (mounted) {
         setState(() {
-          _notifications = notifications
-              .take(widget.maxNotifications)
-              .toList();
+          _notifications = notifications.take(widget.maxNotifications).toList();
           _isLoading = false;
         });
       }
 
-      EnhancedLogger.info('Notificações sincronizadas com Firebase', 
-        tag: 'CACHED_NOTIFICATIONS',
-        data: {'count': notifications.length}
-      );
+      EnhancedLogger.info('Notificações sincronizadas com Firebase',
+          tag: 'CACHED_NOTIFICATIONS', data: {'count': notifications.length});
     } catch (e) {
-      EnhancedLogger.error('Erro ao sincronizar com Firebase: $e', 
-        tag: 'CACHED_NOTIFICATIONS'
-      );
-      
+      EnhancedLogger.error('Erro ao sincronizar com Firebase: $e',
+          tag: 'CACHED_NOTIFICATIONS');
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -183,7 +173,7 @@ class _CachedInterestNotificationsComponentState
         children: [
           // Header
           if (widget.showHeader) _buildHeader(),
-          
+
           // Content
           _buildContent(),
         ],
@@ -354,10 +344,11 @@ class _CachedInterestNotificationsComponentState
               CircleAvatar(
                 backgroundColor: AppColors.primary,
                 child: Text(
-                  notification.fromUserName.isNotEmpty 
-                    ? notification.fromUserName[0].toUpperCase()
-                    : '?',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  notification.fromUserName.isNotEmpty
+                      ? notification.fromUserName[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 12),
@@ -386,13 +377,13 @@ class _CachedInterestNotificationsComponentState
               _buildStatusIndicator(notification.status),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Botões de ação
           if (notification.status == InterestStatus.pending)
             _buildActionButtons(notification),
-          
+
           // Timestamp
           const SizedBox(height: 8),
           Text(
@@ -433,7 +424,8 @@ class _CachedInterestNotificationsComponentState
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: () => _respondToNotification(notification, InterestStatus.accepted),
+            onPressed: () =>
+                _respondToNotification(notification, InterestStatus.accepted),
             icon: const Icon(Icons.favorite, size: 16),
             label: const Text('Também Tenho'),
             style: ElevatedButton.styleFrom(
@@ -446,7 +438,8 @@ class _CachedInterestNotificationsComponentState
         const SizedBox(width: 8),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => _navigationService.navigateFromInterestNotification(
+            onPressed: () =>
+                _navigationService.navigateFromInterestNotification(
               userId: notification.fromUserId,
               userName: notification.fromUserName,
               notificationId: notification.id,
@@ -461,7 +454,8 @@ class _CachedInterestNotificationsComponentState
         const SizedBox(width: 8),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => _respondToNotification(notification, InterestStatus.rejected),
+            onPressed: () =>
+                _respondToNotification(notification, InterestStatus.rejected),
             icon: const Icon(Icons.close, size: 16),
             label: const Text('Não Tenho'),
             style: OutlinedButton.styleFrom(

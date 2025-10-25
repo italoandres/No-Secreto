@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:whatsapp_chat/models/link_descricao_model.dart';
 
@@ -11,7 +10,7 @@ class ChatModel {
   String? fileName;
   String? fileExtension;
   String? videoThumbnail;
-  
+
   Timestamp? dataCadastro;
   ChatType? tipo;
   bool? isLoading;
@@ -33,7 +32,6 @@ class ChatModel {
   });
 
   static ChatModel fromJson(Map<String, dynamic> json) {
-
     return ChatModel(
       id: json['id'],
       idDe: json['idDe'],
@@ -46,11 +44,11 @@ class ChatModel {
       dataCadastro: json['dataCadastro'],
       tipo: ChatType.values.byName(json['tipo']),
       isLoading: json['isLoading'] ?? false,
-      linkDescricaoModel: json['linkDescricaoModel'] == null ? null : LinkDescricaoModel.fromJson(json['linkDescricaoModel']),
+      linkDescricaoModel: json['linkDescricaoModel'] == null
+          ? null
+          : LinkDescricaoModel.fromJson(json['linkDescricaoModel']),
     );
   }
 }
 
-enum ChatType{
-  video, text, img, outro
-}
+enum ChatType { video, text, img, outro }

@@ -29,19 +29,21 @@ class UnreadMessagesCounter extends StatelessWidget {
       stream: MessageReadStatusService.watchUnreadCount(chatId, userId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          EnhancedLogger.error('Erro no stream de mensagens não lidas: ${snapshot.error}', 
-            tag: 'UNREAD_COUNTER');
+          EnhancedLogger.error(
+              'Erro no stream de mensagens não lidas: ${snapshot.error}',
+              tag: 'UNREAD_COUNTER');
           return const SizedBox.shrink();
         }
 
         final unreadCount = snapshot.data ?? 0;
-        
+
         if (unreadCount == 0 && !showZero) {
           return const SizedBox.shrink();
         }
 
         return Container(
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding:
+              padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: backgroundColor ?? Colors.red,
             borderRadius: BorderRadius.circular(12),
@@ -111,15 +113,26 @@ class UnreadBadge extends StatelessWidget {
       children: [
         child,
         Positioned(
-          top: alignment == Alignment.topRight || alignment == Alignment.topLeft ? -4 : null,
-          bottom: alignment == Alignment.bottomRight || alignment == Alignment.bottomLeft ? -4 : null,
-          right: alignment == Alignment.topRight || alignment == Alignment.bottomRight ? -4 : null,
-          left: alignment == Alignment.topLeft || alignment == Alignment.bottomLeft ? -4 : null,
+          top: alignment == Alignment.topRight || alignment == Alignment.topLeft
+              ? -4
+              : null,
+          bottom: alignment == Alignment.bottomRight ||
+                  alignment == Alignment.bottomLeft
+              ? -4
+              : null,
+          right: alignment == Alignment.topRight ||
+                  alignment == Alignment.bottomRight
+              ? -4
+              : null,
+          left: alignment == Alignment.topLeft ||
+                  alignment == Alignment.bottomLeft
+              ? -4
+              : null,
           child: StreamBuilder<int>(
             stream: MessageReadStatusService.watchUnreadCount(chatId, userId),
             builder: (context, snapshot) {
               final unreadCount = snapshot.data ?? 0;
-              
+
               if (unreadCount == 0) {
                 return const SizedBox.shrink();
               }
@@ -218,8 +231,11 @@ class ReadStatsWidget extends StatelessWidget {
                 value: readPercentage / 100,
                 backgroundColor: Colors.grey[300],
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  readPercentage > 80 ? Colors.green : 
-                  readPercentage > 50 ? Colors.orange : Colors.red,
+                  readPercentage > 80
+                      ? Colors.green
+                      : readPercentage > 50
+                          ? Colors.orange
+                          : Colors.red,
                 ),
               ),
               const SizedBox(height: 2),

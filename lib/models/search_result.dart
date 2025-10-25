@@ -105,8 +105,10 @@ class SearchResult {
   factory SearchResult.fromJson(Map<String, dynamic> json) {
     return SearchResult(
       profiles: (json['profiles'] as List<dynamic>?)
-          ?.map((p) => SpiritualProfileModel.fromJson(p as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((p) =>
+                  SpiritualProfileModel.fromJson(p as Map<String, dynamic>))
+              .toList() ??
+          [],
       totalFound: json['totalFound'] as int? ?? 0,
       strategy: json['strategy'] as String? ?? 'auto',
       executionTime: json['executionTime'] as int? ?? 0,
@@ -140,7 +142,7 @@ class SearchResult {
   /// Combina com outro resultado
   SearchResult merge(SearchResult other) {
     final allProfiles = <SpiritualProfileModel>[...profiles];
-    
+
     // Adiciona perfis que não estão duplicados
     for (final profile in other.profiles) {
       if (!allProfiles.any((p) => p.id == profile.id)) {
@@ -167,7 +169,7 @@ class SearchResult {
   /// Filtra os resultados
   SearchResult filter(bool Function(SpiritualProfileModel) predicate) {
     final filteredProfiles = profiles.where(predicate).toList();
-    
+
     return copyWith(
       profiles: filteredProfiles,
       totalFound: filteredProfiles.length,
@@ -183,7 +185,7 @@ class SearchResult {
   /// Limita o número de resultados
   SearchResult limit(int maxResults) {
     if (profiles.length <= maxResults) return this;
-    
+
     return copyWith(
       profiles: profiles.take(maxResults).toList(),
       metadata: {
@@ -198,14 +200,14 @@ class SearchResult {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is SearchResult &&
-           _listEquals(other.profiles, profiles) &&
-           other.totalFound == totalFound &&
-           other.strategy == strategy &&
-           other.executionTime == executionTime &&
-           other.fromCache == fromCache &&
-           other.error == error;
+        _listEquals(other.profiles, profiles) &&
+        other.totalFound == totalFound &&
+        other.strategy == strategy &&
+        other.executionTime == executionTime &&
+        other.fromCache == fromCache &&
+        other.error == error;
   }
 
   @override
@@ -223,8 +225,8 @@ class SearchResult {
   @override
   String toString() {
     return 'SearchResult(profiles: ${profiles.length}, totalFound: $totalFound, '
-           'strategy: $strategy, time: ${executionTime}ms, '
-           'fromCache: $fromCache, error: $error)';
+        'strategy: $strategy, time: ${executionTime}ms, '
+        'fromCache: $fromCache, error: $error)';
   }
 }
 

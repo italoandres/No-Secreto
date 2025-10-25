@@ -27,7 +27,8 @@ class ProfileIdentityTaskView extends StatefulWidget {
   });
 
   @override
-  State<ProfileIdentityTaskView> createState() => _ProfileIdentityTaskViewState();
+  State<ProfileIdentityTaskView> createState() =>
+      _ProfileIdentityTaskViewState();
 }
 
 class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
@@ -50,27 +51,27 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
 
   // Idiomas
   List<String> _selectedLanguages = [];
-  
+
   // Altura
   String? _selectedHeight;
-  
+
   // Profissão
   String? _selectedOccupation;
-  
+
   // Escolaridade
   String? _selectedEducation;
-  
+
   // Curso Superior
   String? _selectedUniversityCourse;
   String? _selectedCourseStatus;
   String? _selectedUniversity;
-  
+
   // Status de Fumante
   String? _selectedSmokingStatus;
-  
+
   // Status de Bebida Alcólica
   String? _selectedDrinkingStatus;
-  
+
   // Hobbies e Interesses
   List<String> _selectedHobbies = [];
 
@@ -96,7 +97,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
     _selectedSmokingStatus = widget.profile.smokingStatus;
     _selectedDrinkingStatus = widget.profile.drinkingStatus;
     _selectedHobbies = widget.profile.hobbies ?? [];
-    
+
     // Carregar dados estruturados se país já selecionado
     if (_selectedCountry != null) {
       _updateStatesForCountry(_selectedCountry!);
@@ -105,7 +106,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
       }
     }
   }
-  
+
   void _updateStatesForCountry(String country) {
     setState(() {
       _selectedState = null;
@@ -114,21 +115,23 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
       _availableCities = [];
       _locationData = null;
       _errorMessage = null;
-      
+
       // Obter código do país
       _selectedCountryCode = WorldLocationsData.getCountryCode(country);
-      
+
       if (_selectedCountryCode != null) {
         try {
           // Verificar se país tem dados estruturados
           if (LocationDataProvider.hasStructuredData(_selectedCountryCode!)) {
-            _locationData = LocationDataProvider.getLocationData(_selectedCountryCode!);
+            _locationData =
+                LocationDataProvider.getLocationData(_selectedCountryCode!);
             if (_locationData != null) {
               _availableStates = _locationData!.getStates();
             }
           }
         } catch (error) {
-          LocationErrorHandler.handleDataLoadError(_selectedCountryCode!, error);
+          LocationErrorHandler.handleDataLoadError(
+              _selectedCountryCode!, error);
           _errorMessage = LocationErrorHandler.getFallbackMessage(country);
         }
       }
@@ -139,12 +142,13 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
     setState(() {
       _selectedCity = null;
       _availableCities = [];
-      
+
       if (_locationData != null) {
         try {
           _availableCities = _locationData!.getCitiesForState(state);
         } catch (error) {
-          LocationErrorHandler.handleDataLoadError(_selectedCountryCode!, error);
+          LocationErrorHandler.handleDataLoadError(
+              _selectedCountryCode!, error);
           _errorMessage = 'Erro ao carregar cidades para $state';
         }
       }
@@ -156,7 +160,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
   }
 
   String _buildFullLocation() {
-    if (_locationData != null && _selectedState != null && _selectedCity != null) {
+    if (_locationData != null &&
+        _selectedState != null &&
+        _selectedCity != null) {
       return _locationData!.formatLocation(_selectedCity!, _selectedState!);
     } else if (_selectedCity != null && _selectedCountry != null) {
       return '$_selectedCity, $_selectedCountry';
@@ -204,22 +210,23 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
               _buildOccupationSection(),
               const SizedBox(height: 24),
               _buildEducationSection(),
-              
+
               // Mostrar curso superior apenas se necessário
-              if (UniversityCoursesData.requiresUniversityCourse(_selectedEducation)) ...[ 
+              if (UniversityCoursesData.requiresUniversityCourse(
+                  _selectedEducation)) ...[
                 const SizedBox(height: 24),
                 _buildUniversityCourseSection(),
               ],
-              
+
               const SizedBox(height: 24),
               _buildSmokingSection(),
-              
+
               const SizedBox(height: 24),
               _buildDrinkingSection(),
-              
+
               const SizedBox(height: 24),
               _buildHobbiesSection(),
-              
+
               const SizedBox(height: 32),
               _buildSaveButton(),
             ],
@@ -312,7 +319,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // País
           DropdownButtonFormField<String>(
             value: _selectedCountry,
@@ -343,9 +350,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             },
             validator: (value) => value == null ? 'Selecione um país' : null,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Estado/Província/Distrito (para países com dados estruturados)
           if (_locationData != null) ...[
             DropdownButtonFormField<String>(
@@ -376,11 +383,13 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
                   });
                 }
               },
-              validator: (value) => value == null ? 'Selecione ${_getStateLabel().toLowerCase()}' : null,
+              validator: (value) => value == null
+                  ? 'Selecione ${_getStateLabel().toLowerCase()}'
+                  : null,
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Cidade
           if (_locationData != null && _selectedState != null)
             // Dropdown de cidades para países com dados estruturados
@@ -408,7 +417,8 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
                   _selectedCity = value;
                 });
               },
-              validator: (value) => value == null ? 'Selecione uma cidade' : null,
+              validator: (value) =>
+                  value == null ? 'Selecione uma cidade' : null,
             )
           else if (_selectedCountry != null && _locationData == null)
             // Campo de texto para países sem dados estruturados
@@ -427,7 +437,8 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
                 ),
                 helperText: _errorMessage ?? 'Digite o nome da sua cidade',
                 helperStyle: TextStyle(
-                  color: _errorMessage != null ? Colors.orange : Colors.grey[600],
+                  color:
+                      _errorMessage != null ? Colors.orange : Colors.grey[600],
                 ),
               ),
               onChanged: (value) {
@@ -486,7 +497,6 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -556,7 +566,6 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ],
           ),
           const SizedBox(height: 16),
-          
           TextFormField(
             controller: _ageController,
             keyboardType: TextInputType.number,
@@ -630,7 +639,6 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
           HeightSelectorComponent(
             selectedHeight: _selectedHeight,
             onHeightChanged: (height) {
@@ -684,7 +692,6 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
           OccupationSelectorComponent(
             selectedOccupation: _selectedOccupation,
             onOccupationChanged: (occupation) {
@@ -738,14 +745,14 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
           EducationSelectorComponent(
             selectedEducation: _selectedEducation,
             onEducationChanged: (education) {
               setState(() {
                 _selectedEducation = education;
                 // Limpar dados de curso superior se não for mais necessário
-                if (!UniversityCoursesData.requiresUniversityCourse(education)) {
+                if (!UniversityCoursesData.requiresUniversityCourse(
+                    education)) {
                   _selectedUniversityCourse = null;
                   _selectedCourseStatus = null;
                   _selectedUniversity = null;
@@ -790,7 +797,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Campo de instituição
           UniversityCourseSelectorComponent(
             selectedCourse: null,
@@ -803,7 +810,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             },
             primaryColor: _primaryColor,
           ),
-          
+
           const SizedBox(height: 16),
           Text(
             'Qual curso você fez/está fazendo?',
@@ -822,9 +829,10 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
               });
             },
             primaryColor: _primaryColor,
-            hintText: 'Digite para buscar seu curso (ex: Direito, Psicologia...)',
+            hintText:
+                'Digite para buscar seu curso (ex: Direito, Psicologia...)',
           ),
-          
+
           const SizedBox(height: 16),
           Text(
             'Status do curso:',
@@ -980,17 +988,20 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Opções de status de fumante
           Column(
             children: [
-              _buildSmokingOption('sim_frequentemente', 'Sim, frequentemente', Icons.smoking_rooms),
+              _buildSmokingOption('sim_frequentemente', 'Sim, frequentemente',
+                  Icons.smoking_rooms),
               const SizedBox(height: 12),
-              _buildSmokingOption('sim_as_vezes', 'Sim, às vezes', Icons.smoking_rooms_outlined),
+              _buildSmokingOption('sim_as_vezes', 'Sim, às vezes',
+                  Icons.smoking_rooms_outlined),
               const SizedBox(height: 12),
               _buildSmokingOption('nao', 'Não', Icons.smoke_free),
               const SizedBox(height: 12),
-              _buildSmokingOption('prefiro_nao_informar', 'Prefiro não informar', Icons.help_outline),
+              _buildSmokingOption('prefiro_nao_informar',
+                  'Prefiro não informar', Icons.help_outline),
             ],
           ),
         ],
@@ -1000,7 +1011,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
 
   Widget _buildSmokingOption(String value, String label, IconData icon) {
     final isSelected = _selectedSmokingStatus == value;
-    
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -1087,17 +1098,20 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Opções de status de bebida
           Column(
             children: [
-              _buildDrinkingOption('sim_frequentemente', 'Sim, frequentemente', Icons.local_bar),
+              _buildDrinkingOption(
+                  'sim_frequentemente', 'Sim, frequentemente', Icons.local_bar),
               const SizedBox(height: 12),
-              _buildDrinkingOption('sim_as_vezes', 'Sim, às vezes', Icons.local_bar_outlined),
+              _buildDrinkingOption(
+                  'sim_as_vezes', 'Sim, às vezes', Icons.local_bar_outlined),
               const SizedBox(height: 12),
               _buildDrinkingOption('nao', 'Não', Icons.block),
               const SizedBox(height: 12),
-              _buildDrinkingOption('prefiro_nao_informar', 'Prefiro não informar', Icons.help_outline),
+              _buildDrinkingOption('prefiro_nao_informar',
+                  'Prefiro não informar', Icons.help_outline),
             ],
           ),
         ],
@@ -1107,7 +1121,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
 
   Widget _buildDrinkingOption(String value, String label, IconData icon) {
     final isSelected = _selectedDrinkingStatus == value;
-    
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -1291,8 +1305,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
         );
         return;
       }
-      
-      if (_selectedUniversityCourse == null || _selectedUniversityCourse!.isEmpty) {
+
+      if (_selectedUniversityCourse == null ||
+          _selectedUniversityCourse!.isEmpty) {
         Get.snackbar(
           'Atenção',
           'Selecione o curso que você fez/está fazendo',
@@ -1302,7 +1317,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
         );
         return;
       }
-      
+
       if (_selectedCourseStatus == null || _selectedCourseStatus!.isEmpty) {
         Get.snackbar(
           'Atenção',
@@ -1322,7 +1337,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
     try {
       // Determinar cidade final
       final finalCity = _selectedCity ?? _cityController.text.trim();
-      
+
       // Gerar localização formatada usando o novo sistema
       final fullLocation = _buildFullLocation();
 
@@ -1346,8 +1361,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
         'hobbies': _selectedHobbies.isNotEmpty ? _selectedHobbies : null,
       };
 
-      await SpiritualProfileRepository.updateProfile(widget.profile.id!, updates);
-      
+      await SpiritualProfileRepository.updateProfile(
+          widget.profile.id!, updates);
+
       // Mark task as completed
       await SpiritualProfileRepository.updateTaskCompletion(
         widget.profile.id!,
@@ -1378,7 +1394,6 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
           duration: const Duration(seconds: 2),
         );
       }
-
     } catch (e) {
       Get.snackbar(
         'Erro',

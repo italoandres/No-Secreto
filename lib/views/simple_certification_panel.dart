@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 📋 Painel Simples de Certificações
-/// 
+///
 /// Versão simplificada para testar se o problema é de complexidade
 class SimpleCertificationPanel extends StatelessWidget {
   const SimpleCertificationPanel({Key? key}) : super(key: key);
@@ -131,12 +131,15 @@ class SimpleCertificationPanel extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              onPressed: () => _approveCertification(context, doc.id, data),
-                              icon: const Icon(Icons.check, color: Colors.green),
+                              onPressed: () =>
+                                  _approveCertification(context, doc.id, data),
+                              icon:
+                                  const Icon(Icons.check, color: Colors.green),
                               tooltip: 'Aprovar',
                             ),
                             IconButton(
-                              onPressed: () => _rejectCertification(context, doc.id, data),
+                              onPressed: () =>
+                                  _rejectCertification(context, doc.id, data),
                               icon: const Icon(Icons.close, color: Colors.red),
                               tooltip: 'Reprovar',
                             ),
@@ -204,7 +207,8 @@ class SimpleCertificationPanel extends StatelessWidget {
     );
   }
 
-  Future<void> _approveCertification(BuildContext context, String docId, Map<String, dynamic> data) async {
+  Future<void> _approveCertification(
+      BuildContext context, String docId, Map<String, dynamic> data) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -256,7 +260,8 @@ class SimpleCertificationPanel extends StatelessWidget {
     }
   }
 
-  Future<void> _rejectCertification(BuildContext context, String docId, Map<String, dynamic> data) async {
+  Future<void> _rejectCertification(
+      BuildContext context, String docId, Map<String, dynamic> data) async {
     final reasonController = TextEditingController();
 
     final confirmed = await showDialog<bool>(

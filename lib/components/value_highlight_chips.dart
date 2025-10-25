@@ -418,7 +418,8 @@ class ValueHighlightChips extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: isHighlighted ? color : const Color(0xFF2C3E50),
+                          color:
+                              isHighlighted ? color : const Color(0xFF2C3E50),
                           letterSpacing: 0.3,
                         ),
                       ),

@@ -389,7 +389,7 @@ class USALocationsData {
   static List<String> getCitiesForState(String state) {
     return citiesByState[state] ?? [];
   }
-  
+
   /// Retorna a sigla de um estado
   static String? getStateAbbreviation(String state) {
     return stateAbbreviations[state];

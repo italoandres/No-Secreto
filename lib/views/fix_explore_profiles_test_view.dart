@@ -22,9 +22,9 @@ class FixExploreProfilesTestView extends StatelessWidget {
           children: [
             // Banner de aviso
             ProfileVisibilityBanner(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Título principal
             Container(
               width: double.infinity,
@@ -58,9 +58,9 @@ class FixExploreProfilesTestView extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Problemas identificados
             Container(
               width: double.infinity,
@@ -85,13 +85,14 @@ class FixExploreProfilesTestView extends StatelessWidget {
                   _buildProblemItem('❌ Perfis encontrados: 0'),
                   _buildProblemItem('❌ Seu perfil não está visível'),
                   _buildProblemItem('❌ Faltam dados de teste'),
-                  _buildProblemItem('❌ Índices do Firebase podem estar faltando'),
+                  _buildProblemItem(
+                      '❌ Índices do Firebase podem estar faltando'),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Solução
             Container(
               width: double.infinity,
@@ -120,19 +121,19 @@ class FixExploreProfilesTestView extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Botão principal de execução
             ExecuteCompleteFixNow.buildFixButton(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botão alternativo
             QuickFixProfileButton(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Instruções
             Container(
               width: double.infinity,
@@ -155,10 +156,13 @@ class FixExploreProfilesTestView extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildInstructionItem('1. Clique no botão vermelho acima'),
-                  _buildInstructionItem('2. Aguarde a execução (30-60 segundos)'),
-                  _buildInstructionItem('3. Toque no ícone 🔍 na barra superior'),
+                  _buildInstructionItem(
+                      '2. Aguarde a execução (30-60 segundos)'),
+                  _buildInstructionItem(
+                      '3. Toque no ícone 🔍 na barra superior'),
                   _buildInstructionItem('4. Você deve ver 7 perfis agora'),
-                  _buildInstructionItem('5. Busque por "italo", "maria" ou "joão"'),
+                  _buildInstructionItem(
+                      '5. Busque por "italo", "maria" ou "joão"'),
                   _buildInstructionItem('6. Seu perfil deve aparecer na busca'),
                 ],
               ),
@@ -168,7 +172,7 @@ class FixExploreProfilesTestView extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildProblemItem(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -181,7 +185,7 @@ class FixExploreProfilesTestView extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildSolutionItem(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -194,7 +198,7 @@ class FixExploreProfilesTestView extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInstructionItem(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),

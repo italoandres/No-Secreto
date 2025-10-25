@@ -57,9 +57,9 @@ class HomeWithFixButton extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Aviso sobre o problema
             Container(
               width: double.infinity,
@@ -99,9 +99,9 @@ class HomeWithFixButton extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Solução
             Container(
               width: double.infinity,
@@ -144,14 +144,14 @@ class HomeWithFixButton extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // BOTÃO PRINCIPAL - ESTE É O BOTÃO QUE RESOLVE TUDO!
             NavigateToFixScreen.buildNavigationButton(context),
-            
+
             const SizedBox(height: 24),
-            
+
             // Instruções simples
             Container(
               width: double.infinity,
@@ -184,16 +184,18 @@ class HomeWithFixButton extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildStep('1', 'Clique no botão azul acima'),
-                  _buildStep('2', 'Na tela que abrir, clique no botão vermelho'),
-                  _buildStep('3', 'Aguarde 1 minuto (o sistema faz tudo sozinho)'),
+                  _buildStep(
+                      '2', 'Na tela que abrir, clique no botão vermelho'),
+                  _buildStep(
+                      '3', 'Aguarde 1 minuto (o sistema faz tudo sozinho)'),
                   _buildStep('4', 'Teste o ícone 🔍 na barra superior'),
                   _buildStep('5', 'Pronto! Agora você aparece nas buscas!'),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Resultado esperado
             Container(
               width: double.infinity,
@@ -241,7 +243,7 @@ class HomeWithFixButton extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildStep(String number, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

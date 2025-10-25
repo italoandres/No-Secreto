@@ -16,7 +16,7 @@ class StoryAuthorHelper {
       } catch (e) {
         // Se não encontrar em stories_files, tentar em outras coleções
       }
-      
+
       // Tentar em stories_sinais_isaque
       try {
         await FirebaseFirestore.instance
@@ -28,7 +28,7 @@ class StoryAuthorHelper {
       } catch (e) {
         // Se não encontrar, tentar próxima coleção
       }
-      
+
       // Tentar em stories_sinais_rebeca
       try {
         await FirebaseFirestore.instance
@@ -44,7 +44,7 @@ class StoryAuthorHelper {
       print('Erro ao adicionar autor ao story: $e');
     }
   }
-  
+
   // Obter ID do autor de um story
   static Future<String?> getStoryAuthorId(String storyId) async {
     try {
@@ -54,49 +54,49 @@ class StoryAuthorHelper {
             .collection('stories_files')
             .doc(storyId)
             .get();
-        
+
         if (doc.exists && doc.data()?['authorId'] != null) {
           return doc.data()!['authorId'] as String;
         }
       } catch (e) {
         // Continuar para próxima coleção
       }
-      
+
       // Tentar em stories_sinais_isaque
       try {
         final doc = await FirebaseFirestore.instance
             .collection('stories_sinais_isaque')
             .doc(storyId)
             .get();
-        
+
         if (doc.exists && doc.data()?['authorId'] != null) {
           return doc.data()!['authorId'] as String;
         }
       } catch (e) {
         // Continuar para próxima coleção
       }
-      
+
       // Tentar em stories_sinais_rebeca
       try {
         final doc = await FirebaseFirestore.instance
             .collection('stories_sinais_rebeca')
             .doc(storyId)
             .get();
-        
+
         if (doc.exists && doc.data()?['authorId'] != null) {
           return doc.data()!['authorId'] as String;
         }
       } catch (e) {
         // Story não encontrado
       }
-      
+
       return null;
     } catch (e) {
       print('Erro ao buscar autor do story: $e');
       return null;
     }
   }
-  
+
   // Marcar story atual como criado pelo usuário logado
   static Future<void> markCurrentUserAsAuthor(String storyId) async {
     final currentUser = FirebaseAuth.instance.currentUser;

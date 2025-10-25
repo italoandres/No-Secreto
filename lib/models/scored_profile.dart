@@ -61,10 +61,12 @@ class ScoredProfile {
   String? get purpose => profileData['purpose'] as String?;
 
   /// Certificação espiritual
-  bool get hasCertification => profileData['hasCertification'] as bool? ?? false;
+  bool get hasCertification =>
+      profileData['hasCertification'] as bool? ?? false;
 
   /// Membro do movimento Deus é Pai
-  bool get isDeusEPaiMember => profileData['isDeusEPaiMember'] as bool? ?? false;
+  bool get isDeusEPaiMember =>
+      profileData['isDeusEPaiMember'] as bool? ?? false;
 
   /// Status de virgindade
   String? get virginityStatus => profileData['virginityStatus'] as String?;
@@ -111,7 +113,8 @@ class ScoredProfile {
   int get commonHobbies => profileData['commonHobbies'] as int? ?? 0;
 
   /// Se corresponde à preferência de virgindade (será calculado pelo serviço)
-  bool get matchesVirginityPreference => profileData['matchesVirginityPreference'] as bool? ?? false;
+  bool get matchesVirginityPreference =>
+      profileData['matchesVirginityPreference'] as bool? ?? false;
 
   /// Distância formatada
   String get formattedDistance {

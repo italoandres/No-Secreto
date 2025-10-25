@@ -119,7 +119,7 @@ class Match {
   /// Marca como visualizado por um usuário
   Match markAsViewedBy(String userId) {
     if (users.isEmpty || users.length < 2) return this;
-    
+
     if (users[0] == userId && !viewedByUser1) {
       return copyWith(viewedByUser1: true);
     }

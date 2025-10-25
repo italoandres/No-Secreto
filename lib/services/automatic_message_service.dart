@@ -8,7 +8,7 @@ import 'package:whatsapp_chat/models/usuario_model.dart';
 class AutomaticMessageService {
   static Timer? _timer;
   static const Duration _inactivityDuration = Duration(days: 3);
-  
+
   // Inicializar o serviço de mensagens automáticas
   static void initialize() {
     _startInactivityTimer();
@@ -53,10 +53,9 @@ class AutomaticMessageService {
       await ChatRepository.sendAutomaticPaiMessageToContext('sinais_rebeca');
 
       print('Mensagens automáticas do Pai enviadas após 3 dias de inatividade');
-      
+
       // Reiniciar o timer para o próximo ciclo
       _startInactivityTimer();
-      
     } catch (e) {
       print('Erro ao enviar mensagens automáticas: $e');
       // Reiniciar o timer mesmo em caso de erro
@@ -105,7 +104,6 @@ class AutomaticMessageService {
 
       // Se não encontrou atividade em nenhum chat, usuário está inativo
       return true;
-      
     } catch (e) {
       print('Erro ao verificar inatividade do usuário: $e');
       return false;
@@ -125,7 +123,7 @@ class AutomaticMessageService {
   // Obter tempo restante até a próxima mensagem
   static Duration? getTimeUntilNextMessage() {
     if (_timer == null || !_timer!.isActive) return null;
-    
+
     // Como Timer não expõe o tempo restante, retornamos uma estimativa
     // baseada no tempo de inatividade configurado
     return _inactivityDuration;

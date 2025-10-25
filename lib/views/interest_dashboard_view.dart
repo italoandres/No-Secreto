@@ -18,9 +18,8 @@ class InterestDashboardView extends StatefulWidget {
 
 class _InterestDashboardViewState extends State<InterestDashboardView>
     with SingleTickerProviderStateMixin {
-  
   final InterestSystemIntegrator _integrator = InterestSystemIntegrator();
-  
+
   late TabController _tabController;
   Map<String, int> _stats = {};
   bool _isLoadingStats = true;
@@ -53,15 +52,12 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
         });
       }
 
-      EnhancedLogger.info('Dashboard data loaded', 
-        tag: 'INTEREST_DASHBOARD',
-        data: {'stats': stats}
-      );
+      EnhancedLogger.info('Dashboard data loaded',
+          tag: 'INTEREST_DASHBOARD', data: {'stats': stats});
     } catch (e) {
-      EnhancedLogger.error('Erro ao carregar dados do dashboard: $e', 
-        tag: 'INTEREST_DASHBOARD'
-      );
-      
+      EnhancedLogger.error('Erro ao carregar dados do dashboard: $e',
+          tag: 'INTEREST_DASHBOARD');
+
       if (mounted) {
         setState(() {
           _isLoadingStats = false;
@@ -118,7 +114,10 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.pink.withOpacity(0.1), Colors.purple.withOpacity(0.1)],
+                colors: [
+                  Colors.pink.withOpacity(0.1),
+                  Colors.purple.withOpacity(0.1)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -153,26 +152,30 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Lista de notificações
           StreamBuilder<List<InterestNotificationModel>>(
-            stream: InterestNotificationRepository.getUserInterestNotifications(currentUser.uid),
+            stream: InterestNotificationRepository.getUserInterestNotifications(
+                currentUser.uid),
             builder: (context, snapshot) {
               // DEBUG: Log do estado do stream
-              print('🔍 [INTEREST_DASHBOARD] Stream state: ${snapshot.connectionState}');
+              print(
+                  '🔍 [INTEREST_DASHBOARD] Stream state: ${snapshot.connectionState}');
               print('🔍 [INTEREST_DASHBOARD] Has error: ${snapshot.hasError}');
               print('🔍 [INTEREST_DASHBOARD] Has data: ${snapshot.hasData}');
-              print('🔍 [INTEREST_DASHBOARD] Data length: ${snapshot.data?.length ?? 0}');
-              
+              print(
+                  '🔍 [INTEREST_DASHBOARD] Data length: ${snapshot.data?.length ?? 0}');
+
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 print('📋 [INTEREST_DASHBOARD] Notificações recebidas:');
                 for (var notif in snapshot.data!) {
-                  print('   - ID: ${notif.id}, Type: ${notif.type}, Status: ${notif.status}, From: ${notif.fromUserName}');
+                  print(
+                      '   - ID: ${notif.id}, Type: ${notif.type}, Status: ${notif.status}, From: ${notif.fromUserName}');
                 }
               }
-              
+
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -180,7 +183,8 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
               if (snapshot.hasError) {
                 print('❌ [INTEREST_DASHBOARD] Erro: ${snapshot.error}');
                 return Center(
-                  child: Text('Erro ao carregar notificações: ${snapshot.error}'),
+                  child:
+                      Text('Erro ao carregar notificações: ${snapshot.error}'),
                 );
               }
 
@@ -203,7 +207,8 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
                 );
               }
 
-              print('✅ [INTEREST_DASHBOARD] Exibindo ${notifications.length} notificações');
+              print(
+                  '✅ [INTEREST_DASHBOARD] Exibindo ${notifications.length} notificações');
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -226,8 +231,6 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
     );
   }
 
-
-
   Widget _buildStatsTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -236,9 +239,9 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
         children: [
           // Estatísticas principais
           _buildStatsCards(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Informações adicionais
           _buildInfoCard(),
         ],
@@ -340,7 +343,8 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
     );
   }
 
-  Widget _buildClickableStatCard(String label, int value, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildClickableStatCard(
+      String label, int value, IconData icon, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

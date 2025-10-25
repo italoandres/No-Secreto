@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UsuarioModel {
@@ -49,13 +48,15 @@ class UsuarioModel {
       dataCadastro: json['dataCadastro'],
       isAdmin: json['isAdmin'] ?? false,
       senhaIsSeted: json['senhaIsSeted'] ?? false,
-      sexo: json['sexo'] == null ? UserSexo.none : UserSexo.values.byName(json['sexo']),
+      sexo: json['sexo'] == null
+          ? UserSexo.none
+          : UserSexo.values.byName(json['sexo']),
       username: json['username'],
-      usernameHistory: json['usernameHistory'] != null 
-          ? List<String>.from(json['usernameHistory']) 
+      usernameHistory: json['usernameHistory'] != null
+          ? List<String>.from(json['usernameHistory'])
           : null,
       usernameChangedAt: json['usernameChangedAt'],
-      lastSyncAt: json['lastSyncAt'] != null 
+      lastSyncAt: json['lastSyncAt'] != null
           ? (json['lastSyncAt'] as Timestamp).toDate()
           : null,
       lastSeen: json['lastSeen'], // ✨ NOVO

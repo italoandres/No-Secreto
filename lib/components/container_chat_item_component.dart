@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -12,7 +11,6 @@ import '/models/usuario_model.dart';
 import '/theme.dart';
 
 class ContainerChatItemComponent extends StatefulWidget {
-
   final ChatModel item;
   final bool showArrow;
   final Widget child;
@@ -20,14 +18,23 @@ class ContainerChatItemComponent extends StatefulWidget {
   final bool isAdmin;
   final String? username;
   final UserSexo? userSexo; // Adicionar sexo do usuário
-  const ContainerChatItemComponent({super.key, required this.item, required this.showArrow, required this.child, required this.userName, required this.isAdmin, this.username, this.userSexo});
+  const ContainerChatItemComponent(
+      {super.key,
+      required this.item,
+      required this.showArrow,
+      required this.child,
+      required this.userName,
+      required this.isAdmin,
+      this.username,
+      this.userSexo});
 
   @override
-  State<ContainerChatItemComponent> createState() => _ContainerChatItemComponentState();
+  State<ContainerChatItemComponent> createState() =>
+      _ContainerChatItemComponentState();
 }
 
-class _ContainerChatItemComponentState extends State<ContainerChatItemComponent> {
-  
+class _ContainerChatItemComponentState
+    extends State<ContainerChatItemComponent> {
   // Método para determinar a cor do nome baseada no sexo
   Color _getNameColor() {
     if (widget.userSexo == UserSexo.feminino) {
@@ -38,10 +45,10 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
       return const Color(0xFF1ebea5); // Cor padrão (verde)
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    if(widget.item.orginemAdmin == true) {
+    if (widget.item.orginemAdmin == true) {
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
         child: Stack(
@@ -59,46 +66,47 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
                           ChatController.idItensToTrash.add(widget.item.id);
                         },
                         onTap: () {
-                          if(ChatController.idItensToTrash.isNotEmpty) {
+                          if (ChatController.idItensToTrash.isNotEmpty) {
                             ChatController.idItensToTrash.add(widget.item.id);
                           }
                         },
                         child: Container(
                           decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              bottomLeft: Radius.circular(8),
-                              bottomRight: Radius.circular(8),
-                            ),
-                            color: AppTheme.chatBalaoColor
-                          ),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                              color: AppTheme.chatBalaoColor),
                           padding: const EdgeInsets.only(
-                            left: 12, right: 12, top: 12, bottom: 16
-                          ),
+                              left: 12, right: 12, top: 12, bottom: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                margin: const EdgeInsets.only(right: 16, bottom: 8),
-                                child: InkWell(
-                                  onDoubleTap: () => _alterarData(), 
-                                  child: Text(AppLanguage.lang('pai'), overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white))
-                                )
-                              ),
+                                  margin: const EdgeInsets.only(
+                                      right: 16, bottom: 8),
+                                  child: InkWell(
+                                      onDoubleTap: () => _alterarData(),
+                                      child: Text(AppLanguage.lang('pai'),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white)))),
                               Stack(
                                 children: [
                                   Container(
-                                    constraints: BoxConstraints(
-                                      minWidth: 150,
-                                      maxWidth: Get.width * 0.6
-                                    ),
-                                    child: widget.child
-                                  ),
+                                      constraints: BoxConstraints(
+                                          minWidth: 150,
+                                          maxWidth: Get.width * 0.6),
+                                      child: widget.child),
                                   Positioned.fill(
-                                    child: Obx(() => ChatController.idItensToTrash.isEmpty ? const SizedBox() : Container(
-                                      color: Colors.transparent,
-                                    ))
-                                  )
+                                      child: Obx(() =>
+                                          ChatController.idItensToTrash.isEmpty
+                                              ? const SizedBox()
+                                              : Container(
+                                                  color: Colors.transparent,
+                                                )))
                                 ],
                               ),
                             ],
@@ -111,25 +119,38 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(DateFormat('HH:mm').format(widget.item.dataCadastro!.toDate()), style: const TextStyle(fontSize: 10, color: Colors.white70)),
+                            Text(
+                                DateFormat('HH:mm')
+                                    .format(widget.item.dataCadastro!.toDate()),
+                                style: const TextStyle(
+                                    fontSize: 10, color: Colors.white70)),
                             const SizedBox(width: 4),
-                            Image.asset('lib/assets/img/read.png', width: 15, color: AppTheme.materialColor)
+                            Image.asset('lib/assets/img/read.png',
+                                width: 15, color: AppTheme.materialColor)
                           ],
                         ),
                       )
                     ],
                   ),
-                  widget.showArrow == false ? const SizedBox(width: 8) : Image.asset('lib/assets/img/mini_arrow.png', width: 8, color: AppTheme.chatBalaoColor),
+                  widget.showArrow == false
+                      ? const SizedBox(width: 8)
+                      : Image.asset('lib/assets/img/mini_arrow.png',
+                          width: 8, color: AppTheme.chatBalaoColor),
                 ],
               ),
             ),
             Positioned.fill(
-              child: Obx(() => !ChatController.idItensToTrash.contains(widget.item.id) ? const SizedBox() : InkWell(
-                onTap: () => ChatController.idItensToTrash.removeWhere((element) => element == widget.item.id),
-                child: Container(
-                  color: AppTheme.materialColor.shade200,
-                ),
-              )),
+              child: Obx(
+                  () => !ChatController.idItensToTrash.contains(widget.item.id)
+                      ? const SizedBox()
+                      : InkWell(
+                          onTap: () => ChatController.idItensToTrash
+                              .removeWhere(
+                                  (element) => element == widget.item.id),
+                          child: Container(
+                            color: AppTheme.materialColor.shade200,
+                          ),
+                        )),
             )
           ],
         ),
@@ -145,7 +166,10 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                widget.showArrow == false ? const SizedBox(width: 8) : Image.asset('lib/assets/img/mini_arrow_2.png', width: 8, color: AppTheme.chatBalaoColor),
+                widget.showArrow == false
+                    ? const SizedBox(width: 8)
+                    : Image.asset('lib/assets/img/mini_arrow_2.png',
+                        width: 8, color: AppTheme.chatBalaoColor),
                 Stack(
                   children: [
                     GestureDetector(
@@ -153,52 +177,51 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
                         ChatController.idItensToTrash.add(widget.item.id);
                       },
                       onTap: () {
-                        if(ChatController.idItensToTrash.isNotEmpty) {
+                        if (ChatController.idItensToTrash.isNotEmpty) {
                           ChatController.idItensToTrash.add(widget.item.id);
                         }
                       },
                       child: Container(
                         decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(8),
-                            bottomLeft: Radius.circular(8),
-                            bottomRight: Radius.circular(8),
-                          ),
-                          color: AppTheme.chatBalaoColor
-                        ),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(8),
+                              bottomLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                            color: AppTheme.chatBalaoColor),
                         padding: const EdgeInsets.only(
-                          left: 12, right: 12, top: 12, bottom: 16
-                        ),
+                            left: 12, right: 12, top: 12, bottom: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              margin: const EdgeInsets.only(right: 16, bottom: 8),
-                              child: InkWell(
-                                onDoubleTap: () => _alterarData(),
-                                child: Text(
-                                  widget.username != null && widget.username!.isNotEmpty 
-                                    ? '${widget.userName} (@${widget.username})'
-                                    : widget.userName, 
-                                  overflow: TextOverflow.ellipsis, 
-                                  style: TextStyle(fontWeight: FontWeight.w500, color: _getNameColor())
-                                )
-                              )
-                            ),
+                                margin:
+                                    const EdgeInsets.only(right: 16, bottom: 8),
+                                child: InkWell(
+                                    onDoubleTap: () => _alterarData(),
+                                    child: Text(
+                                        widget.username != null &&
+                                                widget.username!.isNotEmpty
+                                            ? '${widget.userName} (@${widget.username})'
+                                            : widget.userName,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            color: _getNameColor())))),
                             Stack(
                               children: [
                                 Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 150,
-                                    maxWidth: Get.width * 0.6
-                                  ),
-                                  child: widget.child
-                                ),
+                                    constraints: BoxConstraints(
+                                        minWidth: 150,
+                                        maxWidth: Get.width * 0.6),
+                                    child: widget.child),
                                 Positioned.fill(
-                                  child: Obx(() => ChatController.idItensToTrash.isEmpty ? const SizedBox() : Container(
-                                    color: Colors.transparent,
-                                  ))
-                                )
+                                    child: Obx(() =>
+                                        ChatController.idItensToTrash.isEmpty
+                                            ? const SizedBox()
+                                            : Container(
+                                                color: Colors.transparent,
+                                              )))
                               ],
                             ),
                           ],
@@ -211,9 +234,13 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text('${AppLanguage.lang('visualizou_as')} ${DateFormat('HH:mm').format(widget.item.dataCadastro!.toDate())}', style: const TextStyle(fontSize: 10, color: Colors.white70)),
+                          Text(
+                              '${AppLanguage.lang('visualizou_as')} ${DateFormat('HH:mm').format(widget.item.dataCadastro!.toDate())}',
+                              style: const TextStyle(
+                                  fontSize: 10, color: Colors.white70)),
                           const SizedBox(width: 4),
-                          Image.asset('lib/assets/img/read.png', width: 15, color: AppTheme.materialColor)
+                          Image.asset('lib/assets/img/read.png',
+                              width: 15, color: AppTheme.materialColor)
                         ],
                       ),
                     )
@@ -223,12 +250,16 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
             ),
           ),
           Positioned.fill(
-            child: Obx(() => !ChatController.idItensToTrash.contains(widget.item.id) ? const SizedBox() : InkWell(
-              onTap: () => ChatController.idItensToTrash.removeWhere((element) => element == widget.item.id),
-              child: Container(
-                color: AppTheme.materialColor.shade200,
-              ),
-            )),
+            child: Obx(
+                () => !ChatController.idItensToTrash.contains(widget.item.id)
+                    ? const SizedBox()
+                    : InkWell(
+                        onTap: () => ChatController.idItensToTrash.removeWhere(
+                            (element) => element == widget.item.id),
+                        child: Container(
+                          color: AppTheme.materialColor.shade200,
+                        ),
+                      )),
           )
         ],
       ),
@@ -236,60 +267,64 @@ class _ContainerChatItemComponentState extends State<ContainerChatItemComponent>
   }
 
   _alterarData() async {
-    if(widget.isAdmin != true) {
+    if (widget.isAdmin != true) {
       return;
     }
     DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: widget.item.dataCadastro!.toDate(),
-      locale: const Locale('pt', 'BR'),
-      firstDate:DateTime(2000),
-      lastDate: DateTime(2101)
-    );
+        context: context,
+        initialDate: widget.item.dataCadastro!.toDate(),
+        locale: const Locale('pt', 'BR'),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2101));
 
-    if(pickedDate != null) {
-      
+    if (pickedDate != null) {
       Future.delayed(Duration.zero, () async {
-        
         TimeOfDay? newTime = await showTimePicker(
           context: context,
-          initialTime: TimeOfDay(hour: widget.item.dataCadastro!.toDate().hour, minute: widget.item.dataCadastro!.toDate().minute),
+          initialTime: TimeOfDay(
+              hour: widget.item.dataCadastro!.toDate().hour,
+              minute: widget.item.dataCadastro!.toDate().minute),
         );
 
-        if(newTime != null) {
-          DateTime newDate = pickedDate.add(Duration(hours: newTime.hour, minutes: newTime.minute, seconds: widget.item.dataCadastro!.toDate().second));
+        if (newTime != null) {
+          DateTime newDate = pickedDate.add(Duration(
+              hours: newTime.hour,
+              minutes: newTime.minute,
+              seconds: widget.item.dataCadastro!.toDate().second));
 
-          final inputController = TextEditingController(text: DateFormat('dd/MM/y HH:mm:ss').format(newDate));
+          final inputController = TextEditingController(
+              text: DateFormat('dd/MM/y HH:mm:ss').format(newDate));
 
           Get.defaultDialog(
-            title: AppLanguage.lang('salvar'),
-            content: TextField(
-              autofocus: true,
-              textAlign: TextAlign.center,
-              controller: inputController,
-              inputFormatters: [
-                MaskTextInputFormatter(
-                  initialText: DateFormat('dd/MM/y HH:mm:ss').format(newDate),
-                  mask: '##/##/#### ##:##:##', 
-                  filter: { "#": RegExp(r'[0-9]') },
-                )
-              ],
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () => Get.back(),
-                child: Text(AppLanguage.lang('cancelar')),
+              title: AppLanguage.lang('salvar'),
+              content: TextField(
+                autofocus: true,
+                textAlign: TextAlign.center,
+                controller: inputController,
+                inputFormatters: [
+                  MaskTextInputFormatter(
+                    initialText: DateFormat('dd/MM/y HH:mm:ss').format(newDate),
+                    mask: '##/##/#### ##:##:##',
+                    filter: {"#": RegExp(r'[0-9]')},
+                  )
+                ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Get.back();
-                  DateTime tempDate = DateFormat("dd/MM/y HH:mm:ss").parse(inputController.text);
-                  ChatRepository.updateDataCadastroItem(id: widget.item.id!, data: tempDate);
-                },
-                child: Text(AppLanguage.lang('salvar')),
-              ),
-            ]
-          );
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  child: Text(AppLanguage.lang('cancelar')),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    DateTime tempDate = DateFormat("dd/MM/y HH:mm:ss")
+                        .parse(inputController.text);
+                    ChatRepository.updateDataCadastroItem(
+                        id: widget.item.id!, data: tempDate);
+                  },
+                  child: Text(AppLanguage.lang('salvar')),
+                ),
+              ]);
         }
       });
     }

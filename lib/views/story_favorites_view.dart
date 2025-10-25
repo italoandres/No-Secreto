@@ -11,7 +11,7 @@ import '../utils/context_utils.dart';
 
 class StoryFavoritesView extends StatefulWidget {
   final String? contexto; // Contexto específico ou null para todos
-  
+
   const StoryFavoritesView({super.key, this.contexto});
 
   @override
@@ -25,21 +25,25 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
   @override
   void initState() {
     super.initState();
-    
+
     // Validar contexto no início
     if (widget.contexto != null) {
-      final normalizedContext = ContextValidator.normalizeContext(widget.contexto);
-      if (!ContextValidator.validateAndLog(widget.contexto, 'StoryFavoritesView_initState')) {
-        ContextDebug.logCriticalError('StoryFavoritesView', 'Contexto inválido no initState', normalizedContext);
+      final normalizedContext =
+          ContextValidator.normalizeContext(widget.contexto);
+      if (!ContextValidator.validateAndLog(
+          widget.contexto, 'StoryFavoritesView_initState')) {
+        ContextDebug.logCriticalError('StoryFavoritesView',
+            'Contexto inválido no initState', normalizedContext);
       }
-      
-      ContextDebug.logSummary('StoryFavoritesView_initState', normalizedContext, {
+
+      ContextDebug.logSummary(
+          'StoryFavoritesView_initState', normalizedContext, {
         'originalContext': widget.contexto,
         'normalizedContext': normalizedContext,
         'operation': 'INIT_FAVORITES_VIEW'
       });
     }
-    
+
     _loadFavoriteStories();
   }
 
@@ -52,30 +56,39 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
       }
 
       // Validar e normalizar contexto
-      final normalizedContext = widget.contexto != null 
+      final normalizedContext = widget.contexto != null
           ? ContextValidator.normalizeContext(widget.contexto!)
           : null;
-      
-      if (widget.contexto != null && !ContextValidator.validateAndLog(widget.contexto, 'StoryFavoritesView_loadFavorites')) {
-        ContextDebug.logCriticalError('StoryFavoritesView', 'Contexto inválido, usando contexto normalizado', normalizedContext!);
+
+      if (widget.contexto != null &&
+          !ContextValidator.validateAndLog(
+              widget.contexto, 'StoryFavoritesView_loadFavorites')) {
+        ContextDebug.logCriticalError(
+            'StoryFavoritesView',
+            'Contexto inválido, usando contexto normalizado',
+            normalizedContext!);
       }
 
-      ContextDebug.logSummary('StoryFavoritesView_loadFavorites', normalizedContext ?? 'ALL', {
+      ContextDebug.logSummary(
+          'StoryFavoritesView_loadFavorites', normalizedContext ?? 'ALL', {
         'originalContext': widget.contexto,
         'normalizedContext': normalizedContext,
         'operation': 'LOAD_FAVORITE_STORIES'
       });
 
       // Escutar mudanças nos favoritos do usuário
-      final favoritesStream = normalizedContext != null 
-          ? StoryInteractionsRepository.getUserFavoritesStream(contexto: normalizedContext)
+      final favoritesStream = normalizedContext != null
+          ? StoryInteractionsRepository.getUserFavoritesStream(
+              contexto: normalizedContext)
           : StoryInteractionsRepository.getAllUserFavoritesStream();
-          
-      print('📚 FAVORITES VIEW: Usando stream para contexto: ${widget.contexto ?? "TODOS"}');
-          
+
+      print(
+          '📚 FAVORITES VIEW: Usando stream para contexto: ${widget.contexto ?? "TODOS"}');
+
       favoritesStream.listen((favoriteIds) async {
-        print('📚 FAVORITES VIEW: Recebidos ${favoriteIds.length} IDs de favoritos: $favoriteIds');
-        
+        print(
+            '📚 FAVORITES VIEW: Recebidos ${favoriteIds.length} IDs de favoritos: $favoriteIds');
+
         if (favoriteIds.isEmpty) {
           print('📚 FAVORITES VIEW: Nenhum favorito encontrado');
           if (mounted) {
@@ -90,56 +103,71 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
         // Buscar os stories favoritos
         List<StorieFileModel> stories = [];
         for (String storyId in favoriteIds) {
-          ContextDebug.logSummary('StoryFavoritesView_fetchStory', normalizedContext ?? 'ALL', {
-            'storyId': storyId,
-            'operation': 'FETCH_FAVORITE_STORY'
-          });
-          
+          ContextDebug.logSummary(
+              'StoryFavoritesView_fetchStory',
+              normalizedContext ?? 'ALL',
+              {'storyId': storyId, 'operation': 'FETCH_FAVORITE_STORY'});
+
           final story = await StoriesRepository.getStoryById(storyId);
           if (story != null) {
             // VALIDAÇÃO CRÍTICA: Verificar se o story pertence ao contexto esperado
             if (normalizedContext != null) {
-              if (!StoryContextFilter.validateStoryContext(story, normalizedContext)) {
-                ContextDebug.logCriticalError('StoryFavoritesView', 
-                  'VAZAMENTO CRÍTICO - Story favorito ${story.id} tem contexto "${story.contexto}" mas deveria ser "$normalizedContext"', 
-                  normalizedContext);
+              if (!StoryContextFilter.validateStoryContext(
+                  story, normalizedContext)) {
+                ContextDebug.logCriticalError(
+                    'StoryFavoritesView',
+                    'VAZAMENTO CRÍTICO - Story favorito ${story.id} tem contexto "${story.contexto}" mas deveria ser "$normalizedContext"',
+                    normalizedContext);
                 continue; // Pular este story
               }
             }
-            
-            ContextDebug.logSummary('StoryFavoritesView_storyFound', normalizedContext ?? 'ALL', {
+
+            ContextDebug.logSummary(
+                'StoryFavoritesView_storyFound', normalizedContext ?? 'ALL', {
               'storyId': storyId,
               'storyTitle': story.titulo ?? 'Sem título',
               'storyContext': story.contexto
             });
-            
+
             stories.add(story);
           } else {
-            ContextDebug.logCriticalError('StoryFavoritesView', 'Story favorito não encontrado para ID: $storyId', normalizedContext ?? 'ALL');
+            ContextDebug.logCriticalError(
+                'StoryFavoritesView',
+                'Story favorito não encontrado para ID: $storyId',
+                normalizedContext ?? 'ALL');
           }
         }
 
         // VALIDAÇÃO ADICIONAL: Filtrar stories por contexto se especificado
         if (normalizedContext != null) {
           final originalCount = stories.length;
-          stories = StoryContextFilter.filterByContext(stories, normalizedContext);
-          
+          stories =
+              StoryContextFilter.filterByContext(stories, normalizedContext);
+
           // Detectar vazamentos
-          final hasLeaks = StoryContextFilter.detectContextLeaks(stories, normalizedContext);
+          final hasLeaks =
+              StoryContextFilter.detectContextLeaks(stories, normalizedContext);
           if (hasLeaks) {
-            ContextDebug.logCriticalError('StoryFavoritesView', 'VAZAMENTOS DETECTADOS nos stories favoritos', normalizedContext);
+            ContextDebug.logCriticalError(
+                'StoryFavoritesView',
+                'VAZAMENTOS DETECTADOS nos stories favoritos',
+                normalizedContext);
           }
-          
-          ContextDebug.logFilter(normalizedContext, originalCount, stories.length, 'StoryFavoritesView_filterStories');
+
+          ContextDebug.logFilter(normalizedContext, originalCount,
+              stories.length, 'StoryFavoritesView_filterStories');
         }
 
-        ContextDebug.logSummary('StoryFavoritesView_storiesLoaded', normalizedContext ?? 'ALL', {
+        ContextDebug.logSummary(
+            'StoryFavoritesView_storiesLoaded', normalizedContext ?? 'ALL', {
           'totalStories': stories.length,
           'favoriteIds': favoriteIds.length
         });
 
         // Ordenar por data de favoritamento (mais recentes primeiro)
-        stories.sort((a, b) => (b.dataCadastro?.compareTo(a.dataCadastro ?? Timestamp.now()) ?? 0));
+        stories.sort((a, b) =>
+            (b.dataCadastro?.compareTo(a.dataCadastro ?? Timestamp.now()) ??
+                0));
 
         if (mounted) {
           setState(() {
@@ -160,20 +188,26 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
 
   String _getTitleByContext() {
     // Validar e normalizar contexto para o título
-    final normalizedContext = widget.contexto != null 
+    final normalizedContext = widget.contexto != null
         ? ContextValidator.normalizeContext(widget.contexto!)
         : null;
-    
-    if (widget.contexto != null && !ContextValidator.validateAndLog(widget.contexto, 'StoryFavoritesView_getTitle')) {
-      ContextDebug.logCriticalError('StoryFavoritesView', 'Contexto inválido para título, usando contexto normalizado', normalizedContext!);
+
+    if (widget.contexto != null &&
+        !ContextValidator.validateAndLog(
+            widget.contexto, 'StoryFavoritesView_getTitle')) {
+      ContextDebug.logCriticalError(
+          'StoryFavoritesView',
+          'Contexto inválido para título, usando contexto normalizado',
+          normalizedContext!);
     }
-    
-    ContextDebug.logSummary('StoryFavoritesView_getTitle', normalizedContext ?? 'ALL', {
+
+    ContextDebug.logSummary(
+        'StoryFavoritesView_getTitle', normalizedContext ?? 'ALL', {
       'originalContext': widget.contexto,
       'normalizedContext': normalizedContext,
       'operation': 'GENERATE_TITLE'
     });
-    
+
     switch (normalizedContext) {
       case 'sinais_rebeca':
         return 'Favoritos - Sinais Rebeca';
@@ -267,16 +301,16 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
       onTap: () {
         // Validar contexto do story antes de abrir o viewer
         final storyContext = ContextValidator.normalizeContext(story.contexto);
-        
+
         // VALIDAÇÃO ADICIONAL: Filtrar stories para garantir que apenas stories do contexto correto sejam passados
-        final contextToUse = widget.contexto != null 
+        final contextToUse = widget.contexto != null
             ? ContextValidator.normalizeContext(widget.contexto!)
             : storyContext;
-        
-        final validStories = widget.contexto != null 
+
+        final validStories = widget.contexto != null
             ? StoryContextFilter.filterByContext(favoriteStories, contextToUse)
             : favoriteStories;
-        
+
         ContextDebug.logSummary('StoryFavoritesView_openViewer', contextToUse, {
           'storyId': story.id,
           'storyContext': story.contexto,
@@ -286,22 +320,24 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
           'validStories': validStories.length,
           'initialIndex': index
         });
-        
+
         // Detectar vazamentos antes de abrir o viewer
         if (widget.contexto != null) {
-          final hasLeaks = StoryContextFilter.detectContextLeaks(favoriteStories, contextToUse);
+          final hasLeaks = StoryContextFilter.detectContextLeaks(
+              favoriteStories, contextToUse);
           if (hasLeaks) {
-            ContextDebug.logCriticalError('StoryFavoritesView', 'VAZAMENTOS DETECTADOS antes de abrir viewer', contextToUse);
+            ContextDebug.logCriticalError('StoryFavoritesView',
+                'VAZAMENTOS DETECTADOS antes de abrir viewer', contextToUse);
           }
         }
-        
+
         // Abrir story viewer começando do story selecionado
         Get.to(() => EnhancedStoriesViewerView(
-          contexto: contextToUse, // USAR CONTEXTO VALIDADO
-          userSexo: null,
-          initialStories: validStories, // USAR STORIES VALIDADOS
-          initialIndex: index,
-        ));
+              contexto: contextToUse, // USAR CONTEXTO VALIDADO
+              userSexo: null,
+              initialStories: validStories, // USAR STORIES VALIDADOS
+              initialIndex: index,
+            ));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -318,7 +354,7 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
             children: [
               // Thumbnail da mídia
               _buildMediaThumbnail(story),
-              
+
               // Overlay com informações
               Positioned(
                 bottom: 0,
@@ -367,7 +403,7 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
                   ),
                 ),
               ),
-              
+
               // Ícone de favorito
               Positioned(
                 top: 8,
@@ -385,7 +421,7 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
                   ),
                 ),
               ),
-              
+
               // Ícone de tipo de mídia
               if (story.fileType == StorieFileType.video)
                 const Positioned(
@@ -405,7 +441,8 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
   }
 
   Widget _buildMediaThumbnail(StorieFileModel story) {
-    if (story.fileType == StorieFileType.video && story.videoThumbnail?.isNotEmpty == true) {
+    if (story.fileType == StorieFileType.video &&
+        story.videoThumbnail?.isNotEmpty == true) {
       // Usar thumbnail do vídeo
       return EnhancedImageLoader.buildCachedImage(
         imageUrl: story.videoThumbnail!,

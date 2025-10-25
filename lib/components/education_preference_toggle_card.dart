@@ -29,15 +29,15 @@ class EducationPreferenceToggleCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isEnabled 
-                        ? Colors.purple.shade50 
+                    color: isEnabled
+                        ? Colors.purple.shade50
                         : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isEnabled ? Icons.check_circle : Icons.school,
-                    color: isEnabled 
-                        ? Colors.purple.shade600 
+                    color: isEnabled
+                        ? Colors.purple.shade600
                         : Colors.grey.shade400,
                     size: 24,
                   ),
@@ -60,8 +60,8 @@ class EducationPreferenceToggleCard extends StatelessWidget {
                         isEnabled ? 'Ativado' : 'Desativado',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isEnabled 
-                              ? Colors.purple.shade600 
+                          color: isEnabled
+                              ? Colors.purple.shade600
                               : Colors.grey.shade500,
                           fontWeight: FontWeight.w500,
                         ),

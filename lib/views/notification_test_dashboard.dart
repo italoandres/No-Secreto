@@ -75,9 +75,9 @@ class NotificationTestDashboard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Botões principais
               _buildActionCard(
                 title: 'Abrir Dashboard Principal',
@@ -86,9 +86,9 @@ class NotificationTestDashboard extends StatelessWidget {
                 color: Colors.green,
                 onTap: () => Get.to(() => const InterestDashboardView()),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               _buildActionCard(
                 title: 'Executar Teste Completo',
                 subtitle: 'Testar todo o sistema (ver console)',
@@ -96,9 +96,9 @@ class NotificationTestDashboard extends StatelessWidget {
                 color: Colors.blue,
                 onTap: () => TestCurrentNotificationSystem.testCompleteFlow(),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               _buildActionCard(
                 title: 'Debug Detalhado',
                 subtitle: '⚠️ Funcionalidade desabilitada',
@@ -106,19 +106,20 @@ class NotificationTestDashboard extends StatelessWidget {
                 color: Colors.grey,
                 onTap: () => print('Debug desabilitado (arquivo removido)'),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               _buildActionCard(
                 title: 'Criar Notificação de Teste',
                 subtitle: '⚠️ Funcionalidade desabilitada',
                 icon: Icons.add_alert,
                 color: Colors.grey,
-                onTap: () => print('Criação de teste desabilitada (arquivo removido)'),
+                onTap: () =>
+                    print('Criação de teste desabilitada (arquivo removido)'),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Status do sistema
               Container(
                 padding: const EdgeInsets.all(16),
@@ -160,9 +161,9 @@ class NotificationTestDashboard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Instruções
               Container(
                 padding: const EdgeInsets.all(16),
@@ -191,14 +192,15 @@ class NotificationTestDashboard extends StatelessWidget {
                     Text('1. Clique "Executar Teste Completo"'),
                     Text('2. Veja os resultados no CONSOLE/DEBUG'),
                     Text('3. Use "Debug Detalhado" se houver problemas'),
-                    Text('4. Teste o "Dashboard Principal" para ver a interface'),
+                    Text(
+                        '4. Teste o "Dashboard Principal" para ver a interface'),
                     Text('5. Crie notificações de teste se necessário'),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Problema resolvido
               Container(
                 padding: const EdgeInsets.all(16),
@@ -239,7 +241,7 @@ class NotificationTestDashboard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildActionCard({
     required String title,
     required String subtitle,

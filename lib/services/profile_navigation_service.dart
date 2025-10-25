@@ -6,7 +6,6 @@ import '../views/profile_display_view.dart';
 
 /// Serviço para navegação de perfis
 class ProfileNavigationService {
-  
   /// Navegar para o perfil de um usuário por ID
   static Future<void> navigateToProfile(String userId) async {
     try {
@@ -20,10 +19,10 @@ class ProfileNavigationService {
 
       // Buscar dados do usuário
       final user = await InterestNotificationRepository.getUserById(userId);
-      
+
       // Fechar loading
       Get.back();
-      
+
       if (user == null) {
         Get.snackbar(
           'Erro',
@@ -36,13 +35,12 @@ class ProfileNavigationService {
 
       // Navegar para o perfil usando userId
       Get.to(() => ProfileDisplayView(userId: userId));
-      
     } catch (e) {
       // Fechar loading se ainda estiver aberto
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      
+
       print('❌ Erro ao navegar para perfil: $e');
       Get.snackbar(
         'Erro',
@@ -76,7 +74,7 @@ class ProfileNavigationService {
     try {
       final user = await InterestNotificationRepository.getUserById(userId);
       if (user == null) return null;
-      
+
       return {
         'id': user.id,
         'nome': user.nome,
@@ -118,10 +116,10 @@ class ProfileNavigationService {
 
       // Buscar dados do usuário
       final user = await InterestNotificationRepository.getUserById(userId);
-      
+
       // Fechar loading
       Get.back();
-      
+
       if (user == null) {
         Get.snackbar(
           'Perfil não encontrado',
@@ -139,13 +137,12 @@ class ProfileNavigationService {
         transition: Transition.rightToLeft,
         duration: const Duration(milliseconds: 300),
       );
-      
     } catch (e) {
       // Fechar loading se ainda estiver aberto
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      
+
       print('❌ Erro ao navegar para perfil: $e');
       Get.snackbar(
         'Erro de Conexão',
@@ -159,13 +156,11 @@ class ProfileNavigationService {
 
   /// Navegar para perfil e marcar notificação como visualizada
   static Future<void> navigateToProfileFromNotification(
-    String userId, 
-    String? notificationId
-  ) async {
+      String userId, String? notificationId) async {
     try {
       // Navegar para o perfil
       await navigateToProfileWithAnimation(userId);
-      
+
       // Marcar notificação como visualizada se fornecida
       if (notificationId != null) {
         await InterestNotificationRepository.respondToInterestNotification(
@@ -173,7 +168,6 @@ class ProfileNavigationService {
           'viewed',
         );
       }
-      
     } catch (e) {
       print('❌ Erro ao navegar para perfil da notificação: $e');
       // Mesmo com erro na notificação, tenta navegar para o perfil

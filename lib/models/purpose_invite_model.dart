@@ -31,13 +31,13 @@ class PurposeInviteModel {
     required String fromUserName,
     required String toUserEmail,
   }) : this(
-    fromUserId: fromUserId,
-    fromUserName: fromUserName,
-    toUserEmail: toUserEmail,
-    type: 'partnership',
-    status: 'pending',
-    dataCriacao: Timestamp.now(),
-  );
+          fromUserId: fromUserId,
+          fromUserName: fromUserName,
+          toUserEmail: toUserEmail,
+          type: 'partnership',
+          status: 'pending',
+          dataCriacao: Timestamp.now(),
+        );
 
   // Construtor para criar convite de menção
   PurposeInviteModel.mention({
@@ -46,14 +46,14 @@ class PurposeInviteModel {
     required String toUserId,
     required String message,
   }) : this(
-    fromUserId: fromUserId,
-    fromUserName: fromUserName,
-    toUserId: toUserId,
-    type: 'mention',
-    message: message,
-    status: 'pending',
-    dataCriacao: Timestamp.now(),
-  );
+          fromUserId: fromUserId,
+          fromUserName: fromUserName,
+          toUserId: toUserId,
+          type: 'mention',
+          message: message,
+          status: 'pending',
+          dataCriacao: Timestamp.now(),
+        );
 
   // Converter para Map para Firebase
   Map<String, dynamic> toMap() {
@@ -73,7 +73,7 @@ class PurposeInviteModel {
   // Criar objeto a partir do Firebase
   factory PurposeInviteModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     return PurposeInviteModel(
       id: doc.id,
       fromUserId: data['fromUserId'],
@@ -106,11 +106,11 @@ class PurposeInviteModel {
 
   // Validações
   bool get isValid {
-    return fromUserId != null && 
-           fromUserName != null && 
-           type != null && 
-           status != null &&
-           (type == 'partnership' ? toUserEmail != null : toUserId != null);
+    return fromUserId != null &&
+        fromUserName != null &&
+        type != null &&
+        status != null &&
+        (type == 'partnership' ? toUserEmail != null : toUserId != null);
   }
 
   bool get isPending => status == 'pending';

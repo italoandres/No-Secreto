@@ -168,8 +168,8 @@ class SearchFilters {
       'prioritizeVirginity': prioritizeVirginity,
       'selectedHobbies': selectedHobbies,
       'prioritizeHobbies': prioritizeHobbies,
-      'lastUpdated': lastUpdated != null 
-          ? Timestamp.fromDate(lastUpdated!) 
+      'lastUpdated': lastUpdated != null
+          ? Timestamp.fromDate(lastUpdated!)
           : FieldValue.serverTimestamp(),
     };
   }
@@ -223,10 +223,14 @@ class SearchFilters {
       prioritizeDrinking: prioritizeDrinking ?? this.prioritizeDrinking,
       selectedSmoking: selectedSmoking ?? this.selectedSmoking,
       prioritizeSmoking: prioritizeSmoking ?? this.prioritizeSmoking,
-      requiresCertification: requiresCertification ?? this.requiresCertification,
-      prioritizeCertification: prioritizeCertification ?? this.prioritizeCertification,
-      requiresDeusEPaiMember: requiresDeusEPaiMember ?? this.requiresDeusEPaiMember,
-      prioritizeDeusEPaiMember: prioritizeDeusEPaiMember ?? this.prioritizeDeusEPaiMember,
+      requiresCertification:
+          requiresCertification ?? this.requiresCertification,
+      prioritizeCertification:
+          prioritizeCertification ?? this.prioritizeCertification,
+      requiresDeusEPaiMember:
+          requiresDeusEPaiMember ?? this.requiresDeusEPaiMember,
+      prioritizeDeusEPaiMember:
+          prioritizeDeusEPaiMember ?? this.prioritizeDeusEPaiMember,
       selectedVirginity: selectedVirginity ?? this.selectedVirginity,
       prioritizeVirginity: prioritizeVirginity ?? this.prioritizeVirginity,
       selectedHobbies: selectedHobbies ?? this.selectedHobbies,
@@ -272,13 +276,14 @@ class SearchFilters {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! SearchFilters) return false;
-    
+
     // Comparar listas de idiomas
-    if (selectedLanguages.length != other.selectedLanguages.length) return false;
+    if (selectedLanguages.length != other.selectedLanguages.length)
+      return false;
     for (int i = 0; i < selectedLanguages.length; i++) {
       if (selectedLanguages[i] != other.selectedLanguages[i]) return false;
     }
-    
+
     return other.maxDistance == maxDistance &&
         other.prioritizeDistance == prioritizeDistance &&
         other.minAge == minAge &&
@@ -299,11 +304,11 @@ class SearchFilters {
   }
 
   @override
-  int get hashCode => 
-      maxDistance.hashCode ^ 
-      prioritizeDistance.hashCode ^ 
-      minAge.hashCode ^ 
-      maxAge.hashCode ^ 
+  int get hashCode =>
+      maxDistance.hashCode ^
+      prioritizeDistance.hashCode ^
+      minAge.hashCode ^
+      maxAge.hashCode ^
       prioritizeAge.hashCode ^
       minHeight.hashCode ^
       maxHeight.hashCode ^
@@ -328,14 +333,14 @@ class SearchFilters {
   static int? convertHeightStringToInt(String? heightStr) {
     if (heightStr == null || heightStr.isEmpty) return null;
     if (heightStr.toLowerCase().contains('prefiro não')) return null;
-    
+
     // Remove "m" e espaços
     final cleanStr = heightStr.replaceAll('m', '').replaceAll(' ', '').trim();
-    
+
     // Tenta converter para double (metros)
     final heightInMeters = double.tryParse(cleanStr);
     if (heightInMeters == null) return null;
-    
+
     // Converte para cm
     return (heightInMeters * 100).round();
   }

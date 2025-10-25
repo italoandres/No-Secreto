@@ -22,9 +22,8 @@ class NotificationItemComponent extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: notification.isRead 
-              ? Colors.transparent 
-              : Colors.amber.shade200,
+          color:
+              notification.isRead ? Colors.transparent : Colors.amber.shade200,
           width: notification.isRead ? 0 : 1,
         ),
       ),
@@ -35,18 +34,16 @@ class NotificationItemComponent extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: notification.isRead 
-                ? Colors.white 
-                : Colors.amber.shade50,
+            color: notification.isRead ? Colors.white : Colors.amber.shade50,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar do usuário
               _buildUserAvatar(),
-              
+
               const SizedBox(width: 12),
-              
+
               // Conteúdo da notificação
               Expanded(
                 child: Column(
@@ -67,10 +64,11 @@ class NotificationItemComponent extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        
+
                         // Tempo relativo
                         Text(
-                          NotificationService.getRelativeTime(notification.createdAt),
+                          NotificationService.getRelativeTime(
+                              notification.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade500,
@@ -78,14 +76,14 @@ class NotificationItemComponent extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Tipo da notificação
                     _buildNotificationTypeLabel(),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     // Conteúdo da notificação
                     Text(
                       notification.content,
@@ -100,7 +98,7 @@ class NotificationItemComponent extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Indicador de não lida e menu
               Column(
                 children: [
@@ -114,9 +112,9 @@ class NotificationItemComponent extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Menu de opções
                   if (onDelete != null)
                     PopupMenuButton<String>(
@@ -299,9 +297,9 @@ class CompactNotificationItemComponent extends StatelessWidget {
                       ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Conteúdo
             Expanded(
               child: Column(
@@ -317,9 +315,7 @@ class CompactNotificationItemComponent extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
                   const SizedBox(height: 2),
-                  
                   Text(
                     notification.content,
                     style: TextStyle(
@@ -332,7 +328,7 @@ class CompactNotificationItemComponent extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Tempo e indicador
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -344,9 +340,7 @@ class CompactNotificationItemComponent extends StatelessWidget {
                     color: Colors.grey.shade500,
                   ),
                 ),
-                
                 const SizedBox(height: 4),
-                
                 if (!notification.isRead)
                   Container(
                     width: 6,

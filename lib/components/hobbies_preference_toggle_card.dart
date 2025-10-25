@@ -61,7 +61,8 @@ class HobbiesPreferenceToggleCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isEnabled ? const Color(0xFF333333) : Colors.grey[700],
+                    color:
+                        isEnabled ? const Color(0xFF333333) : Colors.grey[700],
                     height: 1.3,
                   ),
                 ),

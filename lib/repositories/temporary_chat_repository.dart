@@ -9,7 +9,7 @@ import '../repositories/usuario_repository.dart';
 class TemporaryChatRepository {
   static const String _chatsCollection = 'temporary_chats';
   static const String _messagesCollection = 'temporary_chat_messages';
-  
+
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Create a temporary chat from mutual interest
@@ -17,19 +17,21 @@ class TemporaryChatRepository {
     MutualInterestModel mutualInterest,
   ) async {
     try {
-      debugPrint('💬 Criando chat temporário para interesse mútuo: ${mutualInterest.id}');
-      
+      debugPrint(
+          '💬 Criando chat temporário para interesse mútuo: ${mutualInterest.id}');
+
       // Get user information
       final user1 = await UsuarioRepository.getUserById(mutualInterest.user1Id);
       final user2 = await UsuarioRepository.getUserById(mutualInterest.user2Id);
-      
+
       if (user1 == null || user2 == null) {
         throw Exception('Usuários não encontrados');
       }
-      
+
       // Generate unique chat room ID
-      final chatRoomId = 'temp_${mutualInterest.user1Id}_${mutualInterest.user2Id}_${DateTime.now().millisecondsSinceEpoch}';
-      
+      final chatRoomId =
+          'temp_${mutualInterest.user1Id}_${mutualInterest.user2Id}_${DateTime.now().millisecondsSinceEpoch}';
+
       // Create temporary chat
       final temporaryChat = TemporaryChatModel(
         mutualInterestId: mutualInterest.id!,
@@ -45,17 +47,18 @@ class TemporaryChatRepository {
         user2Username: user2.username,
         user2PhotoUrl: user2.imgUrl,
       );
-      
+
       // Save to Firestore
-      final docRef = await _firestore.collection(_chatsCollection).add(temporaryChat.toJson());
+      final docRef = await _firestore
+          .collection(_chatsCollection)
+          .add(temporaryChat.toJson());
       temporaryChat.id = docRef.id;
-      
+
       // Send welcome message
       await _sendWelcomeMessage(temporaryChat);
-      
+
       debugPrint('✅ Chat temporário criado: ${temporaryChat.id}');
       return temporaryChat;
-      
     } catch (e) {
       debugPrint('❌ Erro ao criar chat temporário: $e');
       rethrow;
@@ -70,25 +73,27 @@ class TemporaryChatRepository {
         senderId: 'system',
         senderName: 'Sistema',
         message: '💕 Vocês demonstraram interesse mútuo!\n\n'
-                'Este é um chat temporário de 7 dias para vocês se conhecerem melhor. '
-                'Conversem com respeito e propósito espiritual.\n\n'
-                'Ao final dos 7 dias, vocês podem decidir se querem continuar no "Nosso Propósito".\n\n'
-                '⚠️ Lembrem-se: este é um terreno sagrado. Conexões aqui devem honrar Deus.',
+            'Este é um chat temporário de 7 dias para vocês se conhecerem melhor. '
+            'Conversem com respeito e propósito espiritual.\n\n'
+            'Ao final dos 7 dias, vocês podem decidir se querem continuar no "Nosso Propósito".\n\n'
+            '⚠️ Lembrem-se: este é um terreno sagrado. Conexões aqui devem honrar Deus.',
         timestamp: DateTime.now(),
         messageType: 'welcome',
       );
-      
-      await _firestore.collection(_messagesCollection).add(welcomeMessage.toJson());
-      
+
+      await _firestore
+          .collection(_messagesCollection)
+          .add(welcomeMessage.toJson());
+
       debugPrint('✅ Mensagem de boas-vindas enviada');
-      
     } catch (e) {
       debugPrint('❌ Erro ao enviar mensagem de boas-vindas: $e');
     }
   }
 
   /// Get temporary chat by mutual interest ID
-  static Future<TemporaryChatModel?> getChatByMutualInterestId(String mutualInterestId) async {
+  static Future<TemporaryChatModel?> getChatByMutualInterestId(
+      String mutualInterestId) async {
     try {
       final querySnapshot = await _firestore
           .collection(_chatsCollection)
@@ -104,7 +109,7 @@ class TemporaryChatRepository {
       final doc = querySnapshot.docs.first;
       final chat = TemporaryChatModel.fromJson(doc.data());
       chat.id = doc.id;
-      
+
       return chat;
     } catch (e) {
       debugPrint('❌ Erro ao buscar chat por interesse mútuo: $e');
@@ -128,7 +133,7 @@ class TemporaryChatRepository {
       final doc = querySnapshot.docs.first;
       final chat = TemporaryChatModel.fromJson(doc.data());
       chat.id = doc.id;
-      
+
       return chat;
     } catch (e) {
       debugPrint('❌ Erro ao buscar chat por room ID: $e');
@@ -142,7 +147,8 @@ class TemporaryChatRepository {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return [];
 
-      debugPrint('🔍 Buscando chats temporários para usuário: ${currentUser.uid}');
+      debugPrint(
+          '🔍 Buscando chats temporários para usuário: ${currentUser.uid}');
 
       // Query for chats where user is participant
       final querySnapshot1 = await _firestore
@@ -182,7 +188,6 @@ class TemporaryChatRepository {
 
       debugPrint('✅ Encontrados ${chats.length} chats temporários');
       return chats;
-
     } catch (e) {
       debugPrint('❌ Erro ao buscar chats do usuário: $e');
       return [];
@@ -234,7 +239,9 @@ class TemporaryChatRepository {
       );
 
       // Save message
-      await _firestore.collection(_messagesCollection).add(chatMessage.toJson());
+      await _firestore
+          .collection(_messagesCollection)
+          .add(chatMessage.toJson());
 
       // Update chat with last message info
       await _firestore.collection(_chatsCollection).doc(chat.id).update({
@@ -245,7 +252,6 @@ class TemporaryChatRepository {
       });
 
       debugPrint('✅ Mensagem enviada com sucesso');
-
     } catch (e) {
       debugPrint('❌ Erro ao enviar mensagem: $e');
       rethrow;
@@ -253,7 +259,8 @@ class TemporaryChatRepository {
   }
 
   /// Get messages stream for a chat room
-  static Stream<List<TemporaryChatMessageModel>> getMessagesStream(String chatRoomId) {
+  static Stream<List<TemporaryChatMessageModel>> getMessagesStream(
+      String chatRoomId) {
     return _firestore
         .collection(_messagesCollection)
         .where('chatRoomId', isEqualTo: chatRoomId)
@@ -283,7 +290,6 @@ class TemporaryChatRepository {
       // This would integrate with the existing purpose chat system
 
       debugPrint('✅ Chat movido para Nosso Propósito');
-
     } catch (e) {
       debugPrint('❌ Erro ao mover chat: $e');
       rethrow;
@@ -300,26 +306,28 @@ class TemporaryChatRepository {
       });
 
       // Send expiration message
-      final chat = await _firestore.collection(_chatsCollection).doc(chatId).get();
+      final chat =
+          await _firestore.collection(_chatsCollection).doc(chatId).get();
       if (chat.exists) {
         final chatData = TemporaryChatModel.fromJson(chat.data()!);
-        
+
         final expirationMessage = TemporaryChatMessageModel(
           chatRoomId: chatData.chatRoomId,
           senderId: 'system',
           senderName: 'Sistema',
           message: '⏰ Este chat temporário expirou.\n\n'
-                  'Esperamos que tenham tido uma boa conversa! '
-                  'Se desejarem continuar se conhecendo, podem se conectar através do "Nosso Propósito".',
+              'Esperamos que tenham tido uma boa conversa! '
+              'Se desejarem continuar se conhecendo, podem se conectar através do "Nosso Propósito".',
           timestamp: DateTime.now(),
           messageType: 'system',
         );
 
-        await _firestore.collection(_messagesCollection).add(expirationMessage.toJson());
+        await _firestore
+            .collection(_messagesCollection)
+            .add(expirationMessage.toJson());
       }
 
       debugPrint('✅ Chat expirado');
-
     } catch (e) {
       debugPrint('❌ Erro ao expirar chat: $e');
     }
@@ -351,7 +359,6 @@ class TemporaryChatRepository {
       } else {
         debugPrint('✅ Nenhum chat expirado encontrado');
       }
-
     } catch (e) {
       debugPrint('❌ Erro na limpeza de chats expirados: $e');
     }
@@ -381,7 +388,6 @@ class TemporaryChatRepository {
         'moved': movedChats.docs.length,
         'total': activeChats.docs.length + expiredChats.docs.length,
       };
-
     } catch (e) {
       debugPrint('❌ Erro ao obter estatísticas: $e');
       return {'active': 0, 'expired': 0, 'moved': 0, 'total': 0};
@@ -389,7 +395,8 @@ class TemporaryChatRepository {
   }
 
   /// Mark messages as read
-  static Future<void> markMessagesAsRead(String chatRoomId, String userId) async {
+  static Future<void> markMessagesAsRead(
+      String chatRoomId, String userId) async {
     try {
       final querySnapshot = await _firestore
           .collection(_messagesCollection)
@@ -407,7 +414,6 @@ class TemporaryChatRepository {
 
       await batch.commit();
       debugPrint('✅ Mensagens marcadas como lidas');
-
     } catch (e) {
       debugPrint('❌ Erro ao marcar mensagens como lidas: $e');
     }

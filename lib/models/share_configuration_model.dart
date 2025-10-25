@@ -1,12 +1,5 @@
 /// Enum para diferentes tipos de compartilhamento
-enum ShareType {
-  link,
-  whatsapp,
-  instagram,
-  facebook,
-  email,
-  sms
-}
+enum ShareType { link, whatsapp, instagram, facebook, email, sms }
 
 /// Extensão para obter informações sobre tipos de compartilhamento
 extension ShareTypeExtension on ShareType {
@@ -26,7 +19,7 @@ extension ShareTypeExtension on ShareType {
         return 'SMS';
     }
   }
-  
+
   String get iconName {
     switch (this) {
       case ShareType.link:
@@ -43,7 +36,7 @@ extension ShareTypeExtension on ShareType {
         return 'sms';
     }
   }
-  
+
   String get packageName {
     switch (this) {
       case ShareType.whatsapp:
@@ -65,7 +58,7 @@ class ShareConfiguration {
   final String? imageUrl;
   final String deepLink;
   final Map<String, String> platformSpecificData;
-  
+
   const ShareConfiguration({
     required this.title,
     required this.description,
@@ -73,7 +66,7 @@ class ShareConfiguration {
     required this.deepLink,
     this.platformSpecificData = const {},
   });
-  
+
   /// Gera texto de compartilhamento personalizado por plataforma
   String generateShareText(ShareType type) {
     switch (type) {
@@ -92,7 +85,7 @@ class ShareConfiguration {
         return _generateGenericText();
     }
   }
-  
+
   /// Obtém dados específicos da plataforma
   Map<String, dynamic> getPlatformData(ShareType type) {
     final baseData = {
@@ -100,11 +93,11 @@ class ShareConfiguration {
       'description': description,
       'url': deepLink,
     };
-    
+
     if (imageUrl != null) {
       baseData['image'] = imageUrl!;
     }
-    
+
     // Adicionar dados específicos da plataforma
     switch (type) {
       case ShareType.whatsapp:
@@ -119,13 +112,13 @@ class ShareConfiguration {
       default:
         break;
     }
-    
+
     // Mesclar com dados específicos fornecidos
     baseData.addAll(platformSpecificData);
-    
+
     return baseData;
   }
-  
+
   /// Gera texto genérico para compartilhamento
   String _generateGenericText() {
     String text = '🌟 $title\n\n';
@@ -134,7 +127,7 @@ class ShareConfiguration {
     text += '#Kiro #PropósitoDeVida #ConexõesEspirituais';
     return text;
   }
-  
+
   /// Gera texto otimizado para WhatsApp
   String _generateWhatsAppText() {
     String text = '🌟 *$title*\n\n';
@@ -144,27 +137,29 @@ class ShareConfiguration {
     text += '✨ #Kiro #PropósitoDeVida';
     return text;
   }
-  
+
   /// Gera texto otimizado para Instagram
   String _generateInstagramText() {
     String text = '🌟 $title\n\n';
     text += '$description\n\n';
     text += 'Link na bio ou acesse:\n';
     text += '$deepLink\n\n';
-    text += '#Kiro #PropósitoDeVida #ConexõesEspirituais #Espiritualidade #AutoConhecimento';
+    text +=
+        '#Kiro #PropósitoDeVida #ConexõesEspirituais #Espiritualidade #AutoConhecimento';
     return text;
   }
-  
+
   /// Gera texto otimizado para Facebook
   String _generateFacebookText() {
     String text = '🌟 $title\n\n';
     text += '$description\n\n';
-    text += 'Conheça minha vitrine de propósito e descubra mais sobre minha jornada espiritual.\n\n';
+    text +=
+        'Conheça minha vitrine de propósito e descubra mais sobre minha jornada espiritual.\n\n';
     text += 'Acesse: $deepLink\n\n';
     text += '#Kiro #PropósitoDeVida #ConexõesEspirituais #Espiritualidade';
     return text;
   }
-  
+
   /// Gera texto otimizado para Email
   String _generateEmailText() {
     String text = 'Olá!\n\n';
@@ -177,7 +172,7 @@ class ShareConfiguration {
     text += 'Enviado via Kiro - App de Conexões Espirituais';
     return text;
   }
-  
+
   /// Gera texto otimizado para SMS
   String _generateSMSText() {
     String text = '🌟 $title\n\n';
@@ -186,7 +181,7 @@ class ShareConfiguration {
     text += 'Enviado via Kiro';
     return text;
   }
-  
+
   /// Cria configuração padrão para vitrine
   factory ShareConfiguration.forVitrine({
     required String userName,
@@ -196,9 +191,9 @@ class ShareConfiguration {
   }) {
     return ShareConfiguration(
       title: 'Vitrine de Propósito - $userName',
-      description: userPurpose.isNotEmpty 
-        ? 'Meu propósito: $userPurpose'
-        : 'Conheça minha jornada espiritual e meu propósito de vida.',
+      description: userPurpose.isNotEmpty
+          ? 'Meu propósito: $userPurpose'
+          : 'Conheça minha jornada espiritual e meu propósito de vida.',
       imageUrl: profileImageUrl,
       deepLink: vitrineUrl,
       platformSpecificData: {
@@ -207,13 +202,13 @@ class ShareConfiguration {
       },
     );
   }
-  
+
   @override
   String toString() {
     return 'ShareConfiguration('
-           'title: $title, '
-           'description: $description, '
-           'deepLink: $deepLink'
-           ')';
+        'title: $title, '
+        'description: $description, '
+        'deepLink: $deepLink'
+        ')';
   }
 }

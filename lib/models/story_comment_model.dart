@@ -42,7 +42,8 @@ class StoryCommentModel {
       userUsername: json['userUsername'],
       userPhotoUrl: json['userPhotoUrl'],
       text: json['text'] ?? '',
-      mentions: json['mentions'] != null ? List<String>.from(json['mentions']) : null,
+      mentions:
+          json['mentions'] != null ? List<String>.from(json['mentions']) : null,
       parentCommentId: json['parentCommentId'],
       likesCount: json['likesCount'] ?? 0,
       repliesCount: json['repliesCount'] ?? 0,

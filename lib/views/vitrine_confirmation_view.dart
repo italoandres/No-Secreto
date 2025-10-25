@@ -13,7 +13,7 @@ class VitrineConfirmationView extends StatelessWidget {
   final String? userId;
   final VoidCallback? onContinue;
   final VoidCallback? onSkip;
-  
+
   const VitrineConfirmationView({
     Key? key,
     this.userId,
@@ -27,13 +27,11 @@ class VitrineConfirmationView extends StatelessWidget {
     final confirmationController = Get.put(VitrineConfirmationController());
     final arguments = Get.arguments as Map<String, dynamic>? ?? {};
     final finalUserId = userId ?? arguments['userId'] as String? ?? '';
-    
+
     // Log da inicialização da tela
-    EnhancedLogger.info('VitrineConfirmationView initialized', 
-      tag: 'VITRINE_CONFIRMATION',
-      data: {'userId': finalUserId}
-    );
-    
+    EnhancedLogger.info('VitrineConfirmationView initialized',
+        tag: 'VITRINE_CONFIRMATION', data: {'userId': finalUserId});
+
     // Inicializar controllers
     if (finalUserId.isNotEmpty) {
       if (demoController.currentUserId.value != finalUserId) {
@@ -60,8 +58,11 @@ class VitrineConfirmationView extends StatelessWidget {
         child: Column(
           children: [
             _buildCelebrationHeader(),
-            Expanded(child: _buildMainContent(demoController, confirmationController, finalUserId)),
-            _buildActionButtons(demoController, confirmationController, finalUserId),
+            Expanded(
+                child: _buildMainContent(
+                    demoController, confirmationController, finalUserId)),
+            _buildActionButtons(
+                demoController, confirmationController, finalUserId),
             _buildAdditionalOptions(confirmationController),
           ],
         ),
@@ -131,7 +132,8 @@ class VitrineConfirmationView extends StatelessWidget {
   }
 
   /// Conteúdo principal da tela
-  Widget _buildMainContent(VitrineDemoController demoController, VitrineConfirmationController confirmationController, String userId) {
+  Widget _buildMainContent(VitrineDemoController demoController,
+      VitrineConfirmationController confirmationController, String userId) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -182,7 +184,8 @@ class VitrineConfirmationView extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
-                        _buildVitrinePreview(demoController, confirmationController),
+                        _buildVitrinePreview(
+                            demoController, confirmationController),
                       ],
                     ),
                   ),
@@ -207,7 +210,8 @@ class VitrineConfirmationView extends StatelessWidget {
   }
 
   /// Preview da vitrine
-  Widget _buildVitrinePreview(VitrineDemoController demoController, VitrineConfirmationController confirmationController) {
+  Widget _buildVitrinePreview(VitrineDemoController demoController,
+      VitrineConfirmationController confirmationController) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -231,24 +235,24 @@ class VitrineConfirmationView extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: userPhoto?.isNotEmpty == true
-                ? ClipOval(
-                    child: Image.network(
-                      userPhoto!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.person,
-                          color: AppColors.primary,
-                          size: 30,
-                        );
-                      },
+                  ? ClipOval(
+                      child: Image.network(
+                        userPhoto!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            color: AppColors.primary,
+                            size: 30,
+                          );
+                        },
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      color: AppColors.primary,
+                      size: 30,
                     ),
-                  )
-                : Icon(
-                    Icons.person,
-                    color: AppColors.primary,
-                    size: 30,
-                  ),
             );
           }),
           const SizedBox(width: 12),
@@ -271,13 +275,13 @@ class VitrineConfirmationView extends StatelessWidget {
                 Obx(() {
                   return Text(
                     confirmationController.canShowVitrine.value
-                      ? 'Pronta para ser descoberta'
-                      : 'Aguardando validação',
+                        ? 'Pronta para ser descoberta'
+                        : 'Aguardando validação',
                     style: TextStyle(
                       fontSize: 14,
                       color: confirmationController.canShowVitrine.value
-                        ? AppColors.textSecondary
-                        : Colors.orange,
+                          ? AppColors.textSecondary
+                          : Colors.orange,
                     ),
                   );
                 }),
@@ -302,9 +306,9 @@ class VitrineConfirmationView extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive 
-            ? AppColors.success.withOpacity(0.1)
-            : Colors.grey.withOpacity(0.1),
+          color: isActive
+              ? AppColors.success.withOpacity(0.1)
+              : Colors.grey.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? AppColors.success : Colors.grey,
@@ -335,7 +339,8 @@ class VitrineConfirmationView extends StatelessWidget {
   }
 
   /// Botões de ação principais
-  Widget _buildActionButtons(VitrineDemoController demoController, VitrineConfirmationController confirmationController, String userId) {
+  Widget _buildActionButtons(VitrineDemoController demoController,
+      VitrineConfirmationController confirmationController, String userId) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -344,28 +349,29 @@ class VitrineConfirmationView extends StatelessWidget {
           Obx(() {
             final isLoading = confirmationController.isLoading.value;
             final canShow = confirmationController.canShowVitrine.value;
-            
+
             return SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton.icon(
-                onPressed: (isLoading || !canShow) 
-                  ? null 
-                  : () => confirmationController.navigateToVitrine(),
+                onPressed: (isLoading || !canShow)
+                    ? null
+                    : () => confirmationController.navigateToVitrine(),
                 icon: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Icon(Icons.visibility),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.visibility),
                 label: Text(
-                  isLoading 
-                    ? 'Carregando...' 
-                    : 'Ver meu perfil vitrine de propósito',
+                  isLoading
+                      ? 'Carregando...'
+                      : 'Ver meu perfil vitrine de propósito',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -418,7 +424,8 @@ class VitrineConfirmationView extends StatelessWidget {
   }
 
   /// Opções adicionais
-  Widget _buildAdditionalOptions(VitrineConfirmationController confirmationController) {
+  Widget _buildAdditionalOptions(
+      VitrineConfirmationController confirmationController) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
@@ -445,8 +452,6 @@ class VitrineConfirmationView extends StatelessWidget {
       ),
     );
   }
-
-
 
   /// Widget para mostrar mensagens de erro
   Widget _buildErrorMessage(VitrineConfirmationController controller) {
@@ -506,12 +511,11 @@ class VitrineConfirmationView extends StatelessWidget {
   }
 
   /// Manipula o clique no botão "Ver meu perfil vitrine de propósito"
-  Future<void> _handleViewVitrine(VitrineDemoController controller, String userId) async {
+  Future<void> _handleViewVitrine(
+      VitrineDemoController controller, String userId) async {
     try {
-      EnhancedLogger.info('User clicked to view vitrine', 
-        tag: 'VITRINE_CONFIRMATION',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('User clicked to view vitrine',
+          tag: 'VITRINE_CONFIRMATION', data: {'userId': userId});
 
       // Executar callback personalizado se fornecido
       if (onContinue != null) {
@@ -522,18 +526,16 @@ class VitrineConfirmationView extends StatelessWidget {
       // Usar o helper de navegação para ir para a vitrine
       await VitrineNavigationHelper.navigateToVitrineDisplay(userId);
 
-      EnhancedLogger.success('Successfully navigated to vitrine from confirmation', 
-        tag: 'VITRINE_CONFIRMATION',
-        data: {'userId': userId}
-      );
-
+      EnhancedLogger.success(
+          'Successfully navigated to vitrine from confirmation',
+          tag: 'VITRINE_CONFIRMATION',
+          data: {'userId': userId});
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Failed to navigate to vitrine from confirmation', 
-        tag: 'VITRINE_CONFIRMATION',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Failed to navigate to vitrine from confirmation',
+          tag: 'VITRINE_CONFIRMATION',
+          error: e,
+          stackTrace: stackTrace,
+          data: {'userId': userId});
 
       // Mostrar erro amigável
       Get.snackbar(
@@ -553,9 +555,8 @@ class VitrineConfirmationView extends StatelessWidget {
 
   /// Manipula a opção "Depois" ou voltar
   void _handleSkip() {
-    EnhancedLogger.info('User chose to skip vitrine viewing', 
-      tag: 'VITRINE_CONFIRMATION'
-    );
+    EnhancedLogger.info('User chose to skip vitrine viewing',
+        tag: 'VITRINE_CONFIRMATION');
 
     // Executar callback personalizado se fornecido
     if (onSkip != null) {
@@ -586,10 +587,8 @@ class VitrineConfirmationView extends StatelessWidget {
     VoidCallback? onContinue,
     VoidCallback? onSkip,
   }) async {
-    EnhancedLogger.info('Showing vitrine confirmation', 
-      tag: 'VITRINE_CONFIRMATION',
-      data: {'userId': userId}
-    );
+    EnhancedLogger.info('Showing vitrine confirmation',
+        tag: 'VITRINE_CONFIRMATION', data: {'userId': userId});
 
     Get.to(
       () => VitrineConfirmationView(

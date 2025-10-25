@@ -94,7 +94,7 @@ class QueryOptimizer {
   final List<QueryPerformanceStats> _performanceHistory = [];
   final Map<String, int> _queryFrequency = {};
   final Map<String, Duration> _averageExecutionTimes = {};
-  
+
   QueryOptimizationConfig _config = const QueryOptimizationConfig();
   final Completer<void> _initCompleter = Completer<void>();
 
@@ -104,19 +104,23 @@ class QueryOptimizer {
 
     try {
       _config = config ?? const QueryOptimizationConfig();
-      
-      // Registra configurações de cache específicas para queries
-      _cache.registerCacheConfig('queries', CacheConfig(
-        ttl: _config.cacheTimeout,
-        maxSize: 200,
-        enableCompression: true,
-      ));
 
-      _cache.registerCacheConfig('query_results', CacheConfig(
-        ttl: _config.cacheTimeout,
-        maxSize: 500,
-        enableCompression: true,
-      ));
+      // Registra configurações de cache específicas para queries
+      _cache.registerCacheConfig(
+          'queries',
+          CacheConfig(
+            ttl: _config.cacheTimeout,
+            maxSize: 200,
+            enableCompression: true,
+          ));
+
+      _cache.registerCacheConfig(
+          'query_results',
+          CacheConfig(
+            ttl: _config.cacheTimeout,
+            maxSize: 500,
+            enableCompression: true,
+          ));
 
       _logger.info(
         DiagnosticLogCategory.performance,
@@ -131,7 +135,6 @@ class QueryOptimizer {
 
       EnhancedLogger.log('⚡ [QUERY_OPTIMIZER] Otimizador inicializado');
       _initCompleter.complete();
-
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -153,16 +156,18 @@ class QueryOptimizer {
     Duration? customCacheTimeout,
   }) async {
     await _initCompleter.future;
-    
+
     final stopwatch = Stopwatch()..start();
-    final appliedStrategies = strategies ?? _determineOptimalStrategies(queryId);
-    
+    final appliedStrategies =
+        strategies ?? _determineOptimalStrategies(queryId);
+
     try {
       // Incrementa frequência da query
       _queryFrequency[queryId] = (_queryFrequency[queryId] ?? 0) + 1;
 
       // Tenta cache primeiro se habilitado
-      if (_config.enableCache && appliedStrategies.contains(QueryOptimizationStrategy.cache)) {
+      if (_config.enableCache &&
+          appliedStrategies.contains(QueryOptimizationStrategy.cache)) {
         final cacheKey = _buildCacheKey(queryId, queryParams);
         final cacheResult = await _cache.get<List<T>>(
           cacheKey,
@@ -171,7 +176,7 @@ class QueryOptimizer {
 
         if (cacheResult.isValid) {
           stopwatch.stop();
-          
+
           _recordPerformanceStats(QueryPerformanceStats(
             queryId: queryId,
             executionTime: stopwatch.elapsed,
@@ -188,8 +193,8 @@ class QueryOptimizer {
             data: {
               'queryId': queryId,
               'resultCount': cacheResult.data!.length,
-              'cacheAge': cacheResult.cacheTime != null 
-                  ? DateTime.now().difference(cacheResult.cacheTime!).inSeconds 
+              'cacheAge': cacheResult.cacheTime != null
+                  ? DateTime.now().difference(cacheResult.cacheTime!).inSeconds
                   : 0,
             },
             executionTime: stopwatch.elapsed,
@@ -203,7 +208,8 @@ class QueryOptimizer {
             optimizationStrategy: 'cache',
             metadata: {
               'cacheHit': true,
-              'appliedStrategies': appliedStrategies.map((s) => s.toString()).toList(),
+              'appliedStrategies':
+                  appliedStrategies.map((s) => s.toString()).toList(),
             },
           );
         }
@@ -213,10 +219,12 @@ class QueryOptimizer {
       List<T> results;
       String strategy = 'direct';
 
-      if (appliedStrategies.contains(QueryOptimizationStrategy.batchProcessing)) {
+      if (appliedStrategies
+          .contains(QueryOptimizationStrategy.batchProcessing)) {
         results = await _executeBatchQuery(queryFunction);
         strategy = 'batch';
-      } else if (appliedStrategies.contains(QueryOptimizationStrategy.parallelExecution)) {
+      } else if (appliedStrategies
+          .contains(QueryOptimizationStrategy.parallelExecution)) {
         results = await _executeParallelQuery(queryFunction);
         strategy = 'parallel';
       } else {
@@ -227,7 +235,8 @@ class QueryOptimizer {
       stopwatch.stop();
 
       // Armazena no cache se habilitado
-      if (_config.enableCache && appliedStrategies.contains(QueryOptimizationStrategy.cache)) {
+      if (_config.enableCache &&
+          appliedStrategies.contains(QueryOptimizationStrategy.cache)) {
         final cacheKey = _buildCacheKey(queryId, queryParams);
         await _cache.set(
           cacheKey,
@@ -255,7 +264,8 @@ class QueryOptimizer {
           'queryId': queryId,
           'strategy': strategy,
           'resultCount': results.length,
-          'appliedStrategies': appliedStrategies.map((s) => s.toString()).toList(),
+          'appliedStrategies':
+              appliedStrategies.map((s) => s.toString()).toList(),
         },
         executionTime: stopwatch.elapsed,
       );
@@ -268,11 +278,11 @@ class QueryOptimizer {
         optimizationStrategy: strategy,
         metadata: {
           'cacheHit': false,
-          'appliedStrategies': appliedStrategies.map((s) => s.toString()).toList(),
+          'appliedStrategies':
+              appliedStrategies.map((s) => s.toString()).toList(),
           'queryFrequency': _queryFrequency[queryId] ?? 1,
         },
       );
-
     } catch (e, stackTrace) {
       stopwatch.stop();
 
@@ -282,7 +292,8 @@ class QueryOptimizer {
         data: {
           'queryId': queryId,
           'error': e.toString(),
-          'appliedStrategies': appliedStrategies.map((s) => s.toString()).toList(),
+          'appliedStrategies':
+              appliedStrategies.map((s) => s.toString()).toList(),
         },
         stackTrace: stackTrace.toString(),
         executionTime: stopwatch.elapsed,
@@ -299,21 +310,23 @@ class QueryOptimizer {
     await _initCompleter.future;
 
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       // Limita concorrência
-      final batches = <List<({String queryId, Future<List<T>> Function() queryFunction})>>[];
+      final batches = <List<
+          ({String queryId, Future<List<T>> Function() queryFunction})>>[];
       for (int i = 0; i < queries.length; i += _config.maxConcurrentQueries) {
-        batches.add(queries.skip(i).take(_config.maxConcurrentQueries).toList());
+        batches
+            .add(queries.skip(i).take(_config.maxConcurrentQueries).toList());
       }
 
       final allResults = <OptimizedQueryResult<T>>[];
 
       for (final batch in batches) {
         final futures = batch.map((query) => executeOptimizedQuery<T>(
-          queryId: query.queryId,
-          queryFunction: query.queryFunction,
-        ));
+              queryId: query.queryId,
+              queryFunction: query.queryFunction,
+            ));
 
         final batchResults = await Future.wait(futures);
         allResults.addAll(batchResults);
@@ -328,13 +341,13 @@ class QueryOptimizer {
           'totalQueries': queries.length,
           'batches': batches.length,
           'maxConcurrency': _config.maxConcurrentQueries,
-          'totalResults': allResults.fold(0, (sum, result) => sum + result.data.length),
+          'totalResults':
+              allResults.fold(0, (sum, result) => sum + result.data.length),
         },
         executionTime: stopwatch.elapsed,
       );
 
       return allResults;
-
     } catch (e, stackTrace) {
       stopwatch.stop();
 
@@ -381,8 +394,8 @@ class QueryOptimizer {
       // Aqui você implementaria a lógica específica de pré-carregamento
       // baseada nas queries mais frequentes do seu sistema
 
-      EnhancedLogger.log('🚀 [QUERY_OPTIMIZER] Pré-carregamento de ${frequentQueries.length} queries iniciado');
-
+      EnhancedLogger.log(
+          '🚀 [QUERY_OPTIMIZER] Pré-carregamento de ${frequentQueries.length} queries iniciado');
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -397,7 +410,7 @@ class QueryOptimizer {
   Map<String, dynamic> getPerformanceStatistics() {
     final now = DateTime.now();
     final last24h = now.subtract(Duration(hours: 24));
-    
+
     final recentStats = _performanceHistory
         .where((stat) => stat.timestamp.isAfter(last24h))
         .toList();
@@ -414,10 +427,12 @@ class QueryOptimizer {
 
     final totalQueries = recentStats.length;
     final avgExecutionTime = recentStats
-        .map((stat) => stat.executionTime.inMilliseconds)
-        .reduce((a, b) => a + b) / totalQueries;
+            .map((stat) => stat.executionTime.inMilliseconds)
+            .reduce((a, b) => a + b) /
+        totalQueries;
 
-    final cacheHits = recentStats.where((stat) => stat.strategy == 'cache').length;
+    final cacheHits =
+        recentStats.where((stat) => stat.strategy == 'cache').length;
     final cacheHitRate = cacheHits / totalQueries;
 
     // Estatísticas por query
@@ -429,13 +444,14 @@ class QueryOptimizer {
 
     final topQueries = queryStats.entries
         .map((entry) => {
-          'queryId': entry.key,
-          'count': entry.value.length,
-          'avgTime': entry.value
-              .map((s) => s.executionTime.inMilliseconds)
-              .reduce((a, b) => a + b) / entry.value.length,
-          'frequency': _queryFrequency[entry.key] ?? 0,
-        })
+              'queryId': entry.key,
+              'count': entry.value.length,
+              'avgTime': entry.value
+                      .map((s) => s.executionTime.inMilliseconds)
+                      .reduce((a, b) => a + b) /
+                  entry.value.length,
+              'frequency': _queryFrequency[entry.key] ?? 0,
+            })
         .toList()
       ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
 
@@ -471,13 +487,15 @@ class QueryOptimizer {
       // Analisa cache hit rate
       final cacheHitRate = stats['cacheHitRate'] as double;
       if (cacheHitRate < 0.3 && _config.enableCache) {
-        suggestions.add('Cache hit rate baixo (${(cacheHitRate * 100).toStringAsFixed(1)}%) - considere aumentar TTL');
+        suggestions.add(
+            'Cache hit rate baixo (${(cacheHitRate * 100).toStringAsFixed(1)}%) - considere aumentar TTL');
       }
 
       // Analisa tempo médio de execução
       final avgTime = stats['averageExecutionTime'] as double;
       if (avgTime > 1000) {
-        suggestions.add('Tempo médio alto (${avgTime.toStringAsFixed(0)}ms) - considere otimizações adicionais');
+        suggestions.add(
+            'Tempo médio alto (${avgTime.toStringAsFixed(0)}ms) - considere otimizações adicionais');
       }
 
       // Analisa queries mais frequentes
@@ -485,7 +503,8 @@ class QueryOptimizer {
       if (topQueries.isNotEmpty) {
         final mostFrequent = topQueries.first;
         if ((mostFrequent['count'] as int) > 50) {
-          suggestions.add('Query "${mostFrequent['queryId']}" muito frequente - considere pré-carregamento');
+          suggestions.add(
+              'Query "${mostFrequent['queryId']}" muito frequente - considere pré-carregamento');
         }
       }
 
@@ -503,9 +522,9 @@ class QueryOptimizer {
           },
         );
 
-        EnhancedLogger.log('💡 [QUERY_OPTIMIZER] ${suggestions.length} sugestões de otimização geradas');
+        EnhancedLogger.log(
+            '💡 [QUERY_OPTIMIZER] ${suggestions.length} sugestões de otimização geradas');
       }
-
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -520,7 +539,7 @@ class QueryOptimizer {
   Future<void> clearQueryCache() async {
     await _cache.invalidateType('query_results');
     await _cache.invalidateType('queries');
-    
+
     _logger.info(
       DiagnosticLogCategory.performance,
       'Cache de queries limpo',
@@ -540,7 +559,7 @@ class QueryOptimizer {
 
     // Baseado na frequência da query
     final frequency = _queryFrequency[queryId] ?? 0;
-    
+
     if (frequency > 10 && _config.enablePreloading) {
       strategies.add(QueryOptimizationStrategy.preloading);
     }
@@ -576,22 +595,23 @@ class QueryOptimizer {
     if (params == null || params.isEmpty) {
       return queryId;
     }
-    
+
     final sortedParams = Map.fromEntries(
-      params.entries.toList()..sort((a, b) => a.key.compareTo(b.key))
-    );
-    
+        params.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+
     return '${queryId}_${sortedParams.hashCode}';
   }
 
   /// Executa query em lotes
-  Future<List<T>> _executeBatchQuery<T>(Future<List<T>> Function() queryFunction) async {
+  Future<List<T>> _executeBatchQuery<T>(
+      Future<List<T>> Function() queryFunction) async {
     // Implementação simplificada - em um caso real, você dividiria a query em lotes menores
     return await queryFunction();
   }
 
   /// Executa query em paralelo
-  Future<List<T>> _executeParallelQuery<T>(Future<List<T>> Function() queryFunction) async {
+  Future<List<T>> _executeParallelQuery<T>(
+      Future<List<T>> Function() queryFunction) async {
     // Implementação simplificada - em um caso real, você dividiria a query em partes paralelas
     return await queryFunction();
   }
@@ -599,23 +619,24 @@ class QueryOptimizer {
   /// Registra estatísticas de performance
   void _recordPerformanceStats(QueryPerformanceStats stats) {
     _performanceHistory.add(stats);
-    
+
     // Mantém apenas últimas 1000 estatísticas
     if (_performanceHistory.length > 1000) {
       _performanceHistory.removeRange(0, _performanceHistory.length - 1000);
     }
 
     // Atualiza tempo médio de execução
-    final queryStats = _performanceHistory
-        .where((s) => s.queryId == stats.queryId)
-        .toList();
-    
+    final queryStats =
+        _performanceHistory.where((s) => s.queryId == stats.queryId).toList();
+
     if (queryStats.isNotEmpty) {
       final avgTime = queryStats
-          .map((s) => s.executionTime.inMilliseconds)
-          .reduce((a, b) => a + b) / queryStats.length;
-      
-      _averageExecutionTimes[stats.queryId] = Duration(milliseconds: avgTime.round());
+              .map((s) => s.executionTime.inMilliseconds)
+              .reduce((a, b) => a + b) /
+          queryStats.length;
+
+      _averageExecutionTimes[stats.queryId] =
+          Duration(milliseconds: avgTime.round());
     }
   }
 
@@ -624,7 +645,7 @@ class QueryOptimizer {
     _performanceHistory.clear();
     _queryFrequency.clear();
     _averageExecutionTimes.clear();
-    
+
     _logger.info(
       DiagnosticLogCategory.performance,
       'Query Optimizer finalizado',

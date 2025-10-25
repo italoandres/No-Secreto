@@ -18,8 +18,9 @@ class AutoProfileFixer {
       print('🔍 AutoProfileFixer: Verificando perfil...');
 
       // Verificar se perfil está visível
-      final isVisible = await FixExistingProfileForExploration.checkProfileVisibility();
-      
+      final isVisible =
+          await FixExistingProfileForExploration.checkProfileVisibility();
+
       if (!isVisible) {
         print('🚀 AutoProfileFixer: Corrigindo perfil automaticamente...');
         await FixExistingProfileForExploration.fixCurrentUserProfile();

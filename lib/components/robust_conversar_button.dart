@@ -47,40 +47,41 @@ class _RobustConversarButtonState extends State<RobustConversarButton> {
         setState(() {
           _statusMessage = 'Abrindo chat...';
         });
-        
+
         // Chat já existe, abrir diretamente
-        final chatId = MatchChatCreator.getChatId(currentUser.uid, widget.otherUserId);
+        final chatId =
+            MatchChatCreator.getChatId(currentUser.uid, widget.otherUserId);
         await _openChat(chatId);
       } else {
         setState(() {
           _statusMessage = 'Criando chat...';
         });
-        
+
         // Chat não existe, criar primeiro
         final chatId = await MatchChatCreator.createOrGetChatId(
           currentUser.uid,
           widget.otherUserId,
         );
-        
+
         setState(() {
           _statusMessage = 'Chat criado! Abrindo...';
         });
-        
+
         // Aguardar um momento para garantir que foi criado
         await Future.delayed(Duration(milliseconds: 500));
-        
+
         // Chamar callback se fornecido
         if (widget.onChatCreated != null) {
           widget.onChatCreated!();
         }
-        
+
         // Abrir o chat
         await _openChat(chatId);
       }
-
     } catch (e) {
       print('❌ Erro ao processar botão Conversar: $e');
-      _showError('Estamos criando seu chat... tente novamente em alguns segundos');
+      _showError(
+          'Estamos criando seu chat... tente novamente em alguns segundos');
     } finally {
       if (mounted) {
         setState(() {
@@ -94,7 +95,7 @@ class _RobustConversarButtonState extends State<RobustConversarButton> {
   Future<void> _openChat(String chatId) async {
     try {
       if (!mounted) return;
-      
+
       // Navegar para a tela de chat
       await Navigator.push(
         context,
@@ -114,7 +115,7 @@ class _RobustConversarButtonState extends State<RobustConversarButton> {
 
   void _showError(String message) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

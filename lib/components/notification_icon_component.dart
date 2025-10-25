@@ -6,13 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class NotificationIconComponent extends StatelessWidget {
   final String? contexto; // Contexto de onde está sendo usado
-  
+
   const NotificationIconComponent({Key? key, this.contexto}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
@@ -22,10 +22,10 @@ class NotificationIconComponent extends StatelessWidget {
 
     return Obx(() {
       // Somar todas as 3 categorias para o badge total
-      final unreadCount = controller.storiesUnreadCount.value + 
-                         controller.interestUnreadCount.value + 
-                         controller.systemUnreadCount.value;
-      
+      final unreadCount = controller.storiesUnreadCount.value +
+          controller.interestUnreadCount.value +
+          controller.systemUnreadCount.value;
+
       return GestureDetector(
         onTap: () {
           Get.to(() => const NotificationsView());
@@ -40,7 +40,7 @@ class NotificationIconComponent extends StatelessWidget {
                 color: Colors.white,
                 size: 28,
               ),
-              
+
               // Badge com contador (só aparece se houver notificações)
               if (unreadCount > 0)
                 Positioned(
@@ -84,10 +84,12 @@ class AnimatedNotificationIconComponent extends StatefulWidget {
   const AnimatedNotificationIconComponent({Key? key}) : super(key: key);
 
   @override
-  State<AnimatedNotificationIconComponent> createState() => _AnimatedNotificationIconComponentState();
+  State<AnimatedNotificationIconComponent> createState() =>
+      _AnimatedNotificationIconComponentState();
 }
 
-class _AnimatedNotificationIconComponentState extends State<AnimatedNotificationIconComponent>
+class _AnimatedNotificationIconComponentState
+    extends State<AnimatedNotificationIconComponent>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -99,7 +101,7 @@ class _AnimatedNotificationIconComponentState extends State<AnimatedNotification
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.2,
@@ -127,7 +129,7 @@ class _AnimatedNotificationIconComponentState extends State<AnimatedNotification
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
@@ -137,10 +139,10 @@ class _AnimatedNotificationIconComponentState extends State<AnimatedNotification
 
     return Obx(() {
       // Somar todas as 3 categorias para o badge total
-      final unreadCount = controller.storiesUnreadCount.value + 
-                         controller.interestUnreadCount.value + 
-                         controller.systemUnreadCount.value;
-      
+      final unreadCount = controller.storiesUnreadCount.value +
+          controller.interestUnreadCount.value +
+          controller.systemUnreadCount.value;
+
       // Controlar animação baseado nas notificações
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (unreadCount > 0) {
@@ -149,7 +151,7 @@ class _AnimatedNotificationIconComponentState extends State<AnimatedNotification
           _stopPulseAnimation();
         }
       });
-      
+
       return GestureDetector(
         onTap: () {
           _stopPulseAnimation();
@@ -170,7 +172,7 @@ class _AnimatedNotificationIconComponentState extends State<AnimatedNotification
                       color: Colors.white,
                       size: 28,
                     ),
-                    
+
                     // Badge com contador
                     if (unreadCount > 0)
                       Positioned(
@@ -228,7 +230,7 @@ class SimpleNotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
@@ -238,10 +240,10 @@ class SimpleNotificationIcon extends StatelessWidget {
 
     return Obx(() {
       // Somar todas as 3 categorias para o badge total
-      final unreadCount = controller.storiesUnreadCount.value + 
-                         controller.interestUnreadCount.value + 
-                         controller.systemUnreadCount.value;
-      
+      final unreadCount = controller.storiesUnreadCount.value +
+          controller.interestUnreadCount.value +
+          controller.systemUnreadCount.value;
+
       return InkWell(
         onTap: onTap ?? () => Get.to(() => const NotificationsView()),
         borderRadius: BorderRadius.circular(20),

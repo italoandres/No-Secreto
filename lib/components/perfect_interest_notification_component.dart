@@ -9,13 +9,12 @@ class PerfectInterestNotificationComponent extends StatefulWidget {
   const PerfectInterestNotificationComponent({super.key});
 
   @override
-  State<PerfectInterestNotificationComponent> createState() => 
+  State<PerfectInterestNotificationComponent> createState() =>
       _PerfectInterestNotificationComponentState();
 }
 
-class _PerfectInterestNotificationComponentState 
+class _PerfectInterestNotificationComponentState
     extends State<PerfectInterestNotificationComponent> {
-  
   int _unreadCount = 0;
   List<Map<String, dynamic>> _notifications = [];
   bool _isLoading = true;
@@ -55,18 +54,19 @@ class _PerfectInterestNotificationComponentState
         // Filtrar notificações de interesse não lidas PARA O USUÁRIO ATUAL
         final interestNotifications = snapshot.docs.where((doc) {
           final data = doc.data();
-          
+
           // Buscar notificações onde o usuário atual é o ALVO
           final isTargetUser = data['userId'] == currentUser.uid;
-          
+
           // OU buscar notificações onde o usuário atual é mencionado
           final isFromUser = data['fromUserId'] == currentUser.uid;
-          final isMentioned = data.toString().contains(currentUser.email ?? '') ||
-                             data.toString().contains('itala');
-          
-          return data['type'] == 'interest_match' && 
-                 data['isRead'] == false &&
-                 (isTargetUser || isMentioned);
+          final isMentioned =
+              data.toString().contains(currentUser.email ?? '') ||
+                  data.toString().contains('itala');
+
+          return data['type'] == 'interest_match' &&
+              data['isRead'] == false &&
+              (isTargetUser || isMentioned);
         }).toList();
 
         // Converter para lista de mapas
@@ -76,7 +76,8 @@ class _PerfectInterestNotificationComponentState
             'id': doc.id,
             'fromUserId': data['fromUserId'] ?? '',
             'fromUserName': data['fromUserName'] ?? 'Usuário',
-            'message': data['message'] ?? 'Tem interesse em conhecer seu perfil melhor',
+            'message': data['message'] ??
+                'Tem interesse em conhecer seu perfil melhor',
             'timestamp': data['timestamp'],
             'isRead': data['isRead'] ?? false,
           };
@@ -122,12 +123,11 @@ class _PerfectInterestNotificationComponentState
                 Text(
                   '🔔 Notificações de Interesse',
                   style: const TextStyle(
-                    fontSize: 18, 
-                    fontWeight: FontWeight.bold
-                  ),
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(12),
@@ -142,27 +142,27 @@ class _PerfectInterestNotificationComponentState
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Lista de notificações
             Expanded(
-              child: _notifications.isEmpty 
-                ? const Center(
-                    child: Text(
-                      'Nenhuma notificação de interesse no momento',
-                      style: TextStyle(color: Colors.grey),
+              child: _notifications.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Nenhuma notificação de interesse no momento',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _notifications.length,
+                      itemBuilder: (context, index) {
+                        final notification = _notifications[index];
+                        return _buildNotificationCard(notification);
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: _notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = _notifications[index];
-                      return _buildNotificationCard(notification);
-                    },
-                  ),
             ),
-            
+
             // Botão fechar
             const SizedBox(height: 20),
             SizedBox(
@@ -193,8 +193,9 @@ class _PerfectInterestNotificationComponentState
   /// Constrói o card de notificação EXATAMENTE como você pediu
   Widget _buildNotificationCard(Map<String, dynamic> notification) {
     final userName = notification['fromUserName'] ?? 'Usuário';
-    final message = notification['message'] ?? 'Tem interesse em conhecer seu perfil melhor';
-    
+    final message = notification['message'] ??
+        'Tem interesse em conhecer seu perfil melhor';
+
     // Calcular tempo
     String timeAgo = 'há alguns minutos';
     if (notification['timestamp'] != null) {
@@ -203,13 +204,15 @@ class _PerfectInterestNotificationComponentState
         final now = DateTime.now();
         final notificationTime = timestamp.toDate();
         final difference = now.difference(notificationTime);
-        
+
         if (difference.inMinutes < 60) {
           timeAgo = 'há ${difference.inMinutes} minutos';
         } else if (difference.inHours < 24) {
-          timeAgo = 'há ${difference.inHours} hora${difference.inHours > 1 ? 's' : ''}';
+          timeAgo =
+              'há ${difference.inHours} hora${difference.inHours > 1 ? 's' : ''}';
         } else {
-          timeAgo = 'há ${difference.inDays} dia${difference.inDays > 1 ? 's' : ''}';
+          timeAgo =
+              'há ${difference.inDays} dia${difference.inDays > 1 ? 's' : ''}';
         }
       } catch (e) {
         print('❌ Erro ao calcular tempo: $e');
@@ -259,9 +262,9 @@ class _PerfectInterestNotificationComponentState
               ),
             ],
           ),
-          
+
           const SizedBox(height: 10),
-          
+
           // Mensagem
           Container(
             padding: const EdgeInsets.all(10),
@@ -278,9 +281,9 @@ class _PerfectInterestNotificationComponentState
               ),
             ),
           ),
-          
+
           const SizedBox(height: 15),
-          
+
           // Botões de ação
           Row(
             children: [
@@ -300,7 +303,8 @@ class _PerfectInterestNotificationComponentState
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  child: const Text('Ver Perfil', style: TextStyle(fontSize: 12)),
+                  child:
+                      const Text('Ver Perfil', style: TextStyle(fontSize: 12)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -321,7 +325,8 @@ class _PerfectInterestNotificationComponentState
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  child: const Text('Não Tenho', style: TextStyle(fontSize: 12)),
+                  child:
+                      const Text('Não Tenho', style: TextStyle(fontSize: 12)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -342,7 +347,8 @@ class _PerfectInterestNotificationComponentState
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  child: const Text('Também Tenho ✅', style: TextStyle(fontSize: 12)),
+                  child: const Text('Também Tenho ✅',
+                      style: TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -367,7 +373,7 @@ class _PerfectInterestNotificationComponentState
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60, 
+      width: 60,
       height: 60,
       margin: const EdgeInsets.only(left: 16),
       child: Material(
@@ -397,7 +403,7 @@ class _PerfectInterestNotificationComponentState
                     size: 28,
                   ),
                 ),
-                
+
                 // Badge sempre visível se houver notificações
                 if (_unreadCount > 0)
                   Positioned(
@@ -428,7 +434,7 @@ class _PerfectInterestNotificationComponentState
                       ),
                     ),
                   ),
-                
+
                 // Indicador de carregamento
                 if (_isLoading)
                   Positioned(

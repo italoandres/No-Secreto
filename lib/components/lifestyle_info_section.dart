@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Seção que exibe informações de estilo de vida do perfil
-/// 
+///
 /// Exibe altura, status de fumante e consumo de bebida
 class LifestyleInfoSection extends StatelessWidget {
   final String? height;
@@ -66,10 +66,11 @@ class LifestyleInfoSection extends StatelessWidget {
                     label: 'Altura',
                     value: height!,
                   ),
-                  if (smokingStatus?.isNotEmpty == true || drinkingStatus?.isNotEmpty == true)
+                  if (smokingStatus?.isNotEmpty == true ||
+                      drinkingStatus?.isNotEmpty == true)
                     const SizedBox(height: 16),
                 ],
-                
+
                 // Status de Fumante
                 if (smokingStatus?.isNotEmpty == true) ...[
                   _buildLifestyleItem(
@@ -82,7 +83,7 @@ class LifestyleInfoSection extends StatelessWidget {
                   if (drinkingStatus?.isNotEmpty == true)
                     const SizedBox(height: 16),
                 ],
-                
+
                 // Status de Bebida
                 if (drinkingStatus?.isNotEmpty == true) ...[
                   _buildLifestyleItem(
@@ -155,7 +156,7 @@ class LifestyleInfoSection extends StatelessWidget {
   /// Verifica se há informações de estilo de vida
   bool _hasLifestyleInfo() {
     return height?.isNotEmpty == true ||
-           smokingStatus?.isNotEmpty == true ||
-           drinkingStatus?.isNotEmpty == true;
+        smokingStatus?.isNotEmpty == true ||
+        drinkingStatus?.isNotEmpty == true;
   }
 }

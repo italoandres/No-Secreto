@@ -5,8 +5,9 @@ class LocationErrorHandler {
   /// Trata erro ao carregar dados de um país
   static void handleDataLoadError(String countryCode, dynamic error) {
     // Log erro para debugging
-    debugPrint('❌ Erro ao carregar dados de localização de $countryCode: $error');
-    
+    debugPrint(
+        '❌ Erro ao carregar dados de localização de $countryCode: $error');
+
     // TODO: Adicionar analytics quando necessário
     // FirebaseAnalytics.instance.logEvent(
     //   name: 'location_data_error',
@@ -16,21 +17,21 @@ class LocationErrorHandler {
     //   },
     // );
   }
-  
+
   /// Retorna mensagem de fallback amigável
   static String getFallbackMessage(String countryName) {
     return 'Não foi possível carregar as cidades de $countryName. '
-           'Por favor, digite sua cidade manualmente.';
+        'Por favor, digite sua cidade manualmente.';
   }
-  
+
   /// Verifica se um erro é crítico
   static bool isCriticalError(dynamic error) {
     // Erros de rede ou parsing são críticos
-    return error is FormatException || 
-           error is TypeError ||
-           error.toString().contains('network');
+    return error is FormatException ||
+        error is TypeError ||
+        error.toString().contains('network');
   }
-  
+
   /// Retorna mensagem de erro apropriada
   static String getErrorMessage(dynamic error) {
     if (error is FormatException) {

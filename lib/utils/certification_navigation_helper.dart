@@ -36,13 +36,13 @@ class CertificationNavigationHelper {
   /// Verificar se usuário é admin
   static bool isAdmin(String? userEmail) {
     if (userEmail == null) return false;
-    
+
     // Lista de emails admin
     const adminEmails = [
       'sinais.app@gmail.com',
       'admin@sinais.app',
     ];
-    
+
     return adminEmails.contains(userEmail.toLowerCase());
   }
 

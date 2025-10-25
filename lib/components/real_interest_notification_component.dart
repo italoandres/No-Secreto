@@ -8,7 +8,7 @@ class RealInterestNotificationComponent extends StatefulWidget {
   final String userId;
   final Function(String)? onProfileView;
   final Function(String)? onInterestResponse;
-  
+
   const RealInterestNotificationComponent({
     Key? key,
     required this.userId,
@@ -17,23 +17,22 @@ class RealInterestNotificationComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<RealInterestNotificationComponent> createState() => 
+  State<RealInterestNotificationComponent> createState() =>
       _RealInterestNotificationComponentState();
 }
 
-class _RealInterestNotificationComponentState 
+class _RealInterestNotificationComponentState
     extends State<RealInterestNotificationComponent> {
-  
   List<Map<String, dynamic>> realNotifications = [];
   bool isLoading = true;
   String? error;
-  
+
   @override
   void initState() {
     super.initState();
     _loadRealNotifications();
   }
-  
+
   /// Carrega APENAS notificações REAIS (não de teste)
   Future<void> _loadRealNotifications() async {
     try {
@@ -41,30 +40,28 @@ class _RealInterestNotificationComponentState
         isLoading = true;
         error = null;
       });
-      
+
       print('🔍 [REAL_NOTIFICATIONS] Buscando APENAS notificações REAIS...');
-      
+
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         throw Exception('Usuário não logado');
       }
-      
+
       // 1. BUSCAR INTERAÇÕES REAIS (likes, matches, etc.)
       final realInteractions = await _findRealInteractions(currentUser.uid);
-      
+
       // 2. BUSCAR NOTIFICAÇÕES BASEADAS NAS INTERAÇÕES REAIS
       final realNotificationsList = await _findNotificationsFromInteractions(
-        realInteractions, 
-        currentUser.uid
-      );
-      
+          realInteractions, currentUser.uid);
+
       setState(() {
         realNotifications = realNotificationsList;
         isLoading = false;
       });
-      
-      print('🎉 [REAL_NOTIFICATIONS] ${realNotifications.length} notificações REAIS encontradas');
-      
+
+      print(
+          '🎉 [REAL_NOTIFICATIONS] ${realNotifications.length} notificações REAIS encontradas');
     } catch (e) {
       print('❌ [REAL_NOTIFICATIONS] Erro: $e');
       setState(() {
@@ -73,17 +70,23 @@ class _RealInterestNotificationComponentState
       });
     }
   }
-  
+
   /// Busca interações reais (likes, matches, interests)
-  Future<List<Map<String, dynamic>>> _findRealInteractions(String currentUserId) async {
+  Future<List<Map<String, dynamic>>> _findRealInteractions(
+      String currentUserId) async {
     print('🔍 [REAL_NOTIFICATIONS] Buscando interações reais...');
-    
+
     final List<Map<String, dynamic>> interactions = [];
-    
+
     try {
       // Buscar em diferentes coleções de interações
-      final collections = ['likes', 'interests', 'matches', 'user_interactions'];
-      
+      final collections = [
+        'likes',
+        'interests',
+        'matches',
+        'user_interactions'
+      ];
+
       for (final collectionName in collections) {
         try {
           final querySnapshot = await FirebaseFirestore.instance
@@ -91,9 +94,10 @@ class _RealInterestNotificationComponentState
               .where('targetUserId', isEqualTo: currentUserId)
               .limit(50)
               .get();
-          
-          print('📊 [REAL_NOTIFICATIONS] $collectionName: ${querySnapshot.docs.length} interações');
-          
+
+          print(
+              '📊 [REAL_NOTIFICATIONS] $collectionName: ${querySnapshot.docs.length} interações');
+
           for (final doc in querySnapshot.docs) {
             final data = doc.data();
             data['id'] = doc.id;
@@ -104,37 +108,37 @@ class _RealInterestNotificationComponentState
           print('⚠️ [REAL_NOTIFICATIONS] Erro em $collectionName: $e');
         }
       }
-      
-      print('📊 [REAL_NOTIFICATIONS] Total de interações reais: ${interactions.length}');
+
+      print(
+          '📊 [REAL_NOTIFICATIONS] Total de interações reais: ${interactions.length}');
       return interactions;
-      
     } catch (e) {
       print('❌ [REAL_NOTIFICATIONS] Erro ao buscar interações: $e');
       return [];
     }
   }
-  
+
   /// Busca notificações baseadas nas interações reais
   Future<List<Map<String, dynamic>>> _findNotificationsFromInteractions(
     List<Map<String, dynamic>> interactions,
     String currentUserId,
   ) async {
     print('🔍 [REAL_NOTIFICATIONS] Convertendo interações em notificações...');
-    
+
     final List<Map<String, dynamic>> notifications = [];
-    
+
     for (final interaction in interactions) {
       try {
-        final fromUserId = interaction['fromUserId'] as String? ?? 
-                          interaction['userId'] as String? ?? 
-                          interaction['sourceUserId'] as String?;
-        
+        final fromUserId = interaction['fromUserId'] as String? ??
+            interaction['userId'] as String? ??
+            interaction['sourceUserId'] as String?;
+
         if (fromUserId == null || fromUserId == currentUserId) continue;
-        
+
         // Buscar dados do usuário que fez a interação
         final userData = await _getUserData(fromUserId);
         if (userData == null) continue;
-        
+
         // Criar notificação baseada na interação real
         final notification = {
           'id': interaction['id'],
@@ -143,23 +147,25 @@ class _RealInterestNotificationComponentState
           'fromUserUsername': userData['username'] ?? '',
           'fromUserEmail': userData['email'] ?? '',
           'message': _getMessageFromInteraction(interaction),
-          'timestamp': interaction['createdAt'] ?? interaction['timestamp'] ?? Timestamp.now(),
+          'timestamp': interaction['createdAt'] ??
+              interaction['timestamp'] ??
+              Timestamp.now(),
           'isRead': false,
           'type': 'real_interest',
           'interactionType': interaction['collection'],
           'originalInteraction': interaction,
           'isReal': true, // Marcador de notificação real
         };
-        
+
         notifications.add(notification);
-        
-        print('✅ [REAL_NOTIFICATIONS] Notificação real criada: ${notification['fromUserName']}');
-        
+
+        print(
+            '✅ [REAL_NOTIFICATIONS] Notificação real criada: ${notification['fromUserName']}');
       } catch (e) {
         print('⚠️ [REAL_NOTIFICATIONS] Erro ao processar interação: $e');
       }
     }
-    
+
     // Ordenar por data (mais recentes primeiro)
     notifications.sort((a, b) {
       final aTime = a['timestamp'] as Timestamp?;
@@ -167,10 +173,10 @@ class _RealInterestNotificationComponentState
       if (aTime == null || bTime == null) return 0;
       return bTime.compareTo(aTime);
     });
-    
+
     return notifications;
   }
-  
+
   /// Busca dados do usuário
   Future<Map<String, dynamic>?> _getUserData(String userId) async {
     try {
@@ -178,7 +184,7 @@ class _RealInterestNotificationComponentState
           .collection('users')
           .doc(userId)
           .get();
-      
+
       if (userDoc.exists) {
         return userDoc.data();
       }
@@ -187,11 +193,11 @@ class _RealInterestNotificationComponentState
     }
     return null;
   }
-  
+
   /// Gera mensagem baseada no tipo de interação
   String _getMessageFromInteraction(Map<String, dynamic> interaction) {
     final collection = interaction['collection'] as String?;
-    
+
     switch (collection) {
       case 'likes':
         return 'curtiu seu perfil';
@@ -205,14 +211,15 @@ class _RealInterestNotificationComponentState
         return 'tem interesse em conhecer você melhor';
     }
   }
-  
+
   /// Navega para o perfil do usuário
   Future<void> _viewProfile(Map<String, dynamic> notification) async {
     final userName = notification['fromUserName'] as String;
     final userId = notification['fromUserId'] as String;
-    
-    print('👤 [REAL_NOTIFICATIONS] Visualizando perfil REAL: $userName ($userId)');
-    
+
+    print(
+        '👤 [REAL_NOTIFICATIONS] Visualizando perfil REAL: $userName ($userId)');
+
     Get.snackbar(
       '👤 Abrindo Perfil Real',
       'Carregando perfil de $userName...',
@@ -220,39 +227,40 @@ class _RealInterestNotificationComponentState
       colorText: Colors.white,
       duration: const Duration(seconds: 2),
     );
-    
+
     widget.onProfileView?.call(userId);
   }
-  
+
   /// Responde ao interesse
-  Future<void> _respondToInterest(Map<String, dynamic> notification, bool interested) async {
+  Future<void> _respondToInterest(
+      Map<String, dynamic> notification, bool interested) async {
     final userName = notification['fromUserName'] as String;
     final userId = notification['fromUserId'] as String;
     final response = interested ? 'Também Tenho' : 'Não Tenho';
-    
+
     print('💕 [REAL_NOTIFICATIONS] Resposta REAL: $response para $userName');
-    
+
     Get.snackbar(
       interested ? '💕 Interesse Mútuo Real!' : '👋 Resposta Enviada',
-      interested 
+      interested
           ? 'Você também tem interesse em $userName!'
           : 'Resposta enviada para $userName',
       backgroundColor: interested ? Colors.pink : Colors.blue,
       colorText: Colors.white,
       duration: const Duration(seconds: 3),
     );
-    
+
     widget.onInterestResponse?.call(userId);
   }
-  
+
   /// Retorna tempo relativo
   String _getTimeAgo(dynamic timestamp) {
     if (timestamp is! Timestamp) return 'agora';
-    
+
     final now = DateTime.now();
     final time = timestamp.toDate();
     final difference = now.difference(time);
-    
+
     if (difference.inDays > 0) {
       return 'há ${difference.inDays} dia${difference.inDays > 1 ? 's' : ''}';
     } else if (difference.inHours > 0) {
@@ -263,7 +271,7 @@ class _RealInterestNotificationComponentState
       return 'agora';
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -278,7 +286,7 @@ class _RealInterestNotificationComponentState
         ),
       );
     }
-    
+
     if (error != null) {
       return Center(
         child: Column(
@@ -296,7 +304,7 @@ class _RealInterestNotificationComponentState
         ),
       );
     }
-    
+
     if (realNotifications.isEmpty) {
       return const Center(
         child: Column(
@@ -318,7 +326,7 @@ class _RealInterestNotificationComponentState
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -348,7 +356,7 @@ class _RealInterestNotificationComponentState
             ],
           ),
         ),
-        
+
         // Lista de notificações reais
         Expanded(
           child: ListView.builder(
@@ -362,14 +370,16 @@ class _RealInterestNotificationComponentState
       ],
     );
   }
-  
+
   /// Constrói card de notificação real
   Widget _buildRealNotificationCard(Map<String, dynamic> notification) {
     final userName = notification['fromUserName'] as String? ?? 'Usuário';
-    final message = notification['message'] as String? ?? 'tem interesse em você';
+    final message =
+        notification['message'] as String? ?? 'tem interesse em você';
     final timeAgo = _getTimeAgo(notification['timestamp']);
-    final interactionType = notification['interactionType'] as String? ?? 'interest';
-    
+    final interactionType =
+        notification['interactionType'] as String? ?? 'interest';
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 3,
@@ -417,7 +427,8 @@ class _RealInterestNotificationComponentState
                 Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(8),
@@ -433,7 +444,8 @@ class _RealInterestNotificationComponentState
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade100,
                         borderRadius: BorderRadius.circular(8),
@@ -451,17 +463,17 @@ class _RealInterestNotificationComponentState
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Mensagem
             Text(
               message,
               style: const TextStyle(fontSize: 14),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [

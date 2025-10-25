@@ -23,17 +23,20 @@ class UnifiedNotificationWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<UnifiedNotificationWidget> createState() => _UnifiedNotificationWidgetState();
+  State<UnifiedNotificationWidget> createState() =>
+      _UnifiedNotificationWidgetState();
 }
 
 class _UnifiedNotificationWidgetState extends State<UnifiedNotificationWidget> {
   final UIStateManager _uiStateManager = UIStateManager();
-  final UnifiedNotificationInterface _unifiedInterface = UnifiedNotificationInterface();
+  final UnifiedNotificationInterface _unifiedInterface =
+      UnifiedNotificationInterface();
 
   @override
   void initState() {
     super.initState();
-    EnhancedLogger.log('🎨 [UNIFIED_WIDGET] Inicializando para: ${widget.userId}');
+    EnhancedLogger.log(
+        '🎨 [UNIFIED_WIDGET] Inicializando para: ${widget.userId}');
   }
 
   @override
@@ -48,7 +51,7 @@ class _UnifiedNotificationWidgetState extends State<UnifiedNotificationWidget> {
         }
 
         final state = snapshot.data!;
-        
+
         return Column(
           children: [
             if (widget.showSyncStatus) _buildSyncStatusBar(state),
@@ -108,7 +111,7 @@ class _UnifiedNotificationWidgetState extends State<UnifiedNotificationWidget> {
   Widget _buildLastUpdateInfo(NotificationUIState state) {
     final timeDiff = DateTime.now().difference(state.lastUpdate);
     String timeText;
-    
+
     if (timeDiff.inMinutes < 1) {
       timeText = 'agora';
     } else if (timeDiff.inMinutes < 60) {
@@ -313,7 +316,7 @@ class _UnifiedNotificationWidgetState extends State<UnifiedNotificationWidget> {
 
   Future<void> _handleForceSync() async {
     EnhancedLogger.log('🚀 [UNIFIED_WIDGET] Forçando sincronização');
-    
+
     try {
       await _uiStateManager.forceSync(widget.userId);
       widget.onRefresh?.call();

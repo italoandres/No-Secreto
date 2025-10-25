@@ -40,7 +40,7 @@ class ExploreProfilesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(ExploreProfilesController());
     final sinaisController = Get.put(SinaisController());
-    
+
     // Carregar localizações e filtros do usuário
     controller.loadUserLocations();
     controller.loadSearchFilters();
@@ -48,452 +48,489 @@ class ExploreProfilesView extends StatelessWidget {
     return WillPopScope(
       onWillPop: () => controller.showSaveDialog(context),
       child: Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Seus Sinais',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF7B68EE),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Tabs Horizontais
-          Container(
-            color: Colors.white,
-            child: Row(
-              children: [
-                // Tab "Sinais" (Esquerda)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.changeTab(0),
-                    child: Obx(() => Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: controller.currentTab.value == 0
-                                ? const Color(0xFF7B68EE)
-                                : Colors.transparent,
-                            width: 3,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'Sinais',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: controller.currentTab.value == 0
-                              ? const Color(0xFF7B68EE)
-                              : Colors.grey[600],
-                          fontWeight: controller.currentTab.value == 0
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    )),
-                  ),
-                ),
-                
-                // Tab "Configure Sinais" (Direita)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.changeTab(1),
-                    child: Obx(() => Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: controller.currentTab.value == 1
-                                ? const Color(0xFF7B68EE)
-                                : Colors.transparent,
-                            width: 3,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'Configure Sinais',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: controller.currentTab.value == 1
-                              ? const Color(0xFF7B68EE)
-                              : Colors.grey[600],
-                          fontWeight: controller.currentTab.value == 1
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    )),
-                  ),
-                ),
-              ],
+        backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          title: const Text(
+            'Seus Sinais',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-
-          // Conteúdo das Tabs
-          Expanded(
-            child: Obx(() {
-              // Tab 0: Sinais (Sistema de Recomendações)
-              if (controller.currentTab.value == 0) {
-                return _buildSinaisTab(sinaisController);
-              }
-              
-              // Tab 1: Configure Sinais (filtros)
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Header Motivacional
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF7B68EE).withOpacity(0.05),
-                          const Color(0xFF4169E1).withOpacity(0.05),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Espero esses Sinais...',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF7B68EE),
-                            letterSpacing: 0.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Levaremos seus sinais em consideração, mas mostraremos as opções mais adequadas entre as disponíveis para você.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                            height: 1.4,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Seção de Filtros de Localização
-                  Obx(() => LocationFilterSection(
-                    primaryCity: controller.primaryCity.value.isNotEmpty 
-                        ? controller.primaryCity.value 
-                        : null,
-                    primaryState: controller.primaryState.value.isNotEmpty 
-                        ? controller.primaryState.value 
-                        : null,
-                    additionalLocations: controller.additionalLocations.value,
-                    onAddLocation: () => controller.showAddLocationDialog(context),
-                    onRemoveLocation: (index) => controller.removeAdditionalLocation(index),
-                    onEditLocation: (index) => controller.showEditLocationDialog(context, index),
-                    canAddMore: controller.canAddMoreLocations(),
-                  )),
-
-                  const SizedBox(height: 16),
-
-                  // Seção de Filtros de Distância
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        // Filtro de Distância
-                        Obx(() => DistanceFilterCard(
-                          currentDistance: controller.maxDistance.value,
-                          onDistanceChanged: (distance) {
-                            controller.updateMaxDistance(distance);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Distância
-                        Obx(() => PreferenceToggleCard(
-                          isEnabled: controller.prioritizeDistance.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeDistance(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Idade
-                        Obx(() => AgeFilterCard(
-                          minAge: controller.minAge.value,
-                          maxAge: controller.maxAge.value,
-                          onAgeRangeChanged: (min, max) {
-                            controller.updateAgeRange(min, max);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Idade
-                        Obx(() => AgePreferenceToggleCard(
-                          isEnabled: controller.prioritizeAge.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeAge(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Altura
-                        Obx(() => HeightFilterCard(
-                          minHeight: controller.minHeight.value,
-                          maxHeight: controller.maxHeight.value,
-                          onHeightChanged: (min, max) {
-                            controller.updateHeightRange(min, max);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Altura
-                        Obx(() => HeightPreferenceToggleCard(
-                          isEnabled: controller.prioritizeHeight.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeHeight(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Idiomas
-                        Obx(() => LanguagesFilterCard(
-                          selectedLanguages: controller.selectedLanguages.toList(),
-                          onLanguagesChanged: (languages) {
-                            controller.updateSelectedLanguages(languages);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Idiomas
-                        Obx(() => LanguagesPreferenceToggleCard(
-                          isEnabled: controller.prioritizeLanguages.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeLanguages(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Educação
-                        Obx(() => EducationFilterCard(
-                          selectedEducation: controller.selectedEducation.value,
-                          onEducationChanged: (education) {
-                            controller.updateSelectedEducation(education);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Educação
-                        Obx(() => EducationPreferenceToggleCard(
-                          isEnabled: controller.prioritizeEducation.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeEducation(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Filhos
-                        Obx(() => ChildrenFilterCard(
-                          selectedChildren: controller.selectedChildren.value,
-                          onChildrenChanged: (children) {
-                            controller.updateSelectedChildren(children);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Filhos
-                        Obx(() => ChildrenPreferenceToggleCard(
-                          isEnabled: controller.prioritizeChildren.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeChildren(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Beber
-                        Obx(() => DrinkingFilterCard(
-                          selectedDrinking: controller.selectedDrinking.value,
-                          onDrinkingChanged: (drinking) {
-                            controller.updateSelectedDrinking(drinking);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Beber
-                        Obx(() => DrinkingPreferenceToggleCard(
-                          isEnabled: controller.prioritizeDrinking.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeDrinking(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Fumar
-                        Obx(() => SmokingFilterCard(
-                          selectedSmoking: controller.selectedSmoking.value,
-                          onSmokingChanged: (smoking) {
-                            controller.updateSelectedSmoking(smoking);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Fumar
-                        Obx(() => SmokingPreferenceToggleCard(
-                          isEnabled: controller.prioritizeSmoking.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeSmoking(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Certificação Espiritual
-                        Obx(() => CertificationFilterCard(
-                          requiresCertification: controller.requiresCertification.value,
-                          onCertificationChanged: (certification) {
-                            controller.updateRequiresCertification(certification);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Certificação
-                        Obx(() => CertificationPreferenceToggleCard(
-                          isEnabled: controller.prioritizeCertification.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeCertification(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Movimento Deus é Pai
-                        Obx(() => DeusEPaiFilterCard(
-                          requiresDeusEPaiMember: controller.requiresDeusEPaiMember.value,
-                          onDeusEPaiChanged: (member) {
-                            controller.updateRequiresDeusEPaiMember(member);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Deus é Pai
-                        Obx(() => DeusEPaiPreferenceToggleCard(
-                          isEnabled: controller.prioritizeDeusEPaiMember.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeDeusEPaiMember(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Virgindade
-                        Obx(() => VirginityFilterCard(
-                          selectedVirginity: controller.selectedVirginity.value,
-                          onVirginityChanged: (virginity) {
-                            controller.updateSelectedVirginity(virginity);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Virgindade
-                        Obx(() => VirginityPreferenceToggleCard(
-                          isEnabled: controller.prioritizeVirginity.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeVirginity(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Filtro de Hobbies
-                        Obx(() => HobbiesFilterCard(
-                          selectedHobbies: controller.selectedHobbies.toList(),
-                          onHobbiesChanged: (hobbies) {
-                            controller.updateSelectedHobbies(hobbies);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Toggle de Preferência de Hobbies
-                        Obx(() => HobbiesPreferenceToggleCard(
-                          isEnabled: controller.prioritizeHobbies.value,
-                          onToggle: (value) {
-                            controller.updatePrioritizeHobbies(value);
-                          },
-                        )),
-
-                        const SizedBox(height: 16),
-
-                        // Botão Salvar Filtros
-                        Obx(() {
-                          final hasChanges = controller.currentFilters.value != controller.savedFilters.value;
-                          
-                          return SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: hasChanges ? controller.saveSearchFilters : null,
-                              icon: const Icon(Icons.save, size: 20),
-                              label: Text(
-                                hasChanges ? 'Salvar Filtros' : 'Filtros Salvos',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                backgroundColor: hasChanges 
-                                    ? const Color(0xFF7B68EE) 
-                                    : Colors.grey[400],
-                                elevation: hasChanges ? 4 : 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+          backgroundColor: const Color(0xFF7B68EE),
+          elevation: 0,
+        ),
+        body: Column(
+          children: [
+            // Tabs Horizontais
+            Container(
+              color: Colors.white,
+              child: Row(
+                children: [
+                  // Tab "Sinais" (Esquerda)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => controller.changeTab(0),
+                      child: Obx(() => Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: controller.currentTab.value == 0
+                                      ? const Color(0xFF7B68EE)
+                                      : Colors.transparent,
+                                  width: 3,
                                 ),
                               ),
                             ),
-                          );
-                        }),
-
-                        const SizedBox(height: 24),
-                      ],
+                            child: Text(
+                              'Sinais',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: controller.currentTab.value == 0
+                                    ? const Color(0xFF7B68EE)
+                                    : Colors.grey[600],
+                                fontWeight: controller.currentTab.value == 0
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          )),
                     ),
                   ),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
+
+                  // Tab "Configure Sinais" (Direita)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => controller.changeTab(1),
+                      child: Obx(() => Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: controller.currentTab.value == 1
+                                      ? const Color(0xFF7B68EE)
+                                      : Colors.transparent,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              'Configure Sinais',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: controller.currentTab.value == 1
+                                    ? const Color(0xFF7B68EE)
+                                    : Colors.grey[600],
+                                fontWeight: controller.currentTab.value == 1
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Conteúdo das Tabs
+            Expanded(
+              child: Obx(() {
+                // Tab 0: Sinais (Sistema de Recomendações)
+                if (controller.currentTab.value == 0) {
+                  return _buildSinaisTab(sinaisController);
+                }
+
+                // Tab 1: Configure Sinais (filtros)
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Header Motivacional
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF7B68EE).withOpacity(0.05),
+                              const Color(0xFF4169E1).withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Espero esses Sinais...',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF7B68EE),
+                                letterSpacing: 0.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Levaremos seus sinais em consideração, mas mostraremos as opções mais adequadas entre as disponíveis para você.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                                height: 1.4,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Seção de Filtros de Localização
+                      Obx(() => LocationFilterSection(
+                            primaryCity: controller.primaryCity.value.isNotEmpty
+                                ? controller.primaryCity.value
+                                : null,
+                            primaryState:
+                                controller.primaryState.value.isNotEmpty
+                                    ? controller.primaryState.value
+                                    : null,
+                            additionalLocations:
+                                controller.additionalLocations.value,
+                            onAddLocation: () =>
+                                controller.showAddLocationDialog(context),
+                            onRemoveLocation: (index) =>
+                                controller.removeAdditionalLocation(index),
+                            onEditLocation: (index) => controller
+                                .showEditLocationDialog(context, index),
+                            canAddMore: controller.canAddMoreLocations(),
+                          )),
+
+                      const SizedBox(height: 16),
+
+                      // Seção de Filtros de Distância
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          children: [
+                            // Filtro de Distância
+                            Obx(() => DistanceFilterCard(
+                                  currentDistance: controller.maxDistance.value,
+                                  onDistanceChanged: (distance) {
+                                    controller.updateMaxDistance(distance);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Distância
+                            Obx(() => PreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeDistance.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeDistance(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Idade
+                            Obx(() => AgeFilterCard(
+                                  minAge: controller.minAge.value,
+                                  maxAge: controller.maxAge.value,
+                                  onAgeRangeChanged: (min, max) {
+                                    controller.updateAgeRange(min, max);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Idade
+                            Obx(() => AgePreferenceToggleCard(
+                                  isEnabled: controller.prioritizeAge.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeAge(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Altura
+                            Obx(() => HeightFilterCard(
+                                  minHeight: controller.minHeight.value,
+                                  maxHeight: controller.maxHeight.value,
+                                  onHeightChanged: (min, max) {
+                                    controller.updateHeightRange(min, max);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Altura
+                            Obx(() => HeightPreferenceToggleCard(
+                                  isEnabled: controller.prioritizeHeight.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeHeight(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Idiomas
+                            Obx(() => LanguagesFilterCard(
+                                  selectedLanguages:
+                                      controller.selectedLanguages.toList(),
+                                  onLanguagesChanged: (languages) {
+                                    controller
+                                        .updateSelectedLanguages(languages);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Idiomas
+                            Obx(() => LanguagesPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeLanguages.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeLanguages(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Educação
+                            Obx(() => EducationFilterCard(
+                                  selectedEducation:
+                                      controller.selectedEducation.value,
+                                  onEducationChanged: (education) {
+                                    controller
+                                        .updateSelectedEducation(education);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Educação
+                            Obx(() => EducationPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeEducation.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeEducation(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Filhos
+                            Obx(() => ChildrenFilterCard(
+                                  selectedChildren:
+                                      controller.selectedChildren.value,
+                                  onChildrenChanged: (children) {
+                                    controller.updateSelectedChildren(children);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Filhos
+                            Obx(() => ChildrenPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeChildren.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeChildren(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Beber
+                            Obx(() => DrinkingFilterCard(
+                                  selectedDrinking:
+                                      controller.selectedDrinking.value,
+                                  onDrinkingChanged: (drinking) {
+                                    controller.updateSelectedDrinking(drinking);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Beber
+                            Obx(() => DrinkingPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeDrinking.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeDrinking(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Fumar
+                            Obx(() => SmokingFilterCard(
+                                  selectedSmoking:
+                                      controller.selectedSmoking.value,
+                                  onSmokingChanged: (smoking) {
+                                    controller.updateSelectedSmoking(smoking);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Fumar
+                            Obx(() => SmokingPreferenceToggleCard(
+                                  isEnabled: controller.prioritizeSmoking.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeSmoking(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Certificação Espiritual
+                            Obx(() => CertificationFilterCard(
+                                  requiresCertification:
+                                      controller.requiresCertification.value,
+                                  onCertificationChanged: (certification) {
+                                    controller.updateRequiresCertification(
+                                        certification);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Certificação
+                            Obx(() => CertificationPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeCertification.value,
+                                  onToggle: (value) {
+                                    controller
+                                        .updatePrioritizeCertification(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Movimento Deus é Pai
+                            Obx(() => DeusEPaiFilterCard(
+                                  requiresDeusEPaiMember:
+                                      controller.requiresDeusEPaiMember.value,
+                                  onDeusEPaiChanged: (member) {
+                                    controller
+                                        .updateRequiresDeusEPaiMember(member);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Deus é Pai
+                            Obx(() => DeusEPaiPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeDeusEPaiMember.value,
+                                  onToggle: (value) {
+                                    controller
+                                        .updatePrioritizeDeusEPaiMember(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Virgindade
+                            Obx(() => VirginityFilterCard(
+                                  selectedVirginity:
+                                      controller.selectedVirginity.value,
+                                  onVirginityChanged: (virginity) {
+                                    controller
+                                        .updateSelectedVirginity(virginity);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Virgindade
+                            Obx(() => VirginityPreferenceToggleCard(
+                                  isEnabled:
+                                      controller.prioritizeVirginity.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeVirginity(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Filtro de Hobbies
+                            Obx(() => HobbiesFilterCard(
+                                  selectedHobbies:
+                                      controller.selectedHobbies.toList(),
+                                  onHobbiesChanged: (hobbies) {
+                                    controller.updateSelectedHobbies(hobbies);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Toggle de Preferência de Hobbies
+                            Obx(() => HobbiesPreferenceToggleCard(
+                                  isEnabled: controller.prioritizeHobbies.value,
+                                  onToggle: (value) {
+                                    controller.updatePrioritizeHobbies(value);
+                                  },
+                                )),
+
+                            const SizedBox(height: 16),
+
+                            // Botão Salvar Filtros
+                            Obx(() {
+                              final hasChanges =
+                                  controller.currentFilters.value !=
+                                      controller.savedFilters.value;
+
+                              return SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: hasChanges
+                                      ? controller.saveSearchFilters
+                                      : null,
+                                  icon: const Icon(Icons.save, size: 20),
+                                  label: Text(
+                                    hasChanges
+                                        ? 'Salvar Filtros'
+                                        : 'Filtros Salvos',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    backgroundColor: hasChanges
+                                        ? const Color(0xFF7B68EE)
+                                        : Colors.grey[400],
+                                    elevation: hasChanges ? 4 : 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -743,11 +780,11 @@ class ExploreProfilesView extends StatelessWidget {
           itemBuilder: (context, index) {
             final interest = controller.pendingInterests[index];
             final profile = controller.interestProfiles[interest.fromUserId];
-            
+
             if (profile == null) {
               return const SizedBox.shrink();
             }
-            
+
             return InterestCard(
               interest: interest,
               profile: profile,
@@ -786,14 +823,14 @@ class ExploreProfilesView extends StatelessWidget {
             final match = controller.matches[index];
             final userId = FirebaseAuth.instance.currentUser?.uid;
             if (userId == null) return const SizedBox.shrink();
-            
+
             final otherUserId = match.getOtherUserId(userId);
             final profile = controller.matchProfiles[otherUserId];
-            
+
             if (profile == null) {
               return const SizedBox.shrink();
             }
-            
+
             return MatchCard(
               match: match,
               profile: profile,

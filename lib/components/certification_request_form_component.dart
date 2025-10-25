@@ -25,7 +25,7 @@ class _CertificationRequestFormComponentState
   final _formKey = GlobalKey<FormState>();
   final _purchaseEmailController = TextEditingController();
   final _appEmailController = TextEditingController();
-  
+
   PlatformFile? _selectedFile;
   bool _isValid = false;
 
@@ -54,8 +54,8 @@ class _CertificationRequestFormComponentState
   /// Validar formulário
   void _validateForm() {
     setState(() {
-      _isValid = _formKey.currentState?.validate() == true && 
-                 _selectedFile != null;
+      _isValid =
+          _formKey.currentState?.validate() == true && _selectedFile != null;
     });
   }
 
@@ -64,12 +64,12 @@ class _CertificationRequestFormComponentState
     if (value == null || value.isEmpty) {
       return 'Email é obrigatório';
     }
-    
+
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Email inválido';
     }
-    
+
     return null;
   }
 
@@ -102,29 +102,29 @@ class _CertificationRequestFormComponentState
           Text(
             'Solicitação de Certificação',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.amber.shade800,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.amber.shade800,
+                ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Descrição
           Text(
             'Preencha os dados abaixo para solicitar sua certificação espiritual "Sinais de meu Isaque, Sinais de minha Rebeca".',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade700,
-            ),
+                  color: Colors.grey.shade700,
+                ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Email do App (pré-preenchido, somente leitura)
           Text(
             'Email no App',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -145,15 +145,15 @@ class _CertificationRequestFormComponentState
               ),
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Email da Compra
           Text(
             'Email da Compra *',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -187,9 +187,9 @@ class _CertificationRequestFormComponentState
             ),
             validator: _validateEmail,
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Dica sobre email da compra
           Container(
             padding: const EdgeInsets.all(12),
@@ -214,23 +214,23 @@ class _CertificationRequestFormComponentState
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Upload de Diploma
           Text(
             'Comprovante Diploma Sinais *',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           FileUploadComponent(
             onFileSelected: _onFileSelected,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Botão de Enviar
           SizedBox(
             width: double.infinity,
@@ -265,9 +265,9 @@ class _CertificationRequestFormComponentState
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Nota sobre prazo
           Center(
             child: Text(

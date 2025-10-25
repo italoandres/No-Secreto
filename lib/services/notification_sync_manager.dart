@@ -6,38 +6,42 @@ import '../utils/enhanced_logger.dart';
 
 /// Gerenciador de sincronização de notificações
 class NotificationSyncManager {
-  static final NotificationSyncManager _instance = NotificationSyncManager._internal();
+  static final NotificationSyncManager _instance =
+      NotificationSyncManager._internal();
   factory NotificationSyncManager() => _instance;
   NotificationSyncManager._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Map<String, StreamController<List<NotificationModel>>> _streamControllers = {};
+  final Map<String, StreamController<List<NotificationModel>>>
+      _streamControllers = {};
   final Map<String, List<NotificationModel>> _cache = {};
   final Map<String, StreamSubscription> _listeners = {};
   final Map<String, Timer> _periodicTimers = {};
 
   /// Obtém stream de notificações para um usuário
   Stream<List<NotificationModel>> getNotificationsStream(String userId) {
-    EnhancedLogger.log('🔄 [SYNC_MANAGER] Iniciando stream unificado para: $userId');
-    
+    EnhancedLogger.log(
+        '🔄 [SYNC_MANAGER] Iniciando stream unificado para: $userId');
+
     if (!_streamControllers.containsKey(userId)) {
-      _streamControllers[userId] = StreamController<List<NotificationModel>>.broadcast();
+      _streamControllers[userId] =
+          StreamController<List<NotificationModel>>.broadcast();
       _initializeStream(userId);
     }
-    
+
     return _streamControllers[userId]!.stream;
   }
 
   /// Inicializa stream para um usuário
   void _initializeStream(String userId) {
     EnhancedLogger.log('🚀 [SYNC_MANAGER] Inicializando stream para: $userId');
-    
+
     // Carrega dados iniciais
     _loadInitialData(userId);
-    
+
     // Configura listener em tempo real
     _setupRealtimeListener(userId);
-    
+
     // Configura sincronização periódica
     _setupPeriodicSync(userId);
   }
@@ -45,11 +49,13 @@ class NotificationSyncManager {
   /// Carrega dados iniciais
   Future<void> _loadInitialData(String userId) async {
     try {
-      EnhancedLogger.log('📊 [SYNC_MANAGER] Carregando dados iniciais para: $userId');
-      
+      EnhancedLogger.log(
+          '📊 [SYNC_MANAGER] Carregando dados iniciais para: $userId');
+
       // Verifica se há cache válido
       if (_cache.containsKey(userId) && _cache[userId]!.isNotEmpty) {
-        EnhancedLogger.log('✅ [SYNC_MANAGER] Usando cache válido: ${_cache[userId]!.length} notificações');
+        EnhancedLogger.log(
+            '✅ [SYNC_MANAGER] Usando cache válido: ${_cache[userId]!.length} notificações');
         _streamControllers[userId]?.add(_cache[userId]!);
         return;
       }
@@ -58,9 +64,9 @@ class NotificationSyncManager {
       final notifications = await _fetchFromFirebase(userId);
       _updateCache(userId, notifications);
       _streamControllers[userId]?.add(notifications);
-      
     } catch (e) {
-      EnhancedLogger.log('❌ [SYNC_MANAGER] Erro ao carregar dados iniciais: $e');
+      EnhancedLogger.log(
+          '❌ [SYNC_MANAGER] Erro ao carregar dados iniciais: $e');
       _streamControllers[userId]?.addError(e);
     }
   }
@@ -68,7 +74,7 @@ class NotificationSyncManager {
   /// Busca notificações do Firebase
   Future<List<NotificationModel>> _fetchFromFirebase(String userId) async {
     EnhancedLogger.log('🔍 [SYNC_MANAGER] Buscando do Firebase para: $userId');
-    
+
     try {
       // Busca interesses do usuário
       final interestsQuery = await _firestore
@@ -92,19 +98,21 @@ class NotificationSyncManager {
           .toList();
 
       if (userIds.isEmpty) {
-        EnhancedLogger.log('👥 [SYNC_MANAGER] Nenhum usuário válido encontrado');
+        EnhancedLogger.log(
+            '👥 [SYNC_MANAGER] Nenhum usuário válido encontrado');
         return [];
       }
 
       // Busca dados dos usuários
       final userData = await _fetchUserDataBatch(userIds);
-      
+
       // Converte para notificações
-      final notifications = _convertToNotifications(interestsQuery.docs, userData);
-      
-      EnhancedLogger.log('✅ [SYNC_MANAGER] ${notifications.length} notificações processadas');
+      final notifications =
+          _convertToNotifications(interestsQuery.docs, userData);
+
+      EnhancedLogger.log(
+          '✅ [SYNC_MANAGER] ${notifications.length} notificações processadas');
       return notifications;
-      
     } catch (e) {
       EnhancedLogger.log('❌ [SYNC_MANAGER] Erro ao buscar do Firebase: $e');
       return [];
@@ -112,14 +120,15 @@ class NotificationSyncManager {
   }
 
   /// Busca dados de usuários em lote
-  Future<Map<String, UserDataModel>> _fetchUserDataBatch(List<String> userIds) async {
+  Future<Map<String, UserDataModel>> _fetchUserDataBatch(
+      List<String> userIds) async {
     final userData = <String, UserDataModel>{};
-    
+
     try {
       // Busca em lotes de 10 (limite do Firestore para 'in')
       for (int i = 0; i < userIds.length; i += 10) {
         final batch = userIds.skip(i).take(10).toList();
-        
+
         final query = await _firestore
             .collection('usuarios')
             .where(FieldPath.documentId, whereIn: batch)
@@ -136,12 +145,13 @@ class NotificationSyncManager {
           );
         }
       }
-      
-      EnhancedLogger.log('👥 [SYNC_MANAGER] ${userData.length} usuários carregados');
+
+      EnhancedLogger.log(
+          '👥 [SYNC_MANAGER] ${userData.length} usuários carregados');
       return userData;
-      
     } catch (e) {
-      EnhancedLogger.log('❌ [SYNC_MANAGER] Erro ao buscar dados de usuários: $e');
+      EnhancedLogger.log(
+          '❌ [SYNC_MANAGER] Erro ao buscar dados de usuários: $e');
       return {};
     }
   }
@@ -152,17 +162,17 @@ class NotificationSyncManager {
     Map<String, UserDataModel> userData,
   ) {
     final notifications = <NotificationModel>[];
-    
+
     for (final doc in interestDocs) {
       try {
         final data = doc.data() as Map<String, dynamic>;
         final userId = data['userId'] as String?;
-        
+
         if (userId == null || !userData.containsKey(userId)) continue;
-        
+
         final user = userData[userId]!;
         final timestamp = data['timestamp'] as Timestamp?;
-        
+
         final notification = NotificationModel(
           id: doc.id,
           userId: data['interestedUserId'] ?? userId,
@@ -183,23 +193,25 @@ class NotificationSyncManager {
             'interestId': doc.id,
           },
         );
-        
+
         notifications.add(notification);
       } catch (e) {
-        EnhancedLogger.log('❌ [SYNC_MANAGER] Erro ao processar documento ${doc.id}: $e');
+        EnhancedLogger.log(
+            '❌ [SYNC_MANAGER] Erro ao processar documento ${doc.id}: $e');
       }
     }
-    
+
     // Ordena por timestamp (mais recente primeiro)
     notifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    
+
     return notifications;
   }
 
   /// Configura listener em tempo real
   void _setupRealtimeListener(String userId) {
-    EnhancedLogger.log('📡 [SYNC_MANAGER] Configurando listener em tempo real para: $userId');
-    
+    EnhancedLogger.log(
+        '📡 [SYNC_MANAGER] Configurando listener em tempo real para: $userId');
+
     _listeners[userId] = _firestore
         .collection('interests')
         .where('interestedUserId', isEqualTo: userId)
@@ -209,8 +221,9 @@ class NotificationSyncManager {
         .listen(
       (snapshot) async {
         try {
-          EnhancedLogger.log('🔄 [SYNC_MANAGER] Atualização em tempo real: ${snapshot.docs.length} documentos');
-          
+          EnhancedLogger.log(
+              '🔄 [SYNC_MANAGER] Atualização em tempo real: ${snapshot.docs.length} documentos');
+
           if (snapshot.docs.isEmpty) {
             _updateCache(userId, []);
             _streamControllers[userId]?.add([]);
@@ -227,16 +240,17 @@ class NotificationSyncManager {
 
           // Busca dados dos usuários
           final userData = await _fetchUserDataBatch(userIds);
-          
+
           // Converte para notificações
-          final notifications = _convertToNotifications(snapshot.docs, userData);
-          
+          final notifications =
+              _convertToNotifications(snapshot.docs, userData);
+
           // Atualiza cache e stream
           _updateCache(userId, notifications);
           _streamControllers[userId]?.add(notifications);
-          
         } catch (e) {
-          EnhancedLogger.log('❌ [SYNC_MANAGER] Erro no listener em tempo real: $e');
+          EnhancedLogger.log(
+              '❌ [SYNC_MANAGER] Erro no listener em tempo real: $e');
           _streamControllers[userId]?.addError(e);
         }
       },
@@ -251,31 +265,36 @@ class NotificationSyncManager {
   void _setupPeriodicSync(String userId) {
     _periodicTimers[userId] = Timer.periodic(Duration(minutes: 5), (_) async {
       try {
-        EnhancedLogger.log('⏰ [SYNC_MANAGER] Sincronização periódica para: $userId');
-        
+        EnhancedLogger.log(
+            '⏰ [SYNC_MANAGER] Sincronização periódica para: $userId');
+
         final notifications = await _fetchFromFirebase(userId);
-        
+
         if (!_areNotificationsEqual(_cache[userId] ?? [], notifications)) {
           _updateCache(userId, notifications);
           _streamControllers[userId]?.add(notifications);
-          EnhancedLogger.log('🔄 [SYNC_MANAGER] Cache atualizado na sincronização periódica');
+          EnhancedLogger.log(
+              '🔄 [SYNC_MANAGER] Cache atualizado na sincronização periódica');
         }
       } catch (e) {
-        EnhancedLogger.log('❌ [SYNC_MANAGER] Erro na sincronização periódica: $e');
+        EnhancedLogger.log(
+            '❌ [SYNC_MANAGER] Erro na sincronização periódica: $e');
       }
     });
   }
 
   /// Força sincronização
   Future<void> forceSync(String userId) async {
-    EnhancedLogger.log('🚀 [SYNC_MANAGER] Forçando sincronização para: $userId');
-    
+    EnhancedLogger.log(
+        '🚀 [SYNC_MANAGER] Forçando sincronização para: $userId');
+
     try {
       final notifications = await _fetchFromFirebase(userId);
       _updateCache(userId, notifications);
       _streamControllers[userId]?.add(notifications);
-      
-      EnhancedLogger.log('✅ [SYNC_MANAGER] Sincronização forçada concluída: ${notifications.length} notificações');
+
+      EnhancedLogger.log(
+          '✅ [SYNC_MANAGER] Sincronização forçada concluída: ${notifications.length} notificações');
     } catch (e) {
       EnhancedLogger.log('❌ [SYNC_MANAGER] Erro na sincronização forçada: $e');
       rethrow;
@@ -288,13 +307,14 @@ class NotificationSyncManager {
   }
 
   /// Verifica se duas listas de notificações são iguais
-  bool _areNotificationsEqual(List<NotificationModel> list1, List<NotificationModel> list2) {
+  bool _areNotificationsEqual(
+      List<NotificationModel> list1, List<NotificationModel> list2) {
     if (list1.length != list2.length) return false;
-    
+
     for (int i = 0; i < list1.length; i++) {
       if (list1[i].id != list2[i].id) return false;
     }
-    
+
     return true;
   }
 
@@ -306,38 +326,38 @@ class NotificationSyncManager {
   /// Limpa recursos para um usuário
   void dispose(String userId) {
     EnhancedLogger.log('🧹 [SYNC_MANAGER] Limpando recursos para: $userId');
-    
+
     _listeners[userId]?.cancel();
     _listeners.remove(userId);
-    
+
     _periodicTimers[userId]?.cancel();
     _periodicTimers.remove(userId);
-    
+
     _streamControllers[userId]?.close();
     _streamControllers.remove(userId);
-    
+
     _cache.remove(userId);
   }
 
   /// Limpa todos os recursos
   void disposeAll() {
     EnhancedLogger.log('🧹 [SYNC_MANAGER] Limpando todos os recursos');
-    
+
     for (final listener in _listeners.values) {
       listener.cancel();
     }
     _listeners.clear();
-    
+
     for (final timer in _periodicTimers.values) {
       timer.cancel();
     }
     _periodicTimers.clear();
-    
+
     for (final controller in _streamControllers.values) {
       controller.close();
     }
     _streamControllers.clear();
-    
+
     _cache.clear();
   }
 }

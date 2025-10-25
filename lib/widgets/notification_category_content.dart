@@ -6,25 +6,25 @@ import 'package:whatsapp_chat/models/notification_category.dart';
 class NotificationCategoryContent extends StatelessWidget {
   /// Categoria da notificação
   final NotificationCategory category;
-  
+
   /// Lista de notificações (pode ser de qualquer tipo)
   final List<dynamic> notifications;
-  
+
   /// Se está carregando
   final bool isLoading;
-  
+
   /// Callback para refresh
   final Future<void> Function() onRefresh;
-  
+
   /// Callback ao tocar em uma notificação
   final Function(dynamic) onNotificationTap;
-  
+
   /// Callback opcional para deletar notificação
   final Function(dynamic)? onNotificationDelete;
-  
+
   /// Mensagem de erro (se houver)
   final String? errorMessage;
-  
+
   /// Builder customizado para item de notificação
   final Widget Function(BuildContext, dynamic, int)? itemBuilder;
 
@@ -46,17 +46,17 @@ class NotificationCategoryContent extends StatelessWidget {
     if (errorMessage != null && errorMessage!.isNotEmpty) {
       return _buildErrorState(context);
     }
-    
+
     // Estado de loading inicial
     if (isLoading && notifications.isEmpty) {
       return _buildLoadingState();
     }
-    
+
     // Estado vazio
     if (notifications.isEmpty) {
       return _buildEmptyState(context);
     }
-    
+
     // Lista de notificações
     return _buildNotificationList(context);
   }
@@ -72,12 +72,12 @@ class NotificationCategoryContent extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final notification = notifications[index];
-          
+
           // Usar builder customizado se fornecido
           if (itemBuilder != null) {
             return itemBuilder!(context, notification, index);
           }
-          
+
           // Builder padrão simples
           return _buildDefaultNotificationItem(context, notification, index);
         },
@@ -86,7 +86,8 @@ class NotificationCategoryContent extends StatelessWidget {
   }
 
   /// Constrói item de notificação padrão (placeholder)
-  Widget _buildDefaultNotificationItem(BuildContext context, dynamic notification, int index) {
+  Widget _buildDefaultNotificationItem(
+      BuildContext context, dynamic notification, int index) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -114,7 +115,7 @@ class NotificationCategoryContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Conteúdo
               Expanded(
                 child: Column(
@@ -138,7 +139,7 @@ class NotificationCategoryContent extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Botão de deletar (se fornecido)
               if (onNotificationDelete != null)
                 IconButton(
@@ -181,7 +182,7 @@ class NotificationCategoryContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Título
                 Text(
                   category.emptyStateTitle,
@@ -193,7 +194,7 @@ class NotificationCategoryContent extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Mensagem
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -208,7 +209,7 @@ class NotificationCategoryContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Dica de pull-to-refresh
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -273,7 +274,7 @@ class NotificationCategoryContent extends StatelessWidget {
               color: Colors.red.shade300,
             ),
             const SizedBox(height: 16),
-            
+
             // Título
             Text(
               'Erro ao carregar notificações',
@@ -285,7 +286,7 @@ class NotificationCategoryContent extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            
+
             // Mensagem de erro
             Text(
               errorMessage ?? 'Ocorreu um erro desconhecido',
@@ -296,7 +297,7 @@ class NotificationCategoryContent extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
+
             // Botão de tentar novamente
             ElevatedButton.icon(
               onPressed: () => onRefresh(),
@@ -331,7 +332,8 @@ class NotificationShimmerItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<NotificationShimmerItem> createState() => _NotificationShimmerItemState();
+  State<NotificationShimmerItem> createState() =>
+      _NotificationShimmerItemState();
 }
 
 class _NotificationShimmerItemState extends State<NotificationShimmerItem>
@@ -346,7 +348,7 @@ class _NotificationShimmerItemState extends State<NotificationShimmerItem>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
-    
+
     _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
@@ -391,7 +393,7 @@ class _NotificationShimmerItemState extends State<NotificationShimmerItem>
                   ),
                 ),
                 const SizedBox(width: 12),
-                
+
                 // Conteúdo shimmer
                 Expanded(
                   child: Column(

@@ -82,16 +82,17 @@ class MatchPerformanceOptimizer {
     String? error;
 
     try {
-      EnhancedLogger.debug('Executing optimized matches query for user $userId', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.debug('Executing optimized matches query for user $userId',
+          tag: 'MATCH_PERFORMANCE');
 
       // Tentar cache primeiro se habilitado
       if (config.enableCache) {
-        final cachedMatches = await MatchCacheService.getCachedAcceptedMatches();
+        final cachedMatches =
+            await MatchCacheService.getCachedAcceptedMatches();
         if (cachedMatches != null) {
           cacheHit = true;
           stopwatch.stop();
-          
+
           _recordMetrics(QueryMetrics(
             queryType: 'matches_query',
             executionTime: stopwatch.elapsed,
@@ -99,12 +100,14 @@ class MatchPerformanceOptimizer {
             cacheHit: true,
           ));
 
-          EnhancedLogger.info('Matches query served from cache (${cachedMatches.length} matches)', 
-            tag: 'MATCH_PERFORMANCE');
-          
+          EnhancedLogger.info(
+              'Matches query served from cache (${cachedMatches.length} matches)',
+              tag: 'MATCH_PERFORMANCE');
+
           // Retornar snapshot simulado do cache
           // Nota: Em implementação real, seria necessário converter para QuerySnapshot
-          throw UnimplementedError('Cache to QuerySnapshot conversion not implemented');
+          throw UnimplementedError(
+              'Cache to QuerySnapshot conversion not implemented');
         }
       }
 
@@ -138,8 +141,9 @@ class MatchPerformanceOptimizer {
         cacheHit: false,
       ));
 
-      EnhancedLogger.info('Matches query completed in ${stopwatch.elapsedMilliseconds}ms (${snapshot.docs.length} docs)', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.info(
+          'Matches query completed in ${stopwatch.elapsedMilliseconds}ms (${snapshot.docs.length} docs)',
+          tag: 'MATCH_PERFORMANCE');
 
       return snapshot;
     } catch (e) {
@@ -154,8 +158,9 @@ class MatchPerformanceOptimizer {
         error: error,
       ));
 
-      EnhancedLogger.error('Matches query failed after ${stopwatch.elapsedMilliseconds}ms: $e', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error(
+          'Matches query failed after ${stopwatch.elapsedMilliseconds}ms: $e',
+          tag: 'MATCH_PERFORMANCE');
       rethrow;
     }
   }
@@ -171,8 +176,9 @@ class MatchPerformanceOptimizer {
     String? error;
 
     try {
-      EnhancedLogger.debug('Executing optimized messages query for chat $chatId', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.debug(
+          'Executing optimized messages query for chat $chatId',
+          tag: 'MATCH_PERFORMANCE');
 
       Query query = FirebaseFirestore.instance
           .collection('chat_messages')
@@ -205,8 +211,9 @@ class MatchPerformanceOptimizer {
         cacheHit: false,
       ));
 
-      EnhancedLogger.info('Messages query completed in ${stopwatch.elapsedMilliseconds}ms (${snapshot.docs.length} docs)', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.info(
+          'Messages query completed in ${stopwatch.elapsedMilliseconds}ms (${snapshot.docs.length} docs)',
+          tag: 'MATCH_PERFORMANCE');
 
       return snapshot;
     } catch (e) {
@@ -221,8 +228,9 @@ class MatchPerformanceOptimizer {
         error: error,
       ));
 
-      EnhancedLogger.error('Messages query failed after ${stopwatch.elapsedMilliseconds}ms: $e', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error(
+          'Messages query failed after ${stopwatch.elapsedMilliseconds}ms: $e',
+          tag: 'MATCH_PERFORMANCE');
       rethrow;
     }
   }
@@ -230,7 +238,7 @@ class MatchPerformanceOptimizer {
   /// Registrar métricas de performance
   static void _recordMetrics(QueryMetrics metrics) {
     _metrics.add(metrics);
-    
+
     // Manter apenas as métricas mais recentes
     if (_metrics.length > _maxMetrics) {
       _metrics.removeAt(0);
@@ -245,16 +253,14 @@ class MatchPerformanceOptimizer {
     var filteredMetrics = _metrics.toList();
 
     if (queryType != null) {
-      filteredMetrics = filteredMetrics
-          .where((m) => m.queryType == queryType)
-          .toList();
+      filteredMetrics =
+          filteredMetrics.where((m) => m.queryType == queryType).toList();
     }
 
     if (since != null) {
       final cutoff = DateTime.now().subtract(since);
-      filteredMetrics = filteredMetrics
-          .where((m) => m.timestamp.isAfter(cutoff))
-          .toList();
+      filteredMetrics =
+          filteredMetrics.where((m) => m.timestamp.isAfter(cutoff)).toList();
     }
 
     return filteredMetrics;
@@ -264,7 +270,7 @@ class MatchPerformanceOptimizer {
   static Map<String, dynamic> getPerformanceStats({Duration? timeWindow}) {
     try {
       final metrics = getMetrics(since: timeWindow ?? const Duration(hours: 1));
-      
+
       if (metrics.isEmpty) {
         return {
           'totalQueries': 0,
@@ -276,11 +282,11 @@ class MatchPerformanceOptimizer {
 
       final totalQueries = metrics.length;
       final totalExecutionTime = metrics.fold<int>(
-        0, (sum, m) => sum + m.executionTime.inMilliseconds
-      );
+          0, (sum, m) => sum + m.executionTime.inMilliseconds);
       final cacheHits = metrics.where((m) => m.cacheHit).length;
       final errors = metrics.where((m) => m.error != null).length;
-      final totalDocsRead = metrics.fold<int>(0, (sum, m) => sum + m.documentsRead);
+      final totalDocsRead =
+          metrics.fold<int>(0, (sum, m) => sum + m.documentsRead);
 
       // Estatísticas por tipo de query
       final byType = <String, Map<String, dynamic>>{};
@@ -294,10 +300,11 @@ class MatchPerformanceOptimizer {
             'cacheHits': 0,
           };
         }
-        
+
         final stats = byType[metric.queryType]!;
         stats['count'] = stats['count'] + 1;
-        stats['totalTime'] = stats['totalTime'] + metric.executionTime.inMilliseconds;
+        stats['totalTime'] =
+            stats['totalTime'] + metric.executionTime.inMilliseconds;
         stats['totalDocs'] = stats['totalDocs'] + metric.documentsRead;
         if (metric.error != null) stats['errors'] = stats['errors'] + 1;
         if (metric.cacheHit) stats['cacheHits'] = stats['cacheHits'] + 1;
@@ -306,10 +313,14 @@ class MatchPerformanceOptimizer {
       // Calcular médias por tipo
       for (final stats in byType.values) {
         final count = stats['count'] as int;
-        stats['averageTime'] = count > 0 ? (stats['totalTime'] as int) / count : 0;
-        stats['averageDocs'] = count > 0 ? (stats['totalDocs'] as int) / count : 0;
-        stats['errorRate'] = count > 0 ? (stats['errors'] as int) / count * 100 : 0;
-        stats['cacheHitRate'] = count > 0 ? (stats['cacheHits'] as int) / count * 100 : 0;
+        stats['averageTime'] =
+            count > 0 ? (stats['totalTime'] as int) / count : 0;
+        stats['averageDocs'] =
+            count > 0 ? (stats['totalDocs'] as int) / count : 0;
+        stats['errorRate'] =
+            count > 0 ? (stats['errors'] as int) / count * 100 : 0;
+        stats['cacheHitRate'] =
+            count > 0 ? (stats['cacheHits'] as int) / count * 100 : 0;
       }
 
       return {
@@ -323,7 +334,8 @@ class MatchPerformanceOptimizer {
         'timeWindow': timeWindow?.toString() ?? '1 hour',
       };
     } catch (e) {
-      EnhancedLogger.error('Error calculating performance stats: $e', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error('Error calculating performance stats: $e',
+          tag: 'MATCH_PERFORMANCE');
       return {
         'error': e.toString(),
         'totalQueries': 0,
@@ -336,15 +348,17 @@ class MatchPerformanceOptimizer {
     try {
       final cutoff = DateTime.now().subtract(maxAge);
       final initialCount = _metrics.length;
-      
+
       _metrics.removeWhere((metric) => metric.timestamp.isBefore(cutoff));
-      
+
       final removedCount = initialCount - _metrics.length;
       if (removedCount > 0) {
-        EnhancedLogger.info('Cleared $removedCount old metrics', tag: 'MATCH_PERFORMANCE');
+        EnhancedLogger.info('Cleared $removedCount old metrics',
+            tag: 'MATCH_PERFORMANCE');
       }
     } catch (e) {
-      EnhancedLogger.error('Error clearing old metrics: $e', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error('Error clearing old metrics: $e',
+          tag: 'MATCH_PERFORMANCE');
     }
   }
 
@@ -360,28 +374,34 @@ class MatchPerformanceOptimizer {
       final averageDocs = stats['averageDocsPerQuery'] as double;
 
       if (averageTime > 2000) {
-        recommendations.add('Queries estão lentas (${averageTime.round()}ms). Considere otimizar índices.');
+        recommendations.add(
+            'Queries estão lentas (${averageTime.round()}ms). Considere otimizar índices.');
       }
 
       if (cacheHitRate < 30) {
-        recommendations.add('Taxa de cache baixa ($cacheHitRate%). Considere aumentar tempo de cache.');
+        recommendations.add(
+            'Taxa de cache baixa ($cacheHitRate%). Considere aumentar tempo de cache.');
       }
 
       if (errorRate > 10) {
-        recommendations.add('Taxa de erro alta ($errorRate%). Verifique conectividade e índices.');
+        recommendations.add(
+            'Taxa de erro alta ($errorRate%). Verifique conectividade e índices.');
       }
 
       if (averageDocs > 20) {
-        recommendations.add('Muitos documentos por query (${averageDocs.round()}). Considere paginação.');
+        recommendations.add(
+            'Muitos documentos por query (${averageDocs.round()}). Considere paginação.');
       }
 
       if (recommendations.isEmpty) {
-        recommendations.add('Performance está boa! Todas as métricas dentro do esperado.');
+        recommendations
+            .add('Performance está boa! Todas as métricas dentro do esperado.');
       }
 
       return recommendations;
     } catch (e) {
-      EnhancedLogger.error('Error generating recommendations: $e', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error('Error generating recommendations: $e',
+          tag: 'MATCH_PERFORMANCE');
       return ['Erro ao gerar recomendações: $e'];
     }
   }
@@ -389,7 +409,8 @@ class MatchPerformanceOptimizer {
   /// Executar otimização automática
   static Future<void> autoOptimize() async {
     try {
-      EnhancedLogger.info('Starting auto optimization', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.info('Starting auto optimization',
+          tag: 'MATCH_PERFORMANCE');
 
       // Otimizar cache
       await MatchCacheService.optimizeCache();
@@ -400,12 +421,15 @@ class MatchPerformanceOptimizer {
       // Log das recomendações
       final recommendations = getOptimizationRecommendations();
       for (final recommendation in recommendations) {
-        EnhancedLogger.info('Recommendation: $recommendation', tag: 'MATCH_PERFORMANCE');
+        EnhancedLogger.info('Recommendation: $recommendation',
+            tag: 'MATCH_PERFORMANCE');
       }
 
-      EnhancedLogger.info('Auto optimization completed', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.info('Auto optimization completed',
+          tag: 'MATCH_PERFORMANCE');
     } catch (e) {
-      EnhancedLogger.error('Error during auto optimization: $e', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error('Error during auto optimization: $e',
+          tag: 'MATCH_PERFORMANCE');
     }
   }
 
@@ -417,13 +441,14 @@ class MatchPerformanceOptimizer {
   }) {
     try {
       final stats = getPerformanceStats(timeWindow: timeWindow);
-      
+
       final averageTime = stats['averageExecutionTime'] as double;
       final errorRate = stats['errorRate'] as int;
 
       return averageTime > maxAverageTime || errorRate > maxErrorRate;
     } catch (e) {
-      EnhancedLogger.error('Error checking performance degradation: $e', tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error('Error checking performance degradation: $e',
+          tag: 'MATCH_PERFORMANCE');
       return false;
     }
   }
@@ -470,17 +495,19 @@ class MatchPerformanceOptimizer {
     final stopwatch = Stopwatch()..start();
 
     try {
-      EnhancedLogger.debug('Executing ${queries.length} parallel queries', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.debug('Executing ${queries.length} parallel queries',
+          tag: 'MATCH_PERFORMANCE');
 
-      final futures = queries.map((query) => 
-        query.get().timeout(Duration(milliseconds: config.queryTimeout))
-      ).toList();
+      final futures = queries
+          .map((query) =>
+              query.get().timeout(Duration(milliseconds: config.queryTimeout)))
+          .toList();
 
       final results = await Future.wait(futures);
       stopwatch.stop();
 
-      final totalDocs = results.fold<int>(0, (sum, snapshot) => sum + snapshot.docs.length);
+      final totalDocs =
+          results.fold<int>(0, (sum, snapshot) => sum + snapshot.docs.length);
 
       _recordMetrics(QueryMetrics(
         queryType: 'parallel_queries',
@@ -489,8 +516,9 @@ class MatchPerformanceOptimizer {
         cacheHit: false,
       ));
 
-      EnhancedLogger.info('Parallel queries completed in ${stopwatch.elapsedMilliseconds}ms ($totalDocs total docs)', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.info(
+          'Parallel queries completed in ${stopwatch.elapsedMilliseconds}ms ($totalDocs total docs)',
+          tag: 'MATCH_PERFORMANCE');
 
       return results;
     } catch (e) {
@@ -504,8 +532,9 @@ class MatchPerformanceOptimizer {
         error: e.toString(),
       ));
 
-      EnhancedLogger.error('Parallel queries failed after ${stopwatch.elapsedMilliseconds}ms: $e', 
-        tag: 'MATCH_PERFORMANCE');
+      EnhancedLogger.error(
+          'Parallel queries failed after ${stopwatch.elapsedMilliseconds}ms: $e',
+          tag: 'MATCH_PERFORMANCE');
       rethrow;
     }
   }
@@ -513,7 +542,8 @@ class MatchPerformanceOptimizer {
   /// Resetar todas as métricas
   static void resetMetrics() {
     _metrics.clear();
-    EnhancedLogger.info('All performance metrics reset', tag: 'MATCH_PERFORMANCE');
+    EnhancedLogger.info('All performance metrics reset',
+        tag: 'MATCH_PERFORMANCE');
   }
 
   /// Exportar métricas para análise

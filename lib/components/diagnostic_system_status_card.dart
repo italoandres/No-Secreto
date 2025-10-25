@@ -16,195 +16,201 @@ class DiagnosticSystemStatusCard extends StatelessWidget {
     final controller = Get.find<NotificationDiagnosticController>();
 
     return Obx(() => Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [
-              _getStatusColor(controller.systemStatus.value).withOpacity(0.1),
-              _getStatusColor(controller.systemStatus.value).withOpacity(0.05),
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  _getStatusColor(controller.systemStatus.value)
+                      .withOpacity(0.1),
+                  _getStatusColor(controller.systemStatus.value)
+                      .withOpacity(0.05),
+                ],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(controller.systemStatus.value).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    _getStatusIcon(controller.systemStatus.value),
-                    color: _getStatusColor(controller.systemStatus.value),
-                    size: 24,
-                  ),
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(controller.systemStatus.value)
+                            .withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        _getStatusIcon(controller.systemStatus.value),
+                        color: _getStatusColor(controller.systemStatus.value),
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Status do Sistema',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          Text(
+                            controller.systemStatus.value,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _getStatusColor(
+                                  controller.systemStatus.value),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (controller.isRunningDiagnostic.value)
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                            _getStatusColor(controller.systemStatus.value),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
+
+                SizedBox(height: 16),
+
+                // Métricas principais
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMetricCard(
+                        'Cache',
+                        controller.cacheSize.value,
+                        Icons.storage,
+                        Colors.blue,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: _buildMetricCard(
+                        'Memória',
+                        controller.memoryUsage.value,
+                        Icons.memory,
+                        Colors.purple,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: _buildMetricCard(
+                        'Ops/min',
+                        controller.operationsPerMinute.value,
+                        Icons.speed,
+                        Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 16),
+
+                // Barra de progresso se diagnóstico em andamento
+                if (controller.isRunningDiagnostic.value) ...[
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Status do Sistema',
+                        controller.currentAction.value,
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
                         ),
                       ),
+                      SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: controller.diagnosticProgress.value,
+                        backgroundColor: Colors.grey.shade300,
+                        valueColor: AlwaysStoppedAnimation(
+                          _getStatusColor(controller.systemStatus.value),
+                        ),
+                      ),
+                      SizedBox(height: 4),
                       Text(
-                        controller.systemStatus.value,
+                        '${(controller.diagnosticProgress.value * 100).toInt()}%',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: _getStatusColor(controller.systemStatus.value),
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ],
                   ),
-                ),
-                if (controller.isRunningDiagnostic.value)
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(
-                        _getStatusColor(controller.systemStatus.value),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            
-            SizedBox(height: 16),
-            
-            // Métricas principais
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricCard(
-                    'Cache',
-                    controller.cacheSize.value,
-                    Icons.storage,
-                    Colors.blue,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    'Memória',
-                    controller.memoryUsage.value,
-                    Icons.memory,
-                    Colors.purple,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    'Ops/min',
-                    controller.operationsPerMinute.value,
-                    Icons.speed,
-                    Colors.green,
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 16),
-            
-            // Barra de progresso se diagnóstico em andamento
-            if (controller.isRunningDiagnostic.value) ...[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                  SizedBox(height: 16),
+                ],
+
+                // Alertas do sistema
+                if (controller.systemAlerts.isNotEmpty) ...[
                   Text(
-                    controller.currentAction.value,
+                    'Alertas Recentes',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
                     ),
                   ),
                   SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: controller.diagnosticProgress.value,
-                    backgroundColor: Colors.grey.shade300,
-                    valueColor: AlwaysStoppedAnimation(
-                      _getStatusColor(controller.systemStatus.value),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '${(controller.diagnosticProgress.value * 100).toInt()}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+                  Container(
+                    height: 100,
+                    child: ListView.builder(
+                      itemCount: controller.systemAlerts.take(3).length,
+                      itemBuilder: (context, index) {
+                        final alert = controller.systemAlerts[index];
+                        return _buildAlertItem(alert);
+                      },
                     ),
                   ),
                 ],
-              ),
-              SizedBox(height: 16),
-            ],
-            
-            // Alertas do sistema
-            if (controller.systemAlerts.isNotEmpty) ...[
-              Text(
-                'Alertas Recentes',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                ),
-              ),
-              SizedBox(height: 8),
-              Container(
-                height: 100,
-                child: ListView.builder(
-                  itemCount: controller.systemAlerts.take(3).length,
-                  itemBuilder: (context, index) {
-                    final alert = controller.systemAlerts[index];
-                    return _buildAlertItem(alert);
-                  },
-                ),
-              ),
-            ],
-            
-            // Informações adicionais
-            Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Última atualização: ${controller.lastUpdate.value}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                Text(
-                  'Uptime: ${controller.systemUptime.value}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+
+                // Informações adicionais
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Última atualização: ${controller.lastUpdate.value}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      'Uptime: ${controller.systemUptime.value}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
-  Widget _buildMetricCard(String label, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -238,7 +244,7 @@ class DiagnosticSystemStatusCard extends StatelessWidget {
 
   Widget _buildAlertItem(Map<String, dynamic> alert) {
     final alertColor = _getAlertColor(alert['type']);
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: 4),
       padding: EdgeInsets.all(8),

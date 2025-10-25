@@ -61,7 +61,7 @@ class SearchParams {
   factory SearchParams.fromJson(Map<String, dynamic> json) {
     return SearchParams(
       query: json['query'] as String?,
-      filters: json['filters'] != null 
+      filters: json['filters'] != null
           ? SearchFilters.fromJson(json['filters'] as Map<String, dynamic>)
           : null,
       limit: json['limit'] as int? ?? 30,
@@ -81,7 +81,7 @@ class SearchParams {
   /// Verifica se é uma busca vazia
   bool get isEmpty {
     return (query == null || query!.trim().isEmpty) &&
-           (filters == null || !filters!.hasActiveFilters);
+        (filters == null || !filters!.hasActiveFilters);
   }
 
   /// Verifica se tem query de texto
@@ -98,28 +98,28 @@ class SearchParams {
   bool get isValid {
     // Limite deve ser positivo
     if (limit <= 0) return false;
-    
+
     // Query não pode ser apenas espaços
     if (query != null && query!.trim().isEmpty && query!.isNotEmpty) {
       return false;
     }
-    
+
     // Filtros devem ser válidos se existirem
     if (filters != null && !filters!.isValid) {
       return false;
     }
-    
+
     return true;
   }
 
   /// Gera uma chave única para cache
   String get cacheKey {
     final parts = <String>[];
-    
+
     if (hasTextQuery) {
       parts.add('q:${query!.toLowerCase().trim()}');
     }
-    
+
     if (hasFilters) {
       final f = filters!;
       if (f.minAge != null) parts.add('minAge:${f.minAge}');
@@ -130,25 +130,26 @@ class SearchParams {
         parts.add('interests:${f.interests!.join(',')}');
       }
       if (f.isVerified != null) parts.add('verified:${f.isVerified}');
-      if (f.hasCompletedCourse != null) parts.add('course:${f.hasCompletedCourse}');
+      if (f.hasCompletedCourse != null)
+        parts.add('course:${f.hasCompletedCourse}');
     }
-    
+
     parts.add('limit:$limit');
-    
+
     return parts.join('|');
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is SearchParams &&
-           other.query == query &&
-           other.filters == filters &&
-           other.limit == limit &&
-           other.preferredStrategy == preferredStrategy &&
-           other.useCache == useCache &&
-           other.timeout == timeout;
+        other.query == query &&
+        other.filters == filters &&
+        other.limit == limit &&
+        other.preferredStrategy == preferredStrategy &&
+        other.useCache == useCache &&
+        other.timeout == timeout;
   }
 
   @override
@@ -166,6 +167,6 @@ class SearchParams {
   @override
   String toString() {
     return 'SearchParams(query: $query, filters: $filters, limit: $limit, '
-           'strategy: $preferredStrategy, useCache: $useCache, timeout: $timeout)';
+        'strategy: $preferredStrategy, useCache: $useCache, timeout: $timeout)';
   }
 }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../components/spiritual_certification_badge.dart';
 
 /// Helper para integração do badge de certificação em diferentes contextos
-/// 
+///
 /// Facilita a exibição do badge de certificação espiritual em várias telas
 /// do aplicativo, com métodos específicos para cada contexto.
 class CertificationBadgeHelper {
@@ -20,7 +20,7 @@ class CertificationBadgeHelper {
           .collection('usuarios')
           .doc(userId)
           .get();
-      
+
       return isCertified(doc.data());
     } catch (e) {
       print('Erro ao verificar certificação: $e');
@@ -419,26 +419,26 @@ class CertificationBadgeWrapper extends StatelessWidget {
           size: size ?? 70,
           showLabel: showLabel ?? true,
         );
-      
+
       case CertificationBadgeType.otherProfile:
         return CertificationBadgeHelper.buildOtherProfileBadge(
           userId: userId,
           size: size ?? 60,
           showLabel: showLabel ?? true,
         );
-      
+
       case CertificationBadgeType.vitrineCard:
         return CertificationBadgeHelper.buildVitrineCardBadge(
           userId: userId,
           size: size ?? 32,
         );
-      
+
       case CertificationBadgeType.inline:
         return CertificationBadgeHelper.buildInlineBadge(
           userId: userId,
           size: size ?? 20,
         );
-      
+
       case CertificationBadgeType.stream:
         return CertificationBadgeHelper.buildStreamBadge(
           userId: userId,
@@ -447,7 +447,7 @@ class CertificationBadgeWrapper extends StatelessWidget {
           size: size ?? 70,
           showLabel: showLabel ?? true,
         );
-      
+
       case CertificationBadgeType.profileHeader:
         return CertificationBadgeHelper.buildStreamBadge(
           userId: userId,
@@ -462,10 +462,10 @@ class CertificationBadgeWrapper extends StatelessWidget {
 
 /// Tipos de badge disponíveis
 enum CertificationBadgeType {
-  ownProfile,      // Perfil próprio com botão de solicitação
-  otherProfile,    // Perfil de outros usuários
-  vitrineCard,     // Card da vitrine (compacto)
-  inline,          // Inline em listas
-  stream,          // Com stream em tempo real
-  profileHeader,   // Header de perfil com tamanho maior
+  ownProfile, // Perfil próprio com botão de solicitação
+  otherProfile, // Perfil de outros usuários
+  vitrineCard, // Card da vitrine (compacto)
+  inline, // Inline em listas
+  stream, // Com stream em tempo real
+  profileHeader, // Header de perfil com tamanho maior
 }

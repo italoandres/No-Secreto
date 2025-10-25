@@ -13,7 +13,7 @@ class CorrectedInterestNotificationComponent extends StatefulWidget {
   final String userId;
   final Function(String)? onProfileView;
   final Function(String)? onInterestResponse;
-  
+
   const CorrectedInterestNotificationComponent({
     Key? key,
     required this.userId,
@@ -22,23 +22,22 @@ class CorrectedInterestNotificationComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CorrectedInterestNotificationComponent> createState() => 
+  State<CorrectedInterestNotificationComponent> createState() =>
       _CorrectedInterestNotificationComponentState();
 }
 
-class _CorrectedInterestNotificationComponentState 
+class _CorrectedInterestNotificationComponentState
     extends State<CorrectedInterestNotificationComponent> {
-  
   List<CorrectedNotificationData> notifications = [];
   bool isLoading = true;
   String? error;
-  
+
   @override
   void initState() {
     super.initState();
     _loadNotifications();
   }
-  
+
   /// Carrega notificações com correções aplicadas
   Future<void> _loadNotifications() async {
     try {
@@ -46,29 +45,30 @@ class _CorrectedInterestNotificationComponentState
         isLoading = true;
         error = null;
       });
-      
+
       print('🔄 [CORRECTED_COMPONENT] Carregando notificações...');
-      
+
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         throw Exception('Usuário não logado');
       }
-      
+
       // Buscar notificações no Firebase SEM ÍNDICES COMPLEXOS
       final query = FirebaseFirestore.instance
           .collection('notifications')
           .where('type', isEqualTo: 'interest_match')
           .limit(50); // Limitar para performance
-      
+
       final querySnapshot = await query.get();
-      
-      print('🔄 [CORRECTED_COMPONENT] ${querySnapshot.docs.length} notificações encontradas');
-      
+
+      print(
+          '🔄 [CORRECTED_COMPONENT] ${querySnapshot.docs.length} notificações encontradas');
+
       final List<CorrectedNotificationData> loadedNotifications = [];
-      
+
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
-        
+
         // Aplicar filtros e correções
         if (_shouldIncludeNotification(data, currentUser.uid, doc.id)) {
           final correctedNotification = CorrectedNotificationData.fromFirestore(
@@ -76,13 +76,12 @@ class _CorrectedInterestNotificationComponentState
             data,
             currentUser.uid,
           );
-          
+
           // Buscar nome correto do usuário se necessário
-          if (correctedNotification.fromUserName == 'Usuário' || 
+          if (correctedNotification.fromUserName == 'Usuário' ||
               correctedNotification.fromUserName.isEmpty) {
             final correctName = await UserDataCacheSystem.getUserName(
-              correctedNotification.fromUserId
-            );
+                correctedNotification.fromUserId);
             final updatedNotification = correctedNotification.copyWith(
               fromUserName: correctName,
             );
@@ -90,18 +89,19 @@ class _CorrectedInterestNotificationComponentState
           } else {
             loadedNotifications.add(correctedNotification);
           }
-          
-          print('✅ [CORRECTED_COMPONENT] Notificação incluída: ${correctedNotification.fromUserName}');
+
+          print(
+              '✅ [CORRECTED_COMPONENT] Notificação incluída: ${correctedNotification.fromUserName}');
         }
       }
-      
+
       setState(() {
         notifications = loadedNotifications;
         isLoading = false;
       });
-      
-      print('🎉 [CORRECTED_COMPONENT] ${notifications.length} notificações carregadas com sucesso');
-      
+
+      print(
+          '🎉 [CORRECTED_COMPONENT] ${notifications.length} notificações carregadas com sucesso');
     } catch (e) {
       print('❌ [CORRECTED_COMPONENT] Erro ao carregar notificações: $e');
       setState(() {
@@ -110,7 +110,7 @@ class _CorrectedInterestNotificationComponentState
       });
     }
   }
-  
+
   /// Verifica se a notificação deve ser incluída
   bool _shouldIncludeNotification(
     Map<String, dynamic> data,
@@ -120,58 +120,64 @@ class _CorrectedInterestNotificationComponentState
     // Verificar se é para o usuário atual
     final targetUserId = data['userId'] as String?;
     final isForCurrentUser = targetUserId == currentUserId;
-    
+
     // Verificar se é uma notificação conhecida que deve ser corrigida
     final isKnownNotification = notificationId == 'Iu4C9VdYrT0AaAinZEit';
-    
+
     // Verificar se menciona o usuário atual
     final dataString = data.toString().toLowerCase();
-    final mentionsUser = dataString.contains(currentUserId) || 
-                        dataString.contains('itala');
-    
-    final shouldInclude = isForCurrentUser || isKnownNotification || mentionsUser;
-    
-    print('🔍 [CORRECTED_COMPONENT] Notificação $notificationId: incluir=$shouldInclude');
+    final mentionsUser =
+        dataString.contains(currentUserId) || dataString.contains('itala');
+
+    final shouldInclude =
+        isForCurrentUser || isKnownNotification || mentionsUser;
+
+    print(
+        '🔍 [CORRECTED_COMPONENT] Notificação $notificationId: incluir=$shouldInclude');
     print('🔍 [CORRECTED_COMPONENT] - Para usuário atual: $isForCurrentUser');
-    print('🔍 [CORRECTED_COMPONENT] - Notificação conhecida: $isKnownNotification');
+    print(
+        '🔍 [CORRECTED_COMPONENT] - Notificação conhecida: $isKnownNotification');
     print('🔍 [CORRECTED_COMPONENT] - Menciona usuário: $mentionsUser');
-    
+
     return shouldInclude;
   }
-  
+
   /// Navega para o perfil do usuário
   Future<void> _viewProfile(CorrectedNotificationData notification) async {
-    print('👤 [CORRECTED_COMPONENT] Visualizando perfil: ${notification.fromUserName}');
-    
+    print(
+        '👤 [CORRECTED_COMPONENT] Visualizando perfil: ${notification.fromUserName}');
+
     await ProfileNavigationHandler.navigateToProfileWithUserData(
       notification.fromUserId,
       notification.fromUserName,
     );
-    
+
     widget.onProfileView?.call(notification.fromUserId);
   }
-  
+
   /// Responde ao interesse
-  Future<void> _respondToInterest(CorrectedNotificationData notification, bool interested) async {
+  Future<void> _respondToInterest(
+      CorrectedNotificationData notification, bool interested) async {
     final response = interested ? 'Também Tenho' : 'Não Tenho';
-    print('💕 [CORRECTED_COMPONENT] Resposta: $response para ${notification.fromUserName}');
-    
+    print(
+        '💕 [CORRECTED_COMPONENT] Resposta: $response para ${notification.fromUserName}');
+
     Get.snackbar(
       interested ? '💕 Interesse Mútuo!' : '👋 Resposta Enviada',
-      interested 
+      interested
           ? 'Você também tem interesse em ${notification.fromUserName}!'
           : 'Resposta enviada para ${notification.fromUserName}',
       backgroundColor: interested ? Colors.pink : Colors.blue,
       colorText: Colors.white,
       duration: const Duration(seconds: 3),
     );
-    
+
     widget.onInterestResponse?.call(notification.fromUserId);
-    
+
     // TODO: Implementar lógica real de resposta ao interesse
     // await InterestResponseService.respondToInterest(notification.id, interested);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -186,7 +192,7 @@ class _CorrectedInterestNotificationComponentState
         ),
       );
     }
-    
+
     if (error != null) {
       return Center(
         child: Column(
@@ -204,7 +210,7 @@ class _CorrectedInterestNotificationComponentState
         ),
       );
     }
-    
+
     if (notifications.isEmpty) {
       return const Center(
         child: Column(
@@ -220,7 +226,7 @@ class _CorrectedInterestNotificationComponentState
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -250,7 +256,7 @@ class _CorrectedInterestNotificationComponentState
             ],
           ),
         ),
-        
+
         // Lista de notificações
         Expanded(
           child: ListView.builder(
@@ -264,7 +270,7 @@ class _CorrectedInterestNotificationComponentState
       ],
     );
   }
-  
+
   /// Constrói card de notificação
   Widget _buildNotificationCard(CorrectedNotificationData notification) {
     return Card(
@@ -280,7 +286,7 @@ class _CorrectedInterestNotificationComponentState
                 CircleAvatar(
                   backgroundColor: Colors.pink.shade100,
                   child: Text(
-                    notification.fromUserName.isNotEmpty 
+                    notification.fromUserName.isNotEmpty
                         ? notification.fromUserName[0].toUpperCase()
                         : '?',
                     style: TextStyle(
@@ -319,17 +325,17 @@ class _CorrectedInterestNotificationComponentState
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Mensagem
             Text(
               notification.message,
               style: const TextStyle(fontSize: 14),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [

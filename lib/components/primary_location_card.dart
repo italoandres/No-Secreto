@@ -68,9 +68,9 @@ class PrimaryLocationCard extends StatelessWidget {
               size: 28,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Informações da localização
           Expanded(
             child: Column(
@@ -86,9 +86,9 @@ class PrimaryLocationCard extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 4),
-                
+
                 // Cidade e Estado
                 Text(
                   '$city - $state',
@@ -98,9 +98,9 @@ class PrimaryLocationCard extends StatelessWidget {
                     color: Color(0xFF333333),
                   ),
                 ),
-                
+
                 const SizedBox(height: 4),
-                
+
                 // Subtexto explicativo
                 Text(
                   '(Automática do seu perfil)',

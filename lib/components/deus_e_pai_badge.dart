@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Badge que mostra se o perfil é membro do movimento Deus é Pai
-/// 
+///
 /// Sempre aparece, mas muda de cor:
 /// - Colorido (índigo) se É membro
 /// - Cinza se NÃO é membro

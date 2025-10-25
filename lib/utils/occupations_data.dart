@@ -16,7 +16,7 @@ class OccupationsData {
     'Gerente de TI',
     'Suporte Técnico',
     'Analista de Suporte',
-    
+
     // Saúde
     'Médico(a)',
     'Enfermeiro(a)',
@@ -32,7 +32,7 @@ class OccupationsData {
     'Técnico(a) de Enfermagem',
     'Radiologista',
     'Cirurgião(ã)',
-    
+
     // Educação
     'Professor(a)',
     'Pedagogo(a)',
@@ -41,7 +41,7 @@ class OccupationsData {
     'Instrutor(a)',
     'Tutor(a)',
     'Professor(a) Universitário(a)',
-    
+
     // Engenharia
     'Engenheiro(a) Civil',
     'Engenheiro(a) Mecânico(a)',
@@ -51,7 +51,7 @@ class OccupationsData {
     'Engenheiro(a) Ambiental',
     'Arquiteto(a)',
     'Engenheiro(a) de Segurança do Trabalho',
-    
+
     // Direito e Jurídico
     'Advogado(a)',
     'Juiz(a)',
@@ -60,7 +60,7 @@ class OccupationsData {
     'Delegado(a)',
     'Escrivão(ã)',
     'Oficial de Justiça',
-    
+
     // Administração e Negócios
     'Administrador(a)',
     'Gerente',
@@ -72,7 +72,7 @@ class OccupationsData {
     'Auxiliar Administrativo(a)',
     'Empresário(a)',
     'Empreendedor(a)',
-    
+
     // Finanças e Contabilidade
     'Contador(a)',
     'Analista Financeiro(a)',
@@ -82,7 +82,7 @@ class OccupationsData {
     'Bancário(a)',
     'Gerente de Banco',
     'Caixa',
-    
+
     // Marketing e Comunicação
     'Publicitário(a)',
     'Designer Gráfico(a)',
@@ -94,7 +94,7 @@ class OccupationsData {
     'Fotógrafo(a)',
     'Videomaker',
     'Editor(a) de Vídeo',
-    
+
     // Vendas e Comércio
     'Vendedor(a)',
     'Representante Comercial',
@@ -103,7 +103,7 @@ class OccupationsData {
     'Promotor(a) de Vendas',
     'Comerciante',
     'Lojista',
-    
+
     // Serviços
     'Cabeleireiro(a)',
     'Manicure',
@@ -121,7 +121,7 @@ class OccupationsData {
     'Zelador(a)',
     'Faxineiro(a)',
     'Jardineiro(a)',
-    
+
     // Indústria e Produção
     'Operador(a) de Máquinas',
     'Técnico(a) Industrial',
@@ -130,7 +130,7 @@ class OccupationsData {
     'Soldador(a)',
     'Torneiro(a) Mecânico(a)',
     'Montador(a)',
-    
+
     // Artes e Cultura
     'Artista',
     'Músico(a)',
@@ -141,13 +141,13 @@ class OccupationsData {
     'Pintor(a)',
     'Escultor(a)',
     'Artesão(ã)',
-    
+
     // Esportes
     'Atleta',
     'Treinador(a)',
     'Preparador(a) Físico(a)',
     'Árbitro(a)',
-    
+
     // Religioso
     'Pastor(a)',
     'Padre',
@@ -159,7 +159,7 @@ class OccupationsData {
     'Capelão(ã)',
     'Evangelista',
     'Pregador(a)',
-    
+
     // Outros
     'Autônomo(a)',
     'Freelancer',
@@ -175,9 +175,9 @@ class OccupationsData {
   /// Busca profissões que correspondem ao termo de busca
   static List<String> searchOccupations(String query) {
     if (query.isEmpty) return [];
-    
+
     final lowerQuery = query.toLowerCase();
-    
+
     return occupations.where((occupation) {
       return occupation.toLowerCase().contains(lowerQuery);
     }).toList();

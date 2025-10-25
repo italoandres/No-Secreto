@@ -20,20 +20,22 @@ class SpiritualCertificationRequestView extends StatefulWidget {
 
 class _SpiritualCertificationRequestViewState
     extends State<SpiritualCertificationRequestView> {
-  final SpiritualCertificationService _service = SpiritualCertificationService();
-  final SpiritualCertificationRepository _repository = SpiritualCertificationRepository();
-  
+  final SpiritualCertificationService _service =
+      SpiritualCertificationService();
+  final SpiritualCertificationRepository _repository =
+      SpiritualCertificationRepository();
+
   bool _isLoading = false;
   bool _isCheckingStatus = true;
   double _uploadProgress = 0.0;
   bool _showProgress = false;
   bool _mounted = true;
-  
+
   // Status da certificação
   bool _hasApprovedCertification = false;
   bool _hasPendingCertification = false;
   CertificationRequestModel? _latestCertification;
-  
+
   // Toggle: Eu estou preparado para encontrar meu Isaque/Rebeca
   final RxBool _isReady = false.obs;
 
@@ -67,16 +69,18 @@ class _SpiritualCertificationRequestViewState
 
     try {
       // Verificar se tem certificação aprovada
-      final hasApproved = await CertificationStatusHelper.hasApprovedCertification(user.uid);
-      
+      final hasApproved =
+          await CertificationStatusHelper.hasApprovedCertification(user.uid);
+
       // Verificar se tem certificação pendente
-      final hasPending = await CertificationStatusHelper.hasPendingCertification(user.uid);
-      
+      final hasPending =
+          await CertificationStatusHelper.hasPendingCertification(user.uid);
+
       _safeSetState(() {
         _hasApprovedCertification = hasApproved;
         _hasPendingCertification = hasPending;
         _isCheckingStatus = false;
-        
+
         // Se tem aprovada ou pendente, toggle fica ligado
         if (hasApproved || hasPending) {
           _isReady.value = true;
@@ -119,9 +123,10 @@ class _SpiritualCertificationRequestViewState
   }
 
   /// Submeter solicitação
-  Future<void> _submitRequest(String purchaseEmail, PlatformFile proofFile) async {
+  Future<void> _submitRequest(
+      String purchaseEmail, PlatformFile proofFile) async {
     if (!_mounted || !mounted) return;
-    
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (_mounted && mounted) {
@@ -159,9 +164,11 @@ class _SpiritualCertificationRequestViewState
         if (result.success) {
           // Atualizar status após envio bem-sucedido
           await _checkCertificationStatus();
-          _showSuccessDialog(result.message ?? 'Solicitação enviada com sucesso!');
+          _showSuccessDialog(
+              result.message ?? 'Solicitação enviada com sucesso!');
         } else {
-          _showErrorDialog('Erro', result.message ?? 'Erro ao enviar solicitação');
+          _showErrorDialog(
+              'Erro', result.message ?? 'Erro ao enviar solicitação');
         }
       }
     } catch (e) {
@@ -178,7 +185,7 @@ class _SpiritualCertificationRequestViewState
   /// Mostrar diálogo de sucesso
   void _showSuccessDialog(String message) {
     if (!_mounted || !mounted) return;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -267,7 +274,7 @@ class _SpiritualCertificationRequestViewState
   /// Mostrar diálogo de erro
   void _showErrorDialog(String title, String message) {
     if (!_mounted || !mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -390,55 +397,56 @@ class _SpiritualCertificationRequestViewState
                   ],
                 ),
               ),
-              
+
               // Conteúdo
               Expanded(
                 child: _isCheckingStatus
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber.shade700),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Verificando status...',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.amber.shade700),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Text(
+                              'Verificando status...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Obx(() => Column(
+                              children: [
+                                // Card com informações da mentoria
+                                _buildMentoriaInfoCard(),
+
+                                const SizedBox(height: 24),
+
+                                // Toggle: Eu estou preparado
+                                _buildReadyToggle(),
+
+                                const SizedBox(height: 24),
+
+                                // Conteúdo condicional
+                                if (_isReady.value) ...[
+                                  if (_hasApprovedCertification)
+                                    _buildApprovedCertificationCard()
+                                  else if (_hasPendingCertification)
+                                    _buildPendingCertificationCard()
+                                  else
+                                    _buildCertificationForm(),
+                                ] else
+                                  _buildMentoriaCallToAction(),
+                              ],
+                            )),
                       ),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Obx(() => Column(
-                        children: [
-                          // Card com informações da mentoria
-                          _buildMentoriaInfoCard(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Toggle: Eu estou preparado
-                          _buildReadyToggle(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Conteúdo condicional
-                          if (_isReady.value) ...[
-                            if (_hasApprovedCertification)
-                              _buildApprovedCertificationCard()
-                            else if (_hasPendingCertification)
-                              _buildPendingCertificationCard()
-                            else
-                              _buildCertificationForm(),
-                          ] else
-                            _buildMentoriaCallToAction(),
-                        ],
-                      )),
-                    ),
               ),
             ],
           ),
@@ -477,9 +485,9 @@ class _SpiritualCertificationRequestViewState
               color: Colors.amber.shade700,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Título
           Text(
             'Selo de Certificação',
@@ -489,9 +497,9 @@ class _SpiritualCertificationRequestViewState
               color: Colors.amber.shade900,
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Descrição
           Text(
             'Destaque seu perfil com o selo dourado de certificação espiritual',
@@ -511,7 +519,7 @@ class _SpiritualCertificationRequestViewState
   Widget _buildReadyToggle() {
     // Se tem certificação aprovada ou pendente, não pode desabilitar
     final canToggle = !_hasApprovedCertification && !_hasPendingCertification;
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -523,7 +531,9 @@ class _SpiritualCertificationRequestViewState
         ),
         boxShadow: [
           BoxShadow(
-            color: (_isReady.value ? Colors.green : Colors.grey).shade200.withOpacity(0.5),
+            color: (_isReady.value ? Colors.green : Colors.grey)
+                .shade200
+                .withOpacity(0.5),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -554,12 +564,14 @@ class _SpiritualCertificationRequestViewState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  canToggle 
-                    ? 'Ative se você já fez a mentoria'
-                    : '✓ Certificação ativa',
+                  canToggle
+                      ? 'Ative se você já fez a mentoria'
+                      : '✓ Certificação ativa',
                   style: TextStyle(
                     fontSize: 13,
-                    color: canToggle ? Colors.grey.shade600 : Colors.green.shade600,
+                    color: canToggle
+                        ? Colors.grey.shade600
+                        : Colors.green.shade600,
                     fontWeight: canToggle ? FontWeight.normal : FontWeight.bold,
                   ),
                 ),
@@ -569,9 +581,11 @@ class _SpiritualCertificationRequestViewState
           const SizedBox(width: 16),
           Switch(
             value: _isReady.value,
-            onChanged: canToggle ? (value) {
-              _isReady.value = value;
-            } : null, // null = desabilitado
+            onChanged: canToggle
+                ? (value) {
+                    _isReady.value = value;
+                  }
+                : null, // null = desabilitado
             activeColor: Colors.green.shade600,
           ),
         ],
@@ -608,15 +622,15 @@ class _SpiritualCertificationRequestViewState
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Formulário de solicitação
         CertificationRequestFormComponent(
           onSubmit: _submitRequest,
           enabled: !_isLoading,
         ),
-        
+
         // Progress indicator
         if (_showProgress) ...[
           const SizedBox(height: 16),
@@ -687,9 +701,9 @@ class _SpiritualCertificationRequestViewState
               color: Colors.white,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Título
           Text(
             '🎉 Certificação Aprovada!',
@@ -700,9 +714,9 @@ class _SpiritualCertificationRequestViewState
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Mensagem
           Text(
             'Seu perfil agora possui o selo dourado de certificação espiritual',
@@ -713,9 +727,9 @@ class _SpiritualCertificationRequestViewState
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Benefícios ativos
           Container(
             padding: const EdgeInsets.all(16),
@@ -784,9 +798,9 @@ class _SpiritualCertificationRequestViewState
               color: Colors.blue.shade600,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Título
           Text(
             'Solicitação em Análise',
@@ -797,9 +811,9 @@ class _SpiritualCertificationRequestViewState
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Mensagem
           Text(
             'Sua solicitação está sendo analisada. Você será notificado em breve!',
@@ -810,9 +824,9 @@ class _SpiritualCertificationRequestViewState
               height: 1.5,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Info adicional
           Container(
             padding: const EdgeInsets.all(12),
@@ -878,9 +892,9 @@ class _SpiritualCertificationRequestViewState
               color: Colors.purple.shade600,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Título
           Text(
             'Faça a Mentoria',
@@ -891,9 +905,9 @@ class _SpiritualCertificationRequestViewState
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Descrição
           Text(
             'Sinais de meu Isaque e de minha Rebeca',
@@ -904,9 +918,9 @@ class _SpiritualCertificationRequestViewState
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Benefícios
           Container(
             padding: const EdgeInsets.all(16),
@@ -934,9 +948,9 @@ class _SpiritualCertificationRequestViewState
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Botão CTA
           SizedBox(
             width: double.infinity,
@@ -978,9 +992,9 @@ class _SpiritualCertificationRequestViewState
               ),
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Texto informativo
           Text(
             'Após concluir a mentoria, ative o toggle acima para solicitar seu selo',

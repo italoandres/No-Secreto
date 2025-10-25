@@ -17,7 +17,8 @@ class CertificationProofViewer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CertificationProofViewer> createState() => _CertificationProofViewerState();
+  State<CertificationProofViewer> createState() =>
+      _CertificationProofViewerState();
 }
 
 class _CertificationProofViewerState extends State<CertificationProofViewer> {
@@ -44,7 +45,7 @@ class _CertificationProofViewerState extends State<CertificationProofViewer> {
       // Verificar se o arquivo existe
       final ref = FirebaseStorage.instance.refFromURL(widget.proofUrl);
       await ref.getMetadata();
-      
+
       setState(() {
         _isLoading = false;
       });
@@ -65,9 +66,9 @@ class _CertificationProofViewerState extends State<CertificationProofViewer> {
   /// Verificar se é imagem
   bool get _isImage {
     final ext = widget.fileName.toLowerCase();
-    return ext.endsWith('.jpg') || 
-           ext.endsWith('.jpeg') || 
-           ext.endsWith('.png');
+    return ext.endsWith('.jpg') ||
+        ext.endsWith('.jpeg') ||
+        ext.endsWith('.png');
   }
 
   /// Abrir arquivo
@@ -104,7 +105,8 @@ class _CertificationProofViewerState extends State<CertificationProofViewer> {
       // Monitorar progresso
       downloadTask.snapshotEvents.listen((taskSnapshot) {
         setState(() {
-          _downloadProgress = taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
+          _downloadProgress =
+              taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
         });
       });
 
@@ -239,7 +241,7 @@ class _CertificationProofViewerState extends State<CertificationProofViewer> {
             icon: const Icon(Icons.share),
             tooltip: 'Compartilhar',
           ),
-          
+
           // Botão Download
           IconButton(
             onPressed: _isDownloading ? null : _downloadFile,
@@ -250,13 +252,14 @@ class _CertificationProofViewerState extends State<CertificationProofViewer> {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       value: _downloadProgress,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
                 : const Icon(Icons.download),
             tooltip: 'Baixar',
           ),
-          
+
           // Botão Abrir Externamente
           IconButton(
             onPressed: _openFile,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Seção que exibe informações de localização do perfil
-/// 
+///
 /// Exibe cidade, estado e país de forma formatada
 class LocationInfoSection extends StatelessWidget {
   final String? city;
@@ -21,7 +21,7 @@ class LocationInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determinar qual texto exibir
     final locationText = _getLocationText();
-    
+
     // Se não houver localização, não renderizar
     if (locationText.isEmpty) {
       return const SizedBox.shrink();
@@ -89,22 +89,22 @@ class LocationInfoSection extends StatelessWidget {
     if (fullLocation?.isNotEmpty == true) {
       return fullLocation!;
     }
-    
+
     final parts = <String>[];
-    
+
     if (city?.isNotEmpty == true) {
       parts.add(city!);
     }
-    
+
     if (state?.isNotEmpty == true) {
       parts.add(state!);
     }
-    
+
     if (country?.isNotEmpty == true && country != 'Brasil') {
       // Só adicionar país se não for Brasil (padrão)
       parts.add(country!);
     }
-    
+
     return parts.join(' - ');
   }
 }

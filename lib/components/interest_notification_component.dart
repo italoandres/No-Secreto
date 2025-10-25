@@ -10,18 +10,19 @@ class InterestNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
 
     return StreamBuilder<int>(
-      stream: NotificationService.getContextUnreadCount(currentUser.uid, 'interest_matches'),
+      stream: NotificationService.getContextUnreadCount(
+          currentUser.uid, 'interest_matches'),
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;
-        
+
         return Container(
-          width: 50, 
+          width: 50,
           height: 50,
           margin: const EdgeInsets.only(left: 16),
           child: ElevatedButton(
@@ -33,7 +34,8 @@ class InterestNotificationComponent extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Get.to(() => const NotificationsView(contexto: 'interest_matches'));
+              Get.to(
+                  () => const NotificationsView(contexto: 'interest_matches'));
             },
             child: Stack(
               children: [
@@ -45,7 +47,7 @@ class InterestNotificationComponent extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                
+
                 // Badge com contador (só aparece se houver notificações)
                 if (unreadCount > 0)
                   Positioned(
@@ -90,14 +92,13 @@ class AnimatedInterestNotificationComponent extends StatefulWidget {
   const AnimatedInterestNotificationComponent({super.key});
 
   @override
-  State<AnimatedInterestNotificationComponent> createState() => 
+  State<AnimatedInterestNotificationComponent> createState() =>
       _AnimatedInterestNotificationComponentState();
 }
 
-class _AnimatedInterestNotificationComponentState 
+class _AnimatedInterestNotificationComponentState
     extends State<AnimatedInterestNotificationComponent>
     with SingleTickerProviderStateMixin {
-  
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -108,7 +109,7 @@ class _AnimatedInterestNotificationComponentState
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.1,
@@ -136,16 +137,17 @@ class _AnimatedInterestNotificationComponentState
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
 
     return StreamBuilder<int>(
-      stream: NotificationService.getContextUnreadCount(currentUser.uid, 'interest_matches'),
+      stream: NotificationService.getContextUnreadCount(
+          currentUser.uid, 'interest_matches'),
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;
-        
+
         // Controlar animação baseado nas notificações
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (unreadCount > 0) {
@@ -154,14 +156,14 @@ class _AnimatedInterestNotificationComponentState
             _stopPulseAnimation();
           }
         });
-        
+
         return AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, child) {
             return Transform.scale(
               scale: unreadCount > 0 ? _scaleAnimation.value : 1.0,
               child: Container(
-                width: 50, 
+                width: 50,
                 height: 50,
                 margin: const EdgeInsets.only(left: 16),
                 child: ElevatedButton(
@@ -174,7 +176,8 @@ class _AnimatedInterestNotificationComponentState
                   ),
                   onPressed: () {
                     _stopPulseAnimation();
-                    Get.to(() => const NotificationsView(contexto: 'interest_matches'));
+                    Get.to(() =>
+                        const NotificationsView(contexto: 'interest_matches'));
                   },
                   child: Stack(
                     children: [
@@ -186,7 +189,7 @@ class _AnimatedInterestNotificationComponentState
                           size: 24,
                         ),
                       ),
-                      
+
                       // Badge com contador
                       if (unreadCount > 0)
                         Positioned(

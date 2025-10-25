@@ -33,7 +33,7 @@ class InterestNotificationItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: isPending
             ? BorderSide(color: Colors.purple.shade300, width: 2)
-            : (isMutualMatch 
+            : (isMutualMatch
                 ? BorderSide(color: Colors.pink.shade300, width: 2)
                 : BorderSide.none),
       ),
@@ -51,7 +51,7 @@ class InterestNotificationItem extends StatelessWidget {
                   // Avatar misterioso (interrogação)
                   _buildMysteriousAvatar(),
                   const SizedBox(width: 12),
-                  
+
                   // Conteúdo
                   Expanded(
                     child: Column(
@@ -60,21 +60,21 @@ class InterestNotificationItem extends StatelessWidget {
                         // Título misterioso
                         _buildMysteriousHeader(),
                         const SizedBox(height: 8),
-                        
+
                         // Mensagem misteriosa
                         _buildMysteriousMessage(),
-                        
+
                         const SizedBox(height: 4),
-                        
+
                         // Timestamp
                         _buildTimestamp(),
                       ],
                     ),
                   ),
-                  
+
                   // Ícone misterioso
                   _buildMysteriousIcon(),
-                  
+
                   // Botão de deletar (se fornecido)
                   if (onDelete != null)
                     IconButton(
@@ -86,7 +86,7 @@ class InterestNotificationItem extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               // Botão misterioso para ir para Vitrine
               const SizedBox(height: 16),
               _buildMysteriousButton(context),
@@ -133,7 +133,7 @@ class InterestNotificationItem extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Efeito de brilho
         Positioned(
           right: 0,
@@ -241,10 +241,10 @@ class InterestNotificationItem extends StatelessWidget {
   /// Constrói timestamp
   Widget _buildTimestamp() {
     if (notification.dataCriacao == null) return const SizedBox.shrink();
-    
+
     final timestamp = notification.dataCriacao!.toDate();
     final timeAgo = timeago.format(timestamp, locale: 'pt_BR');
-    
+
     return Text(
       timeAgo,
       style: TextStyle(

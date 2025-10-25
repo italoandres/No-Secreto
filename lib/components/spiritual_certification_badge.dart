@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Badge de Certificação Espiritual
-/// 
+///
 /// Componente visual que indica que um usuário foi certificado espiritualmente.
 /// Exibe um badge dourado/laranja com ícone de verificação e texto.
 /// Ao clicar, mostra um dialog informativo sobre a certificação.
@@ -59,7 +59,7 @@ class SpiritualCertificationBadge extends StatelessWidget {
               size: size * 0.6,
             ),
           ),
-          
+
           if (showLabel) ...[
             const SizedBox(height: 8),
             Container(
@@ -172,9 +172,9 @@ class CertificationInfoDialog extends StatelessWidget {
                 size: 48,
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Título
             Text(
               'Certificação Espiritual',
@@ -185,9 +185,9 @@ class CertificationInfoDialog extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Descrição
             Text(
               'Este usuário foi certificado espiritualmente pela nossa equipe.',
@@ -198,9 +198,9 @@ class CertificationInfoDialog extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Informações adicionais
             Container(
               padding: const EdgeInsets.all(16),
@@ -232,9 +232,9 @@ class CertificationInfoDialog extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Botão de fechar
             SizedBox(
               width: double.infinity,

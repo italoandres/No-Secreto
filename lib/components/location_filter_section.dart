@@ -106,7 +106,8 @@ class LocationFilterSection extends StatelessWidget {
               ),
               // Contador
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4169E1).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -160,15 +161,15 @@ class LocationFilterSection extends StatelessWidget {
                     : 'Limite de 2 localizações atingido',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: canAddMore ? const Color(0xFF7B68EE) : Colors.grey[400],
+                  color:
+                      canAddMore ? const Color(0xFF7B68EE) : Colors.grey[400],
                 ),
               ),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 side: BorderSide(
-                  color: canAddMore
-                      ? const Color(0xFF7B68EE)
-                      : Colors.grey[300]!,
+                  color:
+                      canAddMore ? const Color(0xFF7B68EE) : Colors.grey[300]!,
                   width: 1.5,
                 ),
                 shape: RoundedRectangleBorder(

@@ -25,12 +25,12 @@ class PurposePartnershipModel {
     required String user2Id,
     required String chatId,
   }) : this(
-    user1Id: user1Id,
-    user2Id: user2Id,
-    chatId: chatId,
-    isActive: true,
-    dataConexao: Timestamp.now(),
-  );
+          user1Id: user1Id,
+          user2Id: user2Id,
+          chatId: chatId,
+          isActive: true,
+          dataConexao: Timestamp.now(),
+        );
 
   // Converter para Map para Firebase
   Map<String, dynamic> toMap() {
@@ -51,9 +51,9 @@ class PurposePartnershipModel {
       if (data == null) {
         throw Exception('Documento não contém dados');
       }
-      
+
       final Map<String, dynamic> dataMap = data as Map<String, dynamic>;
-      
+
       return PurposePartnershipModel(
         id: doc.id,
         user1Id: dataMap['user1Id']?.toString(),
@@ -83,10 +83,10 @@ class PurposePartnershipModel {
 
   // Validações
   bool get isValid {
-    return user1Id != null && 
-           user2Id != null && 
-           chatId != null &&
-           user1Id != user2Id;
+    return user1Id != null &&
+        user2Id != null &&
+        chatId != null &&
+        user1Id != user2Id;
   }
 
   // Verificar se usuário faz parte da parceria
@@ -97,7 +97,7 @@ class PurposePartnershipModel {
   // Verificar se dois usuários fazem parte da parceria
   bool includesUsers(String userId1, String userId2) {
     return (user1Id == userId1 && user2Id == userId2) ||
-           (user1Id == userId2 && user2Id == userId1);
+        (user1Id == userId2 && user2Id == userId1);
   }
 
   // Obter ID do parceiro
@@ -146,7 +146,7 @@ class PurposePartnershipModel {
   // Calcular duração da parceria
   Duration? get partnershipDuration {
     if (dataConexao == null) return null;
-    
+
     DateTime endDate = dataDesconexao?.toDate() ?? DateTime.now();
     return endDate.difference(dataConexao!.toDate());
   }
@@ -159,7 +159,7 @@ class PurposePartnershipModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is PurposePartnershipModel &&
         other.id == id &&
         other.chatId == chatId;

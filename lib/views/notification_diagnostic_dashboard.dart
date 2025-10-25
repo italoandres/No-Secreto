@@ -88,39 +88,39 @@ class NotificationDiagnosticDashboard extends StatelessWidget {
               children: [
                 // Header com informações do usuário
                 _buildUserHeader(controller),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Status geral do sistema
                 DiagnosticSystemStatusCard(userId: userId),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Monitor de saúde em tempo real
                 DiagnosticHealthMonitor(userId: userId),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Controles manuais
                 DiagnosticManualControls(userId: userId),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Gráficos de performance
                 DiagnosticPerformanceChart(userId: userId),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Visualizador de logs
                 DiagnosticLogsViewer(userId: userId),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Ações rápidas
                 _buildQuickActions(controller),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Informações do sistema
                 _buildSystemInfo(controller),
               ],
@@ -139,77 +139,78 @@ class NotificationDiagnosticDashboard extends StatelessWidget {
 
   Widget _buildUserHeader(NotificationDiagnosticController controller) {
     return Obx(() => Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade600, Colors.blue.shade400],
-          ),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.white.withOpacity(0.2),
-              child: Icon(
-                Icons.person,
-                size: 30,
-                color: Colors.white,
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade600, Colors.blue.shade400],
               ),
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userId ?? 'Sistema Global',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  child: Icon(
+                    Icons.person,
+                    size: 30,
+                    color: Colors.white,
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Status: ${controller.systemStatus.value}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                  Text(
-                    'Última atualização: ${controller.lastUpdate.value}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _getStatusColor(controller.systemStatus.value),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _getStatusText(controller.systemStatus.value),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
                 ),
-              ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userId ?? 'Sistema Global',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Status: ${controller.systemStatus.value}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                      Text(
+                        'Última atualização: ${controller.lastUpdate.value}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(controller.systemStatus.value),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _getStatusText(controller.systemStatus.value),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
   Widget _buildQuickActions(NotificationDiagnosticController controller) {
@@ -301,32 +302,35 @@ class NotificationDiagnosticDashboard extends StatelessWidget {
 
   Widget _buildSystemInfo(NotificationDiagnosticController controller) {
     return Obx(() => Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Informações do Sistema',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
-              ),
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Informações do Sistema',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                SizedBox(height: 16),
+                _buildInfoRow('Versão', controller.systemVersion.value),
+                _buildInfoRow('Uptime', controller.systemUptime.value),
+                _buildInfoRow('Memória Usada', controller.memoryUsage.value),
+                _buildInfoRow('Cache Size', controller.cacheSize.value),
+                _buildInfoRow(
+                    'Operações/min', controller.operationsPerMinute.value),
+                _buildInfoRow(
+                    'Última Sincronização', controller.lastSyncTime.value),
+              ],
             ),
-            SizedBox(height: 16),
-            _buildInfoRow('Versão', controller.systemVersion.value),
-            _buildInfoRow('Uptime', controller.systemUptime.value),
-            _buildInfoRow('Memória Usada', controller.memoryUsage.value),
-            _buildInfoRow('Cache Size', controller.cacheSize.value),
-            _buildInfoRow('Operações/min', controller.operationsPerMinute.value),
-            _buildInfoRow('Última Sincronização', controller.lastSyncTime.value),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
   Widget _buildInfoRow(String label, String value) {

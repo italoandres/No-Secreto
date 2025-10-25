@@ -18,7 +18,8 @@ class SkeletonLoadingComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SkeletonLoadingComponent> createState() => _SkeletonLoadingComponentState();
+  State<SkeletonLoadingComponent> createState() =>
+      _SkeletonLoadingComponentState();
 }
 
 class _SkeletonLoadingComponentState extends State<SkeletonLoadingComponent>
@@ -107,9 +108,9 @@ class MatchCardSkeleton extends StatelessWidget {
             height: 70,
             borderRadius: BorderRadius.all(Radius.circular(35)),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Content skeleton
           Expanded(
             child: Column(
@@ -121,18 +122,18 @@ class MatchCardSkeleton extends StatelessWidget {
                   height: 18,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Status skeleton
                 const SkeletonLoadingComponent(
                   width: 80,
                   height: 14,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Message skeleton
                 const SkeletonLoadingComponent(
                   width: double.infinity,
@@ -142,9 +143,9 @@ class MatchCardSkeleton extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Button skeleton
           const SkeletonLoadingComponent(
             width: 100,
@@ -190,9 +191,8 @@ class ChatMessageSkeleton extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: isFromCurrentUser 
-            ? MainAxisAlignment.end 
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isFromCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isFromCurrentUser) ...[
             const SkeletonLoadingComponent(
@@ -202,14 +202,11 @@ class ChatMessageSkeleton extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-          
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isFromCurrentUser 
-                    ? Colors.grey[200]
-                    : Colors.white,
+                color: isFromCurrentUser ? Colors.grey[200] : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -237,7 +234,6 @@ class ChatMessageSkeleton extends StatelessWidget {
               ),
             ),
           ),
-          
           if (isFromCurrentUser) ...[
             const SizedBox(width: 8),
             const SkeletonLoadingComponent(
@@ -287,36 +283,38 @@ class ProfileSkeleton extends StatelessWidget {
           height: 100,
           borderRadius: BorderRadius.all(Radius.circular(50)),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Name
         const SkeletonLoadingComponent(
           width: 150,
           height: 20,
           borderRadius: BorderRadius.all(Radius.circular(4)),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // Age and location
         const SkeletonLoadingComponent(
           width: 100,
           height: 16,
           borderRadius: BorderRadius.all(Radius.circular(4)),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Bio lines
-        ...List.generate(3, (index) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: SkeletonLoadingComponent(
-            width: double.infinity,
-            height: 14,
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
-        )),
+        ...List.generate(
+            3,
+            (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: SkeletonLoadingComponent(
+                    width: double.infinity,
+                    height: 14,
+                    borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  ),
+                )),
       ],
     );
   }

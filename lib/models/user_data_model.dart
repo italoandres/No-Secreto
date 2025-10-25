@@ -124,7 +124,8 @@ class UserDataModel {
     );
   }
 
-  factory UserDataModel.fromFirestore(String userId, Map<String, dynamic> data) {
+  factory UserDataModel.fromFirestore(
+      String userId, Map<String, dynamic> data) {
     return UserDataModel(
       userId: userId,
       displayName: data['displayName'] ?? data['nome'] ?? 'Usuário',

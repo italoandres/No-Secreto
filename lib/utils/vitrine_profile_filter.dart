@@ -12,17 +12,17 @@ class VitrineProfileFilter {
     int limit = 20,
   }) async {
     final startTime = DateTime.now();
-    
+
     try {
-      EnhancedLogger.info('Searching complete vitrine profiles only', 
-        tag: 'VITRINE_PROFILE_FILTER',
-        data: {'query': query, 'limit': limit}
-      );
+      EnhancedLogger.info('Searching complete vitrine profiles only',
+          tag: 'VITRINE_PROFILE_FILTER',
+          data: {'query': query, 'limit': limit});
 
       // Buscar na coleção spiritual_profiles com filtros específicos para vitrine completa
       final snapshot = await _firestore
           .collection('spiritual_profiles')
-          .where('isProfileComplete', isEqualTo: true) // Apenas perfis completos
+          .where('isProfileComplete',
+              isEqualTo: true) // Apenas perfis completos
           .limit(limit * 5) // Buscar mais para filtrar depois
           .get();
 
@@ -31,21 +31,20 @@ class VitrineProfileFilter {
       for (final doc in snapshot.docs) {
         try {
           final userData = doc.data();
-          
+
           // Verificar se é um perfil de vitrine completo
           if (_isCompleteVitrineProfile(userData)) {
             final profile = _convertToSpiritualProfile(doc.id, userData);
-            
+
             // Aplicar filtro de busca textual se necessário
             if (_matchesSearchQuery(profile, query)) {
               vitrineProfiles.add(profile);
             }
           }
         } catch (e) {
-          EnhancedLogger.warning('Failed to process user profile', 
-            tag: 'VITRINE_PROFILE_FILTER',
-            data: {'docId': doc.id, 'error': e.toString()}
-          );
+          EnhancedLogger.warning('Failed to process user profile',
+              tag: 'VITRINE_PROFILE_FILTER',
+              data: {'docId': doc.id, 'error': e.toString()});
         }
       }
 
@@ -53,28 +52,25 @@ class VitrineProfileFilter {
       final finalResults = vitrineProfiles.take(limit).toList();
 
       final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-      
-      EnhancedLogger.success('Complete vitrine profiles search completed', 
-        tag: 'VITRINE_PROFILE_FILTER',
-        data: {
-          'totalDocuments': snapshot.docs.length,
-          'completeVitrineProfiles': vitrineProfiles.length,
-          'finalResults': finalResults.length,
-          'executionTime': executionTime,
-        }
-      );
+
+      EnhancedLogger.success('Complete vitrine profiles search completed',
+          tag: 'VITRINE_PROFILE_FILTER',
+          data: {
+            'totalDocuments': snapshot.docs.length,
+            'completeVitrineProfiles': vitrineProfiles.length,
+            'finalResults': finalResults.length,
+            'executionTime': executionTime,
+          });
 
       return finalResults;
-
     } catch (e) {
       final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-      
-      EnhancedLogger.error('Complete vitrine profiles search failed', 
-        tag: 'VITRINE_PROFILE_FILTER',
-        error: e,
-        data: {'executionTime': executionTime}
-      );
-      
+
+      EnhancedLogger.error('Complete vitrine profiles search failed',
+          tag: 'VITRINE_PROFILE_FILTER',
+          error: e,
+          data: {'executionTime': executionTime});
+
       return [];
     }
   }
@@ -97,7 +93,7 @@ class VitrineProfileFilter {
     final city = profileData['city'] as String?;
     final state = profileData['state'] as String?;
     final aboutMe = profileData['aboutMe'] as String?;
-    
+
     // Pelo menos cidade OU estado deve estar preenchido
     if ((city == null || city.isEmpty) && (state == null || state.isEmpty)) {
       return false;
@@ -124,20 +120,23 @@ class VitrineProfileFilter {
   }
 
   /// Verifica se o perfil corresponde à query de busca
-  static bool _matchesSearchQuery(SpiritualProfileModel profile, String? query) {
+  static bool _matchesSearchQuery(
+      SpiritualProfileModel profile, String? query) {
     if (query == null || query.isEmpty) {
       return true;
     }
 
     final searchableText = [
       profile.displayName ?? '',
-      profile.username ?? '',  // ← ADICIONADO USERNAME!
+      profile.username ?? '', // ← ADICIONADO USERNAME!
       profile.bio ?? '',
       profile.city ?? '',
       profile.state ?? '',
     ].join(' ').toLowerCase();
 
-    final queryWords = query.toLowerCase().split(' ')
+    final queryWords = query
+        .toLowerCase()
+        .split(' ')
         .where((word) => word.isNotEmpty)
         .toList();
 
@@ -148,14 +147,15 @@ class VitrineProfileFilter {
 
   /// Converte dados de spiritual_profiles para SpiritualProfileModel
   static SpiritualProfileModel _convertToSpiritualProfile(
-    String docId, 
+    String docId,
     Map<String, dynamic> profileData,
   ) {
     return SpiritualProfileModel(
       id: docId,
       userId: profileData['userId'] as String? ?? docId,
       displayName: profileData['displayName'] as String? ?? 'Usuário',
-      username: profileData['username'] as String? ?? '',  // ← ADICIONADO USERNAME!
+      username:
+          profileData['username'] as String? ?? '', // ← ADICIONADO USERNAME!
       age: profileData['age'] as int?,
       bio: profileData['aboutMe'] as String? ?? '',
       city: profileData['city'] as String? ?? '',
@@ -177,7 +177,7 @@ class VitrineProfileFilter {
   static int? _calculateAge(dynamic nascimento) {
     try {
       if (nascimento == null) return null;
-      
+
       DateTime birthDate;
       if (nascimento is Timestamp) {
         birthDate = nascimento.toDate();
@@ -186,14 +186,14 @@ class VitrineProfileFilter {
       } else {
         return null;
       }
-      
+
       final now = DateTime.now();
       int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || 
+      if (now.month < birthDate.month ||
           (now.month == birthDate.month && now.day < birthDate.day)) {
         age--;
       }
-      
+
       return age > 0 ? age : null;
     } catch (e) {
       return null;
@@ -203,48 +203,49 @@ class VitrineProfileFilter {
   /// Extrai interesses dos dados do perfil espiritual
   static List<String> _extractInterests(Map<String, dynamic> profileData) {
     final interests = <String>[];
-    
+
     if (profileData['city'] != null) {
       interests.add(profileData['city'] as String);
     }
     if (profileData['state'] != null) {
       interests.add(profileData['state'] as String);
     }
-    
+
     // Adicionar interesses específicos se existirem
     final profileInterests = profileData['interests'];
     if (profileInterests is List) {
       interests.addAll(profileInterests.cast<String>());
     }
-    
+
     return interests;
   }
 
   /// Gera keywords de busca para o perfil
-  static List<String> _generateSearchKeywords(Map<String, dynamic> profileData) {
+  static List<String> _generateSearchKeywords(
+      Map<String, dynamic> profileData) {
     final keywords = <String>[];
-    
+
     final displayName = profileData['displayName'] as String? ?? '';
     final username = profileData['username'] as String? ?? '';
     final city = profileData['city'] as String? ?? '';
     final state = profileData['state'] as String? ?? '';
-    
+
     if (displayName.isNotEmpty) {
       keywords.add(displayName.toLowerCase());
       keywords.addAll(displayName.toLowerCase().split(' '));
     }
-    
+
     if (username.isNotEmpty) {
       keywords.add(username.toLowerCase());
     }
-    
+
     if (city.isNotEmpty) {
       keywords.add(city.toLowerCase());
     }
     if (state.isNotEmpty) {
       keywords.add(state.toLowerCase());
     }
-    
+
     return keywords.toSet().toList();
   }
 
@@ -266,10 +267,7 @@ class VitrineProfileFilter {
     print('=' * 50);
 
     try {
-      final snapshot = await _firestore
-          .collection('usuarios')
-          .limit(50)
-          .get();
+      final snapshot = await _firestore.collection('usuarios').limit(50).get();
 
       int totalUsers = snapshot.docs.length;
       int completeVitrineCount = 0;
@@ -281,15 +279,17 @@ class VitrineProfileFilter {
       for (final doc in snapshot.docs) {
         final userData = doc.data();
         final nome = userData['nome'] as String? ?? 'Sem nome';
-        
+
         if (_isCompleteVitrineProfile(userData)) {
           completeVitrineCount++;
           print('✅ VITRINE COMPLETO: $nome');
           print('   • Username: ${userData['username']}');
           print('   • Cidade: ${userData['cidade'] ?? 'N/A'}');
           print('   • Estado: ${userData['estado'] ?? 'N/A'}');
-          print('   • Bio: ${(userData['bio'] as String? ?? '').length > 0 ? 'Sim' : 'Não'}');
-          print('   • Nascimento: ${userData['nascimento'] != null ? 'Sim' : 'Não'}');
+          print(
+              '   • Bio: ${(userData['bio'] as String? ?? '').length > 0 ? 'Sim' : 'Não'}');
+          print(
+              '   • Nascimento: ${userData['nascimento'] != null ? 'Sim' : 'Não'}');
         } else {
           incompleteCount++;
           print('❌ INCOMPLETO: $nome');
@@ -303,8 +303,8 @@ class VitrineProfileFilter {
       print('   • Total analisados: $totalUsers');
       print('   • Perfis de vitrine completos: $completeVitrineCount');
       print('   • Perfis incompletos: $incompleteCount');
-      print('   • Taxa de completude: ${(completeVitrineCount / totalUsers * 100).toStringAsFixed(1)}%');
-
+      print(
+          '   • Taxa de completude: ${(completeVitrineCount / totalUsers * 100).toStringAsFixed(1)}%');
     } catch (e) {
       print('❌ Erro no debug: $e');
     }
@@ -326,7 +326,8 @@ class VitrineProfileFilter {
 
     final cidade = userData['cidade'] as String?;
     final estado = userData['estado'] as String?;
-    if ((cidade == null || cidade.isEmpty) && (estado == null || estado.isEmpty)) {
+    if ((cidade == null || cidade.isEmpty) &&
+        (estado == null || estado.isEmpty)) {
       reasons.add('Localização ausente');
     }
 
@@ -357,19 +358,20 @@ class VitrineProfileFilter {
     print('\n📊 Teste 1: Busca geral (todos os perfis completos)');
     final allComplete = await searchCompleteVitrineProfiles(limit: 20);
     print('✅ Encontrados: ${allComplete.length} perfis completos');
-    
+
     for (final profile in allComplete.take(5)) {
       print('   - ${profile.displayName} - ${profile.city}, ${profile.state}');
     }
 
     // Teste 2: Busca por "itala"
     print('\n📊 Teste 2: Busca por "itala"');
-    final italaProfiles = await searchCompleteVitrineProfiles(query: 'itala', limit: 10);
+    final italaProfiles =
+        await searchCompleteVitrineProfiles(query: 'itala', limit: 10);
     print('✅ Encontrados: ${italaProfiles.length} perfis');
-    
+
     for (final profile in italaProfiles) {
       print('   - ${profile.displayName} - ${profile.city}, ${profile.state}');
-      final bioPreview = profile.bio?.length != null && profile.bio!.length > 50 
+      final bioPreview = profile.bio?.length != null && profile.bio!.length > 50
           ? profile.bio!.substring(0, 50) + '...'
           : profile.bio ?? '';
       print('     Bio: $bioPreview');

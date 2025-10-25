@@ -36,16 +36,16 @@ class InterestNotificationModel {
     required String toUserEmail,
     String? message,
   }) : this(
-    fromUserId: fromUserId,
-    fromUserName: fromUserName,
-    fromUserEmail: fromUserEmail,
-    toUserId: toUserId,
-    toUserEmail: toUserEmail,
-    type: 'interest',
-    message: message ?? 'Tem interesse em conhecer seu perfil melhor',
-    status: 'pending',
-    dataCriacao: Timestamp.now(),
-  );
+          fromUserId: fromUserId,
+          fromUserName: fromUserName,
+          fromUserEmail: fromUserEmail,
+          toUserId: toUserId,
+          toUserEmail: toUserEmail,
+          type: 'interest',
+          message: message ?? 'Tem interesse em conhecer seu perfil melhor',
+          status: 'pending',
+          dataCriacao: Timestamp.now(),
+        );
 
   // Converter para Map para Firebase
   Map<String, dynamic> toMap() {
@@ -66,7 +66,7 @@ class InterestNotificationModel {
   // Criar objeto a partir do Firebase
   factory InterestNotificationModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     return InterestNotificationModel(
       id: doc.id,
       fromUserId: data['fromUserId'],
@@ -128,24 +128,24 @@ class InterestNotificationModel {
       type: json['type'],
       message: json['message'],
       status: json['status'],
-      dataCriacao: json['dataCriacao'] != null 
-        ? Timestamp.fromMillisecondsSinceEpoch(json['dataCriacao'])
-        : null,
-      dataResposta: json['dataResposta'] != null 
-        ? Timestamp.fromMillisecondsSinceEpoch(json['dataResposta'])
-        : null,
+      dataCriacao: json['dataCriacao'] != null
+          ? Timestamp.fromMillisecondsSinceEpoch(json['dataCriacao'])
+          : null,
+      dataResposta: json['dataResposta'] != null
+          ? Timestamp.fromMillisecondsSinceEpoch(json['dataResposta'])
+          : null,
     );
   }
 
   // Validações
   bool get isValid {
-    return fromUserId != null && 
-           fromUserName != null && 
-           fromUserEmail != null &&
-           toUserId != null &&
-           toUserEmail != null &&
-           type != null && 
-           status != null;
+    return fromUserId != null &&
+        fromUserName != null &&
+        fromUserEmail != null &&
+        toUserId != null &&
+        toUserEmail != null &&
+        type != null &&
+        status != null;
   }
 
   // Getters de conveniência

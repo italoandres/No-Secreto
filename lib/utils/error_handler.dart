@@ -6,16 +6,16 @@ import 'enhanced_logger.dart';
 
 /// Sistema centralizado de tratamento de erros
 class ErrorHandler {
-  
   /// Trata erros de forma centralizada
-  static void handleError(dynamic error, {
+  static void handleError(
+    dynamic error, {
     String? context,
     StackTrace? stackTrace,
     Map<String, dynamic>? additionalData,
     bool showUserMessage = true,
   }) {
     final errorInfo = _analyzeError(error);
-    
+
     EnhancedLogger.error(
       'Error in ${context ?? 'unknown context'}',
       tag: 'ERROR_HANDLER',
@@ -28,12 +28,12 @@ class ErrorHandler {
         ...?additionalData,
       },
     );
-    
+
     if (showUserMessage) {
       _showUserError(errorInfo);
     }
   }
-  
+
   /// Executa uma operação com tratamento de erro automático
   static Future<T?> safeExecute<T>(
     Future<T> Function() operation, {
@@ -43,15 +43,15 @@ class ErrorHandler {
     int maxRetries = 0,
   }) async {
     int attempts = 0;
-    
+
     while (attempts <= maxRetries) {
       try {
         return await operation();
       } catch (error, stackTrace) {
         attempts++;
-        
+
         final errorInfo = _analyzeError(error);
-        
+
         // Se é um erro que pode ser tentado novamente e ainda temos tentativas
         if (errorInfo.isRetryable && attempts <= maxRetries) {
           EnhancedLogger.warning(
@@ -62,12 +62,12 @@ class ErrorHandler {
               'error': error.toString(),
             },
           );
-          
+
           // Aguarda um pouco antes de tentar novamente
           await Future.delayed(Duration(milliseconds: 500 * attempts));
           continue;
         }
-        
+
         // Se chegou aqui, não vai tentar mais
         handleError(
           error,
@@ -75,20 +75,20 @@ class ErrorHandler {
           stackTrace: stackTrace,
           showUserMessage: showUserMessage,
         );
-        
+
         return fallbackValue;
       }
     }
-    
+
     return fallbackValue;
   }
-  
+
   /// Analisa o erro e retorna informações estruturadas
   static ErrorInfo _analyzeError(dynamic error) {
     if (error is FirebaseException) {
       return _handleFirebaseError(error);
     }
-    
+
     if (error is FormatException) {
       return ErrorInfo(
         type: 'FormatException',
@@ -97,7 +97,7 @@ class ErrorHandler {
         technicalMessage: error.message,
       );
     }
-    
+
     if (error is TypeError) {
       return ErrorInfo(
         type: 'TypeError',
@@ -106,7 +106,7 @@ class ErrorHandler {
         technicalMessage: error.toString(),
       );
     }
-    
+
     if (error is NetworkImageLoadException) {
       return ErrorInfo(
         type: 'NetworkImageLoadException',
@@ -115,7 +115,7 @@ class ErrorHandler {
         technicalMessage: error.toString(),
       );
     }
-    
+
     // Erro genérico
     return ErrorInfo(
       type: 'UnknownError',
@@ -124,7 +124,7 @@ class ErrorHandler {
       technicalMessage: error.toString(),
     );
   }
-  
+
   /// Trata erros específicos do Firebase
   static ErrorInfo _handleFirebaseError(FirebaseException error) {
     switch (error.code) {
@@ -135,23 +135,25 @@ class ErrorHandler {
           isRetryable: false,
           technicalMessage: error.message ?? '',
         );
-        
+
       case 'unavailable':
         return ErrorInfo(
           type: 'ServiceUnavailable',
-          userMessage: 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.',
+          userMessage:
+              'Serviço temporariamente indisponível. Tente novamente em alguns minutos.',
           isRetryable: true,
           technicalMessage: error.message ?? '',
         );
-        
+
       case 'deadline-exceeded':
         return ErrorInfo(
           type: 'Timeout',
-          userMessage: 'Operação demorou muito para responder. Tente novamente.',
+          userMessage:
+              'Operação demorou muito para responder. Tente novamente.',
           isRetryable: true,
           technicalMessage: error.message ?? '',
         );
-        
+
       case 'not-found':
         return ErrorInfo(
           type: 'NotFound',
@@ -159,7 +161,7 @@ class ErrorHandler {
           isRetryable: false,
           technicalMessage: error.message ?? '',
         );
-        
+
       case 'already-exists':
         return ErrorInfo(
           type: 'AlreadyExists',
@@ -167,25 +169,27 @@ class ErrorHandler {
           isRetryable: false,
           technicalMessage: error.message ?? '',
         );
-        
+
       case 'resource-exhausted':
         return ErrorInfo(
           type: 'ResourceExhausted',
-          userMessage: 'Muitas tentativas. Aguarde um momento antes de tentar novamente.',
+          userMessage:
+              'Muitas tentativas. Aguarde um momento antes de tentar novamente.',
           isRetryable: true,
           technicalMessage: error.message ?? '',
         );
-        
+
       default:
         return ErrorInfo(
           type: 'FirebaseError',
-          userMessage: 'Erro de conexão com o servidor. Verifique sua internet.',
+          userMessage:
+              'Erro de conexão com o servidor. Verifique sua internet.',
           isRetryable: true,
           technicalMessage: '${error.code}: ${error.message}',
         );
     }
   }
-  
+
   /// Mostra erro para o usuário
   static void _showUserError(ErrorInfo errorInfo) {
     if (!Get.isSnackbarOpen) {
@@ -205,7 +209,7 @@ class ErrorHandler {
       );
     }
   }
-  
+
   /// Mostra mensagem de sucesso
   static void showSuccess(String message) {
     if (!Get.isSnackbarOpen) {
@@ -222,7 +226,7 @@ class ErrorHandler {
       );
     }
   }
-  
+
   /// Mostra mensagem de aviso
   static void showWarning(String message) {
     if (!Get.isSnackbarOpen) {
@@ -239,7 +243,7 @@ class ErrorHandler {
       );
     }
   }
-  
+
   /// Mostra mensagem informativa
   static void showInfo(String message) {
     if (!Get.isSnackbarOpen) {
@@ -256,25 +260,26 @@ class ErrorHandler {
       );
     }
   }
-  
+
   /// Mostra dialog de confirmação para retry
   static Future<bool> showRetryDialog(String message) async {
     return await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Erro'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancelar'),
+          AlertDialog(
+            title: const Text('Erro'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Tentar Novamente'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Tentar Novamente'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 }
 
@@ -284,7 +289,7 @@ class ErrorInfo {
   final String userMessage;
   final bool isRetryable;
   final String technicalMessage;
-  
+
   ErrorInfo({
     required this.type,
     required this.userMessage,
@@ -298,9 +303,9 @@ class NetworkImageLoadException implements Exception {
   final String message;
   final String? url;
   final int? statusCode;
-  
+
   NetworkImageLoadException(this.message, {this.url, this.statusCode});
-  
+
   @override
   String toString() {
     return 'NetworkImageLoadException: $message${url != null ? ' (URL: $url)' : ''}${statusCode != null ? ' (Status: $statusCode)' : ''}';

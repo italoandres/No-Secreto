@@ -25,7 +25,7 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
   final ScrollController _scrollController = ScrollController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   bool _isSending = false;
   String? _errorMessage;
   Map<String, dynamic>? _chatData;
@@ -39,10 +39,8 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
 
   Future<void> _loadChatData() async {
     try {
-      final chatDoc = await _firestore
-          .collection('match_chats')
-          .doc(widget.chatId)
-          .get();
+      final chatDoc =
+          await _firestore.collection('match_chats').doc(widget.chatId).get();
 
       if (chatDoc.exists) {
         setState(() {
@@ -85,7 +83,6 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
         await batch.commit();
         print('✅ ${unreadMessages.docs.length} mensagens marcadas como lidas');
       }
-
     } catch (e) {
       print('⚠️ Erro ao marcar mensagens como lidas: $e');
       // Não quebrar o fluxo por causa disso
@@ -127,10 +124,7 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
       await _firestore.collection('chat_messages').add(messageData);
 
       // Atualizar último timestamp do chat
-      await _firestore
-          .collection('match_chats')
-          .doc(widget.chatId)
-          .update({
+      await _firestore.collection('match_chats').doc(widget.chatId).update({
         'lastMessageAt': FieldValue.serverTimestamp(),
         'lastMessage': message,
       });
@@ -148,7 +142,6 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
           );
         }
       });
-
     } catch (e) {
       print('❌ Erro ao enviar mensagem: $e');
       _showError('Erro ao enviar mensagem');
@@ -265,10 +258,11 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
           itemBuilder: (context, index) {
             final messageDoc = messages[index];
             final messageData = messageDoc.data() as Map<String, dynamic>;
-            
+
             // Sanitizar dados da mensagem
-            final sanitizedData = TimestampSanitizer.sanitizeMessageData(messageData);
-            
+            final sanitizedData =
+                TimestampSanitizer.sanitizeMessageData(messageData);
+
             return _buildMessageBubble(sanitizedData);
           },
         );
@@ -343,7 +337,8 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               maxLines: null,
               textCapitalization: TextCapitalization.sentences,

@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'storie_file_model.dart';
 
@@ -20,10 +19,9 @@ class StorieModel {
   });
 
   static StorieModel fromJson(Map<String, dynamic> json) {
-
     List<StorieFileModel> all = [];
 
-    if(json['listFiles'] != null) {
+    if (json['listFiles'] != null) {
       for (var element in json['listFiles']) {
         all.add(StorieFileModel.fromJson(element));
       }

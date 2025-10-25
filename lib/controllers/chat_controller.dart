@@ -35,15 +35,46 @@ class ChatController {
   static final documentosPath = Rx<List<String>>([]);
   static final linkDescricaoModel = Rx<LinkDescricaoModel?>(null);
   static final List<EmojiGrupoModel> emujiGroup = [
-    {'en': 'Smileys & Emotion', 'pt': 'Smileys e Emoções', 'img_assets': 'lib/assets/img/panel-emoji-people.png'},
-    {'en': 'Animals & Nature', 'pt': 'Animais e Natureza', 'img_assets': 'lib/assets/img/panel-emoji-nature.png'},
-    {'en': 'Food & Drink', 'pt': 'Comida e Bebida', 'img_assets': 'lib/assets/img/panel-emoji-food.png'},
-    {'en': 'Activities', 'pt': 'Atividades', 'img_assets': 'lib/assets/img/panel-emoji-activity.png'},
-    {'en': 'Travel & Places', 'pt': 'Viagens e Lugares', 'img_assets': 'lib/assets/img/panel-emoji-travel.png'},
-    {'en': 'Objects', 'pt': 'Objetos', 'img_assets': 'lib/assets/img/panel-emoji-objects.png'},
-    {'en': 'Symbols', 'pt': 'Símbolos', 'img_assets': 'lib/assets/img/panel-emoji-symbols.png'},
-    {'en': 'Flags', 'pt': 'Bandeiras', 'img_assets': 'lib/assets/img/panel-emoji-flags.png'},
-    
+    {
+      'en': 'Smileys & Emotion',
+      'pt': 'Smileys e Emoções',
+      'img_assets': 'lib/assets/img/panel-emoji-people.png'
+    },
+    {
+      'en': 'Animals & Nature',
+      'pt': 'Animais e Natureza',
+      'img_assets': 'lib/assets/img/panel-emoji-nature.png'
+    },
+    {
+      'en': 'Food & Drink',
+      'pt': 'Comida e Bebida',
+      'img_assets': 'lib/assets/img/panel-emoji-food.png'
+    },
+    {
+      'en': 'Activities',
+      'pt': 'Atividades',
+      'img_assets': 'lib/assets/img/panel-emoji-activity.png'
+    },
+    {
+      'en': 'Travel & Places',
+      'pt': 'Viagens e Lugares',
+      'img_assets': 'lib/assets/img/panel-emoji-travel.png'
+    },
+    {
+      'en': 'Objects',
+      'pt': 'Objetos',
+      'img_assets': 'lib/assets/img/panel-emoji-objects.png'
+    },
+    {
+      'en': 'Symbols',
+      'pt': 'Símbolos',
+      'img_assets': 'lib/assets/img/panel-emoji-symbols.png'
+    },
+    {
+      'en': 'Flags',
+      'pt': 'Bandeiras',
+      'img_assets': 'lib/assets/img/panel-emoji-flags.png'
+    },
     {'en': 'Component', 'pt': 'Componente'},
     {'en': 'People & Body', 'pt': 'Pessoas e Corpo'},
   ].map((e) => EmojiGrupoModel.fromJson(e)).toList();
@@ -65,43 +96,37 @@ class ChatController {
     return match?.group(0);
   }
 
-  static void sendMsg({
-    required bool isFirst
-  }) {
-    if(msgController.text.trim().isNotEmpty) {
+  static void sendMsg({required bool isFirst}) {
+    if (msgController.text.trim().isNotEmpty) {
       // Atualizar status online ao enviar mensagem
       OnlineStatusService.updateLastSeen();
-      
+
       ChatRepository.addText(
-        msg: msgController.text.trim(),
-        linkDescricaoModel: linkDescricaoModel.value
-      );
+          msg: msgController.text.trim(),
+          linkDescricaoModel: linkDescricaoModel.value);
       msgController.clear();
       showBtnAudio.value = true;
       linkDescricaoModel.value = null;
       linkDescricaoModel.refresh();
 
-      if(isFirst == true) {
+      if (isFirst == true) {
         mensagensDoPaiAposPrimeiraMsg();
       }
     }
   }
 
   // Método específico para o chat "Sinais de Meu Isaque"
-  static void sendMsgSinaisIsaque({
-    required bool isFirst
-  }) {
-    if(msgController.text.trim().isNotEmpty) {
+  static void sendMsgSinaisIsaque({required bool isFirst}) {
+    if (msgController.text.trim().isNotEmpty) {
       ChatRepository.addTextSinaisIsaque(
-        msg: msgController.text.trim(),
-        linkDescricaoModel: linkDescricaoModel.value
-      );
+          msg: msgController.text.trim(),
+          linkDescricaoModel: linkDescricaoModel.value);
       msgController.clear();
       showBtnAudio.value = true;
       linkDescricaoModel.value = null;
       linkDescricaoModel.refresh();
 
-      if(isFirst == true) {
+      if (isFirst == true) {
         mensagensSinaisIsaqueAposPrimeiraMsg();
       }
     }
@@ -109,7 +134,7 @@ class ChatController {
 
   static mensagensDoPaiAposPrimeiraMsg() async {
     // Mensagens específicas para usuários do sexo feminino no chat principal
-    if(TokenUsuario().sexo == UserSexo.feminino) {
+    if (TokenUsuario().sexo == UserSexo.feminino) {
       final data = {
         'WOWWW agora tem um canal de comunicação exclusivo comigo filha. saiba que quando me enviar mensagem eu vou ver imediatamente, seja texto, audio ou videos, pois passo o dia e a noite esperando vir falar comigo',
         'Filha saiba que a minha voz tem diferentes sons, tons e sinais de se ouvir se for preciso eu uso até uma mula para falar contigo',
@@ -190,15 +215,13 @@ class ChatController {
 
   static Future<bool> cameraImg() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 520
-    );
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.camera, maxWidth: 520);
 
     HomeController.disableShowSenha = false;
     TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
 
-    if(image != null) {
+    if (image != null) {
       fotoData = await image.readAsBytes();
       fotoPath.value = image.path;
       return true;
@@ -210,19 +233,17 @@ class ChatController {
   static Future<bool> cameraVideo() async {
     final ImagePicker picker = ImagePicker();
     final XFile? video = await picker.pickVideo(
-      source: ImageSource.camera,
-      maxDuration: const Duration(seconds: 30)
-    );
+        source: ImageSource.camera, maxDuration: const Duration(seconds: 30));
 
     HomeController.disableShowSenha = false;
     TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
 
-    if(video != null) {
+    if (video != null) {
       final bytes = (await video.readAsBytes()).lengthInBytes;
       final kb = bytes / 1024;
       final mb = kb / 1024;
-      if(TokenUsuario().isAdmin != true) {
-        if(mb > 16) {
+      if (TokenUsuario().isAdmin != true) {
+        if (mb > 16) {
           Get.rawSnackbar(message: 'O Vídeo deve ter no máximo 16MB!');
           return false;
         }
@@ -235,25 +256,20 @@ class ChatController {
   }
 
   static void sendFoto() {
-    if(fotoData == null) {
+    if (fotoData == null) {
       return;
     }
-    ChatRepository.addImg(
-      msg: legendaController.text.trim(), 
-      img: fotoData!
-    );
+    ChatRepository.addImg(msg: legendaController.text.trim(), img: fotoData!);
   }
 
   static Future<bool> galeriaImg() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile> image = await picker.pickMultiImage(
-      maxWidth: 520
-    );
+    final List<XFile> image = await picker.pickMultiImage(maxWidth: 520);
 
     HomeController.disableShowSenha = false;
     TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
 
-    if(image.isNotEmpty) {
+    if (image.isNotEmpty) {
       for (var element in image) {
         ChatRepository.addImg(msg: '', img: await element.readAsBytes());
       }
@@ -266,19 +282,17 @@ class ChatController {
   static Future<bool> galeriaVideo() async {
     final ImagePicker picker = ImagePicker();
     final XFile? video = await picker.pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(seconds: 30)
-    );
+        source: ImageSource.gallery, maxDuration: const Duration(seconds: 30));
 
     HomeController.disableShowSenha = false;
     TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
 
-    if(video != null) {
+    if (video != null) {
       final bytes = (await video.readAsBytes()).lengthInBytes;
       final kb = bytes / 1024;
       final mb = kb / 1024;
-      if(TokenUsuario().isAdmin != true) {
-        if(mb > 16) {
+      if (TokenUsuario().isAdmin != true) {
+        if (mb > 16) {
           Get.rawSnackbar(message: 'O Vídeo deve ter no máximo 16MB!');
           return false;
         }
@@ -290,27 +304,24 @@ class ChatController {
     }
   }
 
-  static Future<bool> getFile({
-    required bool isFirst
-  }) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true
-    );
+  static Future<bool> getFile({required bool isFirst}) async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: true);
 
     HomeController.disableShowSenha = false;
     TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
 
     if (result != null) {
       documentosPath.value.clear();
-      
+
       int tot = 0;
 
       for (var i = 0; i < result.files.length; i++) {
         final kb = result.files[i].size / 1024;
         final mb = kb / 1024;
 
-        if(TokenUsuario().isAdmin != true) {
-          if(mb > 16) {
+        if (TokenUsuario().isAdmin != true) {
+          if (mb > 16) {
             Get.rawSnackbar(message: 'Os arquivos não podem ter mais de 16MB!');
             tot += 1;
             return false;
@@ -318,20 +329,25 @@ class ChatController {
         }
       }
 
-      if(tot > 0) {
+      if (tot > 0) {
         return false;
       }
-      
+
       for (var element in result.paths) {
-        if(element != null) {
+        if (element != null) {
           String extensao = element.split('.').last;
 
-          if(['mp4','webp','3gp'].contains(extensao)) {
+          if (['mp4', 'webp', '3gp'].contains(extensao)) {
             ChatRepository.addVideo(msg: '', video: File(element));
-          } else if(['avif','png','jpg','jpeg','webp'].contains(extensao)) {
-            ChatRepository.addImgFile(msg: '', extensao: extensao, img: File(element));
+          } else if (['avif', 'png', 'jpg', 'jpeg', 'webp']
+              .contains(extensao)) {
+            ChatRepository.addImgFile(
+                msg: '', extensao: extensao, img: File(element));
           } else {
-            ChatRepository.addFile(file: File(element), fileName: element.split('/').last, extensao: extensao);
+            ChatRepository.addFile(
+                file: File(element),
+                fileName: element.split('/').last,
+                extensao: extensao);
           }
         }
       }
@@ -343,7 +359,7 @@ class ChatController {
         'ahh ${TokenUsuario().sexo == UserSexo.masculino ? 'Filho' : 'Filha'} não poderia esquecer disso.. só não chore aqui pra mim, por que a um coração quebrantado não resisto rsrs ♥🥹'
       };
 
-      if(isFirst == true) {
+      if (isFirst == true) {
         for (var element in data) {
           ChatRepository.addText(
             msg: element,
@@ -358,37 +374,33 @@ class ChatController {
 
   // Método extractURL removido - duplicação
 
-  static Future<void> openFile(String uri, String fileName, String chatId) async {
-    
+  static Future<void> openFile(
+      String uri, String fileName, String chatId) async {
     Directory dir = await getApplicationDocumentsDirectory();
 
     String savePath = '${dir.path}/${chatId}_$fileName';
 
     Get.defaultDialog(
-      title: 'Validando...',
-      content: const CircularProgressIndicator(),
-      barrierDismissible: false
-    );
+        title: 'Validando...',
+        content: const CircularProgressIndicator(),
+        barrierDismissible: false);
 
     bool exists = await File(savePath).exists();
 
     Get.back();
 
-    if(exists == true) {
-
+    if (exists == true) {
       final bytes = (await File(savePath).readAsBytes()).lengthInBytes;
       final kb = bytes / 1024;
       final mb = kb / 1024;
-      if(TokenUsuario().isAdmin != true) {
-        if(mb > 16) {
+      if (TokenUsuario().isAdmin != true) {
+        if (mb > 16) {
           Get.rawSnackbar(message: 'O Arquivo deve ter no máximo 16MB!');
           return;
         }
       }
 
-      Share.shareXFiles([
-        XFile(savePath)
-      ]);
+      Share.shareXFiles([XFile(savePath)]);
       return;
     }
 
@@ -397,32 +409,28 @@ class ChatController {
     Dio dio = Dio();
 
     Get.defaultDialog(
-      title: 'Baixando...',
-      content: ClipRRect(
-        borderRadius: BorderRadius.circular(100),
-        child: Obx(() => LinearProgressIndicator(
-          value: progress.value / 100,
-          backgroundColor: Colors.grey.shade300,
-          color: AppTheme.materialColor,
-          minHeight: 8,
-        )),
-      ),
-      barrierDismissible: false
-    );
+        title: 'Baixando...',
+        content: ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: Obx(() => LinearProgressIndicator(
+                value: progress.value / 100,
+                backgroundColor: Colors.grey.shade300,
+                color: AppTheme.materialColor,
+                minHeight: 8,
+              )),
+        ),
+        barrierDismissible: false);
 
     dio.download(
       uri,
       savePath,
       onReceiveProgress: (rcv, total) {
-      
         progress.value = ((rcv / total) * 100);
       },
       deleteOnError: true,
     ).then((_) {
       Get.back();
-      Share.shareXFiles([
-        XFile(savePath)
-      ]);
+      Share.shareXFiles([XFile(savePath)]);
     });
   }
 }

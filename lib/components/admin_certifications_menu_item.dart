@@ -4,7 +4,7 @@ import '../views/certification_approval_panel_view.dart';
 import '../services/certification_approval_service.dart';
 
 /// Item de menu para acesso ao painel de certificações
-/// 
+///
 /// Exibe:
 /// - Ícone de certificação
 /// - Texto "Certificações"
@@ -13,7 +13,7 @@ import '../services/certification_approval_service.dart';
 class AdminCertificationsMenuItem extends StatelessWidget {
   final bool isAdmin;
   final VoidCallback? onTap;
-  
+
   const AdminCertificationsMenuItem({
     Key? key,
     required this.isAdmin,
@@ -31,7 +31,7 @@ class AdminCertificationsMenuItem extends StatelessWidget {
       stream: _getPendingCountStream(),
       builder: (context, snapshot) {
         final pendingCount = snapshot.data ?? 0;
-        
+
         return ListTile(
           leading: Stack(
             children: [
@@ -115,7 +115,7 @@ class AdminCertificationsMenuItem extends StatelessWidget {
 /// Versão compacta para drawer/menu lateral
 class CompactAdminCertificationsMenuItem extends StatelessWidget {
   final bool isAdmin;
-  
+
   const CompactAdminCertificationsMenuItem({
     Key? key,
     required this.isAdmin,
@@ -131,7 +131,7 @@ class CompactAdminCertificationsMenuItem extends StatelessWidget {
       stream: _getPendingCountStream(),
       builder: (context, snapshot) {
         final pendingCount = snapshot.data ?? 0;
-        
+
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           elevation: 2,
@@ -239,7 +239,7 @@ class CompactAdminCertificationsMenuItem extends StatelessWidget {
 /// Badge flutuante para exibir contador de pendentes
 class CertificationPendingBadge extends StatelessWidget {
   final bool isAdmin;
-  
+
   const CertificationPendingBadge({
     Key? key,
     required this.isAdmin,
@@ -255,7 +255,7 @@ class CertificationPendingBadge extends StatelessWidget {
       stream: _getPendingCountStream(),
       builder: (context, snapshot) {
         final pendingCount = snapshot.data ?? 0;
-        
+
         if (pendingCount == 0) {
           return const SizedBox.shrink();
         }
@@ -288,7 +288,7 @@ class CertificationPendingBadge extends StatelessWidget {
 /// Botão de ação flutuante para acesso rápido
 class QuickAccessCertificationButton extends StatelessWidget {
   final bool isAdmin;
-  
+
   const QuickAccessCertificationButton({
     Key? key,
     required this.isAdmin,
@@ -304,7 +304,7 @@ class QuickAccessCertificationButton extends StatelessWidget {
       stream: _getPendingCountStream(),
       builder: (context, snapshot) {
         final pendingCount = snapshot.data ?? 0;
-        
+
         // Só exibe se houver pendentes
         if (pendingCount == 0) {
           return const SizedBox.shrink();

@@ -18,12 +18,13 @@ class ProfilePhotosTaskView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Usar tag única para evitar conflitos e dispose automático
-    final controllerTag = 'photos_task_${profile.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final controllerTag =
+        'photos_task_${profile.id}_${DateTime.now().millisecondsSinceEpoch}';
     final controller = Get.put(
       ProfilePhotosTaskController(profile),
       tag: controllerTag,
     );
-    
+
     // Controller será automaticamente removido pelo GetX quando a tela for fechada
 
     return Scaffold(
@@ -155,7 +156,8 @@ class ProfilePhotosTaskView extends StatelessWidget {
               userId: controller.profile.userId!,
               currentImageUrl: controller.profile.mainPhotoUrl,
               fallbackText: 'Foto Principal',
-              onImageUploaded: (imageUrl) => controller.updateMainPhoto(imageUrl),
+              onImageUploaded: (imageUrl) =>
+                  controller.updateMainPhoto(imageUrl),
               onImageRemoved: () => controller.removeMainPhoto(),
               size: 150,
               imageType: 'main_photo',
@@ -217,7 +219,8 @@ class ProfilePhotosTaskView extends StatelessWidget {
                   userId: controller.profile.userId!,
                   currentImageUrl: controller.profile.secondaryPhoto1Url,
                   fallbackText: 'Foto 2',
-                  onImageUploaded: (imageUrl) => controller.updateSecondaryPhoto1(imageUrl),
+                  onImageUploaded: (imageUrl) =>
+                      controller.updateSecondaryPhoto1(imageUrl),
                   onImageRemoved: () => controller.removeSecondaryPhoto1(),
                   size: 120,
                   imageType: 'secondary_photo_1',
@@ -227,7 +230,8 @@ class ProfilePhotosTaskView extends StatelessWidget {
                   userId: controller.profile.userId!,
                   currentImageUrl: controller.profile.secondaryPhoto2Url,
                   fallbackText: 'Foto 3',
-                  onImageUploaded: (imageUrl) => controller.updateSecondaryPhoto2(imageUrl),
+                  onImageUploaded: (imageUrl) =>
+                      controller.updateSecondaryPhoto2(imageUrl),
                   onImageRemoved: () => controller.removeSecondaryPhoto2(),
                   size: 120,
                   imageType: 'secondary_photo_2',
@@ -240,55 +244,54 @@ class ProfilePhotosTaskView extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildSaveButton(ProfilePhotosTaskController controller) {
     return Obx(() => SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: controller.isSaving.value
-            ? null
-            : () => _savePhotos(controller),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple[700],
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-        ),
-        child: controller.isSaving.value
-            ? const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: controller.isSaving.value
+                ? null
+                : () => _savePhotos(controller),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple[700],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 2,
+            ),
+            child: controller.isSaving.value
+                ? const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('Salvando...'),
+                    ],
+                  )
+                : const Text(
+                    'Salvar Fotos',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Text('Salvando...'),
-                ],
-              )
-            : const Text(
-                'Salvar Fotos',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-      ),
-    ));
+          ),
+        ));
   }
 
   Future<void> _savePhotos(ProfilePhotosTaskController controller) async {
     try {
       // Validate that main photo is present
-      if (controller.mainPhotoData.value == null && 
+      if (controller.mainPhotoData.value == null &&
           (controller.profile.mainPhotoUrl?.isEmpty ?? true)) {
         Get.snackbar(
           'Foto Obrigatória',
@@ -301,13 +304,12 @@ class ProfilePhotosTaskView extends StatelessWidget {
       }
 
       await controller.savePhotos();
-      
+
       // Mark task as completed
       onCompleted('photos');
-      
+
       // Return to previous screen
       Get.back();
-      
     } catch (e) {
       Get.snackbar(
         'Erro',

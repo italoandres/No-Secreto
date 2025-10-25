@@ -29,11 +29,11 @@ class _AppWrapperState extends State<AppWrapper> {
     try {
       // Adicionar delay para evitar travamento na inicialização
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       final prefs = await SharedPreferences.getInstance();
       // Verificar se é primeira vez normalmente
       final isFirstTime = prefs.getBool('first_time') ?? true;
-      
+
       if (mounted) {
         setState(() {
           _isFirstTime = isFirstTime;
@@ -54,7 +54,7 @@ class _AppWrapperState extends State<AppWrapper> {
   @override
   Widget build(BuildContext context) {
     print('AppWrapper: _isLoading=$_isLoading, _isFirstTime=$_isFirstTime');
-    
+
     if (_isLoading) {
       print('AppWrapper: Mostrando loading');
       return const Scaffold(
@@ -86,10 +86,10 @@ class _AppWrapperState extends State<AppWrapper> {
 
     // Fluxo normal do app
     print('AppWrapper: Mostrando fluxo normal do app');
-    return TokenUsuario().idioma.isEmpty 
-        ? const SelectLanguageView() 
-        : (FirebaseAuth.instance.currentUser == null 
-            ? const LoginView() 
+    return TokenUsuario().idioma.isEmpty
+        ? const SelectLanguageView()
+        : (FirebaseAuth.instance.currentUser == null
+            ? const LoginView()
             : const HomeView());
   }
 }

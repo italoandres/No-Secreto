@@ -10,10 +10,11 @@ import '../utils/error_handler.dart';
 /// Controller para a tela de confirmação da vitrine
 class VitrineConfirmationController extends GetxController {
   static const String _tag = 'VITRINE_CONFIRMATION_CONTROLLER';
-  
+
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
-  final Rx<VitrineConfirmationData?> confirmationData = Rx<VitrineConfirmationData?>(null);
+  final Rx<VitrineConfirmationData?> confirmationData =
+      Rx<VitrineConfirmationData?>(null);
   final RxBool canShowVitrine = false.obs;
 
   String? _userId;
@@ -21,15 +22,15 @@ class VitrineConfirmationController extends GetxController {
   /// Inicializa o controller com dados do usuário
   Future<void> initialize(String userId) async {
     if (_userId == userId) return; // Evitar reinicialização
-    
+
     _userId = userId;
-    
+
     // Resetar estado
     isLoading.value = true;
     errorMessage.value = '';
     confirmationData.value = null;
     canShowVitrine.value = false;
-    
+
     // Carregar dados de forma assíncrona
     _loadConfirmationData();
   }
@@ -43,10 +44,8 @@ class VitrineConfirmationController extends GetxController {
         isLoading.value = true;
         errorMessage.value = '';
 
-        EnhancedLogger.info('Loading confirmation data', 
-          tag: _tag,
-          data: {'userId': _userId}
-        );
+        EnhancedLogger.info('Loading confirmation data',
+            tag: _tag, data: {'userId': _userId});
 
         // Verificar se pode mostrar a vitrine
         final canShow = await VitrineNavigationHelper.canShowVitrine(_userId!);
@@ -58,7 +57,7 @@ class VitrineConfirmationController extends GetxController {
 
         // Buscar dados do usuário
         final userData = await UsuarioRepository.getUserById(_userId!);
-        
+
         if (userData == null) {
           throw Exception('User data not found');
         }
@@ -73,15 +72,13 @@ class VitrineConfirmationController extends GetxController {
 
         confirmationData.value = data;
 
-        EnhancedLogger.success('Confirmation data loaded successfully', 
-          tag: _tag,
-          data: {
-            'userId': _userId,
-            'userName': data.userName,
-            'canShowVitrine': canShow,
-          }
-        );
-
+        EnhancedLogger.success('Confirmation data loaded successfully',
+            tag: _tag,
+            data: {
+              'userId': _userId,
+              'userName': data.userName,
+              'canShowVitrine': canShow,
+            });
       },
       context: 'VitrineConfirmationController._loadConfirmationData',
       showUserMessage: false,
@@ -101,29 +98,25 @@ class VitrineConfirmationController extends GetxController {
       () async {
         isLoading.value = true;
 
-        EnhancedLogger.info('Navigating to vitrine from confirmation', 
-          tag: _tag,
-          data: {'userId': _userId}
-        );
+        EnhancedLogger.info('Navigating to vitrine from confirmation',
+            tag: _tag, data: {'userId': _userId});
 
         // Verificar novamente se pode mostrar a vitrine
         final canShow = await VitrineNavigationHelper.canShowVitrine(_userId!);
-        
+
         if (!canShow) {
           throw Exception('Cannot show vitrine - profile validation failed');
         }
 
         // Navegar para a vitrine com flag de celebration
-        await VitrineNavigationHelper.navigateToVitrineDisplay(_userId!, fromCelebration: true);
+        await VitrineNavigationHelper.navigateToVitrineDisplay(_userId!,
+            fromCelebration: true);
 
         // Registrar analytics
         _trackUserAction('view_vitrine');
 
-        EnhancedLogger.success('Successfully navigated to vitrine', 
-          tag: _tag,
-          data: {'userId': _userId}
-        );
-
+        EnhancedLogger.success('Successfully navigated to vitrine',
+            tag: _tag, data: {'userId': _userId});
       },
       context: 'VitrineConfirmationController.navigateToVitrine',
       showUserMessage: true,
@@ -134,10 +127,8 @@ class VitrineConfirmationController extends GetxController {
 
   /// Manipula a opção "Depois"
   void handleSkip() {
-    EnhancedLogger.info('User chose to skip vitrine viewing', 
-      tag: _tag,
-      data: {'userId': _userId}
-    );
+    EnhancedLogger.info('User chose to skip vitrine viewing',
+        tag: _tag, data: {'userId': _userId});
 
     // Registrar analytics
     _trackUserAction('skip_vitrine');
@@ -148,10 +139,8 @@ class VitrineConfirmationController extends GetxController {
 
   /// Navega para o início
   void navigateToHome() {
-    EnhancedLogger.info('User chose to go to home', 
-      tag: _tag,
-      data: {'userId': _userId}
-    );
+    EnhancedLogger.info('User chose to go to home',
+        tag: _tag, data: {'userId': _userId});
 
     // Registrar analytics
     _trackUserAction('go_to_home');
@@ -164,7 +153,8 @@ class VitrineConfirmationController extends GetxController {
       }
     } catch (e) {
       // Se falhar, apenas voltar para a tela anterior
-      EnhancedLogger.warning('Failed to navigate to home, going back instead', 
+      EnhancedLogger.warning(
+        'Failed to navigate to home, going back instead',
         tag: _tag,
         data: {'error': e.toString()},
       );
@@ -190,12 +180,9 @@ class VitrineConfirmationController extends GetxController {
   /// Manipula erros
   void _handleError(String error) {
     errorMessage.value = error;
-    
-    EnhancedLogger.error('Confirmation controller error', 
-      tag: _tag,
-      error: Exception(error),
-      data: {'userId': _userId}
-    );
+
+    EnhancedLogger.error('Confirmation controller error',
+        tag: _tag, error: Exception(error), data: {'userId': _userId});
 
     // Mostrar erro para o usuário
     Get.snackbar(
@@ -216,20 +203,15 @@ class VitrineConfirmationController extends GetxController {
   void _trackUserAction(String action) {
     try {
       // Aqui você pode integrar com seu sistema de analytics
-      EnhancedLogger.info('User action tracked', 
-        tag: _tag,
-        data: {
-          'userId': _userId,
-          'action': action,
-          'timestamp': DateTime.now().toIso8601String(),
-        }
-      );
+      EnhancedLogger.info('User action tracked', tag: _tag, data: {
+        'userId': _userId,
+        'action': action,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       // Silenciar erros de analytics para não afetar a experiência
-      EnhancedLogger.warning('Failed to track user action: $e', 
-        tag: _tag,
-        data: {'error': e.toString()}
-      );
+      EnhancedLogger.warning('Failed to track user action: $e',
+          tag: _tag, data: {'error': e.toString()});
     }
   }
 
@@ -238,35 +220,36 @@ class VitrineConfirmationController extends GetxController {
     if (_userId == null) return false;
 
     return await ErrorHandler.safeExecute<bool>(
-      () async {
-        final isComplete = await ProfileCompletionDetector.isProfileComplete(_userId!);
-        
-        if (!isComplete) {
-          EnhancedLogger.warning('Profile is no longer complete', 
-            tag: _tag,
-            data: {'userId': _userId}
-          );
-          
-          // Mostrar mensagem e redirecionar para completar perfil
-          Get.snackbar(
-            'Perfil Incompleto',
-            'Seu perfil não está mais completo. Complete as tarefas pendentes.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange[100],
-            colorText: Colors.orange[800],
-            duration: const Duration(seconds: 4),
-            mainButton: TextButton(
-              onPressed: () => VitrineNavigationHelper.navigateToProfileCompletion(),
-              child: const Text('Completar'),
-            ),
-          );
-        }
+          () async {
+            final isComplete =
+                await ProfileCompletionDetector.isProfileComplete(_userId!);
 
-        return isComplete;
-      },
-      context: 'VitrineConfirmationController.validateProfileCompletion',
-      fallbackValue: false,
-    ) ?? false;
+            if (!isComplete) {
+              EnhancedLogger.warning('Profile is no longer complete',
+                  tag: _tag, data: {'userId': _userId});
+
+              // Mostrar mensagem e redirecionar para completar perfil
+              Get.snackbar(
+                'Perfil Incompleto',
+                'Seu perfil não está mais completo. Complete as tarefas pendentes.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.orange[100],
+                colorText: Colors.orange[800],
+                duration: const Duration(seconds: 4),
+                mainButton: TextButton(
+                  onPressed: () =>
+                      VitrineNavigationHelper.navigateToProfileCompletion(),
+                  child: const Text('Completar'),
+                ),
+              );
+            }
+
+            return isComplete;
+          },
+          context: 'VitrineConfirmationController.validateProfileCompletion',
+          fallbackValue: false,
+        ) ??
+        false;
   }
 
   /// Mostra informações sobre a vitrine
@@ -319,10 +302,8 @@ class VitrineConfirmationController extends GetxController {
 
   @override
   void onClose() {
-    EnhancedLogger.info('VitrineConfirmationController disposed', 
-      tag: _tag,
-      data: {'userId': _userId}
-    );
+    EnhancedLogger.info('VitrineConfirmationController disposed',
+        tag: _tag, data: {'userId': _userId});
     super.onClose();
   }
 }

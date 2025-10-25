@@ -21,7 +21,8 @@ class UniversityCourseCompleteSelectorComponent extends StatefulWidget {
       _UniversityCourseCompleteSelectorComponentState();
 }
 
-class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCourseCompleteSelectorComponent> {
+class _UniversityCourseCompleteSelectorComponentState
+    extends State<UniversityCourseCompleteSelectorComponent> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   List<String> _filteredCourses = [];
@@ -58,9 +59,12 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
   void _updateFilteredCourses(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredCourses = UniversityCoursesCompleteData.getAllCourses().take(10).toList();
+        _filteredCourses =
+            UniversityCoursesCompleteData.getAllCourses().take(10).toList();
       } else {
-        _filteredCourses = UniversityCoursesCompleteData.searchCourses(query).take(10).toList();
+        _filteredCourses = UniversityCoursesCompleteData.searchCourses(query)
+            .take(10)
+            .toList();
       }
     });
   }
@@ -93,7 +97,8 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _focusNode.hasFocus ? widget.primaryColor : Colors.grey[300]!,
+              color:
+                  _focusNode.hasFocus ? widget.primaryColor : Colors.grey[300]!,
               width: _focusNode.hasFocus ? 2 : 1,
             ),
           ),
@@ -105,7 +110,9 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
               hintStyle: TextStyle(color: Colors.grey[500]),
               prefixIcon: Icon(
                 Icons.school,
-                color: _focusNode.hasFocus ? widget.primaryColor : Colors.grey[400],
+                color: _focusNode.hasFocus
+                    ? widget.primaryColor
+                    : Colors.grey[400],
               ),
               suffixIcon: _selectedCourse != null
                   ? IconButton(
@@ -117,7 +124,8 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
                       color: Colors.grey[400],
                     ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             onChanged: (value) {
               _updateFilteredCourses(value);
@@ -155,13 +163,16 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
               itemBuilder: (context, index) {
                 final course = _filteredCourses[index];
                 final isSelected = course == _selectedCourse;
-                
+
                 return InkWell(
                   onTap: () => _selectCourse(course),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isSelected ? widget.primaryColor.withOpacity(0.1) : null,
+                      color: isSelected
+                          ? widget.primaryColor.withOpacity(0.1)
+                          : null,
                       border: index < _filteredCourses.length - 1
                           ? Border(bottom: BorderSide(color: Colors.grey[200]!))
                           : null,
@@ -171,15 +182,21 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
                         Icon(
                           Icons.school_outlined,
                           size: 18,
-                          color: isSelected ? widget.primaryColor : Colors.grey[600],
+                          color: isSelected
+                              ? widget.primaryColor
+                              : Colors.grey[600],
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             course,
                             style: TextStyle(
-                              color: isSelected ? widget.primaryColor : Colors.black87,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              color: isSelected
+                                  ? widget.primaryColor
+                                  : Colors.black87,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -197,7 +214,9 @@ class _UniversityCourseCompleteSelectorComponentState extends State<UniversityCo
             ),
           ),
         ],
-        if (_controller.text.isNotEmpty && _filteredCourses.isEmpty && _showDropdown)
+        if (_controller.text.isNotEmpty &&
+            _filteredCourses.isEmpty &&
+            _showDropdown)
           Container(
             margin: const EdgeInsets.only(top: 4),
             padding: const EdgeInsets.all(16),

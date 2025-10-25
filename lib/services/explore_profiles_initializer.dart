@@ -9,26 +9,26 @@ class ExploreProfilesInitializer {
   /// Inicializa todo o sistema automaticamente
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       print('🚀 ExploreProfilesInitializer: Iniciando...');
-      
+
       // Aguardar autenticação
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        print('⚠️ ExploreProfilesInitializer: Usuário não autenticado, aguardando...');
+        print(
+            '⚠️ ExploreProfilesInitializer: Usuário não autenticado, aguardando...');
         return;
       }
 
       // 1. Popular dados de teste se necessário
       await AutoDataPopulator.ensureTestDataExists();
-      
+
       // 2. Corrigir perfil do usuário atual
       await AutoProfileFixer.autoFixIfNeeded();
-      
+
       _isInitialized = true;
       print('✅ ExploreProfilesInitializer: Sistema inicializado com sucesso!');
-      
     } catch (e) {
       print('❌ ExploreProfilesInitializer: Erro durante inicialização: $e');
     }

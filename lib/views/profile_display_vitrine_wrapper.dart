@@ -22,12 +22,14 @@ class ProfileDisplayVitrineWrapper extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ProfileDisplayVitrineWrapper> createState() => _ProfileDisplayVitrineWrapperState();
+  State<ProfileDisplayVitrineWrapper> createState() =>
+      _ProfileDisplayVitrineWrapperState();
 }
 
-class _ProfileDisplayVitrineWrapperState extends State<ProfileDisplayVitrineWrapper> {
+class _ProfileDisplayVitrineWrapperState
+    extends State<ProfileDisplayVitrineWrapper> {
   final VitrineDemoController controller = Get.put(VitrineDemoController());
-  
+
   SpiritualProfileModel? profileData;
   bool isLoading = true;
   String? errorMessage;
@@ -35,10 +37,8 @@ class _ProfileDisplayVitrineWrapperState extends State<ProfileDisplayVitrineWrap
   @override
   void initState() {
     super.initState();
-    EnhancedLogger.info('ProfileDisplayVitrineWrapper initState called', 
-      tag: 'PROFILE_DISPLAY_VITRINE',
-      data: {'userId': widget.userId}
-    );
+    EnhancedLogger.info('ProfileDisplayVitrineWrapper initState called',
+        tag: 'PROFILE_DISPLAY_VITRINE', data: {'userId': widget.userId});
     _loadVitrineData();
   }
 
@@ -49,13 +49,12 @@ class _ProfileDisplayVitrineWrapperState extends State<ProfileDisplayVitrineWrap
         errorMessage = null;
       });
 
-      EnhancedLogger.info('Loading vitrine data for user', 
-        tag: 'PROFILE_DISPLAY_VITRINE',
-        data: {'userId': widget.userId}
-      );
+      EnhancedLogger.info('Loading vitrine data for user',
+          tag: 'PROFILE_DISPLAY_VITRINE', data: {'userId': widget.userId});
 
-      final profile = await SpiritualProfileRepository.getProfileByUserId(widget.userId);
-      
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(widget.userId);
+
       if (profile == null) {
         setState(() {
           errorMessage = 'Perfil de vitrine não encontrado';
@@ -69,22 +68,19 @@ class _ProfileDisplayVitrineWrapperState extends State<ProfileDisplayVitrineWrap
         isLoading = false;
       });
 
-      EnhancedLogger.info('Vitrine data loaded successfully', 
-        tag: 'PROFILE_DISPLAY_VITRINE',
-        data: {
-          'userId': widget.userId,
-          'profileId': profile.id,
-          'displayName': profile.displayName,
-        }
-      );
-
+      EnhancedLogger.info('Vitrine data loaded successfully',
+          tag: 'PROFILE_DISPLAY_VITRINE',
+          data: {
+            'userId': widget.userId,
+            'profileId': profile.id,
+            'displayName': profile.displayName,
+          });
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Error loading vitrine data', 
-        tag: 'PROFILE_DISPLAY_VITRINE',
-        data: {'userId': widget.userId, 'error': e.toString()},
-        stackTrace: stackTrace
-      );
-      
+      EnhancedLogger.error('Error loading vitrine data',
+          tag: 'PROFILE_DISPLAY_VITRINE',
+          data: {'userId': widget.userId, 'error': e.toString()},
+          stackTrace: stackTrace);
+
       setState(() {
         errorMessage = 'Erro ao carregar perfil: $e';
         isLoading = false;
@@ -181,47 +177,51 @@ class _ProfileDisplayVitrineWrapperState extends State<ProfileDisplayVitrineWrap
             hasVerification: true,
             username: profileData!.username,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Informações básicas
           BasicInfoSection(
             city: profileData!.city,
-            fullLocation: '${profileData!.city ?? ''} - ${profileData!.state ?? ''}'.trim(),
+            fullLocation:
+                '${profileData!.city ?? ''} - ${profileData!.state ?? ''}'
+                    .trim(),
             age: profileData!.age,
             isDeusEPaiMember: true, // Assumir que perfis de vitrine são membros
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Informações espirituais
           SpiritualInfoSection(
             purpose: profileData!.purpose ?? profileData!.aboutMe,
             faithPhrase: profileData!.faithPhrase,
-            readyForPurposefulRelationship: profileData!.readyForPurposefulRelationship,
+            readyForPurposefulRelationship:
+                profileData!.readyForPurposefulRelationship,
             nonNegotiableValue: profileData!.nonNegotiableValue,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Status de relacionamento
           RelationshipStatusSection(
             relationshipStatus: profileData!.relationshipStatus,
             hasChildren: profileData!.hasChildren,
-            childrenDetails: profileData!.hasChildren == true ? 'Tem filhos' : null,
+            childrenDetails:
+                profileData!.hasChildren == true ? 'Tem filhos' : null,
             isVirgin: null, // Não expor informação sensível
             wasPreviouslyMarried: null, // Não expor informação sensível
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Botão de interesse (apenas se não for o próprio perfil)
           InterestButtonComponent(
             targetUserId: widget.userId,
             targetUserName: 'Usuário', // Será obtido dinamicamente
             targetUserEmail: 'usuario@exemplo.com', // Será obtido dinamicamente
           ),
-          
+
           const SizedBox(height: 24),
         ],
       ),

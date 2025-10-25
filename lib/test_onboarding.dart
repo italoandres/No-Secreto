@@ -10,9 +10,10 @@ class TestOnboardingView extends StatelessWidget {
       appBar: AppBar(title: const Text('Teste Onboarding Assets')),
       body: Column(
         children: [
-          const Text('Testando GIFs do Onboarding:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Testando GIFs do Onboarding:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
-          
+
           // Teste slide1.gif
           Expanded(
             child: Container(
@@ -45,7 +46,7 @@ class TestOnboardingView extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Teste slide2.gif
           Expanded(
             child: Container(
@@ -78,7 +79,7 @@ class TestOnboardingView extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Botão para testar se assets existem
           ElevatedButton(
             onPressed: () async {
@@ -88,7 +89,7 @@ class TestOnboardingView extends StatelessWidget {
               } catch (e) {
                 print('❌ slide1.gif NÃO encontrado: $e');
               }
-              
+
               try {
                 await rootBundle.load('lib/assets/onboarding/slide2.gif');
                 print('✅ slide2.gif encontrado');

@@ -30,10 +30,8 @@ class NotificationDisplayWidget extends StatelessWidget {
         return _buildNotificationContent(controller);
       });
     } catch (e) {
-      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro no build', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        error: e
-      );
+      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro no build',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET', error: e);
       return _buildErrorWidget('Erro ao carregar notificações');
     }
   }
@@ -45,14 +43,13 @@ class NotificationDisplayWidget extends StatelessWidget {
       final loading = isLoading ?? controller.isLoadingNotifications.value;
       final errorMessage = error ?? controller.notificationError.value;
 
-      EnhancedLogger.info('🔄 [NOTIFICATION_WIDGET] Construindo UI', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        data: {
-          'notificationsCount': notificationsList.length,
-          'isLoading': loading,
-          'hasError': errorMessage.isNotEmpty,
-        }
-      );
+      EnhancedLogger.info('🔄 [NOTIFICATION_WIDGET] Construindo UI',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET',
+          data: {
+            'notificationsCount': notificationsList.length,
+            'isLoading': loading,
+            'hasError': errorMessage.isNotEmpty,
+          });
 
       // Estado de carregamento
       if (loading) {
@@ -72,10 +69,8 @@ class NotificationDisplayWidget extends StatelessWidget {
       // Estado com notificações
       return _buildNotificationsList(notificationsList);
     } catch (e) {
-      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir conteúdo', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        error: e
-      );
+      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir conteúdo',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET', error: e);
       return _buildErrorWidget('Erro interno');
     }
   }
@@ -159,17 +154,18 @@ class NotificationDisplayWidget extends StatelessWidget {
 
   Widget _buildNotificationsList(List<RealNotification> notificationsList) {
     try {
-      EnhancedLogger.success('✅ [NOTIFICATION_WIDGET] Renderizando lista de notificações', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        data: {'count': notificationsList.length}
-      );
+      EnhancedLogger.success(
+          '✅ [NOTIFICATION_WIDGET] Renderizando lista de notificações',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET',
+          data: {'count': notificationsList.length});
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header da seção
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
                 const Icon(
@@ -196,18 +192,16 @@ class NotificationDisplayWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Lista de notificações
-          ...notificationsList.map((notification) => 
-            _buildNotificationItem(notification)
-          ).toList(),
+          ...notificationsList
+              .map((notification) => _buildNotificationItem(notification))
+              .toList(),
         ],
       );
     } catch (e) {
-      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir lista', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        error: e
-      );
+      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir lista',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET', error: e);
       return _buildErrorWidget('Erro ao exibir notificações');
     }
   }
@@ -293,32 +287,30 @@ class NotificationDisplayWidget extends StatelessWidget {
           ),
           onTap: () {
             try {
-              EnhancedLogger.info('👆 [NOTIFICATION_WIDGET] Notificação tocada', 
-                tag: 'NOTIFICATION_DISPLAY_WIDGET',
-                data: {
-                  'notificationId': notification.id,
-                  'fromUser': notification.fromUserName,
-                }
-              );
-              
+              EnhancedLogger.info('👆 [NOTIFICATION_WIDGET] Notificação tocada',
+                  tag: 'NOTIFICATION_DISPLAY_WIDGET',
+                  data: {
+                    'notificationId': notification.id,
+                    'fromUser': notification.fromUserName,
+                  });
+
               if (onNotificationTap != null) {
                 onNotificationTap!(notification);
               }
             } catch (e) {
-              EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao tocar notificação', 
-                tag: 'NOTIFICATION_DISPLAY_WIDGET',
-                error: e
-              );
+              EnhancedLogger.error(
+                  '❌ [NOTIFICATION_WIDGET] Erro ao tocar notificação',
+                  tag: 'NOTIFICATION_DISPLAY_WIDGET',
+                  error: e);
             }
           },
         ),
       );
     } catch (e) {
-      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir item', 
-        tag: 'NOTIFICATION_DISPLAY_WIDGET',
-        error: e,
-        data: {'notificationId': notification.id}
-      );
+      EnhancedLogger.error('❌ [NOTIFICATION_WIDGET] Erro ao construir item',
+          tag: 'NOTIFICATION_DISPLAY_WIDGET',
+          error: e,
+          data: {'notificationId': notification.id});
       return Container(
         padding: const EdgeInsets.all(8.0),
         child: const Text(
@@ -374,9 +366,8 @@ class SimpleNotificationDisplayWidget extends StatelessWidget {
         onRefresh: () => controller.refreshRealInterestNotifications(),
         onNotificationTap: (notification) {
           // Implementar navegação para perfil
-          EnhancedLogger.info('Navegando para perfil do usuário', 
-            data: {'userId': notification.fromUserId}
-          );
+          EnhancedLogger.info('Navegando para perfil do usuário',
+              data: {'userId': notification.fromUserId});
         },
       );
     });

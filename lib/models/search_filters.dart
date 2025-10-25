@@ -68,12 +68,12 @@ class SearchFilters {
   /// Verifica se tem filtros ativos
   bool get hasActiveFilters {
     return minAge != null ||
-           maxAge != null ||
-           (city != null && city!.isNotEmpty) ||
-           (state != null && state!.isNotEmpty) ||
-           (interests != null && interests!.isNotEmpty) ||
-           isVerified != null ||
-           hasCompletedCourse != null;
+        maxAge != null ||
+        (city != null && city!.isNotEmpty) ||
+        (state != null && state!.isNotEmpty) ||
+        (interests != null && interests!.isNotEmpty) ||
+        isVerified != null ||
+        hasCompletedCourse != null;
   }
 
   /// Valida se os filtros são válidos
@@ -82,26 +82,26 @@ class SearchFilters {
     if (minAge != null && maxAge != null && minAge! > maxAge!) {
       return false;
     }
-    
+
     // Idades devem ser positivas
     if (minAge != null && minAge! < 0) return false;
     if (maxAge != null && maxAge! < 0) return false;
-    
+
     return true;
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is SearchFilters &&
-           other.minAge == minAge &&
-           other.maxAge == maxAge &&
-           other.city == city &&
-           other.state == state &&
-           _listEquals(other.interests, interests) &&
-           other.isVerified == isVerified &&
-           other.hasCompletedCourse == hasCompletedCourse;
+        other.minAge == minAge &&
+        other.maxAge == maxAge &&
+        other.city == city &&
+        other.state == state &&
+        _listEquals(other.interests, interests) &&
+        other.isVerified == isVerified &&
+        other.hasCompletedCourse == hasCompletedCourse;
   }
 
   @override
@@ -120,8 +120,8 @@ class SearchFilters {
   @override
   String toString() {
     return 'SearchFilters(minAge: $minAge, maxAge: $maxAge, city: $city, '
-           'state: $state, interests: $interests, isVerified: $isVerified, '
-           'hasCompletedCourse: $hasCompletedCourse)';
+        'state: $state, interests: $interests, isVerified: $isVerified, '
+        'hasCompletedCourse: $hasCompletedCourse)';
   }
 }
 

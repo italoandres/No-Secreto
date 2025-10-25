@@ -10,7 +10,7 @@ class PreferencesResult {
   final PreferencesError? errorType;
   final Duration? operationDuration;
   final String? strategyUsed;
-  
+
   const PreferencesResult({
     required this.success,
     this.errorMessage,
@@ -20,7 +20,7 @@ class PreferencesResult {
     this.operationDuration,
     this.strategyUsed,
   });
-  
+
   /// Cria resultado de sucesso
   factory PreferencesResult.success({
     required PreferencesData data,
@@ -36,7 +36,7 @@ class PreferencesResult {
       strategyUsed: strategyUsed,
     );
   }
-  
+
   /// Cria resultado de erro
   factory PreferencesResult.error({
     required String errorMessage,
@@ -54,7 +54,7 @@ class PreferencesResult {
       strategyUsed: strategyUsed,
     );
   }
-  
+
   /// Cria resultado de erro de validação
   factory PreferencesResult.validationError(String message) {
     return PreferencesResult.error(
@@ -62,7 +62,7 @@ class PreferencesResult {
       errorType: PreferencesError.validationError,
     );
   }
-  
+
   /// Cria resultado de erro de sanitização
   factory PreferencesResult.sanitizationError(String message) {
     return PreferencesResult.error(
@@ -70,7 +70,7 @@ class PreferencesResult {
       errorType: PreferencesError.sanitizationError,
     );
   }
-  
+
   /// Cria resultado de erro de persistência
   factory PreferencesResult.persistenceError(String message) {
     return PreferencesResult.error(
@@ -78,7 +78,7 @@ class PreferencesResult {
       errorType: PreferencesError.persistenceError,
     );
   }
-  
+
   /// Cria resultado de erro de rede
   factory PreferencesResult.networkError(String message) {
     return PreferencesResult.error(
@@ -86,7 +86,7 @@ class PreferencesResult {
       errorType: PreferencesError.networkError,
     );
   }
-  
+
   /// Cria resultado de erro desconhecido
   factory PreferencesResult.unknownError(String message) {
     return PreferencesResult.error(
@@ -94,14 +94,14 @@ class PreferencesResult {
       errorType: PreferencesError.unknownError,
     );
   }
-  
+
   /// Verifica se houve correções aplicadas
   bool get hadCorrections => appliedCorrections.isNotEmpty;
-  
+
   /// Verifica se é um erro recuperável
   bool get isRecoverable {
     if (success) return false;
-    
+
     switch (errorType) {
       case PreferencesError.networkError:
       case PreferencesError.persistenceError:
@@ -113,13 +113,13 @@ class PreferencesResult {
         return false;
     }
   }
-  
+
   /// Obtém mensagem amigável para o usuário
   String get userFriendlyMessage {
     if (success) {
       return 'Preferências salvas com sucesso!';
     }
-    
+
     switch (errorType) {
       case PreferencesError.networkError:
         return 'Problema de conexão. Tente novamente.';
@@ -134,7 +134,7 @@ class PreferencesResult {
         return 'Erro inesperado. Nossa equipe foi notificada.';
     }
   }
-  
+
   /// Converte para Map para logs
   Map<String, dynamic> toLogData() {
     return {
@@ -148,33 +148,33 @@ class PreferencesResult {
       'strategyUsed': strategyUsed,
     };
   }
-  
+
   @override
   String toString() {
     if (success) {
       return 'PreferencesResult.success('
-             'data: $data, '
-             'corrections: ${appliedCorrections.length}, '
-             'duration: ${operationDuration?.inMilliseconds}ms, '
-             'strategy: $strategyUsed'
-             ')';
+          'data: $data, '
+          'corrections: ${appliedCorrections.length}, '
+          'duration: ${operationDuration?.inMilliseconds}ms, '
+          'strategy: $strategyUsed'
+          ')';
     } else {
       return 'PreferencesResult.error('
-             'type: $errorType, '
-             'message: $errorMessage, '
-             'corrections: ${appliedCorrections.length}'
-             ')';
+          'type: $errorType, '
+          'message: $errorMessage, '
+          'corrections: ${appliedCorrections.length}'
+          ')';
     }
   }
 }
 
 /// Tipos de erro para preferências
 enum PreferencesError {
-  validationError,    // Dados de entrada inválidos
-  sanitizationError,  // Falha na correção de dados
-  persistenceError,   // Falha na persistência
-  networkError,       // Problemas de conectividade
-  unknownError,       // Erros não categorizados
+  validationError, // Dados de entrada inválidos
+  sanitizationError, // Falha na correção de dados
+  persistenceError, // Falha na persistência
+  networkError, // Problemas de conectividade
+  unknownError, // Erros não categorizados
 }
 
 /// Extensão para PreferencesError
@@ -194,7 +194,7 @@ extension PreferencesErrorExtension on PreferencesError {
         return 'Erro não categorizado';
     }
   }
-  
+
   /// Verifica se é erro crítico
   bool get isCritical {
     switch (this) {

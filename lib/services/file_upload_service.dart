@@ -47,11 +47,11 @@ class FileUploadService {
   ];
 
   /// Upload de comprovante de certificação
-  /// 
+  ///
   /// [userId] - ID do usuário
   /// [file] - Arquivo a ser enviado
   /// [onProgress] - Callback de progresso (0.0 a 1.0)
-  /// 
+  ///
   /// Retorna [FileUploadResult] com URL de download e metadados
   Future<FileUploadResult> uploadCertificationProof({
     required String userId,
@@ -133,7 +133,7 @@ class FileUploadService {
   }
 
   /// Deletar comprovante
-  /// 
+  ///
   /// [proofUrl] - URL do comprovante a ser deletado
   Future<void> deleteProof(String proofUrl) async {
     try {
@@ -164,7 +164,7 @@ class FileUploadService {
   }
 
   /// Validar arquivo antes do upload
-  /// 
+  ///
   /// Lança [FileUploadException] se o arquivo for inválido
   bool validateFile(File file) {
     // Verificar se arquivo existe

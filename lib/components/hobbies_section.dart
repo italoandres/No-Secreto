@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Seção que exibe hobbies e interesses do perfil
-/// 
+///
 /// Exibe lista de hobbies em formato de chips/tags
 class HobbiesSection extends StatelessWidget {
   final List<String>? hobbies;
@@ -53,7 +53,8 @@ class HobbiesSection extends StatelessWidget {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: hobbies!.map((hobby) => _buildHobbyChip(hobby)).toList(),
+              children:
+                  hobbies!.map((hobby) => _buildHobbyChip(hobby)).toList(),
             ),
           ),
         ],
@@ -95,64 +96,74 @@ class HobbiesSection extends StatelessWidget {
   /// Retorna um ícone apropriado para o hobby
   IconData _getHobbyIcon(String hobby) {
     final hobbyLower = hobby.toLowerCase();
-    
+
     // Música
-    if (hobbyLower.contains('música') || hobbyLower.contains('musica') || 
-        hobbyLower.contains('cantar') || hobbyLower.contains('tocar')) {
+    if (hobbyLower.contains('música') ||
+        hobbyLower.contains('musica') ||
+        hobbyLower.contains('cantar') ||
+        hobbyLower.contains('tocar')) {
       return Icons.music_note;
     }
-    
+
     // Leitura
-    if (hobbyLower.contains('ler') || hobbyLower.contains('leitura') || 
+    if (hobbyLower.contains('ler') ||
+        hobbyLower.contains('leitura') ||
         hobbyLower.contains('livro')) {
       return Icons.menu_book;
     }
-    
+
     // Esportes
-    if (hobbyLower.contains('esporte') || hobbyLower.contains('futebol') || 
-        hobbyLower.contains('corrida') || hobbyLower.contains('academia')) {
+    if (hobbyLower.contains('esporte') ||
+        hobbyLower.contains('futebol') ||
+        hobbyLower.contains('corrida') ||
+        hobbyLower.contains('academia')) {
       return Icons.sports_soccer;
     }
-    
+
     // Arte
-    if (hobbyLower.contains('arte') || hobbyLower.contains('pintura') || 
+    if (hobbyLower.contains('arte') ||
+        hobbyLower.contains('pintura') ||
         hobbyLower.contains('desenho')) {
       return Icons.palette;
     }
-    
+
     // Culinária
-    if (hobbyLower.contains('cozinhar') || hobbyLower.contains('culinária') || 
+    if (hobbyLower.contains('cozinhar') ||
+        hobbyLower.contains('culinária') ||
         hobbyLower.contains('culinaria')) {
       return Icons.restaurant;
     }
-    
+
     // Viagem
     if (hobbyLower.contains('viajar') || hobbyLower.contains('viagem')) {
       return Icons.flight;
     }
-    
+
     // Cinema/Filmes
-    if (hobbyLower.contains('filme') || hobbyLower.contains('cinema') || 
-        hobbyLower.contains('série') || hobbyLower.contains('serie')) {
+    if (hobbyLower.contains('filme') ||
+        hobbyLower.contains('cinema') ||
+        hobbyLower.contains('série') ||
+        hobbyLower.contains('serie')) {
       return Icons.movie;
     }
-    
+
     // Fotografia
     if (hobbyLower.contains('foto') || hobbyLower.contains('fotografia')) {
       return Icons.camera_alt;
     }
-    
+
     // Jogos
     if (hobbyLower.contains('jogo') || hobbyLower.contains('game')) {
       return Icons.sports_esports;
     }
-    
+
     // Natureza
-    if (hobbyLower.contains('natureza') || hobbyLower.contains('trilha') || 
+    if (hobbyLower.contains('natureza') ||
+        hobbyLower.contains('trilha') ||
         hobbyLower.contains('camping')) {
       return Icons.nature;
     }
-    
+
     // Padrão
     return Icons.star;
   }

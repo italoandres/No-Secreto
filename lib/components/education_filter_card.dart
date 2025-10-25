@@ -123,14 +123,15 @@ class EducationFilterCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: _educationLevels.map((level) {
-                final isSelected = selectedEducation == level || 
-                    (selectedEducation == null && level == 'Não tenho preferência');
-                
+                final isSelected = selectedEducation == level ||
+                    (selectedEducation == null &&
+                        level == 'Não tenho preferência');
+
                 return FilterChip(
                   label: Text(
                     level,
@@ -153,7 +154,9 @@ class EducationFilterCard extends StatelessWidget {
                   selectedColor: Colors.purple.shade600,
                   checkmarkColor: Colors.white,
                   side: BorderSide(
-                    color: isSelected ? Colors.purple.shade600 : Colors.grey.shade300,
+                    color: isSelected
+                        ? Colors.purple.shade600
+                        : Colors.grey.shade300,
                   ),
                 );
               }).toList(),

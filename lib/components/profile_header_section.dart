@@ -63,12 +63,14 @@ class ProfileHeaderSection extends StatelessWidget {
                             ? Image.network(
                                 photoUrl!,
                                 fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
                                   return _buildLoadingAvatar();
                                 },
                                 errorBuilder: (context, error, stackTrace) {
-                                  debugPrint('❌ Error loading profile image (Web): $error');
+                                  debugPrint(
+                                      '❌ Error loading profile image (Web): $error');
                                   debugPrint('📸 Image URL: $photoUrl');
                                   return _buildAvatarFallback();
                                 },
@@ -77,9 +79,11 @@ class ProfileHeaderSection extends StatelessWidget {
                             : CachedNetworkImage(
                                 imageUrl: photoUrl!,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => _buildLoadingAvatar(),
+                                placeholder: (context, url) =>
+                                    _buildLoadingAvatar(),
                                 errorWidget: (context, url, error) {
-                                  debugPrint('❌ Error loading profile image (Mobile): $error');
+                                  debugPrint(
+                                      '❌ Error loading profile image (Mobile): $error');
                                   debugPrint('📸 Image URL: $photoUrl');
                                   return _buildAvatarFallback();
                                 },
@@ -88,7 +92,7 @@ class ProfileHeaderSection extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Verification Badge
               if (hasVerification)
                 Positioned(
@@ -121,9 +125,9 @@ class ProfileHeaderSection extends StatelessWidget {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Display Name
           Text(
             displayName,
@@ -134,7 +138,7 @@ class ProfileHeaderSection extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           // Username
           if (username?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
@@ -156,7 +160,7 @@ class ProfileHeaderSection extends StatelessWidget {
   Widget _buildAvatarFallback() {
     // Create initials from display name
     String initials = _getInitials(displayName);
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
@@ -189,23 +193,23 @@ class ProfileHeaderSection extends StatelessWidget {
 
   String _getInitials(String name) {
     if (name.isEmpty) return '?';
-    
+
     List<String> nameParts = name.trim().split(' ');
     if (nameParts.length == 1) {
       return nameParts[0].substring(0, 1).toUpperCase();
     }
-    
+
     String firstInitial = nameParts.first.substring(0, 1).toUpperCase();
     String lastInitial = nameParts.last.substring(0, 1).toUpperCase();
-    
+
     return '$firstInitial$lastInitial';
   }
-  
+
   /// Abre o visualizador de foto em tela cheia
   void _openPhotoViewer(BuildContext context, String photoUrl) {
     print('📸 Opening main photo viewer');
     print('📸 Photo URL: $photoUrl');
-    
+
     try {
       Get.to(
         () => PhotoViewerScreen(

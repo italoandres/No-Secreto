@@ -144,8 +144,7 @@ class SinaisFiltersConfigView extends StatelessWidget {
                   Obx(() => LanguagesFilterCard(
                         selectedLanguages:
                             controller.selectedLanguages.toList(),
-                        onLanguagesChanged:
-                            controller.updateSelectedLanguages,
+                        onLanguagesChanged: controller.updateSelectedLanguages,
                       )),
                   const SizedBox(height: 16),
                   Obx(() => LanguagesPreferenceToggleCard(
@@ -157,8 +156,7 @@ class SinaisFiltersConfigView extends StatelessWidget {
                   // Educação
                   Obx(() => EducationFilterCard(
                         selectedEducation: controller.selectedEducation.value,
-                        onEducationChanged:
-                            controller.updateSelectedEducation,
+                        onEducationChanged: controller.updateSelectedEducation,
                       )),
                   const SizedBox(height: 16),
                   Obx(() => EducationPreferenceToggleCard(
@@ -233,10 +231,8 @@ class SinaisFiltersConfigView extends StatelessWidget {
 
                   // Virgindade
                   Obx(() => VirginityFilterCard(
-                        selectedVirginity:
-                            controller.selectedVirginity.value,
-                        onVirginityChanged:
-                            controller.updateSelectedVirginity,
+                        selectedVirginity: controller.selectedVirginity.value,
+                        onVirginityChanged: controller.updateSelectedVirginity,
                       )),
                   const SizedBox(height: 16),
                   Obx(() => VirginityPreferenceToggleCard(

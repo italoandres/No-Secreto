@@ -247,13 +247,17 @@ class NotificationFeedback extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: hasNewNotifications ? Colors.blue[100] : Colors.grey[100],
+                color:
+                    hasNewNotifications ? Colors.blue[100] : Colors.grey[100],
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                hasNewNotifications ? Icons.notifications_active : Icons.notifications,
+                hasNewNotifications
+                    ? Icons.notifications_active
+                    : Icons.notifications,
                 size: 20,
-                color: hasNewNotifications ? Colors.blue[700] : Colors.grey[600],
+                color:
+                    hasNewNotifications ? Colors.blue[700] : Colors.grey[600],
               ),
             ),
             const SizedBox(width: 12),
@@ -266,7 +270,9 @@ class NotificationFeedback extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: hasNewNotifications ? Colors.blue[800] : Colors.grey[700],
+                      color: hasNewNotifications
+                          ? Colors.blue[800]
+                          : Colors.grey[700],
                     ),
                   ),
                   if (hasNewNotifications) ...[

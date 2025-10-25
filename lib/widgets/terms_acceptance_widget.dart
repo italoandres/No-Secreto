@@ -40,119 +40,123 @@ class TermsAcceptanceWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Checkbox Termos e Condições
           Obx(() => InkWell(
-            onTap: () => termsAccepted.value = !termsAccepted.value,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Checkbox(
-                      value: termsAccepted.value,
-                      onChanged: (value) => termsAccepted.value = value ?? false,
-                      activeColor: Colors.green[600],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                          height: 1.4,
+                onTap: () => termsAccepted.value = !termsAccepted.value,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Checkbox(
+                          value: termsAccepted.value,
+                          onChanged: (value) =>
+                              termsAccepted.value = value ?? false,
+                          activeColor: Colors.green[600],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
-                        children: [
-                          const TextSpan(text: 'Eu li e aceito os '),
-                          WidgetSpan(
-                            child: GestureDetector(
-                              onTap: () => Get.to(() => const TermsConditionsView()),
-                              child: Text(
-                                'Termos e Condições',
-                                style: TextStyle(
-                                  color: Colors.blue[600],
-                                  fontWeight: FontWeight.w500,
-                                  decoration: TextDecoration.underline,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                              height: 1.4,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Eu li e aceito os '),
+                              WidgetSpan(
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      Get.to(() => const TermsConditionsView()),
+                                  child: Text(
+                                    'Termos e Condições',
+                                    style: TextStyle(
+                                      color: Colors.blue[600],
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const TextSpan(text: ' do aplicativo.'),
+                            ],
                           ),
-                          const TextSpan(text: ' do aplicativo.'),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          )),
-          
+                ),
+              )),
+
           const SizedBox(height: 8),
-          
+
           // Checkbox Política de Privacidade
           Obx(() => InkWell(
-            onTap: () => privacyAccepted.value = !privacyAccepted.value,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Checkbox(
-                      value: privacyAccepted.value,
-                      onChanged: (value) => privacyAccepted.value = value ?? false,
-                      activeColor: Colors.green[600],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                          height: 1.4,
+                onTap: () => privacyAccepted.value = !privacyAccepted.value,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Checkbox(
+                          value: privacyAccepted.value,
+                          onChanged: (value) =>
+                              privacyAccepted.value = value ?? false,
+                          activeColor: Colors.green[600],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
-                        children: [
-                          const TextSpan(text: 'Eu li e aceito a '),
-                          WidgetSpan(
-                            child: GestureDetector(
-                              onTap: () => Get.to(() => const PrivacyPolicyView()),
-                              child: Text(
-                                'Política de Privacidade',
-                                style: TextStyle(
-                                  color: Colors.blue[600],
-                                  fontWeight: FontWeight.w500,
-                                  decoration: TextDecoration.underline,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                              height: 1.4,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Eu li e aceito a '),
+                              WidgetSpan(
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      Get.to(() => const PrivacyPolicyView()),
+                                  child: Text(
+                                    'Política de Privacidade',
+                                    style: TextStyle(
+                                      color: Colors.blue[600],
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const TextSpan(text: ' do aplicativo.'),
+                            ],
                           ),
-                          const TextSpan(text: ' do aplicativo.'),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          )),
-          
+                ),
+              )),
+
           const SizedBox(height: 12),
-          
+
           // Status de validação
           Obx(() {
             bool allAccepted = termsAccepted.value && privacyAccepted.value;
@@ -175,12 +179,14 @@ class TermsAcceptanceWidget extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      allAccepted 
-                        ? 'Termos aceitos! Você pode prosseguir com o cadastro.'
-                        : 'É necessário aceitar ambos os termos para continuar.',
+                      allAccepted
+                          ? 'Termos aceitos! Você pode prosseguir com o cadastro.'
+                          : 'É necessário aceitar ambos os termos para continuar.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: allAccepted ? Colors.green[700] : Colors.orange[700],
+                        color: allAccepted
+                            ? Colors.green[700]
+                            : Colors.orange[700],
                         fontWeight: FontWeight.w500,
                       ),
                     ),

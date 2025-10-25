@@ -13,7 +13,8 @@ class PurposeInvitesComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<PurposeInviteModel>>(
-      stream: PurposePartnershipRepository.getUserInvites(FirebaseAuth.instance.currentUser!.uid),
+      stream: PurposePartnershipRepository.getUserInvites(
+          FirebaseAuth.instance.currentUser!.uid),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox();
@@ -69,7 +70,8 @@ class PurposeInvitesComponent extends StatelessWidget {
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -118,7 +120,7 @@ class PurposeInvitesComponent extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: invite.isPartnership 
+                  color: invite.isPartnership
                       ? const Color(0xFF39b9ff).withOpacity(0.1)
                       : const Color(0xFFfc6aeb).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -126,7 +128,7 @@ class PurposeInvitesComponent extends StatelessWidget {
                 child: Text(
                   invite.isPartnership ? 'Parceria' : 'Menção',
                   style: TextStyle(
-                    color: invite.isPartnership 
+                    color: invite.isPartnership
                         ? const Color(0xFF39b9ff)
                         : const Color(0xFFfc6aeb),
                     fontSize: 12,
@@ -207,7 +209,8 @@ class PurposeInvitesComponent extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    invite.message ?? 'Quer conversar com Deus juntos no Propósito?',
+                    invite.message ??
+                        'Quer conversar com Deus juntos no Propósito?',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -248,7 +251,7 @@ class PurposeInvitesComponent extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => _respondToInvite(invite, true, false),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: invite.isPartnership 
+                    backgroundColor: invite.isPartnership
                         ? const Color(0xFF39b9ff)
                         : const Color(0xFFfc6aeb),
                   ),
@@ -265,7 +268,8 @@ class PurposeInvitesComponent extends StatelessWidget {
     );
   }
 
-  void _respondToInvite(PurposeInviteModel invite, bool accepted, bool blocked) async {
+  void _respondToInvite(
+      PurposeInviteModel invite, bool accepted, bool blocked) async {
     try {
       // Mostrar loading
       Get.dialog(
@@ -279,11 +283,12 @@ class PurposeInvitesComponent extends StatelessWidget {
 
       // Responder ao convite
       final action = blocked ? 'blocked' : (accepted ? 'accepted' : 'rejected');
-      await PurposePartnershipRepository.respondToInviteWithAction(invite.id!, action);
-      
+      await PurposePartnershipRepository.respondToInviteWithAction(
+          invite.id!, action);
+
       // Fechar loading
       Get.back();
-      
+
       // Mostrar feedback
       if (blocked) {
         Get.snackbar(
@@ -297,7 +302,7 @@ class PurposeInvitesComponent extends StatelessWidget {
       } else if (accepted) {
         Get.snackbar(
           invite.isPartnership ? 'Parceria Aceita! 💕' : 'Convite Aceito! 🎉',
-          invite.isPartnership 
+          invite.isPartnership
               ? 'Agora vocês podem conversar com Deus juntos!'
               : 'Você foi adicionado(a) à conversa!',
           backgroundColor: const Color(0xFF39b9ff),
@@ -315,13 +320,12 @@ class PurposeInvitesComponent extends StatelessWidget {
           duration: const Duration(seconds: 2),
         );
       }
-      
     } catch (e) {
       // Fechar loading se ainda estiver aberto
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      
+
       // Mostrar erro
       Get.snackbar(
         'Erro',
@@ -336,11 +340,11 @@ class PurposeInvitesComponent extends StatelessWidget {
 
   String _formatDate(Timestamp? timestamp) {
     if (timestamp == null) return '';
-    
+
     final date = timestamp.toDate();
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora';
     } else if (difference.inHours < 1) {

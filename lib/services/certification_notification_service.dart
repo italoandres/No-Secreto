@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Serviço de notificações para certificação espiritual
-/// 
+///
 /// Este serviço gerencia as notificações de certificação criadas pela Cloud Function.
 /// Ele NÃO cria notificações (isso é feito pela Cloud Function onCertificationStatusChange),
 /// mas sim lê, exibe e gerencia a navegação quando o usuário toca nas notificações.
@@ -11,10 +11,11 @@ class CertificationNotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Obter stream de notificações de certificação do usuário
-  /// 
+  ///
   /// Retorna um stream com todas as notificações de certificação (aprovadas e reprovadas)
   /// ordenadas por data de criação (mais recentes primeiro).
-  Stream<List<Map<String, dynamic>>> getCertificationNotifications(String userId) {
+  Stream<List<Map<String, dynamic>>> getCertificationNotifications(
+      String userId) {
     return _firestore
         .collection('notifications')
         .where('userId', isEqualTo: userId)
@@ -35,7 +36,7 @@ class CertificationNotificationService {
   }
 
   /// Obter todas as notificações do usuário (não apenas certificação)
-  /// 
+  ///
   /// Útil para exibir em uma lista geral de notificações
   Stream<List<Map<String, dynamic>>> getAllNotifications(String userId) {
     return _firestore
@@ -45,12 +46,12 @@ class CertificationNotificationService {
         .limit(100)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return data;
-          }).toList();
-        });
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    });
   }
 
   /// Obter contagem de notificações não lidas de certificação
@@ -80,14 +81,11 @@ class CertificationNotificationService {
   /// Marcar notificação como lida
   Future<void> markAsRead(String notificationId) async {
     try {
-      await _firestore
-          .collection('notifications')
-          .doc(notificationId)
-          .update({
-            'read': true,
-            'readAt': FieldValue.serverTimestamp(),
-          });
-      
+      await _firestore.collection('notifications').doc(notificationId).update({
+        'read': true,
+        'readAt': FieldValue.serverTimestamp(),
+      });
+
       print('✅ Notificação $notificationId marcada como lida');
     } catch (e) {
       print('❌ Erro ao marcar notificação como lida: $e');
@@ -99,20 +97,20 @@ class CertificationNotificationService {
   Future<void> markAllAsRead(String userId) async {
     try {
       final batch = _firestore.batch();
-      
+
       final unreadNotifications = await _firestore
           .collection('notifications')
           .where('userId', isEqualTo: userId)
           .where('read', isEqualTo: false)
           .get();
-      
+
       for (var doc in unreadNotifications.docs) {
         batch.update(doc.reference, {
           'read': true,
           'readAt': FieldValue.serverTimestamp(),
         });
       }
-      
+
       await batch.commit();
       print('✅ Todas as notificações marcadas como lidas');
     } catch (e) {
@@ -124,11 +122,8 @@ class CertificationNotificationService {
   /// Deletar notificação
   Future<void> deleteNotification(String notificationId) async {
     try {
-      await _firestore
-          .collection('notifications')
-          .doc(notificationId)
-          .delete();
-      
+      await _firestore.collection('notifications').doc(notificationId).delete();
+
       print('✅ Notificação $notificationId deletada');
     } catch (e) {
       print('❌ Erro ao deletar notificação: $e');
@@ -140,17 +135,17 @@ class CertificationNotificationService {
   Future<void> deleteAllRead(String userId) async {
     try {
       final batch = _firestore.batch();
-      
+
       final readNotifications = await _firestore
           .collection('notifications')
           .where('userId', isEqualTo: userId)
           .where('read', isEqualTo: true)
           .get();
-      
+
       for (var doc in readNotifications.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
       print('✅ Todas as notificações lidas foram deletadas');
     } catch (e) {
@@ -160,7 +155,7 @@ class CertificationNotificationService {
   }
 
   /// Lidar com o toque em uma notificação
-  /// 
+  ///
   /// Esta função determina para onde navegar baseado no tipo de ação da notificação.
   /// Também marca a notificação como lida automaticamente.
   Future<void> handleNotificationTap(
@@ -171,12 +166,12 @@ class CertificationNotificationService {
       final notificationId = notification['id'] as String?;
       final actionType = notification['actionType'] as String?;
       final type = notification['type'] as String?;
-      
+
       // Marcar como lida
       if (notificationId != null) {
         await markAsRead(notificationId);
       }
-      
+
       // Navegar baseado no tipo de ação
       if (actionType == 'view_profile') {
         // Certificação aprovada - navegar para o perfil
@@ -198,7 +193,7 @@ class CertificationNotificationService {
       }
     } catch (e) {
       print('❌ Erro ao lidar com toque na notificação: $e');
-      
+
       // Mostrar snackbar de erro
       Get.snackbar(
         'Erro',
@@ -243,7 +238,7 @@ class CertificationNotificationService {
           .where('read', isEqualTo: false)
           .limit(1)
           .get();
-      
+
       return snapshot.docs.isNotEmpty;
     } catch (e) {
       print('❌ Erro ao verificar notificações não lidas: $e');
@@ -252,7 +247,8 @@ class CertificationNotificationService {
   }
 
   /// Obter a notificação mais recente de certificação
-  Future<Map<String, dynamic>?> getLatestCertificationNotification(String userId) async {
+  Future<Map<String, dynamic>?> getLatestCertificationNotification(
+      String userId) async {
     try {
       final snapshot = await _firestore
           .collection('notifications')
@@ -264,11 +260,11 @@ class CertificationNotificationService {
           .orderBy('createdAt', descending: true)
           .limit(1)
           .get();
-      
+
       if (snapshot.docs.isEmpty) {
         return null;
       }
-      
+
       final data = snapshot.docs.first.data();
       data['id'] = snapshot.docs.first.id;
       return data;

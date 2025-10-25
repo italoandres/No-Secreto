@@ -110,8 +110,9 @@ class ChildrenFilterCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: _childrenOptions.map((option) {
-                final isSelected = selectedChildren == option || 
-                    (selectedChildren == null && option == 'Não tenho preferência');
+                final isSelected = selectedChildren == option ||
+                    (selectedChildren == null &&
+                        option == 'Não tenho preferência');
                 return FilterChip(
                   label: Text(
                     option,
@@ -123,13 +124,16 @@ class ChildrenFilterCard extends StatelessWidget {
                   ),
                   selected: isSelected,
                   onSelected: (_) {
-                    onChildrenChanged(option == 'Não tenho preferência' ? null : option);
+                    onChildrenChanged(
+                        option == 'Não tenho preferência' ? null : option);
                   },
                   backgroundColor: Colors.grey.shade100,
                   selectedColor: Colors.teal.shade600,
                   checkmarkColor: Colors.white,
                   side: BorderSide(
-                    color: isSelected ? Colors.teal.shade600 : Colors.grey.shade300,
+                    color: isSelected
+                        ? Colors.teal.shade600
+                        : Colors.grey.shade300,
                   ),
                 );
               }).toList(),

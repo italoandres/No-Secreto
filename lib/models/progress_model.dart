@@ -1,4 +1,3 @@
-
 class ProgressModel {
   String id;
   double progress;
@@ -9,7 +8,6 @@ class ProgressModel {
   });
 
   static ProgressModel fromJson(Map<String, dynamic> json) {
-
     return ProgressModel(
       id: json['id'] ?? '',
       progress: double.parse('${json['progress']}'),

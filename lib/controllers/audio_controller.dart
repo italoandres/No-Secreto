@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -22,14 +21,17 @@ class AudioController {
       print(path);
     }
 
-    if(path == null) {
+    if (path == null) {
       return;
     }
 
-    await ChatRepository.addFile(file: File(path), fileName: '${DateTime.now().millisecondsSinceEpoch}.m4a', extensao: 'm4a');
+    await ChatRepository.addFile(
+        file: File(path),
+        fileName: '${DateTime.now().millisecondsSinceEpoch}.m4a',
+        extensao: 'm4a');
     List<ChatModel> all = await ChatRepository.getAllFuture();
 
-    if(all.length == 1) {
+    if (all.length == 1) {
       ChatController.mensagensDoPaiAposPrimeiraMsg();
     }
   }
@@ -37,7 +39,7 @@ class AudioController {
   static void start() async {
     bool p = await record.hasPermission();
     if (p) {
-      Directory tempDir = await getApplicationDocumentsDirectory(); 
+      Directory tempDir = await getApplicationDocumentsDirectory();
       // Start recording
       await record.start(
         RecordConfig(

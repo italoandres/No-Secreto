@@ -20,9 +20,8 @@ class ChatMessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
-        mainAxisAlignment: isCurrentUser 
-            ? MainAxisAlignment.end 
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isCurrentUser) ...[
             _buildAvatar(),
@@ -41,7 +40,7 @@ class ChatMessageBubble extends StatelessWidget {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: isCurrentUser 
+                  color: isCurrentUser
                       ? const Color(0xFFFF6B9D)
                       : Colors.grey[200],
                   borderRadius: BorderRadius.only(
@@ -164,7 +163,8 @@ class ChatMessageBubble extends StatelessWidget {
                 ),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
                   ),
                 ),
               );
@@ -224,7 +224,7 @@ class ChatMessageBubble extends StatelessWidget {
         Text(
           _formatTime(message.timestamp),
           style: TextStyle(
-            color: isCurrentUser 
+            color: isCurrentUser
                 ? Colors.white.withValues(alpha: 0.8)
                 : Colors.grey[600],
             fontSize: 12,
@@ -371,7 +371,13 @@ class DateSeparator extends StatelessWidget {
       return 'Ontem';
     } else if (now.difference(date).inDays < 7) {
       const weekdays = [
-        'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'
+        'Segunda',
+        'Terça',
+        'Quarta',
+        'Quinta',
+        'Sexta',
+        'Sábado',
+        'Domingo'
       ];
       return weekdays[date.weekday - 1];
     } else {
@@ -484,7 +490,8 @@ class _TypingIndicatorState extends State<TypingIndicator>
                     return Row(
                       children: List.generate(3, (index) {
                         final delay = index * 0.2;
-                        final animationValue = (_animation.value - delay).clamp(0.0, 1.0);
+                        final animationValue =
+                            (_animation.value - delay).clamp(0.0, 1.0);
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 1),
                           width: 4,

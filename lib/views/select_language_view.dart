@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/token_usuario.dart';
@@ -11,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SelectLanguageView extends StatefulWidget {
-const SelectLanguageView({ Key? key }) : super(key: key);
+  const SelectLanguageView({Key? key}) : super(key: key);
 
   @override
   State<SelectLanguageView> createState() => _SelectLanguageViewState();
@@ -22,7 +21,7 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
   UserSexo? sexo;
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: Get.width,
@@ -34,7 +33,7 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
             colors: [
               const Color(0xFFFFF9C4), // Amarelo claro
               const Color(0xFFFFF59D), // Amarelo médio
-              Colors.white,             // Branco
+              Colors.white, // Branco
             ],
             stops: const [0.0, 0.3, 1.0],
           ),
@@ -45,15 +44,15 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
             child: Column(
               children: [
                 SizedBox(height: Get.height * 0.08),
-                
+
                 // Header com logo e títulos
                 _buildHeader(),
-                
+
                 SizedBox(height: Get.height * 0.08),
-                
+
                 // Card principal com seleção de idioma
                 _buildLanguageCard(),
-                
+
                 SizedBox(height: Get.height * 0.04),
               ],
             ),
@@ -85,11 +84,12 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               ),
             ],
           ),
-          child: Image.asset('lib/assets/img/logo.png', width: Get.width * 0.25),
+          child:
+              Image.asset('lib/assets/img/logo.png', width: Get.width * 0.25),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Título principal
         Text(
           AppLanguage.lang('bem_vindo_ao', idioma: idioma),
@@ -100,9 +100,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // Nome do app
         Text(
           Constants.appName,
@@ -119,9 +119,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Mensagem inspiradora
         Text(
           'Conecte-se com Deus Pai e encontre seu propósito',
@@ -175,9 +175,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
                 ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             AppLanguage.lang('para_continuar', idioma: idioma),
             style: GoogleFonts.poppins(
@@ -185,9 +185,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               color: Colors.grey.shade600,
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Dropdown de idiomas
           Container(
             decoration: BoxDecoration(
@@ -197,7 +197,8 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
             ),
             child: DropdownButton<String>(
               value: idioma.isEmpty ? null : idioma,
-              icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500),
+              icon:
+                  Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500),
               hint: Text(
                 AppLanguage.lang('selecionar_idioma', idioma: idioma),
                 style: GoogleFonts.poppins(
@@ -212,11 +213,13 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
                   idioma = value!;
                 });
               },
-              items: AppLanguage.languages().map<DropdownMenuItem<String>>((String value) {
+              items: AppLanguage.languages()
+                  .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
                         Text(
@@ -238,9 +241,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               }).toList(),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Seleção de sexo
           Text(
             'Selecione seu sexo',
@@ -250,9 +253,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               color: Colors.grey.shade700,
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Dropdown de sexo
           Container(
             decoration: BoxDecoration(
@@ -262,7 +265,8 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
             ),
             child: DropdownButton<UserSexo>(
               value: sexo,
-              icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500),
+              icon:
+                  Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500),
               hint: Text(
                 'Selecionar sexo',
                 style: GoogleFonts.poppins(
@@ -281,7 +285,8 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
                 DropdownMenuItem<UserSexo>(
                   value: UserSexo.feminino,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
                         const Icon(Icons.female, color: Colors.pink, size: 20),
@@ -300,7 +305,8 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
                 DropdownMenuItem<UserSexo>(
                   value: UserSexo.masculino,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
                         const Icon(Icons.male, color: Colors.blue, size: 20),
@@ -319,9 +325,9 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Botão continuar
           _buildContinueButton(),
         ],
@@ -336,35 +342,35 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: (idioma.isNotEmpty && sexo != null)
-          ? const LinearGradient(
-              colors: [
-                Color(0xFF38b6ff),
-                Color(0xFFf76cec),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-          : LinearGradient(
-              colors: [
-                Colors.grey.shade400,
-                Colors.grey.shade400,
-              ],
-            ),
-        boxShadow: (idioma.isNotEmpty && sexo != null) 
-          ? [
-              BoxShadow(
-                color: const Color(0xFF38b6ff).withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFF38b6ff),
+                  Color(0xFFf76cec),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [
+                  Colors.grey.shade400,
+                  Colors.grey.shade400,
+                ],
               ),
-            ]
-          : [],
+        boxShadow: (idioma.isNotEmpty && sexo != null)
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF38b6ff).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            if(idioma.isEmpty) {
+            if (idioma.isEmpty) {
               Get.snackbar(
                 'Idioma necessário',
                 'Por favor, selecione um idioma para continuar.',
@@ -378,8 +384,8 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               );
               return;
             }
-            
-            if(sexo == null) {
+
+            if (sexo == null) {
               Get.snackbar(
                 'Sexo necessário',
                 'Por favor, selecione seu sexo para continuar.',
@@ -393,12 +399,12 @@ class _SelectLanguageViewState extends State<SelectLanguageView> {
               );
               return;
             }
-            
+
             // Salvar idioma e sexo
             TokenUsuario().idioma = idioma;
             TokenUsuario().sexo = sexo!;
-            
-            if(FirebaseAuth.instance.currentUser == null) {
+
+            if (FirebaseAuth.instance.currentUser == null) {
               Get.offAll(() => const LoginView());
             } else {
               Get.offAll(() => const HomeView());

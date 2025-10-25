@@ -309,7 +309,8 @@ class WeeklyRecommendationsService {
 
     for (final profileId in profileIds) {
       try {
-        final doc = await _firestore.collection('profiles').doc(profileId).get();
+        final doc =
+            await _firestore.collection('profiles').doc(profileId).get();
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
@@ -454,7 +455,8 @@ class WeeklyRecommendationsService {
       });
 
       // Verificar interesse mútuo
-      final hasMutualInterest = await _checkMutualInterest(fromUserId, toUserId);
+      final hasMutualInterest =
+          await _checkMutualInterest(fromUserId, toUserId);
 
       if (hasMutualInterest) {
         EnhancedLogger.success(
@@ -532,7 +534,10 @@ class WeeklyRecommendationsService {
       EnhancedLogger.success(
         'Match created successfully',
         tag: 'WEEKLY_RECOMMENDATIONS',
-        data: {'matchId': matchId, 'users': [user1Id, user2Id]},
+        data: {
+          'matchId': matchId,
+          'users': [user1Id, user2Id]
+        },
       );
     } catch (e) {
       EnhancedLogger.error(
@@ -603,7 +608,9 @@ class WeeklyRecommendationsService {
       EnhancedLogger.info(
         'Match notifications sent',
         tag: 'WEEKLY_RECOMMENDATIONS',
-        data: {'users': [user1Id, user2Id]},
+        data: {
+          'users': [user1Id, user2Id]
+        },
       );
     } catch (e) {
       EnhancedLogger.error(

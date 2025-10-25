@@ -28,13 +28,13 @@ class SystemPerformanceMetrics {
   });
 
   Map<String, dynamic> toJson() => {
-    'cpuUsage': cpuUsage,
-    'memoryUsage': memoryUsage,
-    'diskUsage': diskUsage,
-    'networkLatency': networkLatency,
-    'activeConnections': activeConnections,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'cpuUsage': cpuUsage,
+        'memoryUsage': memoryUsage,
+        'diskUsage': diskUsage,
+        'networkLatency': networkLatency,
+        'activeConnections': activeConnections,
+        'timestamp': timestamp.toIso8601String(),
+      };
 }
 
 /// Métricas de performance da aplicação
@@ -58,14 +58,14 @@ class AppPerformanceMetrics {
   });
 
   Map<String, dynamic> toJson() => {
-    'frameRate': frameRate,
-    'frameRenderTime': frameRenderTime,
-    'memoryFootprint': memoryFootprint,
-    'cacheHitRate': cacheHitRate,
-    'activeWidgets': activeWidgets,
-    'pendingOperations': pendingOperations,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'frameRate': frameRate,
+        'frameRenderTime': frameRenderTime,
+        'memoryFootprint': memoryFootprint,
+        'cacheHitRate': cacheHitRate,
+        'activeWidgets': activeWidgets,
+        'pendingOperations': pendingOperations,
+        'timestamp': timestamp.toIso8601String(),
+      };
 }
 
 /// Alerta de performance
@@ -89,14 +89,14 @@ class PerformanceAlert {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': type,
-    'severity': severity,
-    'message': message,
-    'data': data,
-    'timestamp': timestamp.toIso8601String(),
-    'isResolved': isResolved,
-  };
+        'id': id,
+        'type': type,
+        'severity': severity,
+        'message': message,
+        'data': data,
+        'timestamp': timestamp.toIso8601String(),
+        'isResolved': isResolved,
+      };
 }
 
 /// Configuração do monitor de performance
@@ -134,16 +134,16 @@ class PerformanceMonitor {
   final DiagnosticLogger _logger = DiagnosticLogger();
   final IntelligentCacheManager _cache = IntelligentCacheManager();
   final QueryOptimizer _queryOptimizer = QueryOptimizer();
-  
+
   final List<SystemPerformanceMetrics> _systemMetricsHistory = [];
   final List<AppPerformanceMetrics> _appMetricsHistory = [];
   final List<PerformanceAlert> _activeAlerts = [];
   final Map<String, Timer> _alertTimers = {};
-  
+
   Timer? _monitoringTimer;
   PerformanceMonitorConfig _config = const PerformanceMonitorConfig();
   bool _isInitialized = false;
-  
+
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   Map<String, dynamic> _deviceSpecs = {};
 
@@ -153,13 +153,13 @@ class PerformanceMonitor {
 
     try {
       _config = config ?? const PerformanceMonitorConfig();
-      
+
       // Coleta informações do dispositivo
       await _collectDeviceInfo();
-      
+
       // Inicia monitoramento
       _startMonitoring();
-      
+
       _isInitialized = true;
 
       _logger.info(
@@ -175,7 +175,6 @@ class PerformanceMonitor {
       );
 
       EnhancedLogger.log('📊 [PERFORMANCE_MONITOR] Monitor inicializado');
-
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -206,7 +205,6 @@ class PerformanceMonitor {
       }
 
       return metrics;
-
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -246,7 +244,6 @@ class PerformanceMonitor {
       }
 
       return metrics;
-
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -278,37 +275,44 @@ class PerformanceMonitor {
     final recentSystemMetrics = _systemMetricsHistory
         .where((m) => m.timestamp.isAfter(last24h))
         .toList();
-    
-    final recentAppMetrics = _appMetricsHistory
-        .where((m) => m.timestamp.isAfter(last24h))
-        .toList();
+
+    final recentAppMetrics =
+        _appMetricsHistory.where((m) => m.timestamp.isAfter(last24h)).toList();
 
     final hourlySystemMetrics = _systemMetricsHistory
         .where((m) => m.timestamp.isAfter(lastHour))
         .toList();
 
-    final hourlyAppMetrics = _appMetricsHistory
-        .where((m) => m.timestamp.isAfter(lastHour))
-        .toList();
+    final hourlyAppMetrics =
+        _appMetricsHistory.where((m) => m.timestamp.isAfter(lastHour)).toList();
 
     return {
       'timestamp': now.toIso8601String(),
       'deviceInfo': _deviceSpecs,
       'systemMetrics': {
-        'current': recentSystemMetrics.isNotEmpty ? recentSystemMetrics.last.toJson() : null,
+        'current': recentSystemMetrics.isNotEmpty
+            ? recentSystemMetrics.last.toJson()
+            : null,
         'last24h': _calculateSystemAverages(recentSystemMetrics),
         'lastHour': _calculateSystemAverages(hourlySystemMetrics),
         'trends': _calculateSystemTrends(recentSystemMetrics),
       },
       'appMetrics': {
-        'current': recentAppMetrics.isNotEmpty ? recentAppMetrics.last.toJson() : null,
+        'current':
+            recentAppMetrics.isNotEmpty ? recentAppMetrics.last.toJson() : null,
         'last24h': _calculateAppAverages(recentAppMetrics),
         'lastHour': _calculateAppAverages(hourlyAppMetrics),
         'trends': _calculateAppTrends(recentAppMetrics),
       },
       'alerts': {
-        'active': _activeAlerts.where((a) => !a.isResolved).map((a) => a.toJson()).toList(),
-        'resolved': _activeAlerts.where((a) => a.isResolved).map((a) => a.toJson()).toList(),
+        'active': _activeAlerts
+            .where((a) => !a.isResolved)
+            .map((a) => a.toJson())
+            .toList(),
+        'resolved': _activeAlerts
+            .where((a) => a.isResolved)
+            .map((a) => a.toJson())
+            .toList(),
         'total': _activeAlerts.length,
       },
       'cacheStatistics': _cache.getStatistics(),
@@ -329,13 +333,13 @@ class PerformanceMonitor {
 
       // Otimiza cache
       await _cache.forceCleanup();
-      
+
       // Otimiza queries
       await _queryOptimizer.optimizeConfiguration();
-      
+
       // Limpa métricas antigas
       _cleanupOldMetrics();
-      
+
       // Resolve alertas antigos
       _resolveOldAlerts();
 
@@ -349,8 +353,8 @@ class PerformanceMonitor {
         },
       );
 
-      EnhancedLogger.log('🚀 [PERFORMANCE_MONITOR] Otimização forçada concluída');
-
+      EnhancedLogger.log(
+          '🚀 [PERFORMANCE_MONITOR] Otimização forçada concluída');
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.performance,
@@ -378,7 +382,6 @@ class PerformanceMonitor {
         if (_config.enableAutoOptimization) {
           await _performAutoOptimization(systemMetrics, appMetrics);
         }
-
       } catch (e) {
         _logger.warning(
           DiagnosticLogCategory.performance,
@@ -415,7 +418,8 @@ class PerformanceMonitor {
       ));
     }
 
-    if (systemMetrics.networkLatency > _config.alertThresholds['networkLatency']!) {
+    if (systemMetrics.networkLatency >
+        _config.alertThresholds['networkLatency']!) {
       alerts.add(_createAlert(
         'high_network_latency',
         'medium',
@@ -434,7 +438,8 @@ class PerformanceMonitor {
       ));
     }
 
-    if (appMetrics.frameRenderTime > _config.alertThresholds['frameRenderTime']!) {
+    if (appMetrics.frameRenderTime >
+        _config.alertThresholds['frameRenderTime']!) {
       alerts.add(_createAlert(
         'slow_frame_render',
         'medium',
@@ -447,14 +452,15 @@ class PerformanceMonitor {
     for (final alert in alerts) {
       if (!_hasActiveAlert(alert.type)) {
         _activeAlerts.add(alert);
-        
+
         _logger.warning(
           DiagnosticLogCategory.performance,
           'Alerta de performance gerado',
           data: alert.toJson(),
         );
 
-        EnhancedLogger.log('⚠️ [PERFORMANCE_MONITOR] ${alert.severity.toUpperCase()}: ${alert.message}');
+        EnhancedLogger.log(
+            '⚠️ [PERFORMANCE_MONITOR] ${alert.severity.toUpperCase()}: ${alert.message}');
       }
     }
   }
@@ -467,7 +473,7 @@ class PerformanceMonitor {
     // Otimização baseada no uso de memória
     if (systemMetrics.memoryUsage > 70.0) {
       await _cache.forceCleanup();
-      
+
       _logger.debug(
         DiagnosticLogCategory.performance,
         'Auto-otimização: cache limpo devido ao alto uso de memória',
@@ -597,38 +603,66 @@ class PerformanceMonitor {
 
   /// Verifica se já existe um alerta ativo do tipo
   bool _hasActiveAlert(String type) {
-    return _activeAlerts.any((alert) => alert.type == type && !alert.isResolved);
+    return _activeAlerts
+        .any((alert) => alert.type == type && !alert.isResolved);
   }
 
   /// Calcula médias das métricas do sistema
-  Map<String, double> _calculateSystemAverages(List<SystemPerformanceMetrics> metrics) {
+  Map<String, double> _calculateSystemAverages(
+      List<SystemPerformanceMetrics> metrics) {
     if (metrics.isEmpty) return {};
 
     return {
-      'cpuUsage': metrics.map((m) => m.cpuUsage).reduce((a, b) => a + b) / metrics.length,
-      'memoryUsage': metrics.map((m) => m.memoryUsage).reduce((a, b) => a + b) / metrics.length,
-      'diskUsage': metrics.map((m) => m.diskUsage).reduce((a, b) => a + b) / metrics.length,
-      'networkLatency': metrics.map((m) => m.networkLatency).reduce((a, b) => a + b) / metrics.length,
-      'activeConnections': metrics.map((m) => m.activeConnections.toDouble()).reduce((a, b) => a + b) / metrics.length,
+      'cpuUsage': metrics.map((m) => m.cpuUsage).reduce((a, b) => a + b) /
+          metrics.length,
+      'memoryUsage': metrics.map((m) => m.memoryUsage).reduce((a, b) => a + b) /
+          metrics.length,
+      'diskUsage': metrics.map((m) => m.diskUsage).reduce((a, b) => a + b) /
+          metrics.length,
+      'networkLatency':
+          metrics.map((m) => m.networkLatency).reduce((a, b) => a + b) /
+              metrics.length,
+      'activeConnections': metrics
+              .map((m) => m.activeConnections.toDouble())
+              .reduce((a, b) => a + b) /
+          metrics.length,
     };
   }
 
   /// Calcula médias das métricas da aplicação
-  Map<String, double> _calculateAppAverages(List<AppPerformanceMetrics> metrics) {
+  Map<String, double> _calculateAppAverages(
+      List<AppPerformanceMetrics> metrics) {
     if (metrics.isEmpty) return {};
 
     return {
-      'frameRate': metrics.map((m) => m.frameRate.toDouble()).reduce((a, b) => a + b) / metrics.length,
-      'frameRenderTime': metrics.map((m) => m.frameRenderTime).reduce((a, b) => a + b) / metrics.length,
-      'memoryFootprint': metrics.map((m) => m.memoryFootprint.toDouble()).reduce((a, b) => a + b) / metrics.length,
-      'cacheHitRate': metrics.map((m) => m.cacheHitRate.toDouble()).reduce((a, b) => a + b) / metrics.length,
-      'activeWidgets': metrics.map((m) => m.activeWidgets.toDouble()).reduce((a, b) => a + b) / metrics.length,
-      'pendingOperations': metrics.map((m) => m.pendingOperations.toDouble()).reduce((a, b) => a + b) / metrics.length,
+      'frameRate':
+          metrics.map((m) => m.frameRate.toDouble()).reduce((a, b) => a + b) /
+              metrics.length,
+      'frameRenderTime':
+          metrics.map((m) => m.frameRenderTime).reduce((a, b) => a + b) /
+              metrics.length,
+      'memoryFootprint': metrics
+              .map((m) => m.memoryFootprint.toDouble())
+              .reduce((a, b) => a + b) /
+          metrics.length,
+      'cacheHitRate': metrics
+              .map((m) => m.cacheHitRate.toDouble())
+              .reduce((a, b) => a + b) /
+          metrics.length,
+      'activeWidgets': metrics
+              .map((m) => m.activeWidgets.toDouble())
+              .reduce((a, b) => a + b) /
+          metrics.length,
+      'pendingOperations': metrics
+              .map((m) => m.pendingOperations.toDouble())
+              .reduce((a, b) => a + b) /
+          metrics.length,
     };
   }
 
   /// Calcula tendências das métricas do sistema
-  Map<String, String> _calculateSystemTrends(List<SystemPerformanceMetrics> metrics) {
+  Map<String, String> _calculateSystemTrends(
+      List<SystemPerformanceMetrics> metrics) {
     if (metrics.length < 2) return {};
 
     final recent = metrics.takeLast(10).toList();
@@ -641,8 +675,10 @@ class PerformanceMonitor {
 
     return {
       'cpuUsage': _getTrend(olderAvg['cpuUsage']!, recentAvg['cpuUsage']!),
-      'memoryUsage': _getTrend(olderAvg['memoryUsage']!, recentAvg['memoryUsage']!),
-      'networkLatency': _getTrend(olderAvg['networkLatency']!, recentAvg['networkLatency']!),
+      'memoryUsage':
+          _getTrend(olderAvg['memoryUsage']!, recentAvg['memoryUsage']!),
+      'networkLatency':
+          _getTrend(olderAvg['networkLatency']!, recentAvg['networkLatency']!),
     };
   }
 
@@ -660,17 +696,19 @@ class PerformanceMonitor {
 
     return {
       'frameRate': _getTrend(olderAvg['frameRate']!, recentAvg['frameRate']!),
-      'frameRenderTime': _getTrend(olderAvg['frameRenderTime']!, recentAvg['frameRenderTime']!),
-      'memoryFootprint': _getTrend(olderAvg['memoryFootprint']!, recentAvg['memoryFootprint']!),
+      'frameRenderTime': _getTrend(
+          olderAvg['frameRenderTime']!, recentAvg['frameRenderTime']!),
+      'memoryFootprint': _getTrend(
+          olderAvg['memoryFootprint']!, recentAvg['memoryFootprint']!),
     };
   }
 
   /// Determina tendência (improving, stable, degrading)
   String _getTrend(double oldValue, double newValue) {
     final change = ((newValue - oldValue) / oldValue * 100).abs();
-    
+
     if (change < 5) return 'stable';
-    
+
     // Para métricas onde menor é melhor (latência, uso de recursos)
     return newValue < oldValue ? 'improving' : 'degrading';
   }
@@ -678,31 +716,34 @@ class PerformanceMonitor {
   /// Gera recomendações baseadas nas métricas
   List<String> _generateRecommendations() {
     final recommendations = <String>[];
-    
+
     if (_systemMetricsHistory.isNotEmpty) {
       final latest = _systemMetricsHistory.last;
-      
+
       if (latest.memoryUsage > 80) {
-        recommendations.add('Considere limpar o cache ou fechar aplicações não utilizadas');
+        recommendations.add(
+            'Considere limpar o cache ou fechar aplicações não utilizadas');
       }
-      
+
       if (latest.networkLatency > 500) {
-        recommendations.add('Verifique a conexão de rede ou considere usar cache offline');
+        recommendations
+            .add('Verifique a conexão de rede ou considere usar cache offline');
       }
     }
-    
+
     if (_appMetricsHistory.isNotEmpty) {
       final latest = _appMetricsHistory.last;
-      
+
       if (latest.frameRate < 45) {
         recommendations.add('Otimize a interface para melhorar a fluidez');
       }
-      
+
       if (latest.cacheHitRate < 50) {
-        recommendations.add('Ajuste a configuração de cache para melhor performance');
+        recommendations
+            .add('Ajuste a configuração de cache para melhor performance');
       }
     }
-    
+
     return recommendations;
   }
 
@@ -716,7 +757,7 @@ class PerformanceMonitor {
   /// Limpa métricas antigas
   void _cleanupOldMetrics() {
     final cutoff = DateTime.now().subtract(Duration(days: 7));
-    
+
     _systemMetricsHistory.removeWhere((m) => m.timestamp.isBefore(cutoff));
     _appMetricsHistory.removeWhere((m) => m.timestamp.isBefore(cutoff));
   }
@@ -724,7 +765,7 @@ class PerformanceMonitor {
   /// Resolve alertas antigos
   void _resolveOldAlerts() {
     final cutoff = DateTime.now().subtract(Duration(hours: 24));
-    
+
     for (final alert in _activeAlerts) {
       if (alert.timestamp.isBefore(cutoff) && !alert.isResolved) {
         final index = _activeAlerts.indexOf(alert);
@@ -745,12 +786,12 @@ class PerformanceMonitor {
   void dispose() {
     _monitoringTimer?.cancel();
     _alertTimers.values.forEach((timer) => timer.cancel());
-    
+
     _systemMetricsHistory.clear();
     _appMetricsHistory.clear();
     _activeAlerts.clear();
     _alertTimers.clear();
-    
+
     _logger.info(
       DiagnosticLogCategory.performance,
       'Monitor de performance finalizado',

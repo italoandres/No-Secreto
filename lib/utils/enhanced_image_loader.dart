@@ -19,12 +19,12 @@ class EnhancedImageLoader {
     Duration retryDelay = const Duration(seconds: 2),
   }) {
     // Usar proxy para URLs do Firebase Storage
-    final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl) 
+    final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl)
         ? StorageProxy.getProxiedUrl(imageUrl)
         : imageUrl;
-    
+
     print('🖼️ ENHANCED: Carregando imagem via proxy: $proxiedUrl');
-    
+
     return CachedNetworkImage(
       imageUrl: proxiedUrl,
       width: width,
@@ -101,16 +101,17 @@ class EnhancedImageLoader {
         }
 
         // Usar proxy para URLs do Firebase Storage no retry também
-        final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl) 
+        final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl)
             ? StorageProxy.getProxiedUrl(imageUrl)
             : imageUrl;
-        
+
         return CachedNetworkImage(
           imageUrl: proxiedUrl,
           width: width,
           height: height,
           fit: fit,
-          placeholder: (context, url) => placeholder ?? _buildDefaultPlaceholder(),
+          placeholder: (context, url) =>
+              placeholder ?? _buildDefaultPlaceholder(),
           errorWidget: (context, url, error) => _buildRetryWidget(
             imageUrl: imageUrl,
             width: width,
@@ -158,13 +159,15 @@ class EnhancedImageLoader {
   }
 
   /// Pré-carrega uma imagem para otimização
-  static Future<void> preloadImage(String imageUrl, BuildContext context) async {
+  static Future<void> preloadImage(
+      String imageUrl, BuildContext context) async {
     if (_preloadedImages.containsKey(imageUrl)) {
       return; // Já foi pré-carregada
     }
 
     if (_preloadingImages.containsKey(imageUrl)) {
-      return await _preloadingImages[imageUrl]!.future; // Já está sendo pré-carregada
+      return await _preloadingImages[imageUrl]!
+          .future; // Já está sendo pré-carregada
     }
 
     final completer = Completer<void>();
@@ -172,20 +175,19 @@ class EnhancedImageLoader {
 
     try {
       // Usar proxy para URLs do Firebase Storage no preload também
-      final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl) 
+      final proxiedUrl = StorageProxy.isFirebaseStorageUrl(imageUrl)
           ? StorageProxy.getProxiedUrl(imageUrl)
           : imageUrl;
-      
+
       debugPrint('🖼️ PRELOAD: Pré-carregando imagem: $proxiedUrl');
-      
+
       await precacheImage(
         CachedNetworkImageProvider(proxiedUrl),
         context,
       );
-      
+
       _preloadedImages[imageUrl] = true;
       debugPrint('✅ PRELOAD: Imagem pré-carregada com sucesso: $imageUrl');
-      
     } catch (e) {
       debugPrint('❌ PRELOAD: Erro ao pré-carregar imagem $imageUrl: $e');
     } finally {
@@ -195,7 +197,8 @@ class EnhancedImageLoader {
   }
 
   /// Pré-carrega múltiplas imagens
-  static Future<void> preloadImages(List<String> imageUrls, BuildContext context) async {
+  static Future<void> preloadImages(
+      List<String> imageUrls, BuildContext context) async {
     final futures = imageUrls.map((url) => preloadImage(url, context));
     await Future.wait(futures);
   }

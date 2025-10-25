@@ -25,14 +25,14 @@ class SystemNotificationItem extends StatelessWidget {
 
     return Card(
       elevation: isUnread ? 3 : 1,
-      color: isApproved 
-          ? Colors.green.shade50 
+      color: isApproved
+          ? Colors.green.shade50
           : (isRejected ? Colors.orange.shade50 : Colors.blue.shade50),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isApproved 
+        side: isApproved
             ? BorderSide(color: Colors.green.shade200, width: 2)
-            : (isRejected 
+            : (isRejected
                 ? BorderSide(color: Colors.orange.shade200, width: 2)
                 : BorderSide.none),
       ),
@@ -47,7 +47,7 @@ class SystemNotificationItem extends StatelessWidget {
               // Ícone do sistema
               _buildIcon(type),
               const SizedBox(width: 12),
-              
+
               // Conteúdo
               Expanded(
                 child: Column(
@@ -56,15 +56,15 @@ class SystemNotificationItem extends StatelessWidget {
                     // Título
                     _buildTitle(type),
                     const SizedBox(height: 4),
-                    
+
                     // Mensagem
                     _buildMessage(),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Timestamp
                     _buildTimestamp(),
-                    
+
                     // Botão de ação (se houver)
                     if (_hasAction(type)) ...[
                       const SizedBox(height: 8),
@@ -73,7 +73,7 @@ class SystemNotificationItem extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Indicador de não lida
               if (isUnread)
                 Column(
@@ -81,7 +81,7 @@ class SystemNotificationItem extends StatelessWidget {
                     _buildUnreadIndicator(),
                   ],
                 ),
-              
+
               // Botão de deletar (se fornecido)
               if (onDelete != null)
                 IconButton(
@@ -167,9 +167,9 @@ class SystemNotificationItem extends StatelessWidget {
 
   /// Constrói mensagem
   Widget _buildMessage() {
-    final message = notification['message'] ?? 
-                   notification['body'] ?? 
-                   'Você tem uma nova notificação';
+    final message = notification['message'] ??
+        notification['body'] ??
+        'Você tem uma nova notificação';
 
     return Text(
       message,
@@ -186,7 +186,7 @@ class SystemNotificationItem extends StatelessWidget {
   Widget _buildTimestamp() {
     final createdAt = notification['createdAt'];
     if (createdAt == null) return const SizedBox.shrink();
-    
+
     DateTime timestamp;
     if (createdAt is Timestamp) {
       timestamp = createdAt.toDate();
@@ -195,9 +195,9 @@ class SystemNotificationItem extends StatelessWidget {
     } else {
       return const SizedBox.shrink();
     }
-    
+
     final timeAgo = timeago.format(timestamp, locale: 'pt_BR');
-    
+
     return Text(
       timeAgo,
       style: TextStyle(

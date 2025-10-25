@@ -2,22 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Serviço para sanitização robusta de dados Timestamp
 class TimestampSanitizer {
-  
   /// Sanitiza um valor para Timestamp, tratando nulls e tipos inválidos
   static Timestamp sanitizeTimestamp(dynamic value) {
     if (value == null) {
       print('⚠️ Timestamp null encontrado, usando timestamp atual');
       return Timestamp.now();
     }
-    
+
     if (value is Timestamp) {
       return value;
     }
-    
+
     if (value is DateTime) {
       return Timestamp.fromDate(value);
     }
-    
+
     if (value is String) {
       try {
         final dateTime = DateTime.parse(value);
@@ -27,7 +26,7 @@ class TimestampSanitizer {
         return Timestamp.now();
       }
     }
-    
+
     if (value is int) {
       try {
         // Assumir que é timestamp em milliseconds
@@ -38,7 +37,7 @@ class TimestampSanitizer {
         return Timestamp.now();
       }
     }
-    
+
     print('⚠️ Tipo de Timestamp não reconhecido: ${value.runtimeType}');
     return Timestamp.now();
   }
@@ -52,8 +51,8 @@ class TimestampSanitizer {
         'user2Id': data['user2Id'] ?? '',
         'createdAt': sanitizeTimestamp(data['createdAt']),
         'expiresAt': sanitizeTimestamp(data['expiresAt']),
-        'lastMessageAt': data['lastMessageAt'] != null 
-            ? sanitizeTimestamp(data['lastMessageAt']) 
+        'lastMessageAt': data['lastMessageAt'] != null
+            ? sanitizeTimestamp(data['lastMessageAt'])
             : null,
         'lastMessage': data['lastMessage'] ?? '',
         'isExpired': data['isExpired'] ?? false,
@@ -85,7 +84,7 @@ class TimestampSanitizer {
         'senderId': data['senderId'] ?? '',
         'senderName': data['senderName'] ?? 'Usuário',
         'message': data['message'] ?? '',
-        'timestamp': data['timestamp'] != null 
+        'timestamp': data['timestamp'] != null
             ? sanitizeTimestamp(data['timestamp'])
             : Timestamp.now(),
         'isRead': data['isRead'] ?? false,
@@ -108,7 +107,7 @@ class TimestampSanitizer {
   /// Sanitiza contador de mensagens não lidas
   static Map<String, int> _sanitizeUnreadCount(dynamic value) {
     if (value == null) return {};
-    
+
     if (value is Map<String, dynamic>) {
       final result = <String, int>{};
       value.forEach((key, val) {
@@ -120,7 +119,7 @@ class TimestampSanitizer {
       });
       return result;
     }
-    
+
     return {};
   }
 
@@ -163,13 +162,13 @@ class TimestampSanitizer {
   static bool isValidTimestamp(Timestamp timestamp) {
     final dateTime = timestamp.toDate();
     final now = DateTime.now();
-    
+
     // Não pode ser mais de 10 anos no passado
     final tenYearsAgo = now.subtract(Duration(days: 365 * 10));
-    
+
     // Não pode ser mais de 1 ano no futuro
     final oneYearFromNow = now.add(Duration(days: 365));
-    
+
     return dateTime.isAfter(tenYearsAgo) && dateTime.isBefore(oneYearFromNow);
   }
 
@@ -178,7 +177,7 @@ class TimestampSanitizer {
     if (isValidTimestamp(timestamp)) {
       return timestamp;
     }
-    
+
     print('⚠️ Timestamp inválido detectado, corrigindo...');
     return Timestamp.now();
   }

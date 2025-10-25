@@ -43,11 +43,12 @@ class HighlightedTextComponent extends StatelessWidget {
 
   TextSpan _buildHighlightedTextSpan() {
     final defaultStyle = style ?? const TextStyle();
-    final defaultHighlightStyle = highlightStyle ?? TextStyle(
-      backgroundColor: Colors.yellow[200],
-      fontWeight: FontWeight.bold,
-      color: Colors.black87,
-    );
+    final defaultHighlightStyle = highlightStyle ??
+        TextStyle(
+          backgroundColor: Colors.yellow[200],
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        );
 
     // Dividir a query em palavras individuais
     final queryWords = searchQuery!
@@ -72,7 +73,7 @@ class HighlightedTextComponent extends StatelessWidget {
 
         // Verificar se é uma palavra completa (não parte de outra palavra)
         final isWordBoundary = _isWordBoundary(lowerText, index, word.length);
-        
+
         if (isWordBoundary) {
           matches.add(HighlightMatch(
             start: index,
@@ -80,7 +81,7 @@ class HighlightedTextComponent extends StatelessWidget {
             word: word,
           ));
         }
-        
+
         startIndex = index + 1;
       }
     }
@@ -159,7 +160,7 @@ class HighlightedTextComponent extends StatelessWidget {
 
     for (int i = 1; i < matches.length; i++) {
       final next = matches[i];
-      
+
       // Se há sobreposição ou adjacência, mesclar
       if (current.end >= next.start - 1) {
         current = HighlightMatch(

@@ -12,10 +12,10 @@ class AutoDataPopulator {
 
     try {
       print('🔍 AutoDataPopulator: Verificando dados de teste...');
-      
+
       // Verificar se já existem dados
       final hasData = await QuickPopulateProfiles.checkData();
-      
+
       if (!hasData) {
         print('🚀 AutoDataPopulator: Populando dados de teste...');
         await QuickPopulateProfiles.populateNow();
@@ -26,7 +26,6 @@ class AutoDataPopulator {
 
       // Também corrigir perfil do usuário atual se necessário
       await FixExistingProfileForExploration.autoFixIfNeeded();
-      
     } catch (e) {
       print('⚠️ AutoDataPopulator: Erro: $e');
     }

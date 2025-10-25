@@ -33,11 +33,11 @@ class SinaisProfileDetailView extends StatelessWidget {
                     const Divider(height: 32, thickness: 1),
 
                     // Bio
-                    if (profile.bio?.isNotEmpty == true) _buildBioSection(profile),
+                    if (profile.bio?.isNotEmpty == true)
+                      _buildBioSection(profile),
 
                     // Galeria de fotos
-                    if (profile.photos.length > 1)
-                      _buildPhotoGallery(profile),
+                    if (profile.photos.length > 1) _buildPhotoGallery(profile),
 
                     // Valores e informações
                     Padding(

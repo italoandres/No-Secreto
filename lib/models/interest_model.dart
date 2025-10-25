@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Interest {
   final String id;
   final String from; // userId que demonstrou interesse
-  final String to;   // userId que recebeu interesse
+  final String to; // userId que recebeu interesse
   final DateTime timestamp;
   final String? message;
   final Map<String, dynamic>? metadata;

@@ -21,20 +21,18 @@ class _VideoEditorComponentState extends State<VideoEditorComponent> {
   final _isExporting = ValueNotifier<bool>(false);
   final double height = 60;
 
-  
   late final VideoEditorController _controller = VideoEditorController.file(
     widget.file,
     minDuration: const Duration(seconds: 1),
-    maxDuration: TokenUsuario().isAdmin != true ? const Duration(seconds: 10) : const Duration(hours: 100),
+    maxDuration: TokenUsuario().isAdmin != true
+        ? const Duration(seconds: 10)
+        : const Duration(hours: 100),
   );
 
   @override
   void initState() {
     super.initState();
-    _controller
-        .initialize()
-        .then((_) => setState(() {}))
-        .catchError((error) {
+    _controller.initialize().then((_) => setState(() {})).catchError((error) {
       // handle minumum duration bigger than video duration error
       Navigator.pop(context);
     }, test: (e) => e is VideoMinDurationError);
@@ -59,15 +57,15 @@ class _VideoEditorComponentState extends State<VideoEditorComponent> {
   void _exportVideo() async {
     _exportingProgress.value = 0;
     _isExporting.value = true;
-    
+
     try {
       final file = await _controller.exportVideo(
         onProgress: (stats, value) => _exportingProgress.value = value,
       );
-      
+
       _isExporting.value = false;
       if (!mounted) return;
-      
+
       if (file != null) {
         Get.back();
         ChatRepository.addVideo(msg: '', video: file);
@@ -140,8 +138,9 @@ class _VideoEditorComponentState extends State<VideoEditorComponent> {
                                   height: 160,
                                   margin: const EdgeInsets.only(top: 16),
                                   decoration: BoxDecoration(
-                                    border: Border(top: BorderSide(color: AppTheme.materialColor))
-                                  ),
+                                      border: Border(
+                                          top: BorderSide(
+                                              color: AppTheme.materialColor))),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: _trimSlider(),

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Níveis de compatibilidade de match
 enum MatchLevel {
-  excellent,  // 80-100%
-  good,       // 60-79%
-  moderate,   // 40-59%
-  low,        // 0-39%
+  excellent, // 80-100%
+  good, // 60-79%
+  moderate, // 40-59%
+  low, // 0-39%
 }
 
 extension MatchLevelExtension on MatchLevel {

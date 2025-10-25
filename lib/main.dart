@@ -1,4 +1,3 @@
-
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -38,7 +37,7 @@ import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Otimizações de performance
   if (!kIsWeb) {
     // Configurar orientação para evitar rebuilds desnecessários
@@ -46,13 +45,13 @@ void main() async {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    
+
     // Otimizar renderização
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ));
   }
-  
+
   // Only initialize platform-specific features on non-web platforms
   if (!kIsWeb) {
     try {
@@ -60,16 +59,17 @@ void main() async {
       NotificationController().initNotification();
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     } catch (e) {
-      debugPrint('⚠️ Erro na inicialização de recursos específicos da plataforma: $e');
+      debugPrint(
+          '⚠️ Erro na inicialização de recursos específicos da plataforma: $e');
     }
   }
-  
+
   await TokenUsuario().initTokenUsuario();
-  if(!kIsWeb) {
+  if (!kIsWeb) {
     try {
       await Firebase.initializeApp();
       debugPrint('✅ Firebase inicializado com sucesso');
-      
+
       // Firebase Admin desabilitado para evitar crashes em dispositivos reais
       // if(kDebugMode && LoginRepository.appFirebaseAdmin == null) {
       //   try {
@@ -79,7 +79,7 @@ void main() async {
       //     debugPrint('⚠️ Firebase Admin não pôde ser inicializado: $e');
       //   }
       // }
-      
+
       try {
         FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
         FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
@@ -87,27 +87,28 @@ void main() async {
       } catch (e) {
         debugPrint('⚠️ Erro ao configurar Crashlytics: $e');
       }
-      
+
       // Inicializar serviço de mensagens automáticas
       try {
         AutomaticMessageService.initialize();
         debugPrint('✅ Serviço de mensagens automáticas inicializado');
       } catch (e) {
-        debugPrint('⚠️ Erro ao inicializar serviço de mensagens automáticas: $e');
+        debugPrint(
+            '⚠️ Erro ao inicializar serviço de mensagens automáticas: $e');
       }
-      
+
       // Sistema de matches removido - usando sistema de notificações de interesse
       debugPrint('✅ Sistema de notificações de interesse ativo');
-      
+
       // 🔍 DEBUG: Funções de teste removidas (arquivos deletados)
-      
+
       // 🔧 CORREÇÃO DE EMERGÊNCIA: COMENTADO - Causava erros de permissão
       // Future.delayed(const Duration(seconds: 3), () async {
       //   try {
       //     debugPrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS...');
       //     await TimestampChatErrorsFixer.fixAllTimestampErrors();
       //     debugPrint('✅ CORREÇÃO DE TIMESTAMPS CONCLUÍDA!');
-      //     
+      //
       //     // Iniciar monitoramento automático após correção
       //     AutoChatMonitor.startMonitoring();
       //     debugPrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO!');
@@ -115,7 +116,7 @@ void main() async {
       //     debugPrint('❌ Erro na correção de timestamps: $e');
       //   }
       // });
-      
+
       // 🚀 SOLUÇÃO DEFINITIVA: COMENTADO - Causava erros de permissão
       // Future.delayed(const Duration(seconds: 8), () async {
       //   try {
@@ -132,30 +133,28 @@ void main() async {
   } else {
     setPathUrlStrategy();
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyBstIEyw9AhXwnrfnCy4234SbTHdYtmVsw",
-        authDomain: "app-no-secreto-com-o-pai.firebaseapp.com",
-        projectId: "app-no-secreto-com-o-pai",
-        storageBucket: "app-no-secreto-com-o-pai.firebasestorage.app",
-        messagingSenderId: "490614568896",
-        appId: "1:490614568896:web:3fef2cd88964958aff7a25",
-        measurementId: "G-E1NQZXWKDN"
-      )
-    );
-    
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyBstIEyw9AhXwnrfnCy4234SbTHdYtmVsw",
+            authDomain: "app-no-secreto-com-o-pai.firebaseapp.com",
+            projectId: "app-no-secreto-com-o-pai",
+            storageBucket: "app-no-secreto-com-o-pai.firebasestorage.app",
+            messagingSenderId: "490614568896",
+            appId: "1:490614568896:web:3fef2cd88964958aff7a25",
+            measurementId: "G-E1NQZXWKDN"));
+
     // 🔍 DEBUG: COMENTADO - Causava erros de permissão no Firestore
     // if (kDebugMode) {
     //   Future.delayed(const Duration(seconds: 3), () {
     //     DualCollectionDebug.debugBothCollections();
     //   });
-    //   
+    //
     //   // 🔧 CORREÇÃO DE EMERGÊNCIA NA WEB: Executar fix de timestamps após 5 segundos
     //   Future.delayed(const Duration(seconds: 5), () async {
     //     try {
     //       debugPrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS NA WEB...');
     //       await TimestampChatErrorsFixer.fixAllTimestampErrors();
     //       debugPrint('✅ CORREÇÃO DE TIMESTAMPS NA WEB CONCLUÍDA!');
-    //       
+    //
     //       // Iniciar monitoramento automático na web
     //       AutoChatMonitor.startMonitoring();
     //       debugPrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO NA WEB!');
@@ -163,7 +162,7 @@ void main() async {
     //       debugPrint('❌ Erro na correção de timestamps na web: $e');
     //     }
     //   });
-    //   
+    //
     //   // 🚀 SOLUÇÃO DEFINITIVA: Executar fix de notificações reais na web após 10 segundos
     //   Future.delayed(const Duration(seconds: 10), () async {
     //     try {
@@ -190,10 +189,12 @@ void main() async {
       Locale('es', 'ES'),
     ],
     locale: const Locale('pt', 'BR'), // Set default locale for web
-    builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
+    builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!),
     home: const MyApp(), // Always use MyApp which includes onboarding flow
     // home: const TestOnboardingView(), // Descomente para testar assets
-    
+
     // Configurar rotas GetX para vitrine
     getPages: [
       GetPage(
@@ -254,13 +255,16 @@ void main() async {
           final otherUserName = arguments?['otherUserName'] as String?;
           final otherUserPhoto = arguments?['otherUserPhoto'] as String?;
           final matchDate = arguments?['matchDate'] as DateTime?;
-          
-          if (chatId == null || otherUserId == null || otherUserName == null || matchDate == null) {
+
+          if (chatId == null ||
+              otherUserId == null ||
+              otherUserName == null ||
+              matchDate == null) {
             return const Scaffold(
               body: Center(child: Text('Parâmetros de chat inválidos')),
             );
           }
-          
+
           return RomanticMatchChatView(
             chatId: chatId,
             otherUserId: otherUserId,
@@ -272,18 +276,20 @@ void main() async {
         transitionDuration: const Duration(milliseconds: 300),
       ),
     ],
-    
-    onGenerateRoute: !kIsWeb ? null : (RouteSettings settings) {
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) => PageRoutes.getPageFromString(settings.name!.split('?')[0])
-      );
-    },
+
+    onGenerateRoute: !kIsWeb
+        ? null
+        : (RouteSettings settings) {
+            return MaterialPageRoute(
+                settings: settings,
+                builder: (context) =>
+                    PageRoutes.getPageFromString(settings.name!.split('?')[0]));
+          },
   ));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({ Key? key }) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -308,7 +314,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // App voltou ao primeiro plano
@@ -329,7 +335,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return const AppWrapper();
   }
 }

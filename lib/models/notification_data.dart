@@ -58,8 +58,10 @@ class NotificationData {
       'status': status,
       'dataCriacao': Timestamp.fromDate(createdAt),
       'createdAt': Timestamp.fromDate(createdAt),
-      'dataResposta': respondedAt != null ? Timestamp.fromDate(respondedAt!) : null,
-      'respondedAt': respondedAt != null ? Timestamp.fromDate(respondedAt!) : null,
+      'dataResposta':
+          respondedAt != null ? Timestamp.fromDate(respondedAt!) : null,
+      'respondedAt':
+          respondedAt != null ? Timestamp.fromDate(respondedAt!) : null,
       'metadata': metadata,
     };
   }
@@ -137,7 +139,7 @@ class NotificationData {
   String get timeAgo {
     final now = DateTime.now();
     final difference = now.difference(createdAt);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora mesmo';
     } else if (difference.inHours < 1) {
@@ -156,7 +158,8 @@ class NotificationData {
     if (timestamp == null) return DateTime.now();
     if (timestamp is Timestamp) return timestamp.toDate();
     if (timestamp is DateTime) return timestamp;
-    if (timestamp is String) return DateTime.tryParse(timestamp) ?? DateTime.now();
+    if (timestamp is String)
+      return DateTime.tryParse(timestamp) ?? DateTime.now();
     return DateTime.now();
   }
 

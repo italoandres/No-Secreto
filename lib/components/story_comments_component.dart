@@ -10,7 +10,7 @@ import '../repositories/spiritual_profile_repository.dart';
 
 class StoryCommentsComponent extends StatelessWidget {
   final String storyId;
-  
+
   const StoryCommentsComponent({
     super.key,
     required this.storyId,
@@ -20,7 +20,7 @@ class StoryCommentsComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<StoryInteractionsController>();
     final RxSet<String> expandedComments = <String>{}.obs;
-    
+
     return Container(
       height: Get.height * 0.7,
       decoration: const BoxDecoration(
@@ -36,7 +36,8 @@ class StoryCommentsComponent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+              border:
+                  Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,7 +59,7 @@ class StoryCommentsComponent extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Lista de comentários
           Expanded(
             child: Obx(() {
@@ -67,7 +68,7 @@ class StoryCommentsComponent extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 );
               }
-              
+
               if (controller.comments.isEmpty) {
                 return const Center(
                   child: Text(
@@ -79,7 +80,7 @@ class StoryCommentsComponent extends StatelessWidget {
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: controller.comments.length,
@@ -94,16 +95,16 @@ class StoryCommentsComponent extends StatelessWidget {
               );
             }),
           ),
-          
+
           // Campo de comentário
           _buildCommentInput(controller),
-          
+
           // Sugestões de menção
           Obx(() {
             if (!controller.showMentionSuggestions.value) {
               return const SizedBox();
             }
-            
+
             return Container(
               height: 150,
               decoration: const BoxDecoration(
@@ -123,8 +124,9 @@ class StoryCommentsComponent extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildCommentItem(StoryCommentModel comment, StoryInteractionsController controller) {
+
+  Widget _buildCommentItem(
+      StoryCommentModel comment, StoryInteractionsController controller) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -134,16 +136,16 @@ class StoryCommentsComponent extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.blue.withOpacity(0.1),
-            backgroundImage: comment.userPhotoUrl != null 
+            backgroundImage: comment.userPhotoUrl != null
                 ? NetworkImage(comment.userPhotoUrl!)
                 : null,
             child: comment.userPhotoUrl == null
                 ? const Icon(Icons.person, color: Colors.blue)
                 : null,
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Conteúdo do comentário
           Expanded(
             child: Column(
@@ -183,17 +185,17 @@ class StoryCommentsComponent extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 4),
-                
+
                 // Texto do comentário
                 Text(
                   comment.text ?? '',
                   style: const TextStyle(fontSize: 14),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Ações do comentário
                 Row(
                   children: [
@@ -220,9 +222,7 @@ class StoryCommentsComponent extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
                     const SizedBox(width: 16),
-                    
                     GestureDetector(
                       onTap: () => controller.replyToComment(
                         comment.id!,
@@ -237,7 +237,6 @@ class StoryCommentsComponent extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
                     if (comment.hasReplies) ...[
                       const SizedBox(width: 16),
                       GestureDetector(
@@ -262,7 +261,7 @@ class StoryCommentsComponent extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildCommentInput(StoryInteractionsController controller) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -299,34 +298,32 @@ class StoryCommentsComponent extends StatelessWidget {
               },
             ),
           ),
-          
           const SizedBox(width: 8),
-          
           Obx(() => IconButton(
-            onPressed: controller.isAddingComment.value 
-                ? null 
-                : controller.addComment,
-            icon: controller.isAddingComment.value
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.send, color: Colors.blue),
-          )),
+                onPressed: controller.isAddingComment.value
+                    ? null
+                    : controller.addComment,
+                icon: controller.isAddingComment.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send, color: Colors.blue),
+              )),
         ],
       ),
     );
   }
-  
-  Widget _buildMentionSuggestion(UsuarioModel user, StoryInteractionsController controller) {
+
+  Widget _buildMentionSuggestion(
+      UsuarioModel user, StoryInteractionsController controller) {
     return ListTile(
       leading: CircleAvatar(
         radius: 16,
         backgroundColor: Colors.blue.withOpacity(0.1),
-        backgroundImage: user.imgUrl != null 
-            ? NetworkImage(user.imgUrl!)
-            : null,
+        backgroundImage:
+            user.imgUrl != null ? NetworkImage(user.imgUrl!) : null,
         child: user.imgUrl == null
             ? const Icon(Icons.person, size: 16, color: Colors.blue)
             : null,
@@ -344,14 +341,14 @@ class StoryCommentsComponent extends StatelessWidget {
       onTap: () => controller.selectUserForMention(user),
     );
   }
-  
+
   String _formatDate(Timestamp? timestamp) {
     if (timestamp == null) return '';
-    
+
     final date = timestamp.toDate();
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inMinutes < 1) {
       return 'agora';
     } else if (difference.inHours < 1) {
@@ -379,8 +376,9 @@ class StoryCommentsComponent extends StatelessWidget {
 
     try {
       // Check if user has a spiritual profile
-      final profile = await SpiritualProfileRepository.getProfileByUserId(userId);
-      
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(userId);
+
       if (profile == null || !profile.canShowPublicProfile) {
         Get.snackbar(
           'Perfil Indisponível',
@@ -394,7 +392,6 @@ class StoryCommentsComponent extends StatelessWidget {
 
       // Navigate to profile display
       Get.to(() => ProfileDisplayView(userId: userId));
-      
     } catch (e) {
       debugPrint('❌ Erro ao abrir perfil: $e');
       Get.snackbar(

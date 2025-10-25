@@ -37,7 +37,7 @@ class BasicInfoSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              
+
               // Age Info
               if (age != null) ...[
                 Expanded(
@@ -51,7 +51,7 @@ class BasicInfoSection extends StatelessWidget {
               ],
             ],
           ),
-          
+
           // Deus é Pai Movement Badge
           if (isDeusEPaiMember == true) ...[
             const SizedBox(height: 16),

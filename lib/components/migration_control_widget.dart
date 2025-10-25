@@ -20,7 +20,7 @@ class MigrationControlWidget extends StatefulWidget {
 
 class _MigrationControlWidgetState extends State<MigrationControlWidget> {
   final LegacySystemMigrator _migrator = LegacySystemMigrator();
-  
+
   MigrationStatus _currentStatus = MigrationStatus.notStarted;
   bool _isLoading = false;
   String _statusMessage = '';
@@ -37,10 +37,10 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
     setState(() {
       _currentStatus = _migrator.getMigrationStatus(widget.userId);
       _migrationStats = _migrator.getMigrationStats(widget.userId);
-      
+
       final report = _migrator.getMigrationReport(widget.userId);
       _recommendations = List<String>.from(report['recommendations'] ?? []);
-      
+
       _statusMessage = _getStatusMessage(_currentStatus);
     });
   }
@@ -96,19 +96,19 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
     });
 
     try {
-      EnhancedLogger.log('🚀 [MIGRATION_WIDGET] Iniciando migração via interface');
-      
+      EnhancedLogger.log(
+          '🚀 [MIGRATION_WIDGET] Iniciando migração via interface');
+
       final result = await _migrator.migrateUserToUnifiedSystem(widget.userId);
-      
+
       _updateStatus();
-      
+
       if (result.isSuccess) {
         _showSuccessSnackbar('Migração concluída com sucesso!');
         widget.onMigrationComplete?.call();
       } else {
         _showErrorSnackbar('Migração falhou: ${result.message}');
       }
-      
     } catch (e) {
       EnhancedLogger.log('❌ [MIGRATION_WIDGET] Erro na migração: $e');
       _showErrorSnackbar('Erro na migração: $e');
@@ -125,18 +125,18 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
     });
 
     try {
-      EnhancedLogger.log('⏪ [MIGRATION_WIDGET] Iniciando rollback via interface');
-      
+      EnhancedLogger.log(
+          '⏪ [MIGRATION_WIDGET] Iniciando rollback via interface');
+
       final result = await _migrator.rollbackMigration(widget.userId);
-      
+
       _updateStatus();
-      
+
       if (result.isSuccess) {
         _showSuccessSnackbar('Rollback concluído com sucesso!');
       } else {
         _showErrorSnackbar('Rollback falhou: ${result.message}');
       }
-      
     } catch (e) {
       EnhancedLogger.log('❌ [MIGRATION_WIDGET] Erro no rollback: $e');
       _showErrorSnackbar('Erro no rollback: $e');
@@ -181,13 +181,15 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
               SizedBox(height: 8),
               Text('Duração: ${_migrationStats['duration'] ?? 0}ms'),
               SizedBox(height: 8),
-              Text('Sistemas migrados: ${_migrationStats['migratedSystems'] ?? []}'),
+              Text(
+                  'Sistemas migrados: ${_migrationStats['migratedSystems'] ?? []}'),
               SizedBox(height: 16),
-              Text('Recomendações:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Recomendações:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ..._recommendations.map((rec) => Padding(
-                padding: EdgeInsets.only(left: 8, top: 4),
-                child: Text('• $rec'),
-              )),
+                    padding: EdgeInsets.only(left: 8, top: 4),
+                    child: Text('• $rec'),
+                  )),
             ],
           ),
         ),
@@ -234,9 +236,9 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Status atual
             Container(
               padding: EdgeInsets.all(12),
@@ -259,7 +261,11 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _currentStatus.toString().split('.').last.toUpperCase(),
+                          _currentStatus
+                              .toString()
+                              .split('.')
+                              .last
+                              .toUpperCase(),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: _getStatusColor(_currentStatus),
@@ -275,9 +281,9 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                 ],
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Estatísticas rápidas
             if (_migrationStats.isNotEmpty) ...[
               Row(
@@ -301,23 +307,24 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
               ),
               SizedBox(height: 16),
             ],
-            
+
             // Botões de ação
             Row(
               children: [
-                if (_currentStatus == MigrationStatus.notStarted || 
+                if (_currentStatus == MigrationStatus.notStarted ||
                     _currentStatus == MigrationStatus.failed) ...[
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _executeMigration,
-                      icon: _isLoading 
+                      icon: _isLoading
                           ? SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Icon(Icons.play_arrow),
-                      label: Text(_isLoading ? 'Migrando...' : 'Iniciar Migração'),
+                      label:
+                          Text(_isLoading ? 'Migrando...' : 'Iniciar Migração'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -325,10 +332,10 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                     ),
                   ),
                 ],
-                
-                if (_currentStatus == MigrationStatus.completed || 
+                if (_currentStatus == MigrationStatus.completed ||
                     _currentStatus == MigrationStatus.failed) ...[
-                  if (_currentStatus == MigrationStatus.completed) SizedBox(width: 8),
+                  if (_currentStatus == MigrationStatus.completed)
+                    SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _executeRollback,
@@ -341,7 +348,6 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                     ),
                   ),
                 ],
-                
                 SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _showMigrationDetails,
@@ -354,7 +360,7 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                 ),
               ],
             ),
-            
+
             // Recomendações
             if (_recommendations.isNotEmpty) ...[
               SizedBox(height: 16),
@@ -374,22 +380,26 @@ class _MigrationControlWidgetState extends State<MigrationControlWidget> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _recommendations.take(2).map((rec) => Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            rec,
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )).toList(),
+                  children: _recommendations
+                      .take(2)
+                      .map((rec) => Padding(
+                            padding: EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.lightbulb_outline,
+                                    size: 16, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    rec,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
                 ),
               ),
             ],

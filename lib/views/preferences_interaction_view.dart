@@ -18,12 +18,14 @@ class PreferencesInteractionView extends StatefulWidget {
   });
 
   @override
-  State<PreferencesInteractionView> createState() => _PreferencesInteractionViewState();
+  State<PreferencesInteractionView> createState() =>
+      _PreferencesInteractionViewState();
 }
 
-class _PreferencesInteractionViewState extends State<PreferencesInteractionView> {
+class _PreferencesInteractionViewState
+    extends State<PreferencesInteractionView> {
   static const String _tag = 'PREFERENCES_VIEW_V2';
-  
+
   // Estado local limpo
   bool _allowInteractions = true;
   bool _isLoading = false;
@@ -46,10 +48,8 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
     });
 
     try {
-      EnhancedLogger.info('Loading current preferences', 
-        tag: _tag, 
-        data: {'profileId': widget.profileId}
-      );
+      EnhancedLogger.info('Loading current preferences',
+          tag: _tag, data: {'profileId': widget.profileId});
 
       final result = await PreferencesService.loadPreferences(widget.profileId);
 
@@ -61,13 +61,12 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
         });
 
         if (result.hadCorrections) {
-          EnhancedLogger.info('Data corrections were applied during load', 
-            tag: _tag, 
-            data: {
-              'corrections': result.appliedCorrections,
-              'profileId': widget.profileId,
-            }
-          );
+          EnhancedLogger.info('Data corrections were applied during load',
+              tag: _tag,
+              data: {
+                'corrections': result.appliedCorrections,
+                'profileId': widget.profileId,
+              });
         }
       } else {
         setState(() {
@@ -81,11 +80,8 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
         _isInitialLoading = false;
       });
 
-      EnhancedLogger.error('Failed to load preferences in view', 
-        tag: _tag, 
-        error: e,
-        data: {'profileId': widget.profileId}
-      );
+      EnhancedLogger.error('Failed to load preferences in view',
+          tag: _tag, error: e, data: {'profileId': widget.profileId});
     }
   }
 
@@ -100,13 +96,10 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
     });
 
     try {
-      EnhancedLogger.info('Saving preferences from view', 
-        tag: _tag, 
-        data: {
-          'profileId': widget.profileId,
-          'allowInteractions': _allowInteractions,
-        }
-      );
+      EnhancedLogger.info('Saving preferences from view', tag: _tag, data: {
+        'profileId': widget.profileId,
+        'allowInteractions': _allowInteractions,
+      });
 
       final result = await PreferencesService.savePreferences(
         profileId: widget.profileId,
@@ -121,23 +114,22 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
         });
 
         // Log de sucesso com detalhes
-        EnhancedLogger.success('Preferences saved successfully from view', 
-          tag: _tag, 
-          data: {
-            'profileId': widget.profileId,
-            'allowInteractions': _allowInteractions,
-            'strategy': result.strategyUsed,
-            'corrections': result.appliedCorrections,
-            'duration': result.operationDuration?.inMilliseconds,
-          }
-        );
+        EnhancedLogger.success('Preferences saved successfully from view',
+            tag: _tag,
+            data: {
+              'profileId': widget.profileId,
+              'allowInteractions': _allowInteractions,
+              'strategy': result.strategyUsed,
+              'corrections': result.appliedCorrections,
+              'duration': result.operationDuration?.inMilliseconds,
+            });
 
         // Notificar conclusão da tarefa
         widget.onTaskCompleted('preferences');
 
         // Aguardar um pouco para mostrar sucesso, depois voltar
         await Future.delayed(const Duration(seconds: 2));
-        
+
         if (mounted) {
           Get.back();
         }
@@ -147,14 +139,13 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
           _isLoading = false;
         });
 
-        EnhancedLogger.error('Failed to save preferences from view', 
-          tag: _tag, 
-          data: {
-            'profileId': widget.profileId,
-            'errorType': result.errorType?.toString(),
-            'errorMessage': result.errorMessage,
-          }
-        );
+        EnhancedLogger.error('Failed to save preferences from view',
+            tag: _tag,
+            data: {
+              'profileId': widget.profileId,
+              'errorType': result.errorType?.toString(),
+              'errorMessage': result.errorMessage,
+            });
       }
     } catch (e) {
       setState(() {
@@ -162,11 +153,8 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
         _isLoading = false;
       });
 
-      EnhancedLogger.error('Unexpected error in save preferences', 
-        tag: _tag, 
-        error: e,
-        data: {'profileId': widget.profileId}
-      );
+      EnhancedLogger.error('Unexpected error in save preferences',
+          tag: _tag, error: e, data: {'profileId': widget.profileId});
     }
   }
 
@@ -186,7 +174,7 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: _isInitialLoading 
+      body: _isInitialLoading
           ? _buildLoadingState()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -295,7 +283,7 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Allow interactions switch
           Container(
             padding: const EdgeInsets.all(16),
@@ -332,21 +320,23 @@ class _PreferencesInteractionViewState extends State<PreferencesInteractionView>
                 ),
                 Switch(
                   value: _allowInteractions,
-                  onChanged: _isLoading ? null : (value) {
-                    setState(() {
-                      _allowInteractions = value;
-                      _errorMessage = null;
-                      _successMessage = null;
-                    });
-                  },
+                  onChanged: _isLoading
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _allowInteractions = value;
+                            _errorMessage = null;
+                            _successMessage = null;
+                          });
+                        },
                   activeColor: Colors.orange[700],
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Information about interactions
           Container(
             padding: const EdgeInsets.all(16),

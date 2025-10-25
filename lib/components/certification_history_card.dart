@@ -4,7 +4,7 @@ import '../models/certification_request_model.dart';
 import '../components/certification_proof_viewer.dart';
 
 /// Card para exibir uma certificação do histórico
-/// 
+///
 /// Exibe:
 /// - Status final (aprovado/reprovado)
 /// - Informações do usuário
@@ -39,25 +39,25 @@ class CertificationHistoryCard extends StatelessWidget {
           children: [
             // Cabeçalho com status
             _buildHeader(statusColor, statusIcon, statusText),
-            
+
             Divider(height: 24),
-            
+
             // Informações do usuário
             _buildUserInfo(),
-            
+
             SizedBox(height: 12),
-            
+
             // Informações de processamento
             _buildProcessingInfo(),
-            
+
             // Motivo da reprovação (se aplicável)
             if (!isApproved && certification.rejectionReason != null) ...[
               SizedBox(height: 12),
               _buildRejectionReason(),
             ],
-            
+
             SizedBox(height: 12),
-            
+
             // Botão para ver comprovante
             _buildViewProofButton(context),
           ],
@@ -67,7 +67,8 @@ class CertificationHistoryCard extends StatelessWidget {
   }
 
   /// Cabeçalho com status
-  Widget _buildHeader(Color statusColor, IconData statusIcon, String statusText) {
+  Widget _buildHeader(
+      Color statusColor, IconData statusIcon, String statusText) {
     return Row(
       children: [
         // Ícone de status
@@ -79,9 +80,9 @@ class CertificationHistoryCard extends StatelessWidget {
           ),
           child: Icon(statusIcon, color: statusColor, size: 32),
         ),
-        
+
         SizedBox(width: 12),
-        
+
         // Nome e status
         Expanded(
           child: Column(

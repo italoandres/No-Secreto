@@ -34,28 +34,26 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
   Future<void> _checkCertificationStatus() async {
     try {
       if (widget.userId.isEmpty) return;
-      
-      final hasApproved = await CertificationStatusHelper.hasApprovedCertification(widget.userId);
-      
+
+      final hasApproved =
+          await CertificationStatusHelper.hasApprovedCertification(
+              widget.userId);
+
       if (mounted) {
         setState(() {
           hasApprovedCertification = hasApproved;
         });
       }
-      
-      EnhancedLogger.info('Certification status checked', 
-        tag: 'PROFILE_DISPLAY',
-        data: {
-          'userId': widget.userId,
-          'hasApprovedCertification': hasApprovedCertification,
-        }
-      );
+
+      EnhancedLogger.info('Certification status checked',
+          tag: 'PROFILE_DISPLAY',
+          data: {
+            'userId': widget.userId,
+            'hasApprovedCertification': hasApprovedCertification,
+          });
     } catch (e) {
-      EnhancedLogger.error('Error checking certification status', 
-        tag: 'PROFILE_DISPLAY',
-        error: e,
-        data: {'userId': widget.userId}
-      );
+      EnhancedLogger.error('Error checking certification status',
+          tag: 'PROFILE_DISPLAY', error: e, data: {'userId': widget.userId});
       // Em caso de erro, ocultar o selo silenciosamente
       if (mounted) {
         setState(() {
@@ -67,7 +65,6 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: Obx(() {
@@ -267,7 +264,8 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
     );
   }
 
-  Widget _buildIdentitySection(UsuarioModel user, SpiritualProfileModel profile) {
+  Widget _buildIdentitySection(
+      UsuarioModel user, SpiritualProfileModel profile) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -303,7 +301,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Location and age
           if (profile.city?.isNotEmpty == true || profile.age != null) ...[
             Row(
@@ -321,7 +319,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 12),
           ],
-          
+
           // Relationship status
           if (profile.relationshipStatus != null) ...[
             Row(
@@ -330,9 +328,10 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
                   profile.relationshipStatus == RelationshipStatus.solteiro
                       ? Icons.favorite_border
                       : Icons.favorite,
-                  color: profile.relationshipStatus == RelationshipStatus.solteiro
-                      ? Colors.green[600]
-                      : Colors.red[600],
+                  color:
+                      profile.relationshipStatus == RelationshipStatus.solteiro
+                          ? Colors.green[600]
+                          : Colors.red[600],
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -340,7 +339,8 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
                   _getRelationshipStatusText(profile.relationshipStatus!),
                   style: TextStyle(
                     fontSize: 16,
-                    color: profile.relationshipStatus == RelationshipStatus.solteiro
+                    color: profile.relationshipStatus ==
+                            RelationshipStatus.solteiro
                         ? Colors.green[700]
                         : Colors.red[700],
                     fontWeight: FontWeight.w500,
@@ -350,7 +350,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 12),
           ],
-          
+
           // Deus é Pai movement
           if (profile.isDeusEPaiMember != null) ...[
             Row(
@@ -418,7 +418,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Purpose
           if (profile.purpose?.isNotEmpty == true) ...[
             _buildBiographyItem(
@@ -428,7 +428,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Non-negotiable value
           if (profile.nonNegotiableValue?.isNotEmpty == true) ...[
             _buildBiographyItem(
@@ -438,7 +438,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Faith phrase
           if (profile.faithPhrase?.isNotEmpty == true) ...[
             _buildBiographyItem(
@@ -448,7 +448,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // About me
           if (profile.aboutMe?.isNotEmpty == true) ...[
             _buildBiographyItem(
@@ -458,7 +458,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Ready for purposeful relationship
           if (profile.readyForPurposefulRelationship != null) ...[
             Row(
@@ -531,9 +531,10 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
     );
   }
 
-  Widget _buildInteractionSection(ProfileDisplayController controller, SpiritualProfileModel profile) {
+  Widget _buildInteractionSection(
+      ProfileDisplayController controller, SpiritualProfileModel profile) {
     // Only show interaction section if profile allows interactions and user is single
-    if (!profile.allowInteractions || 
+    if (!profile.allowInteractions ||
         profile.relationshipStatus != RelationshipStatus.solteiro) {
       return const SizedBox();
     }
@@ -573,7 +574,6 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
             ],
           ),
           const SizedBox(height: 16),
-          
           Obx(() {
             if (controller.hasExpressedInterest.value) {
               return _buildInterestExpressedButton();

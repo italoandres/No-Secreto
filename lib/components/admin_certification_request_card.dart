@@ -129,7 +129,7 @@ class AdminCertificationRequestCard extends StatelessWidget {
                   radius: 24,
                   backgroundColor: Colors.amber.shade700,
                   child: Text(
-                    request.userName.isNotEmpty 
+                    request.userName.isNotEmpty
                         ? request.userName[0].toUpperCase()
                         : 'U',
                     style: const TextStyle(
@@ -139,9 +139,9 @@ class AdminCertificationRequestCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Informações do usuário
                 Expanded(
                   child: Column(
@@ -165,10 +165,11 @@ class AdminCertificationRequestCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Badge de status
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: _getStatusColor(),
                     borderRadius: BorderRadius.circular(20),
@@ -195,7 +196,7 @@ class AdminCertificationRequestCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Conteúdo principal
           Padding(
             padding: const EdgeInsets.all(16),
@@ -209,25 +210,25 @@ class AdminCertificationRequestCard extends StatelessWidget {
                   value: request.purchaseEmail,
                   color: Colors.blue,
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 _buildInfoRow(
                   icon: Icons.calendar_today,
                   label: 'Data da solicitação',
                   value: _formatDate(request.requestedAt),
                   color: Colors.green,
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 _buildInfoRow(
                   icon: Icons.attach_file,
                   label: 'Comprovante',
                   value: request.proofFileName,
                   color: Colors.purple,
                 ),
-                
+
                 // Motivo de rejeição (se houver)
                 if (request.rejectionReason != null) ...[
                   const SizedBox(height: 16),
@@ -243,7 +244,8 @@ class AdminCertificationRequestCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.info_outline, color: Colors.red.shade700, size: 20),
+                            Icon(Icons.info_outline,
+                                color: Colors.red.shade700, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               'Motivo da rejeição:',
@@ -267,7 +269,7 @@ class AdminCertificationRequestCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                
+
                 // Data de processamento (se houver)
                 if (request.processedAt != null) ...[
                   const SizedBox(height: 12),
@@ -281,7 +283,7 @@ class AdminCertificationRequestCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Ações (apenas para pendentes)
           if (showActions && request.status == CertificationStatus.pending) ...[
             const Divider(height: 1),
@@ -305,9 +307,9 @@ class AdminCertificationRequestCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Botão Rejeitar
                   Expanded(
                     child: OutlinedButton.icon(
@@ -324,9 +326,9 @@ class AdminCertificationRequestCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Botão Aprovar
                   Expanded(
                     child: ElevatedButton.icon(

@@ -93,7 +93,8 @@ class ScoreCalculator {
     // 6. Filhos
     if (filters.selectedChildren != null &&
         filters.selectedChildren != 'Não tenho preferência') {
-      final profileChildrenStr = _convertProfileChildren(profileData['children']);
+      final profileChildrenStr =
+          _convertProfileChildren(profileData['children']);
       final childrenScore = _calculateChildrenScore(
         profileChildren: profileChildrenStr,
         filterChildren: filters.selectedChildren,
@@ -311,8 +312,7 @@ class ScoreCalculator {
     final maxPoints = basePoint * multiplier;
 
     // Ganha pontos se há correspondência
-    final earnedPoints =
-        (profileDrinking == filterDrinking) ? maxPoints : 0.0;
+    final earnedPoints = (profileDrinking == filterDrinking) ? maxPoints : 0.0;
 
     return {'earned': earnedPoints, 'max': maxPoints};
   }
@@ -352,31 +352,31 @@ class ScoreCalculator {
   /// Converte altura do perfil (pode ser String ou int) para int em cm
   int _convertProfileHeight(dynamic height) {
     if (height == null) return 0;
-    
+
     // Se já é int, retorna direto
     if (height is int) return height;
-    
+
     // Se é String, converte
     if (height is String) {
       // Usa o método do SearchFiltersModel
       return SearchFilters.convertHeightStringToInt(height) ?? 0;
     }
-    
+
     return 0;
   }
 
   /// Converte filhos do perfil (pode ser bool ou String) para String do filtro
   String? _convertProfileChildren(dynamic children) {
     if (children == null) return null;
-    
+
     // Se já é String, retorna direto
     if (children is String) return children;
-    
+
     // Se é bool, converte
     if (children is bool) {
       return SearchFilters.mapChildrenBoolToString(children);
     }
-    
+
     return null;
   }
 
@@ -391,7 +391,8 @@ class ScoreCalculator {
     final maxPoints = basePoint * multiplier;
 
     // Ganha pontos se há correspondência
-    final earnedPoints = (profileCertification == filterCertification) ? maxPoints : 0.0;
+    final earnedPoints =
+        (profileCertification == filterCertification) ? maxPoints : 0.0;
 
     return {'earned': earnedPoints, 'max': maxPoints};
   }

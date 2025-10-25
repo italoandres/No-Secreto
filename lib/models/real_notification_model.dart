@@ -69,10 +69,10 @@ class RealNotification {
   }
 
   bool isValid() {
-    return id.isNotEmpty && 
-           fromUserId.isNotEmpty && 
-           fromUserName.isNotEmpty && 
-           message.isNotEmpty;
+    return id.isNotEmpty &&
+        fromUserId.isNotEmpty &&
+        fromUserName.isNotEmpty &&
+        message.isNotEmpty;
   }
 
   String getDisplayName() {

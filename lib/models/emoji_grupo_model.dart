@@ -1,4 +1,3 @@
-
 class EmojiGrupoModel {
   String? en;
   String? pt;
@@ -11,7 +10,6 @@ class EmojiGrupoModel {
   });
 
   static EmojiGrupoModel fromJson(Map<String, dynamic> json) {
-
     return EmojiGrupoModel(
       en: json['en'],
       pt: json['pt'],

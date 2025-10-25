@@ -55,7 +55,8 @@ class PurposeInviteButtonComponent extends StatelessWidget {
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                                 strokeWidth: 2,
                               ),
                             ),

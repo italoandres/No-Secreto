@@ -8,35 +8,36 @@ import '../utils/enhanced_logger.dart';
 /// com pre-loading, cache de páginas e otimizações de memória
 class SearchPaginationManager {
   static SearchPaginationManager? _instance;
-  static SearchPaginationManager get instance => _instance ??= SearchPaginationManager._();
-  
+  static SearchPaginationManager get instance =>
+      _instance ??= SearchPaginationManager._();
+
   SearchPaginationManager._();
 
   /// Cache de páginas por query
   final Map<String, PaginatedSearchSession> _sessions = {};
-  
+
   /// Configurações de paginação
   static const int defaultPageSize = 20;
   static const int maxCachedPages = 10;
-  static const int preloadThreshold = 3; // Páginas restantes para iniciar preload
+  static const int preloadThreshold =
+      3; // Páginas restantes para iniciar preload
   static const Duration sessionTimeout = Duration(minutes: 15);
-  
+
   /// Timer para limpeza de sessões expiradas
   Timer? _cleanupTimer;
 
   /// Inicializa o gerenciador
   void initialize() {
     _startCleanupTimer();
-    
-    EnhancedLogger.info('Search pagination manager initialized', 
-      tag: 'SEARCH_PAGINATION_MANAGER',
-      data: {
-        'defaultPageSize': defaultPageSize,
-        'maxCachedPages': maxCachedPages,
-        'preloadThreshold': preloadThreshold,
-        'sessionTimeout': sessionTimeout.inMinutes,
-      }
-    );
+
+    EnhancedLogger.info('Search pagination manager initialized',
+        tag: 'SEARCH_PAGINATION_MANAGER',
+        data: {
+          'defaultPageSize': defaultPageSize,
+          'maxCachedPages': maxCachedPages,
+          'preloadThreshold': preloadThreshold,
+          'sessionTimeout': sessionTimeout.inMinutes,
+        });
   }
 
   /// Cria ou obtém uma sessão de busca paginada
@@ -44,23 +45,24 @@ class SearchPaginationManager {
     required String query,
     SearchFilters? filters,
     int pageSize = defaultPageSize,
-    required Future<SearchResult> Function(String query, SearchFilters? filters, int limit, int offset) searchFunction,
+    required Future<SearchResult> Function(
+            String query, SearchFilters? filters, int limit, int offset)
+        searchFunction,
   }) async {
     final sessionKey = _generateSessionKey(query, filters, pageSize);
-    
+
     // Verificar se já existe uma sessão ativa
     var session = _sessions[sessionKey];
     if (session != null && !session.isExpired) {
-      EnhancedLogger.debug('Reusing existing pagination session', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'sessionKey': sessionKey,
-          'currentPage': session.currentPage,
-          'totalPages': session.totalPages,
-          'cachedPages': session.cachedPages.length,
-        }
-      );
-      
+      EnhancedLogger.debug('Reusing existing pagination session',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'sessionKey': sessionKey,
+            'currentPage': session.currentPage,
+            'totalPages': session.totalPages,
+            'cachedPages': session.cachedPages.length,
+          });
+
       return _buildPaginatedResult(session, 0);
     }
 
@@ -76,15 +78,14 @@ class SearchPaginationManager {
 
     _sessions[sessionKey] = session;
 
-    EnhancedLogger.info('Starting new paginated search session', 
-      tag: 'SEARCH_PAGINATION_MANAGER',
-      data: {
-        'sessionKey': sessionKey,
-        'query': query,
-        'hasFilters': filters != null,
-        'pageSize': pageSize,
-      }
-    );
+    EnhancedLogger.info('Starting new paginated search session',
+        tag: 'SEARCH_PAGINATION_MANAGER',
+        data: {
+          'sessionKey': sessionKey,
+          'query': query,
+          'hasFilters': filters != null,
+          'pageSize': pageSize,
+        });
 
     // Carregar primeira página
     return await _loadPage(session, 0);
@@ -99,9 +100,10 @@ class SearchPaginationManager {
   }) async {
     final sessionKey = _generateSessionKey(query, filters, pageSize);
     final session = _sessions[sessionKey];
-    
+
     if (session == null || session.isExpired) {
-      throw Exception('Pagination session not found or expired. Start a new search first.');
+      throw Exception(
+          'Pagination session not found or expired. Start a new search first.');
     }
 
     return await _loadPage(session, pageNumber);
@@ -115,7 +117,7 @@ class SearchPaginationManager {
   }) async {
     final sessionKey = _generateSessionKey(query, filters, pageSize);
     final session = _sessions[sessionKey];
-    
+
     if (session == null || session.isExpired) {
       return null;
     }
@@ -135,7 +137,7 @@ class SearchPaginationManager {
   }) async {
     final sessionKey = _generateSessionKey(query, filters, pageSize);
     final session = _sessions[sessionKey];
-    
+
     if (session == null || session.isExpired || session.currentPage <= 0) {
       return null;
     }
@@ -144,26 +146,26 @@ class SearchPaginationManager {
   }
 
   /// Implementação interna para carregar uma página
-  Future<PaginatedSearchResult> _loadPage(PaginatedSearchSession session, int pageNumber) async {
+  Future<PaginatedSearchResult> _loadPage(
+      PaginatedSearchSession session, int pageNumber) async {
     final startTime = DateTime.now();
-    
+
     // Verificar se a página já está em cache
     if (session.cachedPages.containsKey(pageNumber)) {
       session.currentPage = pageNumber;
       session.lastAccessedAt = DateTime.now();
-      
-      EnhancedLogger.debug('Page loaded from cache', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'sessionKey': session.sessionKey,
-          'pageNumber': pageNumber,
-          'cacheHit': true,
-        }
-      );
+
+      EnhancedLogger.debug('Page loaded from cache',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'sessionKey': session.sessionKey,
+            'pageNumber': pageNumber,
+            'cacheHit': true,
+          });
 
       // Verificar se precisa fazer preload
       _checkPreloadNeeds(session, pageNumber);
-      
+
       return _buildPaginatedResult(session, pageNumber);
     }
 
@@ -179,10 +181,12 @@ class SearchPaginationManager {
 
       // Atualizar informações da sessão
       if (session.totalResults == null) {
-        session.totalResults = result.profiles.length < session.pageSize ? 
-            offset + result.profiles.length : null; // Não sabemos o total ainda
-        session.totalPages = session.totalResults != null ? 
-            (session.totalResults! / session.pageSize).ceil() : null;
+        session.totalResults = result.profiles.length < session.pageSize
+            ? offset + result.profiles.length
+            : null; // Não sabemos o total ainda
+        session.totalPages = session.totalResults != null
+            ? (session.totalResults! / session.pageSize).ceil()
+            : null;
       }
 
       // Cachear a página
@@ -201,38 +205,36 @@ class SearchPaginationManager {
 
       final executionTime = DateTime.now().difference(startTime).inMilliseconds;
 
-      EnhancedLogger.info('Page loaded from server', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'sessionKey': session.sessionKey,
-          'pageNumber': pageNumber,
-          'profilesCount': result.profiles.length,
-          'executionTime': executionTime,
-          'cacheHit': false,
-          'fromCache': result.fromCache,
-        }
-      );
+      EnhancedLogger.info('Page loaded from server',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'sessionKey': session.sessionKey,
+            'pageNumber': pageNumber,
+            'profilesCount': result.profiles.length,
+            'executionTime': executionTime,
+            'cacheHit': false,
+            'fromCache': result.fromCache,
+          });
 
       // Verificar se precisa fazer preload
       _checkPreloadNeeds(session, pageNumber);
 
       return _buildPaginatedResult(session, pageNumber);
-
     } catch (e) {
-      EnhancedLogger.error('Failed to load page', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'sessionKey': session.sessionKey,
-          'pageNumber': pageNumber,
-          'error': e.toString(),
-        }
-      );
+      EnhancedLogger.error('Failed to load page',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'sessionKey': session.sessionKey,
+            'pageNumber': pageNumber,
+            'error': e.toString(),
+          });
       rethrow;
     }
   }
 
   /// Constrói resultado paginado
-  PaginatedSearchResult _buildPaginatedResult(PaginatedSearchSession session, int pageNumber) {
+  PaginatedSearchResult _buildPaginatedResult(
+      PaginatedSearchSession session, int pageNumber) {
     final cachedPage = session.cachedPages[pageNumber];
     if (cachedPage == null) {
       throw Exception('Page $pageNumber not found in cache');
@@ -258,27 +260,28 @@ class SearchPaginationManager {
     if (session.totalPages == null) return;
 
     final remainingPages = session.totalPages! - currentPage - 1;
-    
+
     if (remainingPages <= preloadThreshold && remainingPages > 0) {
       // Fazer preload das próximas páginas em background
-      _preloadPages(session, currentPage + 1, math.min(currentPage + preloadThreshold, session.totalPages! - 1));
+      _preloadPages(session, currentPage + 1,
+          math.min(currentPage + preloadThreshold, session.totalPages! - 1));
     }
   }
 
   /// Faz preload de páginas em background
-  void _preloadPages(PaginatedSearchSession session, int startPage, int endPage) {
+  void _preloadPages(
+      PaginatedSearchSession session, int startPage, int endPage) {
     for (int page = startPage; page <= endPage; page++) {
       if (!session.cachedPages.containsKey(page)) {
         // Preload em background sem bloquear
         _loadPage(session, page).catchError((error) {
-          EnhancedLogger.warning('Preload failed for page $page', 
-            tag: 'SEARCH_PAGINATION_MANAGER',
-            data: {
-              'sessionKey': session.sessionKey,
-              'page': page,
-              'error': error.toString(),
-            }
-          );
+          EnhancedLogger.warning('Preload failed for page $page',
+              tag: 'SEARCH_PAGINATION_MANAGER',
+              data: {
+                'sessionKey': session.sessionKey,
+                'page': page,
+                'error': error.toString(),
+              });
         });
       }
     }
@@ -297,24 +300,24 @@ class SearchPaginationManager {
     for (int i = 0; i < pagesToRemove; i++) {
       final pageToRemove = sortedPages[i].key;
       session.cachedPages.remove(pageToRemove);
-      
-      EnhancedLogger.debug('Removed cached page due to size limit', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'sessionKey': session.sessionKey,
-          'removedPage': pageToRemove,
-          'remainingPages': session.cachedPages.length,
-        }
-      );
+
+      EnhancedLogger.debug('Removed cached page due to size limit',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'sessionKey': session.sessionKey,
+            'removedPage': pageToRemove,
+            'remainingPages': session.cachedPages.length,
+          });
     }
   }
 
   /// Gera chave única para a sessão
-  String _generateSessionKey(String query, SearchFilters? filters, int pageSize) {
+  String _generateSessionKey(
+      String query, SearchFilters? filters, int pageSize) {
     final buffer = StringBuffer();
     buffer.write('q:${query.toLowerCase()}');
     buffer.write('|ps:$pageSize');
-    
+
     if (filters != null) {
       if (filters.minAge != null) buffer.write('|minAge:${filters.minAge}');
       if (filters.maxAge != null) buffer.write('|maxAge:${filters.maxAge}');
@@ -337,7 +340,7 @@ class SearchPaginationManager {
         buffer.write('|course:${filters.hasCompletedCourse}');
       }
     }
-    
+
     return buffer.toString();
   }
 
@@ -352,25 +355,24 @@ class SearchPaginationManager {
   void _cleanupExpiredSessions() {
     final now = DateTime.now();
     final expiredKeys = <String>[];
-    
+
     _sessions.forEach((key, session) {
       if (session.isExpired) {
         expiredKeys.add(key);
       }
     });
-    
+
     for (final key in expiredKeys) {
       _sessions.remove(key);
     }
-    
+
     if (expiredKeys.isNotEmpty) {
-      EnhancedLogger.info('Cleaned up expired pagination sessions', 
-        tag: 'SEARCH_PAGINATION_MANAGER',
-        data: {
-          'expiredSessions': expiredKeys.length,
-          'activeSessions': _sessions.length,
-        }
-      );
+      EnhancedLogger.info('Cleaned up expired pagination sessions',
+          tag: 'SEARCH_PAGINATION_MANAGER',
+          data: {
+            'expiredSessions': expiredKeys.length,
+            'activeSessions': _sessions.length,
+          });
     }
   }
 
@@ -379,12 +381,12 @@ class SearchPaginationManager {
     final now = DateTime.now();
     int totalCachedPages = 0;
     int totalSessions = _sessions.length;
-    
+
     final sessionStats = <String, Map<String, dynamic>>{};
-    
+
     _sessions.forEach((key, session) {
       totalCachedPages += session.cachedPages.length;
-      
+
       sessionStats[key] = {
         'query': session.query,
         'currentPage': session.currentPage,
@@ -401,7 +403,8 @@ class SearchPaginationManager {
       'timestamp': now.toIso8601String(),
       'totalSessions': totalSessions,
       'totalCachedPages': totalCachedPages,
-      'averageCachedPagesPerSession': totalSessions > 0 ? totalCachedPages / totalSessions : 0.0,
+      'averageCachedPagesPerSession':
+          totalSessions > 0 ? totalCachedPages / totalSessions : 0.0,
       'configuration': {
         'defaultPageSize': defaultPageSize,
         'maxCachedPages': maxCachedPages,
@@ -420,32 +423,28 @@ class SearchPaginationManager {
   }) {
     final sessionKey = _generateSessionKey(query, filters, pageSize);
     _sessions.remove(sessionKey);
-    
-    EnhancedLogger.info('Pagination session cleared', 
-      tag: 'SEARCH_PAGINATION_MANAGER',
-      data: {'sessionKey': sessionKey}
-    );
+
+    EnhancedLogger.info('Pagination session cleared',
+        tag: 'SEARCH_PAGINATION_MANAGER', data: {'sessionKey': sessionKey});
   }
 
   /// Limpa todas as sessões
   void clearAllSessions() {
     final sessionCount = _sessions.length;
     _sessions.clear();
-    
-    EnhancedLogger.info('All pagination sessions cleared', 
-      tag: 'SEARCH_PAGINATION_MANAGER',
-      data: {'clearedSessions': sessionCount}
-    );
+
+    EnhancedLogger.info('All pagination sessions cleared',
+        tag: 'SEARCH_PAGINATION_MANAGER',
+        data: {'clearedSessions': sessionCount});
   }
 
   /// Para o gerenciador
   void dispose() {
     _cleanupTimer?.cancel();
     _sessions.clear();
-    
-    EnhancedLogger.info('Search pagination manager disposed', 
-      tag: 'SEARCH_PAGINATION_MANAGER'
-    );
+
+    EnhancedLogger.info('Search pagination manager disposed',
+        tag: 'SEARCH_PAGINATION_MANAGER');
   }
 }
 
@@ -455,9 +454,11 @@ class PaginatedSearchSession {
   final String query;
   final SearchFilters? filters;
   final int pageSize;
-  final Future<SearchResult> Function(String query, SearchFilters? filters, int limit, int offset) searchFunction;
+  final Future<SearchResult> Function(
+          String query, SearchFilters? filters, int limit, int offset)
+      searchFunction;
   final DateTime createdAt;
-  
+
   int currentPage = 0;
   int? totalResults;
   int? totalPages;
@@ -473,13 +474,16 @@ class PaginatedSearchSession {
     required this.createdAt,
   }) : lastAccessedAt = createdAt;
 
-  bool get isExpired => DateTime.now().difference(lastAccessedAt) > SearchPaginationManager.sessionTimeout;
-  
+  bool get isExpired =>
+      DateTime.now().difference(lastAccessedAt) >
+      SearchPaginationManager.sessionTimeout;
+
   bool get hasNextPage {
     if (totalPages == null) {
       // Se não sabemos o total, assumir que há próxima página se a atual tem resultados completos
       final currentPageData = cachedPages[currentPage];
-      return currentPageData != null && currentPageData.profiles.length == pageSize;
+      return currentPageData != null &&
+          currentPageData.profiles.length == pageSize;
     }
     return currentPage < totalPages! - 1;
   }

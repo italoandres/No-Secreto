@@ -29,7 +29,7 @@ class RelationshipStatusSection extends StatelessWidget {
           // Section Title
           _buildSectionTitle('Status de Relacionamento'),
           const SizedBox(height: 16),
-          
+
           // Status Cards Grid
           _buildStatusGrid(),
         ],
@@ -50,7 +50,7 @@ class RelationshipStatusSection extends StatelessWidget {
 
   Widget _buildStatusGrid() {
     List<Widget> statusCards = [];
-    
+
     // Marital Status
     if (relationshipStatus != null) {
       statusCards.add(_buildStatusCard(
@@ -61,7 +61,7 @@ class RelationshipStatusSection extends StatelessWidget {
         isHighlighted: relationshipStatus == RelationshipStatus.solteiro,
       ));
     }
-    
+
     // Children Status
     if (hasChildren != null) {
       statusCards.add(_buildStatusCard(
@@ -71,17 +71,18 @@ class RelationshipStatusSection extends StatelessWidget {
         value: _getChildrenStatusText(),
       ));
     }
-    
+
     // Previous Marriage
     if (wasPreviouslyMarried != null) {
       statusCards.add(_buildStatusCard(
         icon: wasPreviouslyMarried! ? Icons.history : Icons.new_releases,
-        iconColor: wasPreviouslyMarried! ? Colors.orange[600]! : Colors.teal[600]!,
+        iconColor:
+            wasPreviouslyMarried! ? Colors.orange[600]! : Colors.teal[600]!,
         title: 'Histórico',
         value: _getMarriageHistoryText(),
       ));
     }
-    
+
     // Virginity Status (PUBLIC - user chose to share)
     if (isVirgin != null) {
       statusCards.add(_buildStatusCard(
@@ -92,7 +93,7 @@ class RelationshipStatusSection extends StatelessWidget {
         isPrivate: false, // Agora é público
       ));
     }
-    
+
     return Column(
       children: [
         // First row
@@ -109,7 +110,7 @@ class RelationshipStatusSection extends StatelessWidget {
           statusCards[0],
           const SizedBox(height: 12),
         ],
-        
+
         // Second row
         if (statusCards.length >= 4) ...[
           Row(
@@ -142,12 +143,11 @@ class RelationshipStatusSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted 
-            ? AppColors.primary.withOpacity(0.05)
-            : Colors.white,
+        color:
+            isHighlighted ? AppColors.primary.withOpacity(0.05) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isHighlighted 
+          color: isHighlighted
               ? AppColors.primary.withOpacity(0.3)
               : Colors.grey[200]!,
           width: isHighlighted ? 2 : 1,
@@ -181,7 +181,8 @@ class RelationshipStatusSection extends StatelessWidget {
               const Spacer(),
               if (isPrivate)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
@@ -209,7 +210,7 @@ class RelationshipStatusSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // Title
           Text(
             title,
@@ -220,14 +221,15 @@ class RelationshipStatusSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          
+
           // Value
           Text(
             value,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isHighlighted ? AppColors.primary : const Color(0xFF333333),
+              color:
+                  isHighlighted ? AppColors.primary : const Color(0xFF333333),
             ),
           ),
         ],

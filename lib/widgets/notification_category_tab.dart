@@ -6,13 +6,13 @@ import 'package:whatsapp_chat/models/notification_category.dart';
 class NotificationCategoryTab extends StatelessWidget {
   /// Categoria da notificação
   final NotificationCategory category;
-  
+
   /// Contador de notificações não lidas
   final int badgeCount;
-  
+
   /// Se a categoria está ativa
   final bool isActive;
-  
+
   /// Callback ao tocar na tab
   final VoidCallback onTap;
 
@@ -60,19 +60,20 @@ class NotificationCategoryTab extends StatelessWidget {
                     size: 28,
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Nome da categoria
                   Text(
                     category.displayName,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isActive ? FontWeight.bold : FontWeight.normal,
                       color: isActive ? category.color : Colors.grey.shade600,
                     ),
                   ),
                 ],
               ),
-              
+
               // Badge com contador
               if (badgeCount > 0)
                 Positioned(
@@ -188,7 +189,7 @@ class NotificationCategoryTabHorizontal extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 8),
-              
+
               // Nome da categoria
               Text(
                 category.displayName,

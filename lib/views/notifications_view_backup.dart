@@ -5,9 +5,11 @@ import 'package:whatsapp_chat/models/notification_model.dart';
 import 'package:whatsapp_chat/services/notification_service.dart';
 import 'package:whatsapp_chat/components/notification_item_component.dart';
 import 'package:whatsapp_chat/views/story_favorites_view.dart';
+
 class NotificationsView extends StatefulWidget {
-  final String? contexto; // Contexto de onde foi chamada (principal, sinais_rebeca, sinais_isaque)
-  
+  final String?
+      contexto; // Contexto de onde foi chamada (principal, sinais_rebeca, sinais_isaque)
+
   const NotificationsView({Key? key, this.contexto}) : super(key: key);
 
   @override
@@ -51,7 +53,8 @@ class _NotificationsViewState extends State<NotificationsView> {
     try {
       // Se há contexto específico, marcar apenas notificações desse contexto
       if (widget.contexto != null) {
-        await NotificationService.markContextNotificationsAsRead(currentUser.uid, widget.contexto!);
+        await NotificationService.markContextNotificationsAsRead(
+            currentUser.uid, widget.contexto!);
       } else {
         await NotificationService.markAllNotificationsAsRead(currentUser.uid);
       }
@@ -70,7 +73,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   Future<void> _onRefresh() async {
     // Aguardar um pouco para simular o refresh
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Marcar todas como lidas novamente
     await _markAllAsRead();
   }
@@ -223,13 +226,14 @@ class _NotificationsViewState extends State<NotificationsView> {
           IconButton(
             onPressed: () {
               final contextoAtual = widget.contexto ?? 'principal';
-              print('🔔 BOTÃO NOTIFICAÇÕES: Abrindo favoritos do contexto: $contextoAtual');
+              print(
+                  '🔔 BOTÃO NOTIFICAÇÕES: Abrindo favoritos do contexto: $contextoAtual');
               Get.to(() => StoryFavoritesView(contexto: contextoAtual));
             },
             icon: _buildBookmarkIcon(),
             tooltip: 'Stories Salvos',
           ),
-          
+
           // Botão para marcar todas como lidas
           if (!_isMarkingAsRead)
             IconButton(
@@ -237,7 +241,7 @@ class _NotificationsViewState extends State<NotificationsView> {
               icon: const Icon(Icons.done_all, color: Colors.white),
               tooltip: 'Marcar todas como lidas',
             ),
-          
+
           // Indicador de loading
           if (_isMarkingAsRead)
             const Padding(
@@ -254,9 +258,10 @@ class _NotificationsViewState extends State<NotificationsView> {
         ],
       ),
       body: StreamBuilder<List<NotificationModel>>(
-        stream: widget.contexto != null 
-          ? NotificationService.getContextNotifications(currentUser.uid, widget.contexto!)
-          : NotificationService.getUserNotifications(currentUser.uid),
+        stream: widget.contexto != null
+            ? NotificationService.getContextNotifications(
+                currentUser.uid, widget.contexto!)
+            : NotificationService.getUserNotifications(currentUser.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -366,9 +371,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                 if (index == notifications.length) {
                   return TestNotifications.buildTestButton();
                 }
-                
+
                 final notification = notifications[index];
-                
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: NotificationItemComponent(
@@ -426,7 +431,7 @@ class _NotificationsViewState extends State<NotificationsView> {
     if (confirmed == true) {
       try {
         await NotificationService.deleteNotification(notification.id);
-        
+
         Get.snackbar(
           'Sucesso',
           'Notificação excluída',

@@ -29,7 +29,7 @@ class _UniversityCourseSelectorComponentState
   final TextEditingController _universityController = TextEditingController();
   final FocusNode _courseFocusNode = FocusNode();
   final FocusNode _universityFocusNode = FocusNode();
-  
+
   List<String> _courseSuggestions = [];
   bool _showCourseSuggestions = false;
   String? _selectedCourse;
@@ -40,7 +40,7 @@ class _UniversityCourseSelectorComponentState
     super.initState();
     _selectedCourse = widget.selectedCourse;
     _selectedUniversity = widget.selectedUniversity;
-    
+
     if (_selectedCourse != null) {
       _courseController.text = _selectedCourse!;
     }
@@ -148,7 +148,7 @@ class _UniversityCourseSelectorComponentState
         ),
 
         // Lista de sugestões de cursos
-        if (_showCourseSuggestions && _courseSuggestions.isNotEmpty) ...[ 
+        if (_showCourseSuggestions && _courseSuggestions.isNotEmpty) ...[
           const SizedBox(height: 8),
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
@@ -267,7 +267,9 @@ class _UniversityCourseSelectorComponentState
         ],
 
         // Mensagem quando não há resultados
-        if (_showCourseSuggestions && _courseSuggestions.isEmpty && _courseController.text.isNotEmpty) ...[ 
+        if (_showCourseSuggestions &&
+            _courseSuggestions.isEmpty &&
+            _courseController.text.isNotEmpty) ...[
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),

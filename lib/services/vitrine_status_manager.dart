@@ -5,7 +5,7 @@ import '../services/profile_completion_detector.dart';
 class VitrineStatus {
   final bool isPubliclyVisible;
   final String displayName;
-  
+
   const VitrineStatus({
     required this.isPubliclyVisible,
     required this.displayName,
@@ -19,26 +19,20 @@ class VitrineStatusManager {
   /// Verifica se pode ativar a vitrine
   Future<bool> canActivateVitrine(String userId) async {
     try {
-      EnhancedLogger.info('Checking if can activate vitrine', 
-        tag: _tag,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('Checking if can activate vitrine',
+          tag: _tag, data: {'userId': userId});
 
       // Usar o detector de completude como validação principal
-      final isComplete = await ProfileCompletionDetector.isProfileComplete(userId);
-      
-      EnhancedLogger.info('Vitrine activation check result', 
-        tag: _tag,
-        data: {'userId': userId, 'canActivate': isComplete}
-      );
+      final isComplete =
+          await ProfileCompletionDetector.isProfileComplete(userId);
+
+      EnhancedLogger.info('Vitrine activation check result',
+          tag: _tag, data: {'userId': userId, 'canActivate': isComplete});
 
       return isComplete;
     } catch (e) {
-      EnhancedLogger.error('Error checking vitrine activation', 
-        tag: _tag,
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Error checking vitrine activation',
+          tag: _tag, error: e, data: {'userId': userId});
       return false;
     }
   }
@@ -47,18 +41,15 @@ class VitrineStatusManager {
   Future<VitrineStatus> getVitrineStatus(String userId) async {
     try {
       final canActivate = await canActivateVitrine(userId);
-      
+
       return VitrineStatus(
         isPubliclyVisible: canActivate,
         displayName: canActivate ? 'Ativa' : 'Inativa',
       );
     } catch (e) {
-      EnhancedLogger.error('Error getting vitrine status', 
-        tag: _tag,
-        error: e,
-        data: {'userId': userId}
-      );
-      
+      EnhancedLogger.error('Error getting vitrine status',
+          tag: _tag, error: e, data: {'userId': userId});
+
       return const VitrineStatus(
         isPubliclyVisible: false,
         displayName: 'Erro',
@@ -69,15 +60,16 @@ class VitrineStatusManager {
   /// Obtém campos faltantes para ativar a vitrine
   Future<List<String>> getMissingRequiredFields(String userId) async {
     try {
-      final status = await ProfileCompletionDetector.getCompletionStatus(userId);
-      
+      final status =
+          await ProfileCompletionDetector.getCompletionStatus(userId);
+
       if (status.isComplete) {
         return [];
       }
 
       // Retornar campos faltantes baseado no status
       final missingFields = <String>[];
-      
+
       if (status.missingTasks.contains('photos')) {
         missingFields.add('Foto principal');
       }
@@ -92,13 +84,9 @@ class VitrineStatusManager {
       }
 
       return missingFields.isEmpty ? ['Perfil incompleto'] : missingFields;
-      
     } catch (e) {
-      EnhancedLogger.error('Error getting missing fields', 
-        tag: _tag,
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Error getting missing fields',
+          tag: _tag, error: e, data: {'userId': userId});
       return ['Erro ao verificar campos'];
     }
   }

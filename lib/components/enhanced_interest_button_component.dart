@@ -26,13 +26,15 @@ class EnhancedInterestButtonComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<EnhancedInterestButtonComponent> createState() => _EnhancedInterestButtonComponentState();
+  State<EnhancedInterestButtonComponent> createState() =>
+      _EnhancedInterestButtonComponentState();
 }
 
-class _EnhancedInterestButtonComponentState extends State<EnhancedInterestButtonComponent>
+class _EnhancedInterestButtonComponentState
+    extends State<EnhancedInterestButtonComponent>
     with SingleTickerProviderStateMixin {
   final InterestSystemIntegrator _integrator = InterestSystemIntegrator();
-  
+
   bool _isLoading = false;
   bool _hasInterest = false;
   InterestNotificationModel? _existingInterest;
@@ -77,9 +79,8 @@ class _EnhancedInterestButtonComponentState extends State<EnhancedInterestButton
         });
       }
     } catch (e) {
-      EnhancedLogger.error('Erro ao verificar interesse existente: $e', 
-        tag: 'ENHANCED_INTEREST_BUTTON'
-      );
+      EnhancedLogger.error('Erro ao verificar interesse existente: $e',
+          tag: 'ENHANCED_INTEREST_BUTTON');
     }
   }
 
@@ -119,7 +120,7 @@ class _EnhancedInterestButtonComponentState extends State<EnhancedInterestButton
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     // Não mostrar para o próprio perfil
     if (currentUser == null || currentUser.uid == widget.targetUserId) {
       return const SizedBox.shrink();
@@ -139,7 +140,7 @@ class _EnhancedInterestButtonComponentState extends State<EnhancedInterestButton
               );
             },
           ),
-          
+
           // Status do interesse
           if (_hasInterest && _existingInterest != null) ...[
             const SizedBox(height: 12),

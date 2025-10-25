@@ -1,4 +1,3 @@
-
 class StorieUserModel {
   String? id;
   String? idStore;
@@ -11,7 +10,6 @@ class StorieUserModel {
   });
 
   static StorieUserModel fromJson(Map<String, dynamic> json) {
-
     return StorieUserModel(
       idStore: json['idStore'] ?? '',
       idUser: json['idUser'],
@@ -19,7 +17,6 @@ class StorieUserModel {
   }
 
   static Map<String, dynamic> toJson(StorieUserModel item) {
-
     return {
       'idStore': item.idStore,
       'idUser': item.idUser,

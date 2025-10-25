@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 /// Widget otimizado para exibir imagens com cache automático
-/// 
+///
 /// Usa cached_network_image para:
 /// - Cache em disco
 /// - Cache em memória
 /// - Placeholder durante carregamento
 /// - Error handling automático
-/// 
+///
 /// USO:
 /// ```dart
 /// CachedImage(
@@ -54,21 +54,21 @@ class CachedImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        
+
         // Placeholder durante carregamento
         placeholder: (context, url) {
           return placeholder ?? _buildPlaceholder();
         },
-        
+
         // Widget de erro
         errorWidget: (context, url, error) {
           return errorWidget ?? _buildErrorWidget();
         },
-        
+
         // Cache settings
         fadeInDuration: const Duration(milliseconds: 300),
         fadeOutDuration: const Duration(milliseconds: 300),
-        
+
         // Memory cache
         memCacheWidth: width?.toInt(),
         memCacheHeight: height?.toInt(),
@@ -109,7 +109,7 @@ class CachedImage extends StatelessWidget {
 }
 
 /// Widget para foto de perfil circular com cache
-/// 
+///
 /// USO:
 /// ```dart
 /// CachedProfileImage(
@@ -161,7 +161,7 @@ class CachedProfileImage extends StatelessWidget {
 }
 
 /// Widget para imagem de fundo com cache
-/// 
+///
 /// USO:
 /// ```dart
 /// CachedBackgroundImage(
@@ -206,7 +206,7 @@ class CachedBackgroundImage extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Overlay opcional
         if (overlayColor != null && overlayOpacity > 0)
           Positioned.fill(
@@ -214,7 +214,7 @@ class CachedBackgroundImage extends StatelessWidget {
               color: overlayColor!.withOpacity(overlayOpacity),
             ),
           ),
-        
+
         // Conteúdo
         child,
       ],
@@ -223,7 +223,7 @@ class CachedBackgroundImage extends StatelessWidget {
 }
 
 /// Widget para grid de imagens com cache (stories, galeria, etc)
-/// 
+///
 /// USO:
 /// ```dart
 /// CachedImageGrid(
@@ -269,7 +269,7 @@ class CachedImageGrid extends StatelessWidget {
 }
 
 /// Helper para pre-carregar imagens em cache
-/// 
+///
 /// USO:
 /// ```dart
 /// // Pre-carregar lista de perfis
@@ -284,9 +284,8 @@ class CachedImageHelper {
     BuildContext context,
     List<String?> imageUrls,
   ) async {
-    final validUrls = imageUrls
-        .where((url) => url != null && url.isNotEmpty)
-        .toList();
+    final validUrls =
+        imageUrls.where((url) => url != null && url.isNotEmpty).toList();
 
     for (final url in validUrls) {
       try {

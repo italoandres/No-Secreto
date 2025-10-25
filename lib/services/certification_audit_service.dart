@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/certification_audit_log_model.dart';
 
 /// Serviço para registrar logs de auditoria de certificações
-/// 
+///
 /// Registra todas as ações de aprovação/reprovação incluindo:
 /// - Quem executou a ação
 /// - Quando foi executada
@@ -10,7 +10,7 @@ import '../models/certification_audit_log_model.dart';
 /// - Tentativas de uso de tokens inválidos
 class CertificationAuditService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   /// Registra aprovação de certificação
   Future<void> logApproval({
     required String certificationId,
@@ -29,19 +29,20 @@ class CertificationAuditService {
         method: method,
         timestamp: DateTime.now(),
       );
-      
+
       await _firestore
           .collection('certification_audit_log')
           .doc(log.id)
           .set(log.toFirestore());
-          
-      print('✅ Auditoria: Aprovação registrada - Cert: $certificationId por $approvedBy via $method');
+
+      print(
+          '✅ Auditoria: Aprovação registrada - Cert: $certificationId por $approvedBy via $method');
     } catch (e) {
       print('❌ Erro ao registrar log de aprovação: $e');
       // Não lança exceção para não bloquear o fluxo principal
     }
   }
-  
+
   /// Registra reprovação de certificação
   Future<void> logRejection({
     required String certificationId,
@@ -62,18 +63,19 @@ class CertificationAuditService {
         timestamp: DateTime.now(),
         reason: reason,
       );
-      
+
       await _firestore
           .collection('certification_audit_log')
           .doc(log.id)
           .set(log.toFirestore());
-          
-      print('✅ Auditoria: Reprovação registrada - Cert: $certificationId por $rejectedBy via $method');
+
+      print(
+          '✅ Auditoria: Reprovação registrada - Cert: $certificationId por $rejectedBy via $method');
     } catch (e) {
       print('❌ Erro ao registrar log de reprovação: $e');
     }
   }
-  
+
   /// Registra tentativa de uso de token inválido
   Future<void> logInvalidToken({
     required String token,
@@ -92,18 +94,19 @@ class CertificationAuditService {
         reason: reason,
         ipAddress: ipAddress,
       );
-      
+
       await _firestore
           .collection('certification_audit_log')
           .doc(log.id)
           .set(log.toFirestore());
-          
-      print('⚠️ Auditoria: Tentativa de token inválido registrada - Motivo: $reason');
+
+      print(
+          '⚠️ Auditoria: Tentativa de token inválido registrada - Motivo: $reason');
     } catch (e) {
       print('❌ Erro ao registrar tentativa de token inválido: $e');
     }
   }
-  
+
   /// Registra tentativa de uso de token expirado
   Future<void> logExpiredToken({
     required String token,
@@ -121,18 +124,18 @@ class CertificationAuditService {
         timestamp: DateTime.now(),
         reason: 'Token expirado',
       );
-      
+
       await _firestore
           .collection('certification_audit_log')
           .doc(log.id)
           .set(log.toFirestore());
-          
+
       print('⚠️ Auditoria: Token expirado - Cert: $certificationId');
     } catch (e) {
       print('❌ Erro ao registrar token expirado: $e');
     }
   }
-  
+
   /// Registra tentativa de uso de token já usado
   Future<void> logUsedToken({
     required String token,
@@ -151,30 +154,32 @@ class CertificationAuditService {
         timestamp: DateTime.now(),
         reason: 'Token já foi usado anteriormente',
       );
-      
+
       await _firestore
           .collection('certification_audit_log')
           .doc(log.id)
           .set(log.toFirestore());
-          
+
       print('⚠️ Auditoria: Tentativa de reusar token - Cert: $certificationId');
     } catch (e) {
       print('❌ Erro ao registrar token já usado: $e');
     }
   }
-  
+
   /// Obtém logs de auditoria de uma certificação específica
-  Stream<List<CertificationAuditLogModel>> getCertificationLogs(String certificationId) {
+  Stream<List<CertificationAuditLogModel>> getCertificationLogs(
+      String certificationId) {
     return _firestore
         .collection('certification_audit_log')
         .where('certificationId', isEqualTo: certificationId)
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
+            .map((doc) =>
+                CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
             .toList());
   }
-  
+
   /// Obtém logs de auditoria de um usuário específico
   Stream<List<CertificationAuditLogModel>> getUserLogs(String userId) {
     return _firestore
@@ -183,10 +188,11 @@ class CertificationAuditService {
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
+            .map((doc) =>
+                CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
             .toList());
   }
-  
+
   /// Obtém logs de tentativas suspeitas (tokens inválidos, expirados, etc)
   Stream<List<CertificationAuditLogModel>> getSuspiciousActivityLogs() {
     return _firestore
@@ -200,10 +206,11 @@ class CertificationAuditService {
         .limit(100)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
+            .map((doc) =>
+                CertificationAuditLogModel.fromFirestore(doc.id, doc.data()))
             .toList());
   }
-  
+
   /// Obtém estatísticas de auditoria
   Future<Map<String, int>> getAuditStatistics({
     DateTime? startDate,
@@ -211,17 +218,17 @@ class CertificationAuditService {
   }) async {
     try {
       Query query = _firestore.collection('certification_audit_log');
-      
+
       if (startDate != null) {
         query = query.where('timestamp', isGreaterThanOrEqualTo: startDate);
       }
-      
+
       if (endDate != null) {
         query = query.where('timestamp', isLessThanOrEqualTo: endDate);
       }
-      
+
       final snapshot = await query.get();
-      
+
       final stats = <String, int>{
         'total': snapshot.docs.length,
         'approved': 0,
@@ -230,11 +237,11 @@ class CertificationAuditService {
         'expired_attempts': 0,
         'used_attempts': 0,
       };
-      
+
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final action = data['action'] as String?;
-        
+
         switch (action) {
           case 'approved':
             stats['approved'] = (stats['approved'] ?? 0) + 1;
@@ -253,7 +260,7 @@ class CertificationAuditService {
             break;
         }
       }
-      
+
       return stats;
     } catch (e) {
       print('❌ Erro ao obter estatísticas de auditoria: $e');

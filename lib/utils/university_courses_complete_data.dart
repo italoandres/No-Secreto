@@ -15,7 +15,7 @@ class UniversityCoursesCompleteData {
     'Sistemas de Informação',
     'Engenharia de Software',
     'Análise e Desenvolvimento de Sistemas',
-    
+
     // Ciências Biológicas
     'Biologia',
     'Ciências Biológicas',
@@ -28,7 +28,7 @@ class UniversityCoursesCompleteData {
     'Microbiologia',
     'Zoologia',
     'Botânica',
-    
+
     // Engenharias
     'Engenharia Civil',
     'Engenharia Mecânica',
@@ -50,7 +50,7 @@ class UniversityCoursesCompleteData {
     'Engenharia Biomédica',
     'Engenharia de Telecomunicações',
     'Engenharia da Computação',
-    
+
     // Ciências da Saúde
     'Medicina',
     'Enfermagem',
@@ -67,12 +67,12 @@ class UniversityCoursesCompleteData {
     'Radiologia',
     'Estética e Cosmética',
     'Optometria',
-    
+
     // Ciências Agrárias
     'Agronomia',
     'Zootecnia',
     'Engenharia de Pesca',
-    
+
     // Ciências Sociais Aplicadas
     'Direito',
     'Administração',
@@ -100,7 +100,7 @@ class UniversityCoursesCompleteData {
     'Biblioteconomia',
     'Arquivologia',
     'Museologia',
-    
+
     // Ciências Humanas
     'História',
     'Filosofia',
@@ -111,7 +111,7 @@ class UniversityCoursesCompleteData {
     'Ciências da Religião',
     'Pedagogia',
     'Psicopedagogia',
-    
+
     // Linguística, Letras e Artes
     'Letras',
     'Letras - Português',
@@ -134,7 +134,7 @@ class UniversityCoursesCompleteData {
     'Design de Games',
     'Produção Musical',
     'Educação Artística',
-    
+
     // Cursos Tecnológicos e Gestão
     'Gestão Ambiental',
     'Gestão Pública',
@@ -180,7 +180,7 @@ class UniversityCoursesCompleteData {
   /// Busca cursos que correspondem ao termo de busca
   static List<String> searchCourses(String query) {
     if (query.isEmpty) return [];
-    
+
     final lowerQuery = query.toLowerCase();
     return courses.where((course) {
       return course.toLowerCase().contains(lowerQuery);

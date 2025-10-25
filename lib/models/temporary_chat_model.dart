@@ -11,13 +11,13 @@ class TemporaryChatModel {
   bool isActive;
   bool movedToNossoProposito;
   DateTime? movedAt;
-  
+
   // Chat metadata
   String? lastMessage;
   DateTime? lastMessageAt;
   String? lastMessageSenderId;
   int messageCount;
-  
+
   // User info for quick access
   String? user1Name;
   String? user1Username;
@@ -87,7 +87,8 @@ class TemporaryChatModel {
       'movedToNossoProposito': movedToNossoProposito,
       'movedAt': movedAt != null ? Timestamp.fromDate(movedAt!) : null,
       'lastMessage': lastMessage,
-      'lastMessageAt': lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
+      'lastMessageAt':
+          lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
       'lastMessageSenderId': lastMessageSenderId,
       'messageCount': messageCount,
       'user1Name': user1Name,
@@ -101,16 +102,16 @@ class TemporaryChatModel {
 
   // Helper methods
   bool get isExpired => DateTime.now().isAfter(expiresAt);
-  
+
   Duration get timeUntilExpiration => expiresAt.difference(DateTime.now());
-  
+
   String get timeRemainingText {
     final remaining = timeUntilExpiration;
-    
+
     if (remaining.isNegative) {
       return 'Expirado';
     }
-    
+
     if (remaining.inDays > 0) {
       return '${remaining.inDays}d ${remaining.inHours % 24}h restantes';
     } else if (remaining.inHours > 0) {
@@ -121,27 +122,27 @@ class TemporaryChatModel {
       return 'Expira em breve';
     }
   }
-  
+
   String getOtherUserId(String currentUserId) {
     return currentUserId == user1Id ? user2Id : user1Id;
   }
-  
+
   String? getOtherUserName(String currentUserId) {
     return currentUserId == user1Id ? user2Name : user1Name;
   }
-  
+
   String? getOtherUserUsername(String currentUserId) {
     return currentUserId == user1Id ? user2Username : user1Username;
   }
-  
+
   String? getOtherUserPhotoUrl(String currentUserId) {
     return currentUserId == user1Id ? user2PhotoUrl : user1PhotoUrl;
   }
-  
+
   bool isParticipant(String userId) {
     return userId == user1Id || userId == user2Id;
   }
-  
+
   TemporaryChatModel copyWith({
     String? id,
     String? mutualInterestId,
@@ -173,7 +174,8 @@ class TemporaryChatModel {
       createdAt: createdAt ?? this.createdAt,
       expiresAt: expiresAt ?? this.expiresAt,
       isActive: isActive ?? this.isActive,
-      movedToNossoProposito: movedToNossoProposito ?? this.movedToNossoProposito,
+      movedToNossoProposito:
+          movedToNossoProposito ?? this.movedToNossoProposito,
       movedAt: movedAt ?? this.movedAt,
       lastMessage: lastMessage ?? this.lastMessage,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
@@ -244,12 +246,13 @@ class TemporaryChatMessageModel {
     };
   }
 
-  bool get isSystemMessage => messageType == 'system' || messageType == 'welcome';
-  
+  bool get isSystemMessage =>
+      messageType == 'system' || messageType == 'welcome';
+
   String get formattedTime {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d';
     } else if (difference.inHours > 0) {

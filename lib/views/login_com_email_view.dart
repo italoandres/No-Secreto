@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,7 +6,7 @@ import '/controllers/login_controller.dart';
 
 class LoginComEmailView extends StatefulWidget {
   final bool isLogin;
-  
+
   const LoginComEmailView({super.key, this.isLogin = false});
 
   @override
@@ -18,7 +17,7 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
   PageController pageController = PageController();
   final termsAccepted = false.obs;
   final privacyAccepted = false.obs;
-  
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +33,7 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
       });
     }
   }
-  
+
   void _showTermsAlert() {
     Get.snackbar(
       'Termos e Condições',
@@ -48,9 +47,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
       borderRadius: 8,
     );
   }
-  
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: Get.width,
@@ -62,7 +61,7 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             colors: [
               const Color(0xFFFFF9C4), // Amarelo claro
               const Color(0xFFFFF59D), // Amarelo médio
-              Colors.white,             // Branco
+              Colors.white, // Branco
             ],
             stops: const [0.0, 0.3, 1.0],
           ),
@@ -86,21 +85,21 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
           children: [
             // Header com botão voltar
             _buildHeader('Acessar sua conta', 'Entre com seu email e senha'),
-            
+
             SizedBox(height: Get.height * 0.06),
-            
+
             // Card de login
             _buildLoginCard(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Link para cadastro
             _buildSwitchLink(
               'Ainda não tem uma conta?',
               'Criar conta',
-              () => pageController.animateToPage(1, 
-                duration: const Duration(milliseconds: 300), 
-                curve: Curves.easeInOut),
+              () => pageController.animateToPage(1,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut),
             ),
           ],
         ),
@@ -115,22 +114,23 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
         child: Column(
           children: [
             // Header com botão voltar
-            _buildHeader('Criar sua conta', 'Preencha os dados para se cadastrar'),
-            
+            _buildHeader(
+                'Criar sua conta', 'Preencha os dados para se cadastrar'),
+
             SizedBox(height: Get.height * 0.06),
-            
+
             // Card de cadastro
             _buildCadastroCard(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Link para login
             _buildSwitchLink(
               'Já tem uma conta?',
               'Fazer login',
-              () => pageController.animateToPage(0, 
-                duration: const Duration(milliseconds: 300), 
-                curve: Curves.easeInOut),
+              () => pageController.animateToPage(0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut),
             ),
           ],
         ),
@@ -180,9 +180,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             const SizedBox(width: 48), // Para balancear o botão voltar
           ],
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Título e subtítulo
         Text(
           title,
@@ -201,9 +201,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           subtitle,
           style: GoogleFonts.poppins(
@@ -212,9 +212,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Mensagem inspiradora
         Text(
           'Conecte-se com Deus Pai e encontre seu propósito',
@@ -254,9 +254,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             keyboardType: TextInputType.emailAddress,
             icon: Icons.email_outlined,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Campo Senha
           _buildTextField(
             label: 'Senha',
@@ -264,9 +264,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             isPassword: true,
             icon: Icons.lock_outline,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Botão de login
           _buildGradientButton(
             onPressed: () => LoginController.validadeLogin(),
@@ -303,9 +303,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             keyboardType: TextInputType.name,
             icon: Icons.person_outline,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Campo Email
           _buildTextField(
             label: 'Email',
@@ -313,9 +313,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             keyboardType: TextInputType.emailAddress,
             icon: Icons.email_outlined,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Campo Senha
           _buildTextField(
             label: 'Senha',
@@ -323,9 +323,9 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             isPassword: true,
             icon: Icons.lock_outline,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Campo Confirmar Senha
           _buildTextField(
             label: 'Confirmar Senha',
@@ -333,26 +333,26 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
             isPassword: true,
             icon: Icons.lock_outline,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Widget de aceite dos termos
           TermsAcceptanceWidget(
             termsAccepted: termsAccepted,
             privacyAccepted: privacyAccepted,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Botão de cadastro
           Obx(() => _buildGradientButton(
-            onPressed: (termsAccepted.value && privacyAccepted.value) 
-              ? () => LoginController.validadeCadastro()
-              : () => _showTermsAlert(),
-            text: 'Criar Conta',
-            icon: Icons.person_add,
-            isEnabled: termsAccepted.value && privacyAccepted.value,
-          )),
+                onPressed: (termsAccepted.value && privacyAccepted.value)
+                    ? () => LoginController.validadeCadastro()
+                    : () => _showTermsAlert(),
+                text: 'Criar Conta',
+                icon: Icons.person_add,
+                isEnabled: termsAccepted.value && privacyAccepted.value,
+              )),
         ],
       ),
     );
@@ -418,32 +418,32 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: isEnabled 
-          ? const LinearGradient(
-              colors: [
-                Color(0xFF1E88E5), // Azul mais forte
-                Color(0xFF38b6ff), // Azul médio
-                Color(0xFFf76cec), // Rosa
-              ],
-              stops: [0.0, 0.6, 1.0],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-          : LinearGradient(
-              colors: [
-                Colors.grey.shade400,
-                Colors.grey.shade400,
-              ],
-            ),
-        boxShadow: isEnabled 
-          ? [
-              BoxShadow(
-                color: const Color(0xFF38b6ff).withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+        gradient: isEnabled
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFF1E88E5), // Azul mais forte
+                  Color(0xFF38b6ff), // Azul médio
+                  Color(0xFFf76cec), // Rosa
+                ],
+                stops: [0.0, 0.6, 1.0],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [
+                  Colors.grey.shade400,
+                  Colors.grey.shade400,
+                ],
               ),
-            ]
-          : [],
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF38b6ff).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
       ),
       child: Material(
         color: Colors.transparent,
@@ -473,7 +473,8 @@ class _LoginComEmailViewState extends State<LoginComEmailView> {
     );
   }
 
-  Widget _buildSwitchLink(String question, String linkText, VoidCallback onTap) {
+  Widget _buildSwitchLink(
+      String question, String linkText, VoidCallback onTap) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

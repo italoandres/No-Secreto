@@ -44,7 +44,7 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
       });
 
       FilePickerResult? result;
-      
+
       if (kIsWeb) {
         // Configuração específica para Web (Chrome, Firefox, Safari)
         result = await FilePicker.platform.pickFiles(
@@ -63,14 +63,15 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
-        
+
         // Validar tamanho
         final fileSize = file.size;
         final maxSizeBytes = widget.maxFileSizeMB * 1024 * 1024;
-        
+
         if (fileSize > maxSizeBytes) {
           setState(() {
-            _errorMessage = 'O arquivo deve ter no máximo ${widget.maxFileSizeMB}MB';
+            _errorMessage =
+                'O arquivo deve ter no máximo ${widget.maxFileSizeMB}MB';
             _selectedFile = null;
             _fileName = null;
           });
@@ -123,13 +124,13 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
 
   String _getFileIcon() {
     if (_fileName == null) return '📎';
-    
+
     final extension = _fileName!.toLowerCase();
     if (extension.endsWith('.pdf')) {
       return '📄';
-    } else if (extension.endsWith('.jpg') || 
-               extension.endsWith('.jpeg') || 
-               extension.endsWith('.png')) {
+    } else if (extension.endsWith('.jpg') ||
+        extension.endsWith('.jpeg') ||
+        extension.endsWith('.png')) {
       return '🖼️';
     } else {
       return '📎';
@@ -142,10 +143,7 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Botão de seleção ou preview do arquivo
-        if (_fileName == null)
-          _buildSelectButton()
-        else
-          _buildFilePreview(),
+        if (_fileName == null) _buildSelectButton() else _buildFilePreview(),
 
         // Mensagem de erro
         if (_errorMessage != null) ...[
@@ -163,9 +161,9 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
         if (_fileName == null) ...[
           const SizedBox(height: 8),
           Text(
-            kIsWeb 
-              ? 'Formatos: ${widget.allowedExtensions.map((e) => e.toUpperCase()).join(', ')} • Máx: ${widget.maxFileSizeMB}MB (Web)'
-              : 'Formatos: ${widget.allowedExtensions.map((e) => e.toUpperCase()).join(', ')} • Máx: ${widget.maxFileSizeMB}MB',
+            kIsWeb
+                ? 'Formatos: ${widget.allowedExtensions.map((e) => e.toUpperCase()).join(', ')} • Máx: ${widget.maxFileSizeMB}MB (Web)'
+                : 'Formatos: ${widget.allowedExtensions.map((e) => e.toUpperCase()).join(', ')} • Máx: ${widget.maxFileSizeMB}MB',
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 12,
@@ -240,7 +238,7 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
             style: const TextStyle(fontSize: 32),
           ),
           const SizedBox(width: 12),
-          
+
           // Nome do arquivo
           Expanded(
             child: Column(
@@ -268,7 +266,7 @@ class _FileUploadComponentState extends State<FileUploadComponent> {
               ],
             ),
           ),
-          
+
           // Botão remover
           IconButton(
             icon: const Icon(Icons.close, color: Colors.red),

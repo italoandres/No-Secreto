@@ -23,13 +23,14 @@ import 'package:whatsapp_chat/services/automatic_message_service.dart';
 class ChatRepository {
   static final listObs = Rx<List<ProgressModel>>([]);
   static Future<List<EmojiModel>> getAllEmoji() async {
-    final String response = await rootBundle.loadString('lib/assets/outros/emoji.json');
+    final String response =
+        await rootBundle.loadString('lib/assets/outros/emoji.json');
     final dados = await json.decode(response);
     List<EmojiModel> all = [];
     for (var element in dados) {
       all.add(EmojiModel.fromJson(element));
     }
-    
+
     return all;
   }
 
@@ -39,7 +40,6 @@ class ChatRepository {
     LinkDescricaoModel? linkDescricaoModel,
     String? contexto,
   }) async {
-
     Map<String, dynamic> data = {
       'dataCadastro': DateTime.now(),
       'idDe': FirebaseAuth.instance.currentUser?.uid,
@@ -48,15 +48,16 @@ class ChatRepository {
       'text': msg,
     };
 
-    if(linkDescricaoModel != null) {
-      data['linkDescricaoModel'] = LinkDescricaoModel.toJson(linkDescricaoModel);
+    if (linkDescricaoModel != null) {
+      data['linkDescricaoModel'] =
+          LinkDescricaoModel.toJson(linkDescricaoModel);
     }
-    
+
     // Escolher coleção baseada no contexto
     String colecao = _getCollectionByContext(contexto);
     await FirebaseFirestore.instance.collection(colecao).add(data);
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -81,7 +82,6 @@ class ChatRepository {
     bool? orginemAdmin,
     LinkDescricaoModel? linkDescricaoModel,
   }) async {
-
     Map<String, dynamic> data = {
       'dataCadastro': DateTime.now(),
       'idDe': FirebaseAuth.instance.currentUser?.uid,
@@ -90,13 +90,14 @@ class ChatRepository {
       'text': msg,
     };
 
-    if(linkDescricaoModel != null) {
-      data['linkDescricaoModel'] = LinkDescricaoModel.toJson(linkDescricaoModel);
+    if (linkDescricaoModel != null) {
+      data['linkDescricaoModel'] =
+          LinkDescricaoModel.toJson(linkDescricaoModel);
     }
-    
+
     await FirebaseFirestore.instance.collection('chat_sinais_isaque').add(data);
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -107,7 +108,6 @@ class ChatRepository {
     required String msg,
     required Uint8List img,
   }) async {
-
     final query = await FirebaseFirestore.instance.collection('chat').add({
       'dataCadastro': DateTime.now(),
       'idDe': FirebaseAuth.instance.currentUser?.uid,
@@ -122,7 +122,7 @@ class ChatRepository {
       'isLoading': false
     });
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -135,7 +135,6 @@ class ChatRepository {
     required File img,
     String? contexto,
   }) async {
-
     String colecao = _getCollectionByContext(contexto);
     final query = await FirebaseFirestore.instance.collection(colecao).add({
       'dataCadastro': DateTime.now(),
@@ -151,7 +150,7 @@ class ChatRepository {
       'isLoading': false
     });
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -163,7 +162,6 @@ class ChatRepository {
     required File video,
     String? contexto,
   }) async {
-  
     // Validação simplificada do vídeo usando video_thumbnail
     try {
       final thumbnail = await VideoThumbnail.thumbnailData(
@@ -172,7 +170,7 @@ class ChatRepository {
         maxWidth: 128,
         quality: 25,
       );
-      
+
       if (thumbnail == null) {
         Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_video'));
         return false;
@@ -189,7 +187,7 @@ class ChatRepository {
       quality: 25,
     );
 
-    if(thumbnail == null) {
+    if (thumbnail == null) {
       Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_video'));
       return false;
     }
@@ -208,12 +206,14 @@ class ChatRepository {
 
     FirebaseFirestore.instance.collection(colecao).doc(query.id).update({
       'videoThumbnail': thumbnailImg,
-      'videoDuration': 0, // Duração será definida posteriormente quando o FFmpeg for reintegrado
-      'fileUrl': await _uploadVideo(video, video.path.split('.').last, query.id),
+      'videoDuration':
+          0, // Duração será definida posteriormente quando o FFmpeg for reintegrado
+      'fileUrl':
+          await _uploadVideo(video, video.path.split('.').last, query.id),
       'isLoading': false
     });
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -226,7 +226,6 @@ class ChatRepository {
     required String extensao,
     String? contexto,
   }) async {
-
     String colecao = _getCollectionByContext(contexto);
     final query = await FirebaseFirestore.instance.collection(colecao).add({
       'dataCadastro': DateTime.now(),
@@ -241,9 +240,9 @@ class ChatRepository {
       'fileUrl': await _uploadFile(file: file, extensao: extensao),
       'isLoading': false
     });
-    
+
     NotificationController().setNotification();
-    
+
     // Resetar timer de mensagens automáticas
     AutomaticMessageService.resetInactivityTimer();
 
@@ -251,35 +250,50 @@ class ChatRepository {
   }
 
   static Stream<List<ChatModel>> getAll() {
-    return FirebaseFirestore.instance.collection('chat').where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid).snapshots().map((event) => event.docs.map((e) {
-      ChatModel chat = ChatModel.fromJson(e.data());
-      chat.id = e.id;
-      return chat;
-    }).toList());
+    return FirebaseFirestore.instance
+        .collection('chat')
+        .where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .snapshots()
+        .map((event) => event.docs.map((e) {
+              ChatModel chat = ChatModel.fromJson(e.data());
+              chat.id = e.id;
+              return chat;
+            }).toList());
   }
 
   // Método específico para o chat "Sinais de Meu Isaque"
   static Stream<List<ChatModel>> getAllSinaisIsaque() {
-    return FirebaseFirestore.instance.collection('chat_sinais_isaque').where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid).snapshots().map((event) => event.docs.map((e) {
-      ChatModel chat = ChatModel.fromJson(e.data());
-      chat.id = e.id;
-      return chat;
-    }).toList());
+    return FirebaseFirestore.instance
+        .collection('chat_sinais_isaque')
+        .where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .snapshots()
+        .map((event) => event.docs.map((e) {
+              ChatModel chat = ChatModel.fromJson(e.data());
+              chat.id = e.id;
+              return chat;
+            }).toList());
   }
 
   // Método específico para o chat "Sinais de Minha Rebeca"
   static Stream<List<ChatModel>> getAllSinaisRebeca() {
-    return FirebaseFirestore.instance.collection('chat_sinais_rebeca').where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid).snapshots().map((event) => event.docs.map((e) {
-      ChatModel chat = ChatModel.fromJson(e.data());
-      chat.id = e.id;
-      return chat;
-    }).toList());
+    return FirebaseFirestore.instance
+        .collection('chat_sinais_rebeca')
+        .where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .snapshots()
+        .map((event) => event.docs.map((e) {
+              ChatModel chat = ChatModel.fromJson(e.data());
+              chat.id = e.id;
+              return chat;
+            }).toList());
   }
 
   static Future<List<ChatModel>> getAllFuture() async {
     List<ChatModel> all = [];
 
-    final query = await FirebaseFirestore.instance.collection('chat').where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid).get();
+    final query = await FirebaseFirestore.instance
+        .collection('chat')
+        .where('idDe', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .get();
 
     for (var e in query.docs) {
       ChatModel chat = ChatModel.fromJson(e.data());
@@ -289,9 +303,7 @@ class ChatRepository {
     return all;
   }
 
-  static void deletarItens({
-    required List<String> itens
-  }) async {
+  static void deletarItens({required List<String> itens}) async {
     for (var element in itens) {
       FirebaseFirestore.instance.collection('chat').doc(element).delete();
     }
@@ -301,26 +313,28 @@ class ChatRepository {
     required String id,
     required DateTime data,
   }) async {
-    FirebaseFirestore.instance.collection('chat').doc(id).update({
-      'dataCadastro': data
-    });
+    FirebaseFirestore.instance
+        .collection('chat')
+        .doc(id)
+        .update({'dataCadastro': data});
   }
 
-  static Future<String> _uploadImg(Uint8List fileData, {String? idDocument}) async {
+  static Future<String> _uploadImg(Uint8List fileData,
+      {String? idDocument}) async {
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('chat/${DateTime.now().millisecondsSinceEpoch}.png');
 
-    Reference ref = FirebaseStorage.instance.ref().child('chat/${DateTime.now().millisecondsSinceEpoch}.png');
-
-    final snapshot = ref.putData(fileData, SettableMetadata(contentType: 'image/png'));
+    final snapshot =
+        ref.putData(fileData, SettableMetadata(contentType: 'image/png'));
     snapshot.snapshotEvents.listen((event) {
-      if(idDocument != null) {
-        double progress = event.bytesTransferred.toDouble() /
-              event.totalBytes.toDouble();
+      if (idDocument != null) {
+        double progress =
+            event.bytesTransferred.toDouble() / event.totalBytes.toDouble();
 
         listObs.value.removeWhere((element) => element.id == idDocument);
-        if(progress < 1) {
-          listObs.value.add(
-            ProgressModel(id: idDocument, progress: progress)
-          );
+        if (progress < 1) {
+          listObs.value.add(ProgressModel(id: idDocument, progress: progress));
         }
 
         listObs.refresh();
@@ -331,20 +345,20 @@ class ChatRepository {
     return await ref.getDownloadURL();
   }
 
-  static Future<String> _uploadVideo(File file, String extensao, String idDocument) async {
-
-    Reference ref = FirebaseStorage.instance.ref().child('chat/${DateTime.now().millisecondsSinceEpoch}.$extensao');
+  static Future<String> _uploadVideo(
+      File file, String extensao, String idDocument) async {
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('chat/${DateTime.now().millisecondsSinceEpoch}.$extensao');
 
     final snapshot = ref.putFile(file);
     snapshot.snapshotEvents.listen((event) {
-      double progress = event.bytesTransferred.toDouble() /
-            event.totalBytes.toDouble();
+      double progress =
+          event.bytesTransferred.toDouble() / event.totalBytes.toDouble();
 
       listObs.value.removeWhere((element) => element.id == idDocument);
-      if(progress < 1) {
-        listObs.value.add(
-          ProgressModel(id: idDocument, progress: progress)
-        );
+      if (progress < 1) {
+        listObs.value.add(ProgressModel(id: idDocument, progress: progress));
       }
 
       listObs.refresh();
@@ -358,8 +372,9 @@ class ChatRepository {
     required File file,
     required String extensao,
   }) async {
-
-    Reference ref = FirebaseStorage.instance.ref().child('chat/${DateTime.now().millisecondsSinceEpoch}.$extensao');
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('chat/${DateTime.now().millisecondsSinceEpoch}.$extensao');
 
     final snapshot = ref.putFile(file);
     snapshot.snapshotEvents.listen((event) {});
@@ -372,9 +387,9 @@ class ChatRepository {
   static Future<bool> sendAutomaticPaiMessage() async {
     try {
       // Mensagem personalizada baseada no gênero do usuário
-      String message = TokenUsuario().sexo == UserSexo.masculino 
-        ? 'Filho como você está?' 
-        : 'Filha como você está?';
+      String message = TokenUsuario().sexo == UserSexo.masculino
+          ? 'Filho como você está?'
+          : 'Filha como você está?';
 
       Map<String, dynamic> data = {
         'dataCadastro': DateTime.now(),
@@ -389,7 +404,7 @@ class ChatRepository {
 
       // Enviar para o chat principal
       await FirebaseFirestore.instance.collection('chat').add(data);
-      
+
       return true;
     } catch (e) {
       print('Erro ao enviar mensagem automática do Pai: $e');
@@ -401,9 +416,9 @@ class ChatRepository {
   static Future<bool> sendAutomaticPaiMessageToContext(String contexto) async {
     try {
       // Mensagem personalizada baseada no gênero do usuário
-      String message = TokenUsuario().sexo == UserSexo.masculino 
-        ? 'Filho como você está?' 
-        : 'Filha como você está?';
+      String message = TokenUsuario().sexo == UserSexo.masculino
+          ? 'Filho como você está?'
+          : 'Filha como você está?';
 
       Map<String, dynamic> data = {
         'dataCadastro': DateTime.now(),
@@ -419,10 +434,11 @@ class ChatRepository {
       // Escolher coleção baseada no contexto
       String colecao = _getCollectionByContext(contexto);
       await FirebaseFirestore.instance.collection(colecao).add(data);
-      
+
       return true;
     } catch (e) {
-      print('Erro ao enviar mensagem automática do Pai para contexto $contexto: $e');
+      print(
+          'Erro ao enviar mensagem automática do Pai para contexto $contexto: $e');
       return false;
     }
   }
@@ -441,15 +457,17 @@ class ChatRepository {
         final contentAttribute = tag.attributes['content'];
         if (propertyAttribute == 'og:description' && contentAttribute != null) {
           description = contentAttribute;
-        } else if (propertyAttribute == 'og:image' && contentAttribute != null) {
+        } else if (propertyAttribute == 'og:image' &&
+            contentAttribute != null) {
           imageUrl = contentAttribute;
-        } else if (propertyAttribute == 'og:title' && contentAttribute != null) {
+        } else if (propertyAttribute == 'og:title' &&
+            contentAttribute != null) {
           title = contentAttribute;
         }
 
         title ??= document.head?.querySelector('title')?.text;
 
-        if(description == null) {
+        if (description == null) {
           final propertyAttribute = tag.attributes['name'];
           final contentAttribute = tag.attributes['content'];
 
@@ -458,9 +476,9 @@ class ChatRepository {
           }
         }
 
-        if(imageUrl == null || imageUrl.trim().isEmpty) {
+        if (imageUrl == null || imageUrl.trim().isEmpty) {
           final imageElements = document.getElementsByTagName('img');
-          
+
           for (var imageElement in imageElements) {
             final modeAttribute = imageElement.attributes['mode'];
             if (modeAttribute == '4') {
@@ -470,12 +488,9 @@ class ChatRepository {
         }
       }
 
-      if(title != null && description != null) {
+      if (title != null && description != null) {
         return LinkDescricaoModel(
-          titulo: title, 
-          descricao: description, 
-          imgUrl: imageUrl
-        );
+            titulo: title, descricao: description, imgUrl: imageUrl);
       }
     }
     return null;

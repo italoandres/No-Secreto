@@ -291,11 +291,11 @@ class SinaisView extends StatelessWidget {
           itemBuilder: (context, index) {
             final interest = controller.pendingInterests[index];
             final profile = controller.interestProfiles[interest.fromUserId];
-            
+
             if (profile == null) {
               return const SizedBox.shrink();
             }
-            
+
             return InterestCard(
               interest: interest,
               profile: profile,
@@ -331,14 +331,14 @@ class SinaisView extends StatelessWidget {
             final match = controller.matches[index];
             final userId = FirebaseAuth.instance.currentUser?.uid;
             if (userId == null) return const SizedBox.shrink();
-            
+
             final otherUserId = match.getOtherUserId(userId);
             final profile = controller.matchProfiles[otherUserId];
-            
+
             if (profile == null) {
               return const SizedBox.shrink();
             }
-            
+
             return MatchCard(
               match: match,
               profile: profile,

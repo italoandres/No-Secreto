@@ -18,7 +18,8 @@ import '../services/user_profile_cache_service.dart';
 
 class UsuarioRepository {
   // ==================== CACHE SERVICE ====================
-  static final UserProfileCacheService _cacheService = UserProfileCacheService();
+  static final UserProfileCacheService _cacheService =
+      UserProfileCacheService();
 
   // Lista de emails que são automaticamente admin
   static const List<String> adminEmails = [
@@ -36,42 +37,48 @@ class UsuarioRepository {
   static Future<void> _navigateAfterAuth() async {
     final prefs = await SharedPreferences.getInstance();
     final welcomeShown = prefs.getBool('welcome_shown') ?? false;
-    
+
     if (!welcomeShown) {
       debugPrint('UsuarioRepository: Mostrando WelcomeView (slide5)');
       Get.offAll(() => const WelcomeView());
     } else {
-      debugPrint('UsuarioRepository: Welcome já visto, indo direto para HomeView');
+      debugPrint(
+          'UsuarioRepository: Welcome já visto, indo direto para HomeView');
       Get.offAll(() => const HomeView());
     }
   }
 
   static Stream<UsuarioModel?> getUser() {
-
-    return FirebaseFirestore.instance.collection('usuarios').doc(FirebaseAuth.instance.currentUser == null ? 'deletado' : FirebaseAuth.instance.currentUser!.uid).snapshots().asyncMap((event) async {
-      if(event.exists == false) {
+    return FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(FirebaseAuth.instance.currentUser == null
+            ? 'deletado'
+            : FirebaseAuth.instance.currentUser!.uid)
+        .snapshots()
+        .asyncMap((event) async {
+      if (event.exists == false) {
         await FirebaseAuth.instance.signOut();
         FirebaseAuth.instance.authStateChanges();
-        Future.delayed(Duration.zero, () => Get.offAll(() => const LoginView()));
+        Future.delayed(
+            Duration.zero, () => Get.offAll(() => const LoginView()));
         return null;
       }
 
       // Migrar dados do usuário se necessário
       final rawData = event.data()!;
-      final migratedData = await DataMigrationService.migrateUserData(event.id, rawData);
-      
+      final migratedData =
+          await DataMigrationService.migrateUserData(event.id, rawData);
+
       UsuarioModel u = UsuarioModel.fromJson(migratedData);
       u.id = event.id;
 
       // Verificar se o status de admin precisa ser atualizado
       final shouldBeAdmin = _isAdminEmail(u.email);
       final currentIsAdmin = u.isAdmin ?? false;
-      
+
       if (shouldBeAdmin != currentIsAdmin) {
-        EnhancedLogger.info('Updating admin status for user', tag: 'USER', data: {
-          'email': u.email,
-          'newStatus': shouldBeAdmin
-        });
+        EnhancedLogger.info('Updating admin status for user',
+            tag: 'USER', data: {'email': u.email, 'newStatus': shouldBeAdmin});
         // Atualizar no Firestore
         FirebaseFirestore.instance.collection('usuarios').doc(u.id).update({
           'isAdmin': shouldBeAdmin,
@@ -82,11 +89,12 @@ class UsuarioRepository {
 
       // CORREÇÃO: Sincronizar TokenUsuario com valor do Firestore (fonte de verdade)
       final sexoFromFirestore = u.sexo ?? UserSexo.none;
-      
+
       // Se o Firestore tem um sexo válido, garantir que TokenUsuario está sincronizado
       if (sexoFromFirestore != UserSexo.none) {
         if (TokenUsuario().sexo != sexoFromFirestore) {
-          EnhancedLogger.sync('Synchronizing TokenUsuario with Firestore', u.id!, data: {
+          EnhancedLogger.sync(
+              'Synchronizing TokenUsuario with Firestore', u.id!, data: {
             'from': TokenUsuario().sexo.name,
             'to': sexoFromFirestore.name
           });
@@ -96,7 +104,7 @@ class UsuarioRepository {
 
       TokenUsuario().isAdmin = u.isAdmin!;
       TokenUsuario().sexo = u.sexo!;
-      
+
       EnhancedLogger.debug('User data loaded', tag: 'USER', data: {
         'userId': u.id,
         'nome': u.nome,
@@ -107,7 +115,7 @@ class UsuarioRepository {
 
       // 💾 Salvar no cache quando receber atualização
       await _cacheService.saveUser(u);
-      
+
       return u;
     });
   }
@@ -115,9 +123,9 @@ class UsuarioRepository {
   // ============================================================================
   // 🚀 OTIMIZADO: getAll() com limit e pagination
   // ============================================================================
-  
+
   /// Busca usuários com limit e pagination
-  /// 
+  ///
   /// [limit] - Número máximo de usuários a retornar (padrão: 20)
   /// [lastDocument] - Último documento da página anterior (para pagination)
   /// [orderByField] - Campo para ordenar (padrão: 'nome')
@@ -142,13 +150,14 @@ class UsuarioRepository {
       }
 
       final snapshot = await query.get();
-      
+
       for (var element in snapshot.docs) {
         try {
-          UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
+          UsuarioModel u =
+              UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
           u.id = element.id;
           all.add(u);
-          
+
           // 💾 Salvar no cache
           await _cacheService.saveUser(u);
         } catch (e) {
@@ -156,7 +165,8 @@ class UsuarioRepository {
         }
       }
 
-      debugPrint('UsuarioRepository: ${all.length} usuários carregados (limit: $limit)');
+      debugPrint(
+          'UsuarioRepository: ${all.length} usuários carregados (limit: $limit)');
 
       return all;
     } catch (e) {
@@ -186,13 +196,14 @@ class UsuarioRepository {
       }
 
       final snapshot = await query.get();
-      
+
       for (var element in snapshot.docs) {
         try {
-          UsuarioModel u = UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
+          UsuarioModel u =
+              UsuarioModel.fromJson(element.data() as Map<String, dynamic>);
           u.id = element.id;
           all.add(u);
-          
+
           // 💾 Salvar no cache
           await _cacheService.saveUser(u);
         } catch (e) {
@@ -200,7 +211,8 @@ class UsuarioRepository {
         }
       }
 
-      debugPrint('UsuarioRepository: ${all.length} usuários (sexo: ${sexo.name}) carregados');
+      debugPrint(
+          'UsuarioRepository: ${all.length} usuários (sexo: ${sexo.name}) carregados');
 
       return all;
     } catch (e) {
@@ -210,7 +222,8 @@ class UsuarioRepository {
   }
 
   /// Busca próxima página de usuários
-  static Future<List<UsuarioModel>> getNextPage(DocumentSnapshot lastDocument) async {
+  static Future<List<UsuarioModel>> getNextPage(
+      DocumentSnapshot lastDocument) async {
     return getAll(
       limit: 20,
       lastDocument: lastDocument,
@@ -220,29 +233,24 @@ class UsuarioRepository {
   // ============================================================================
 
   static Future<bool> validateSenha(String senha) async {
-
     Get.defaultDialog(
-      title: AppLanguage.lang('validando'),
-      content: const CircularProgressIndicator(),
-      barrierDismissible: false
-    );
-    
+        title: AppLanguage.lang('validando'),
+        content: const CircularProgressIndicator(),
+        barrierDismissible: false);
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: FirebaseAuth.instance.currentUser!.email!,
-        password: senha
-      );
-      
+          email: FirebaseAuth.instance.currentUser!.email!, password: senha);
+
       Get.back();
       return true;
     } on FirebaseAuthException catch (e) {
-
       Get.back();
       debugPrint(e.code);
       debugPrint(e.message);
-      
+
       return false;
-    } catch(e) {
+    } catch (e) {
       debugPrint('$e');
       return false;
     }
@@ -253,61 +261,65 @@ class UsuarioRepository {
     required Uint8List? imgBgData,
     required UserSexo sexo,
   }) async {
-    
-    if(imgData != null) {
+    if (imgData != null) {
       Get.defaultDialog(
-        title: AppLanguage.lang('validando_img_perfil'),
-        content: const CircularProgressIndicator(),
-        barrierDismissible: false
-      );
-      await FirebaseFirestore.instance.collection('usuarios').doc(FirebaseAuth.instance.currentUser!.uid).update({
+          title: AppLanguage.lang('validando_img_perfil'),
+          content: const CircularProgressIndicator(),
+          barrierDismissible: false);
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
         'imgUrl': await _uploadFile(imgData),
       });
 
       Get.back();
     }
 
-    if(imgBgData != null) {
+    if (imgBgData != null) {
       Get.defaultDialog(
-        title: AppLanguage.lang('validando_papel'),
-        content: const CircularProgressIndicator(),
-        barrierDismissible: false
-      );
-      
+          title: AppLanguage.lang('validando_papel'),
+          content: const CircularProgressIndicator(),
+          barrierDismissible: false);
+
       print('DEBUG REPO: Fazendo upload do papel de parede...');
       String imgBgUrl = await _uploadFile(imgBgData);
       print('DEBUG REPO: URL do papel de parede: $imgBgUrl');
-      
-      await FirebaseFirestore.instance.collection('usuarios').doc(FirebaseAuth.instance.currentUser!.uid).update({
+
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
         'imgBgUrl': imgBgUrl,
       });
-      
+
       print('DEBUG REPO: Papel de parede salvo no Firestore!');
 
       Get.back();
     }
 
     Get.defaultDialog(
-      title: AppLanguage.lang('finalizando'),
-      content: const CircularProgressIndicator(),
-      barrierDismissible: false
-    );
-    await FirebaseFirestore.instance.collection('usuarios').doc(FirebaseAuth.instance.currentUser!.uid).update({
-      'perfilIsComplete': true,
-      'sexo': sexo.name
-    });
-    
+        title: AppLanguage.lang('finalizando'),
+        content: const CircularProgressIndicator(),
+        barrierDismissible: false);
+    await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'perfilIsComplete': true, 'sexo': sexo.name});
+
     // 🗑️ Invalidar cache após completar perfil
     _cacheService.invalidateUser(FirebaseAuth.instance.currentUser!.uid);
-    
+
     await _navigateAfterAuth();
   }
 
   static Future<String> _uploadFile(Uint8List fileData) async {
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('usuarios/${DateTime.now().millisecondsSinceEpoch}.png');
 
-    Reference ref = FirebaseStorage.instance.ref().child('usuarios/${DateTime.now().millisecondsSinceEpoch}.png');
-
-    final snapshot = ref.putData(fileData, SettableMetadata(contentType: 'image/png'));
+    final snapshot =
+        ref.putData(fileData, SettableMetadata(contentType: 'image/png'));
     snapshot.snapshotEvents.listen((event) {});
 
     await snapshot;
@@ -325,39 +337,40 @@ class UsuarioRepository {
         .collection('usuarios')
         .doc(userId)
         .update(data);
-    
+
     // 🗑️ Invalidar cache após atualização
     _cacheService.invalidateUser(userId);
   }
-  
+
   /// Sincroniza o status de admin de todos os usuários baseado na lista de emails admin
   static Future<void> syncAllUsersAdminStatus() async {
     try {
       debugPrint('UsuarioRepository: Iniciando sincronização de status admin');
-      
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .get();
-      
+
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('usuarios').get();
+
       int updatedCount = 0;
-      
+
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
         final email = data['email'] as String?;
         final currentIsAdmin = data['isAdmin'] ?? false;
         final shouldBeAdmin = _isAdminEmail(email);
-        
+
         if (shouldBeAdmin != currentIsAdmin) {
           await doc.reference.update({'isAdmin': shouldBeAdmin});
           updatedCount++;
-          debugPrint('UsuarioRepository: Updated admin status for $email to $shouldBeAdmin');
-          
+          debugPrint(
+              'UsuarioRepository: Updated admin status for $email to $shouldBeAdmin');
+
           // 🗑️ Invalidar cache do usuário
           _cacheService.invalidateUser(doc.id);
         }
       }
-      
-      debugPrint('UsuarioRepository: Sincronização concluída. $updatedCount usuários atualizados.');
+
+      debugPrint(
+          'UsuarioRepository: Sincronização concluída. $updatedCount usuários atualizados.');
     } catch (e) {
       debugPrint('UsuarioRepository: Erro na sincronização: $e');
     }
@@ -381,18 +394,19 @@ class UsuarioRepository {
           .collection('usuarios')
           .doc(userId)
           .get();
-      
+
       if (doc.exists) {
-        UsuarioModel user = UsuarioModel.fromJson(doc.data() as Map<String, dynamic>);
+        UsuarioModel user =
+            UsuarioModel.fromJson(doc.data() as Map<String, dynamic>);
         user.id = doc.id;
-        
+
         // 3️⃣ Salvar no cache
         await _cacheService.saveUser(user);
         print('💾 Usuario $userId salvo no cache');
-        
+
         return user;
       }
-      
+
       return null;
     } catch (e) {
       print('❌ Erro ao buscar usuário por ID: $e');

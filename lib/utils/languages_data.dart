@@ -12,12 +12,12 @@ class LanguagesData {
     {'code': 'de', 'name': 'Alemão', 'flag': '🇩🇪'},
     {'code': 'fr', 'name': 'Francês', 'flag': '🇫🇷'},
   ];
-  
+
   /// Retorna a lista de nomes dos idiomas
   static List<String> getLanguageNames() {
     return languages.map((lang) => lang['name']!).toList();
   }
-  
+
   /// Retorna o nome do idioma pelo código
   static String getLanguageName(String code) {
     final lang = languages.firstWhere(
@@ -26,7 +26,7 @@ class LanguagesData {
     );
     return lang['name']!;
   }
-  
+
   /// Retorna a bandeira do idioma pelo código
   static String getLanguageFlag(String code) {
     final lang = languages.firstWhere(

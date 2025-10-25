@@ -8,13 +8,18 @@ import 'package:whatsapp_chat/theme.dart';
 import '/controllers/audio_controller.dart';
 
 class AudioPlayerComponent extends StatefulWidget {
-
   final String audioUrl;
   final String fileName;
   final double width;
   final UsuarioModel user;
   final bool? isLocal;
-  const AudioPlayerComponent({super.key, required this.audioUrl, required this.fileName, required this.width, required this.user, this.isLocal});
+  const AudioPlayerComponent(
+      {super.key,
+      required this.audioUrl,
+      required this.fileName,
+      required this.width,
+      required this.user,
+      this.isLocal});
 
   @override
   State<AudioPlayerComponent> createState() => _AudioPlayerComponentState();
@@ -33,12 +38,13 @@ class _AudioPlayerComponentState extends State<AudioPlayerComponent> {
   }
 
   _start() async {
-    
     await controller.preparePlayer(
-      path: widget.isLocal == true ? widget.audioUrl : await AudioController.downloadAudioFromUrl(url: widget.audioUrl, fileName: widget.fileName),
-      shouldExtractWaveform: true,
-      noOfSamples: (widget.width - 32 - 62 - 50) ~/ 6
-    ); 
+        path: widget.isLocal == true
+            ? widget.audioUrl
+            : await AudioController.downloadAudioFromUrl(
+                url: widget.audioUrl, fileName: widget.fileName),
+        shouldExtractWaveform: true,
+        noOfSamples: (widget.width - 32 - 62 - 50) ~/ 6);
 
     controller.onPlayerStateChanged.listen((state) {
       status.value = state;
@@ -61,25 +67,35 @@ class _AudioPlayerComponentState extends State<AudioPlayerComponent> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child: Image.network(widget.user.imgUrl ?? '', width: 50, height: 50, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(1000),
-                        color: Colors.white
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      width: 50, height: 50,
-                      child: Image.asset('lib/assets/img/user.png', fit: BoxFit.contain, color: Colors.grey))
-                    ),
+                    child: Image.network(widget.user.imgUrl ?? '',
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(1000),
+                                color: Colors.white),
+                            padding: const EdgeInsets.all(8),
+                            width: 50,
+                            height: 50,
+                            child: Image.asset('lib/assets/img/user.png',
+                                fit: BoxFit.contain, color: Colors.grey))),
                   ),
                   IconButton(
                     onPressed: () async {
-                      if(controller.playerState == PlayerState.initialized || controller.playerState == PlayerState.paused) {
+                      if (controller.playerState == PlayerState.initialized ||
+                          controller.playerState == PlayerState.paused) {
                         controller.startPlayer();
-                      } else if(controller.playerState == PlayerState.playing) {
+                      } else if (controller.playerState ==
+                          PlayerState.playing) {
                         controller.pausePlayer();
                       }
                     },
-                    icon: Obx(() => Icon(status.value == PlayerState.playing ? Icons.pause : Icons.play_arrow_rounded, color: Colors.white)),
+                    icon: Obx(() => Icon(
+                        status.value == PlayerState.playing
+                            ? Icons.pause
+                            : Icons.play_arrow_rounded,
+                        color: Colors.white)),
                   ),
                   Expanded(
                     child: AudioFileWaveforms(
@@ -97,13 +113,15 @@ class _AudioPlayerComponentState extends State<AudioPlayerComponent> {
                 ],
               ),
               const Positioned(
-                bottom: -3,
-                left: 35,
-                child: DecoratedIcon(
-                  icon: Icon(Icons.mic_rounded, color: Colors.white, size: 30),
-                  decoration: IconDecoration(border: IconBorder(width: 4, color: AppTheme.chatBalaoColor)),
-                )
-              )
+                  bottom: -3,
+                  left: 35,
+                  child: DecoratedIcon(
+                    icon:
+                        Icon(Icons.mic_rounded, color: Colors.white, size: 30),
+                    decoration: IconDecoration(
+                        border: IconBorder(
+                            width: 4, color: AppTheme.chatBalaoColor)),
+                  ))
             ],
           ),
         ),
@@ -115,8 +133,16 @@ class _AudioPlayerComponentState extends State<AudioPlayerComponent> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Obx(() => Text(DateFormat('mm:ss').format(DateTime.utc(0).add(Duration(seconds: currentDuration~/1000))), style: const TextStyle(fontSize: 12, color: Colors.white70))),
-                Obx(() => Text(DateFormat('mm:ss').format(DateTime.utc(0).add(Duration(seconds: maxDuration~/1000))), style: const TextStyle(fontSize: 12, color: Colors.white70)))
+                Obx(() => Text(
+                    DateFormat('mm:ss').format(DateTime.utc(0)
+                        .add(Duration(seconds: currentDuration ~/ 1000))),
+                    style:
+                        const TextStyle(fontSize: 12, color: Colors.white70))),
+                Obx(() => Text(
+                    DateFormat('mm:ss').format(DateTime.utc(0)
+                        .add(Duration(seconds: maxDuration ~/ 1000))),
+                    style:
+                        const TextStyle(fontSize: 12, color: Colors.white70)))
               ],
             ),
           ),

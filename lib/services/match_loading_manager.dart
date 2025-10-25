@@ -56,7 +56,8 @@ class LoadingState {
 class MatchLoadingManager extends GetxController {
   static MatchLoadingManager get instance => Get.find<MatchLoadingManager>();
 
-  final RxMap<LoadingType, LoadingState> _loadingStates = <LoadingType, LoadingState>{}.obs;
+  final RxMap<LoadingType, LoadingState> _loadingStates =
+      <LoadingType, LoadingState>{}.obs;
   final RxBool _hasAnyLoading = false.obs;
 
   /// Verificar se uma operação específica está carregando
@@ -143,7 +144,7 @@ class MatchLoadingManager extends GetxController {
       final result = timeout != null
           ? await operation().timeout(timeout)
           : await operation();
-      
+
       stopLoading(type);
       return result;
     } catch (error) {
@@ -158,7 +159,8 @@ class MatchLoadingManager extends GetxController {
     List<Future<T> Function()> operations, {
     List<String>? messages,
   }) async {
-    assert(types.length == operations.length, 'Types and operations must have same length');
+    assert(types.length == operations.length,
+        'Types and operations must have same length');
 
     // Iniciar todos os loadings
     for (int i = 0; i < types.length; i++) {
@@ -243,9 +245,8 @@ class MatchLoadingManager extends GetxController {
     final activeStates = getActiveLoadingStates();
     if (activeStates.isEmpty) return null;
 
-    final oldest = activeStates.values.reduce((a, b) => 
-      a.timestamp.isBefore(b.timestamp) ? a : b
-    );
+    final oldest = activeStates.values
+        .reduce((a, b) => a.timestamp.isBefore(b.timestamp) ? a : b);
 
     final duration = DateTime.now().difference(oldest.timestamp);
     return '${oldest.type.toString()} (${duration.inSeconds}s)';
@@ -253,7 +254,8 @@ class MatchLoadingManager extends GetxController {
 
   /// Stream para observar mudanças em loading específico
   Stream<bool> watchLoading(LoadingType type) {
-    return _loadingStates.stream.map((states) => states[type]?.isLoading ?? false);
+    return _loadingStates.stream
+        .map((states) => states[type]?.isLoading ?? false);
   }
 
   /// Stream para observar se há qualquer loading
@@ -285,7 +287,7 @@ class MatchLoadingManager extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     // Limpar estados antigos periodicamente
     ever(_hasAnyLoading, (hasLoading) {
       if (!hasLoading) {

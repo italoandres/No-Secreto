@@ -11,16 +11,18 @@ import 'search_alert_service.dart';
 /// Serviço principal para busca de perfis - versão funcional
 class SearchProfilesService {
   static SearchProfilesService? _instance;
-  static SearchProfilesService get instance => _instance ??= SearchProfilesService._();
-  
+  static SearchProfilesService get instance =>
+      _instance ??= SearchProfilesService._();
+
   SearchProfilesService._();
 
   /// Firebase Firestore instance
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Serviço de analytics
-  final SearchAnalyticsService _analyticsService = SearchAnalyticsService.instance;
-  
+  final SearchAnalyticsService _analyticsService =
+      SearchAnalyticsService.instance;
+
   /// Serviço de alertas
   final SearchAlertService _alertService = SearchAlertService.instance;
 
@@ -32,17 +34,16 @@ class SearchProfilesService {
     bool useCache = true,
   }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
-      EnhancedLogger.info('Starting profile search', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {
-          'query': query,
-          'hasFilters': filters != null,
-          'limit': limit,
-          'useCache': useCache,
-        }
-      );
+      EnhancedLogger.info('Starting profile search',
+          tag: 'SEARCH_PROFILES_SERVICE',
+          data: {
+            'query': query,
+            'hasFilters': filters != null,
+            'limit': limit,
+            'useCache': useCache,
+          });
 
       // Buscar perfis no Firebase
       final profiles = await _searchProfilesInFirebase(query, filters, limit);
@@ -64,14 +65,11 @@ class SearchProfilesService {
 
       stopwatch.stop();
       return result;
-
     } catch (e) {
       stopwatch.stop();
-      
-      EnhancedLogger.error('Search profiles failed', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {'error': e.toString()}
-      );
+
+      EnhancedLogger.error('Search profiles failed',
+          tag: 'SEARCH_PROFILES_SERVICE', data: {'error': e.toString()});
 
       return SearchResult.error(
         error: e.toString(),
@@ -96,12 +94,11 @@ class SearchProfilesService {
 
       // Executar query simples
       final snapshot = await firestoreQuery.get();
-      
-      EnhancedLogger.info('Firebase query executed', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {'documentsFound': snapshot.docs.length}
-      );
-      
+
+      EnhancedLogger.info('Firebase query executed',
+          tag: 'SEARCH_PROFILES_SERVICE',
+          data: {'documentsFound': snapshot.docs.length});
+
       // Converter documentos para modelos
       List<SpiritualProfileModel> profiles = [];
       for (final doc in snapshot.docs) {
@@ -113,34 +110,28 @@ class SearchProfilesService {
           });
           profiles.add(profile);
         } catch (e) {
-          EnhancedLogger.warning('Failed to parse profile document', 
-            tag: 'SEARCH_PROFILES_SERVICE',
-            data: {'docId': doc.id, 'error': e.toString()}
-          );
+          EnhancedLogger.warning('Failed to parse profile document',
+              tag: 'SEARCH_PROFILES_SERVICE',
+              data: {'docId': doc.id, 'error': e.toString()});
         }
       }
 
-      EnhancedLogger.info('Profiles parsed', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {'profilesParsed': profiles.length}
-      );
+      EnhancedLogger.info('Profiles parsed',
+          tag: 'SEARCH_PROFILES_SERVICE',
+          data: {'profilesParsed': profiles.length});
 
       // Aplicar todos os filtros no código
       profiles = _applyAllFilters(profiles, query, filters);
 
-      EnhancedLogger.info('Filters applied', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {'profilesAfterFilter': profiles.length}
-      );
+      EnhancedLogger.info('Filters applied',
+          tag: 'SEARCH_PROFILES_SERVICE',
+          data: {'profilesAfterFilter': profiles.length});
 
       // Limitar ao número solicitado
       return profiles.take(limit).toList();
-
     } catch (e) {
-      EnhancedLogger.error('Firebase search failed', 
-        tag: 'SEARCH_PROFILES_SERVICE',
-        data: {'error': e.toString()}
-      );
+      EnhancedLogger.error('Firebase search failed',
+          tag: 'SEARCH_PROFILES_SERVICE', data: {'error': e.toString()});
       return [];
     }
   }
@@ -202,7 +193,8 @@ class SearchProfilesService {
 
     // Filtro de interesses
     if (filters?.interests != null && filters!.interests!.isNotEmpty) {
-      filteredProfiles = _applyInterestsFilter(filteredProfiles, filters.interests!);
+      filteredProfiles =
+          _applyInterestsFilter(filteredProfiles, filters.interests!);
     }
 
     return filteredProfiles;
@@ -214,7 +206,7 @@ class SearchProfilesService {
     String query,
   ) {
     final queryLower = query.toLowerCase();
-    
+
     return profiles.where((profile) {
       // Campos pesquisáveis
       final searchableText = [
@@ -226,9 +218,8 @@ class SearchProfilesService {
       ].join(' ').toLowerCase();
 
       // Busca por palavras individuais
-      final queryWords = queryLower.split(' ')
-          .where((word) => word.isNotEmpty)
-          .toList();
+      final queryWords =
+          queryLower.split(' ').where((word) => word.isNotEmpty).toList();
 
       // Deve conter pelo menos uma palavra
       return queryWords.any((word) => searchableText.contains(word));
@@ -241,23 +232,18 @@ class SearchProfilesService {
     List<String> interests,
   ) {
     return profiles.where((profile) {
-      final profileInterests = (profile.interests ?? [])
-          .map((i) => i.toLowerCase())
-          .toList();
+      final profileInterests =
+          (profile.interests ?? []).map((i) => i.toLowerCase()).toList();
 
       if (profileInterests.isEmpty) return false;
 
-      final filterInterests = interests
-          .map((i) => i.toLowerCase())
-          .toList();
+      final filterInterests = interests.map((i) => i.toLowerCase()).toList();
 
       // Deve ter pelo menos um interesse em comum
-      return filterInterests.any((filterInterest) =>
-        profileInterests.any((profileInterest) =>
-          profileInterest.contains(filterInterest) ||
-          filterInterest.contains(profileInterest)
-        )
-      );
+      return filterInterests.any((filterInterest) => profileInterests.any(
+          (profileInterest) =>
+              profileInterest.contains(filterInterest) ||
+              filterInterest.contains(profileInterest)));
     }).toList();
   }
 
@@ -282,10 +268,9 @@ class SearchProfilesService {
     SearchFilters? filters,
     required int limit,
   }) async {
-    EnhancedLogger.info('Search with strategy: $strategyName', 
-      tag: 'SEARCH_PROFILES_SERVICE'
-    );
-    
+    EnhancedLogger.info('Search with strategy: $strategyName',
+        tag: 'SEARCH_PROFILES_SERVICE');
+
     // Por enquanto, usar a mesma implementação
     final result = await searchProfiles(
       query: query,
@@ -293,7 +278,7 @@ class SearchProfilesService {
       limit: limit,
       useCache: false,
     );
-    
+
     return result.profiles;
   }
 
@@ -303,9 +288,8 @@ class SearchProfilesService {
     SearchFilters? filters,
     required int limit,
   }) async {
-    EnhancedLogger.info('Testing all strategies', 
-      tag: 'SEARCH_PROFILES_SERVICE'
-    );
+    EnhancedLogger.info('Testing all strategies',
+        tag: 'SEARCH_PROFILES_SERVICE');
     return {};
   }
 

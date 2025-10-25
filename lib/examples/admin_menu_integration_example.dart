@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../components/admin_certifications_menu_item.dart';
 
 /// Exemplos de integração do menu de certificações
-/// 
+///
 /// Este arquivo mostra diferentes formas de integrar
 /// os componentes de menu de certificações no app
 
@@ -13,7 +13,7 @@ import '../components/admin_certifications_menu_item.dart';
 
 class SettingsViewWithCertifications extends StatelessWidget {
   final bool isAdmin;
-  
+
   const SettingsViewWithCertifications({
     Key? key,
     required this.isAdmin,
@@ -38,9 +38,9 @@ class SettingsViewWithCertifications extends StatelessWidget {
             title: Text('Privacidade'),
             trailing: Icon(Icons.chevron_right),
           ),
-          
+
           const Divider(),
-          
+
           // Seção Admin (só aparece se for admin)
           if (isAdmin) ...[
             Padding(
@@ -54,19 +54,19 @@ class SettingsViewWithCertifications extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Item de Certificações com contador
             AdminCertificationsMenuItem(isAdmin: isAdmin),
-            
+
             const ListTile(
               leading: Icon(Icons.people),
               title: Text('Gerenciar Usuários'),
               trailing: Icon(Icons.chevron_right),
             ),
-            
+
             const Divider(),
           ],
-          
+
           // Outras opções
           const ListTile(
             leading: Icon(Icons.help),
@@ -96,7 +96,7 @@ class AppDrawerWithCertifications extends StatelessWidget {
   final bool isAdmin;
   final String userName;
   final String userEmail;
-  
+
   const AppDrawerWithCertifications({
     Key? key,
     required this.isAdmin,
@@ -124,7 +124,7 @@ class AppDrawerWithCertifications extends StatelessWidget {
               child: Icon(Icons.person, size: 40, color: Colors.purple),
             ),
           ),
-          
+
           // Menu Principal
           ListTile(
             leading: const Icon(Icons.home),
@@ -141,9 +141,9 @@ class AppDrawerWithCertifications extends StatelessWidget {
             title: const Text('Conversas'),
             onTap: () {},
           ),
-          
+
           const Divider(),
-          
+
           // Seção Admin (versão compacta)
           if (isAdmin) ...[
             Padding(
@@ -157,12 +157,10 @@ class AppDrawerWithCertifications extends StatelessWidget {
                 ),
               ),
             ),
-            
             CompactAdminCertificationsMenuItem(isAdmin: isAdmin),
-            
             const SizedBox(height: 8),
           ],
-          
+
           // Configurações
           ListTile(
             leading: const Icon(Icons.settings),
@@ -316,7 +314,7 @@ class AdminDashboardView extends StatelessWidget {
 
 class MainAppWithBottomNav extends StatefulWidget {
   final bool isAdmin;
-  
+
   const MainAppWithBottomNav({
     Key? key,
     required this.isAdmin,
@@ -401,7 +399,7 @@ class _MainAppWithBottomNavState extends State<MainAppWithBottomNav> {
 
 class HomeViewWithCertificationBadge extends StatelessWidget {
   final bool isAdmin;
-  
+
   const HomeViewWithCertificationBadge({
     Key? key,
     required this.isAdmin,
@@ -463,9 +461,9 @@ class AdminOptionsListView extends StatelessWidget {
         children: [
           // Card de Certificações (destaque)
           CompactAdminCertificationsMenuItem(isAdmin: true),
-          
+
           const SizedBox(height: 16),
-          
+
           // Outras opções
           _buildOptionCard(
             icon: Icons.people,
@@ -474,9 +472,9 @@ class AdminOptionsListView extends StatelessWidget {
             color: Colors.blue,
             onTap: () {},
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           _buildOptionCard(
             icon: Icons.report,
             title: 'Denúncias',
@@ -484,9 +482,9 @@ class AdminOptionsListView extends StatelessWidget {
             color: Colors.red,
             onTap: () {},
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           _buildOptionCard(
             icon: Icons.analytics,
             title: 'Estatísticas',

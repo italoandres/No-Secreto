@@ -9,9 +9,11 @@ class UsernameValidationResult {
     this.errorType,
   });
 
-  static const UsernameValidationResult valid = UsernameValidationResult(isValid: true);
+  static const UsernameValidationResult valid =
+      UsernameValidationResult(isValid: true);
 
-  static UsernameValidationResult invalid(String message, UsernameValidationError type) {
+  static UsernameValidationResult invalid(
+      String message, UsernameValidationError type) {
     return UsernameValidationResult(
       isValid: false,
       errorMessage: message,

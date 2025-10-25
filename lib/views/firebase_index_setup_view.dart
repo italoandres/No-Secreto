@@ -7,7 +7,8 @@ class FirebaseIndexSetupView extends StatelessWidget {
   const FirebaseIndexSetupView({super.key});
 
   /// URL pré-configurada para criar o índice de matches aceitos
-  static const String matchesIndexUrl = 'https://console.firebase.google.com/v1/r/project/app-no-secreto-com-o-pai/firestore/indexes?create_composite=Cmdwcm9qZWN0cy9hcHAtbm8tc2VjcmV0by1jb20tby1wYWkvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2ludGVyZXN0X25vdGlmaWNhdGlvbnMvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaDAoIdG9Vc2VySWQQARoQCgxkYXRhUmVzcG9zdGEQAhoMCghfX25hbWVfXxAC';
+  static const String matchesIndexUrl =
+      'https://console.firebase.google.com/v1/r/project/app-no-secreto-com-o-pai/firestore/indexes?create_composite=Cmdwcm9qZWN0cy9hcHAtbm8tc2VjcmV0by1jb20tby1wYWkvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2ludGVyZXN0X25vdGlmaWNhdGlvbnMvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaDAoIdG9Vc2VySWQQARoQCgxkYXRhUmVzcG9zdGEQAhoMCghfX25hbWVfXxAC';
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +85,8 @@ class FirebaseIndexSetupView extends StatelessWidget {
             // Índice de Matches Aceitos
             _buildIndexCard(
               title: 'Índice de Matches Aceitos',
-              description: 'Necessário para o funcionamento do botão de matches (💕) e tela de chats',
+              description:
+                  'Necessário para o funcionamento do botão de matches (💕) e tela de chats',
               icon: Icons.favorite,
               color: const Color(0xFFFF6B9D),
               status: 'Necessário',
@@ -322,7 +324,7 @@ class FirebaseIndexSetupView extends StatelessWidget {
       final uri = Uri.parse(matchesIndexUrl);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
-        
+
         // Mostrar confirmação
         Get.snackbar(
           'Firebase Console Aberto! 🚀',

@@ -179,7 +179,8 @@ class _ProfileRecommendationCardState extends State<ProfileRecommendationCard> {
                             children: [
                               // Match Score Badge
                               Expanded(
-                                child: MatchScoreBadge(score: widget.profile.score),
+                                child: MatchScoreBadge(
+                                    score: widget.profile.score),
                               ),
                               const SizedBox(width: 12),
                               // Deus é Pai Badge (sempre aparece)
@@ -191,7 +192,7 @@ class _ProfileRecommendationCardState extends State<ProfileRecommendationCard> {
                               ),
                             ],
                           ),
-                          
+
                           // Hobbies modernos logo abaixo dos badges
                           HobbiesChipsModern(profile: widget.profile),
                         ],

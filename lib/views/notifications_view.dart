@@ -31,13 +31,13 @@ class _NotificationsViewState extends State<NotificationsView>
   @override
   void initState() {
     super.initState();
-    
+
     // Inicializar TabController
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Inicializar controller GetX
     _controller = Get.put(UnifiedNotificationController());
-    
+
     // Sincronizar TabController com controller
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
@@ -62,7 +62,7 @@ class _NotificationsViewState extends State<NotificationsView>
         children: [
           // Barra de categorias
           _buildCategoryBar(),
-          
+
           // Conteúdo das categorias
           Expanded(
             child: _buildTabBarView(),
@@ -94,20 +94,20 @@ class _NotificationsViewState extends State<NotificationsView>
           onPressed: () {
             // Navegar para stories salvos
             final contexto = 'principal';
-            
+
             print('🔖 Abrindo stories salvos - contexto: $contexto');
-            
+
             // Navegar para StoryFavoritesView
             Get.to(() => StoryFavoritesView(contexto: contexto));
           },
           icon: const Icon(Icons.bookmark, color: Colors.white),
           tooltip: 'Stories Salvos',
         ),
-        
+
         // Botão Marcar todas como lidas com Badge total
         Obx(() {
           final totalBadge = _controller.getTotalBadgeCount();
-          
+
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -116,7 +116,7 @@ class _NotificationsViewState extends State<NotificationsView>
                   // Marcar categoria atual como lida
                   final category = _controller.getActiveCategory();
                   _controller.markCategoryAsRead(category);
-                  
+
                   Get.snackbar(
                     'Sucesso',
                     'Notificações marcadas como lidas',
@@ -129,7 +129,6 @@ class _NotificationsViewState extends State<NotificationsView>
                 icon: const Icon(Icons.done_all, color: Colors.white),
                 tooltip: 'Marcar todas como lidas',
               ),
-              
               if (totalBadge > 0)
                 Positioned(
                   right: 8,
@@ -158,7 +157,7 @@ class _NotificationsViewState extends State<NotificationsView>
             ],
           );
         }),
-        
+
         const SizedBox(width: 8),
       ],
     );
@@ -191,7 +190,7 @@ class _NotificationsViewState extends State<NotificationsView>
               ),
             ),
             const SizedBox(width: 8),
-            
+
             // Tab Interesse
             Expanded(
               child: NotificationCategoryTab(
@@ -202,7 +201,7 @@ class _NotificationsViewState extends State<NotificationsView>
               ),
             ),
             const SizedBox(width: 8),
-            
+
             // Tab Sistema
             Expanded(
               child: NotificationCategoryTab(
@@ -225,10 +224,10 @@ class _NotificationsViewState extends State<NotificationsView>
       children: [
         // Stories
         _buildStoriesContent(),
-        
+
         // Interesse/Match
         _buildInterestContent(),
-        
+
         // Sistema
         _buildSystemContent(),
       ],
@@ -243,7 +242,8 @@ class _NotificationsViewState extends State<NotificationsView>
         notifications: _controller.storiesNotifications,
         isLoading: _controller.isLoading.value,
         errorMessage: _controller.errorMessage.value,
-        onRefresh: () => _controller.refreshCategory(NotificationCategory.stories),
+        onRefresh: () =>
+            _controller.refreshCategory(NotificationCategory.stories),
         onNotificationTap: _handleStoryNotificationTap,
         onNotificationDelete: _handleStoryNotificationDelete,
         itemBuilder: (context, notification, index) {
@@ -266,7 +266,8 @@ class _NotificationsViewState extends State<NotificationsView>
         notifications: _controller.interestNotifications,
         isLoading: _controller.isLoading.value,
         errorMessage: _controller.errorMessage.value,
-        onRefresh: () => _controller.refreshCategory(NotificationCategory.interest),
+        onRefresh: () =>
+            _controller.refreshCategory(NotificationCategory.interest),
         onNotificationTap: _handleInterestNotificationTap,
         onNotificationDelete: _handleInterestNotificationDelete,
         itemBuilder: (context, notification, index) {
@@ -289,7 +290,8 @@ class _NotificationsViewState extends State<NotificationsView>
         notifications: _controller.systemNotifications,
         isLoading: _controller.isLoading.value,
         errorMessage: _controller.errorMessage.value,
-        onRefresh: () => _controller.refreshCategory(NotificationCategory.system),
+        onRefresh: () =>
+            _controller.refreshCategory(NotificationCategory.system),
         onNotificationTap: _handleSystemNotificationTap,
         onNotificationDelete: _handleSystemNotificationDelete,
         itemBuilder: (context, notification, index) {
@@ -310,13 +312,13 @@ class _NotificationsViewState extends State<NotificationsView>
   void _handleStoryNotificationTap(dynamic notification) {
     try {
       print('📖 Tap em notificação de story: ${notification.id}');
-      
+
       // Aqui você pode navegar para o story específico
       // Por exemplo: Get.toNamed('/story/${notification.storyId}');
-      
+
       // Marcar como lida
       // NotificationRepository.markAsRead(notification.id);
-      
+
       Get.snackbar(
         'Story',
         'Navegando para o story...',
@@ -325,7 +327,6 @@ class _NotificationsViewState extends State<NotificationsView>
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-      
     } catch (e) {
       print('❌ Erro ao abrir notificação de story: $e');
       _showErrorSnackbar('Erro ao abrir notificação');
@@ -337,9 +338,9 @@ class _NotificationsViewState extends State<NotificationsView>
     try {
       final confirmed = await _showDeleteConfirmation();
       if (confirmed != true) return;
-      
+
       // NotificationRepository.deleteNotification(notification.id);
-      
+
       Get.snackbar(
         'Sucesso',
         'Notificação excluída',
@@ -348,7 +349,6 @@ class _NotificationsViewState extends State<NotificationsView>
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-      
     } catch (e) {
       print('❌ Erro ao deletar notificação: $e');
       _showErrorSnackbar('Erro ao excluir notificação');
@@ -359,11 +359,11 @@ class _NotificationsViewState extends State<NotificationsView>
   void _handleInterestNotificationTap(dynamic notification) async {
     try {
       print('💕 Tap em notificação de interesse: ${notification.id}');
-      
+
       // Navegar para Interest Dashboard (Vitrine de Propósito)
       // onde ficam as notificações oficiais de interesse
       Get.toNamed('/interest-dashboard');
-      
+
       Get.snackbar(
         '✨ Vitrine de Propósito',
         'Descubra quem tem interesse em você!',
@@ -373,7 +373,6 @@ class _NotificationsViewState extends State<NotificationsView>
         duration: const Duration(seconds: 2),
         icon: const Icon(Icons.storefront, color: Colors.white),
       );
-      
     } catch (e) {
       print('❌ Erro ao abrir notificação de interesse: $e');
       _showErrorSnackbar('Erro ao abrir notificação');
@@ -381,26 +380,26 @@ class _NotificationsViewState extends State<NotificationsView>
   }
 
   /// Handler para responder interesse (aceitar/rejeitar)
-  Future<void> _handleInterestResponse(dynamic notification, bool accept) async {
+  Future<void> _handleInterestResponse(
+      dynamic notification, bool accept) async {
     try {
       final action = accept ? 'accepted' : 'rejected';
-      
+
       await InterestNotificationRepository.respondToInterestNotification(
         notification.id!,
         action,
       );
-      
+
       Get.snackbar(
         accept ? 'Interesse Aceito!' : 'Interesse Rejeitado',
-        accept 
-            ? 'Você aceitou o interesse de ${notification.fromUserName}' 
+        accept
+            ? 'Você aceitou o interesse de ${notification.fromUserName}'
             : 'Você rejeitou o interesse',
         backgroundColor: accept ? Colors.green : Colors.grey.shade600,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );
-      
     } catch (e) {
       print('❌ Erro ao responder interesse: $e');
       _showErrorSnackbar('Erro ao responder interesse');
@@ -412,9 +411,9 @@ class _NotificationsViewState extends State<NotificationsView>
     try {
       final confirmed = await _showDeleteConfirmation();
       if (confirmed != true) return;
-      
+
       // Implementar delete
-      
+
       Get.snackbar(
         'Sucesso',
         'Notificação excluída',
@@ -423,7 +422,6 @@ class _NotificationsViewState extends State<NotificationsView>
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-      
     } catch (e) {
       print('❌ Erro ao deletar notificação: $e');
       _showErrorSnackbar('Erro ao excluir notificação');
@@ -434,21 +432,21 @@ class _NotificationsViewState extends State<NotificationsView>
   void _handleSystemNotificationTap(dynamic notification) async {
     try {
       print('⚙️ Tap em notificação de sistema: ${notification['id']}');
-      
+
       final type = notification['type'];
       final notificationId = notification['id'] as String?;
       final userId = notification['userId'] as String?;
-      
+
       // Marcar como lida ANTES de navegar
       if (notificationId != null) {
         await _controller.markSystemNotificationAsRead(notificationId);
         print('✅ Notificação marcada como lida: $notificationId');
       }
-      
+
       if (type == 'certification_approved') {
         // Sempre passar o userId (da notificação ou do usuário atual)
         final targetUserId = userId ?? FirebaseAuth.instance.currentUser?.uid;
-        
+
         if (targetUserId != null && targetUserId.isNotEmpty) {
           Get.toNamed('/vitrine-display', arguments: {
             'userId': targetUserId,
@@ -459,7 +457,7 @@ class _NotificationsViewState extends State<NotificationsView>
           _showErrorSnackbar('Erro: ID do usuário não encontrado');
           return;
         }
-        
+
         Get.snackbar(
           '🎉 Certificação Aprovada',
           'Veja seu perfil na vitrine!',
@@ -468,11 +466,10 @@ class _NotificationsViewState extends State<NotificationsView>
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2),
         );
-        
       } else if (type == 'certification_rejected') {
         // Navegar para tela de certificação
         Get.toNamed('/spiritual-certification-request');
-        
+
         Get.snackbar(
           'Certificação Pendente',
           'Navegando para solicitar novamente...',
@@ -481,7 +478,6 @@ class _NotificationsViewState extends State<NotificationsView>
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2),
         );
-        
       } else {
         Get.snackbar(
           'Sistema',
@@ -492,7 +488,6 @@ class _NotificationsViewState extends State<NotificationsView>
           duration: const Duration(seconds: 2),
         );
       }
-      
     } catch (e) {
       print('❌ Erro ao abrir notificação de sistema: $e');
       _showErrorSnackbar('Erro ao abrir notificação');
@@ -504,9 +499,9 @@ class _NotificationsViewState extends State<NotificationsView>
     try {
       final confirmed = await _showDeleteConfirmation();
       if (confirmed != true) return;
-      
+
       // Implementar delete
-      
+
       Get.snackbar(
         'Sucesso',
         'Notificação excluída',
@@ -515,7 +510,6 @@ class _NotificationsViewState extends State<NotificationsView>
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-      
     } catch (e) {
       print('❌ Erro ao deletar notificação: $e');
       _showErrorSnackbar('Erro ao excluir notificação');
@@ -552,7 +546,8 @@ class _NotificationsViewState extends State<NotificationsView>
     return Get.dialog<bool>(
       AlertDialog(
         title: Text('${notification.fromUserName} tem interesse em você'),
-        content: Text(notification.message ?? 'Demonstrou interesse em conhecer você melhor'),
+        content: Text(notification.message ??
+            'Demonstrou interesse em conhecer você melhor'),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),

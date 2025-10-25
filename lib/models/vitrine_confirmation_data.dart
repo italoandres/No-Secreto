@@ -6,7 +6,7 @@ class VitrineConfirmationData {
   final DateTime completedAt;
   final bool canShowVitrine;
   final String? profileId;
-  
+
   const VitrineConfirmationData({
     required this.userId,
     required this.userName,
@@ -80,29 +80,29 @@ class VitrineConfirmationData {
   @override
   String toString() {
     return 'VitrineConfirmationData(userId: $userId, '
-           'userName: $userName, '
-           'canShowVitrine: $canShowVitrine, '
-           'profileId: $profileId)';
+        'userName: $userName, '
+        'canShowVitrine: $canShowVitrine, '
+        'profileId: $profileId)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is VitrineConfirmationData &&
-      other.userId == userId &&
-      other.userName == userName &&
-      other.userPhoto == userPhoto &&
-      other.canShowVitrine == canShowVitrine &&
-      other.profileId == profileId;
+        other.userId == userId &&
+        other.userName == userName &&
+        other.userPhoto == userPhoto &&
+        other.canShowVitrine == canShowVitrine &&
+        other.profileId == profileId;
   }
 
   @override
   int get hashCode {
     return userId.hashCode ^
-      userName.hashCode ^
-      userPhoto.hashCode ^
-      canShowVitrine.hashCode ^
-      profileId.hashCode;
+        userName.hashCode ^
+        userPhoto.hashCode ^
+        canShowVitrine.hashCode ^
+        profileId.hashCode;
   }
 }

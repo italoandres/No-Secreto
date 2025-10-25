@@ -74,7 +74,7 @@ class _ChatExpirationBannerState extends State<ChatExpirationBanner>
         setState(() {
           // Força rebuild para atualizar o tempo
         });
-        
+
         // Verificar se expirou
         if (_isExpired() && widget.onExpired != null) {
           widget.onExpired!();
@@ -104,11 +104,11 @@ class _ChatExpirationBannerState extends State<ChatExpirationBanner>
 
   int _getDaysRemaining() {
     if (widget.isExpired || _isExpired()) return 0;
-    
+
     final now = DateTime.now();
     final expirationDate = widget.matchDate.add(const Duration(days: 30));
     final difference = expirationDate.difference(now);
-    
+
     return difference.inDays;
   }
 
@@ -150,9 +150,9 @@ class _ChatExpirationBannerState extends State<ChatExpirationBanner>
     if (widget.isExpired || _isExpired()) {
       return 'Chat Expirado';
     }
-    
+
     final daysRemaining = _getDaysRemaining();
-    
+
     if (daysRemaining == 0) {
       return 'Expira hoje!';
     } else if (daysRemaining == 1) {
@@ -184,7 +184,9 @@ class _ChatExpirationBannerState extends State<ChatExpirationBanner>
         animation: _pulseAnimation,
         builder: (context, child) {
           return Transform.scale(
-            scale: _isCritical() && !widget.isExpired ? _pulseAnimation.value : 1.0,
+            scale: _isCritical() && !widget.isExpired
+                ? _pulseAnimation.value
+                : 1.0,
             child: Container(
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
@@ -254,7 +256,7 @@ class _ChatExpirationBannerState extends State<ChatExpirationBanner>
     final daysRemaining = _getDaysRemaining();
     final totalDays = 30;
     final progress = (totalDays - daysRemaining) / totalDays;
-    
+
     return SizedBox(
       width: 40,
       height: 40,
@@ -295,17 +297,17 @@ class CompactExpirationIndicator extends StatelessWidget {
 
   int _getDaysRemaining() {
     if (isExpired) return 0;
-    
+
     final now = DateTime.now();
     final expirationDate = matchDate.add(const Duration(days: 30));
     final difference = expirationDate.difference(now);
-    
+
     return difference.inDays.clamp(0, 30);
   }
 
   Color _getIndicatorColor() {
     if (isExpired) return Colors.red[600]!;
-    
+
     final daysRemaining = _getDaysRemaining();
     if (daysRemaining <= 3) {
       return Colors.orange[600]!;
@@ -319,7 +321,7 @@ class CompactExpirationIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final daysRemaining = _getDaysRemaining();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

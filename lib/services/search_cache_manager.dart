@@ -4,34 +4,35 @@ import '../models/search_result.dart';
 import '../utils/enhanced_logger.dart';
 
 /// Gerenciador de cache inteligente para resultados de busca
-/// 
+///
 /// Oferece cache com TTL, LRU eviction, estatísticas detalhadas
 /// e invalidação baseada em filtros específicos.
 class SearchCacheManager {
   static SearchCacheManager? _instance;
-  static SearchCacheManager get instance => _instance ??= SearchCacheManager._();
-  
+  static SearchCacheManager get instance =>
+      _instance ??= SearchCacheManager._();
+
   SearchCacheManager._() {
     _initialize();
   }
 
   /// Cache principal de resultados
   final Map<String, CachedSearchResult> _cache = {};
-  
+
   /// Cache de metadados (para estatísticas rápidas)
   final Map<String, CacheMetadata> _metadata = {};
-  
+
   /// Timer para limpeza automática
   Timer? _cleanupTimer;
-  
+
   /// Configurações do cache
   static const Duration defaultCacheDuration = Duration(minutes: 5);
   static const int maxCacheSize = 100;
   static const Duration cleanupInterval = Duration(minutes: 2);
-  
+
   /// Cache específico por tipo de filtro
   final Map<String, Map<String, CachedSearchResult>> _filterTypeCache = {};
-  
+
   /// Estatísticas globais
   int _totalRequests = 0;
   int _totalHits = 0;
@@ -42,15 +43,14 @@ class SearchCacheManager {
   /// Inicializa o gerenciador de cache
   void _initialize() {
     _startCleanupTimer();
-    
-    EnhancedLogger.info('Search cache manager initialized', 
-      tag: 'SEARCH_CACHE_MANAGER',
-      data: {
-        'maxSize': maxCacheSize,
-        'defaultTTL': defaultCacheDuration.inMinutes,
-        'cleanupInterval': cleanupInterval.inMinutes,
-      }
-    );
+
+    EnhancedLogger.info('Search cache manager initialized',
+        tag: 'SEARCH_CACHE_MANAGER',
+        data: {
+          'maxSize': maxCacheSize,
+          'defaultTTL': defaultCacheDuration.inMinutes,
+          'cleanupInterval': cleanupInterval.inMinutes,
+        });
   }
 
   /// Para o gerenciador de cache
@@ -58,10 +58,9 @@ class SearchCacheManager {
     _cleanupTimer?.cancel();
     _cache.clear();
     _metadata.clear();
-    
-    EnhancedLogger.info('Search cache manager disposed', 
-      tag: 'SEARCH_CACHE_MANAGER'
-    );
+
+    EnhancedLogger.info('Search cache manager disposed',
+        tag: 'SEARCH_CACHE_MANAGER');
   }
 
   /// Obtém resultado do cache se disponível e válido
@@ -72,54 +71,50 @@ class SearchCacheManager {
     Duration? maxAge,
   }) async {
     _totalRequests++;
-    
+
     final cacheKey = _generateCacheKey(query, filters, limit);
     final cached = _cache[cacheKey];
-    
+
     if (cached == null) {
       _totalMisses++;
       _updateMetadata(cacheKey, hit: false);
       return null;
     }
-    
+
     // Verificar se ainda é válido
     final age = DateTime.now().difference(cached.cachedAt);
     final maxCacheAge = maxAge ?? defaultCacheDuration;
-    
+
     if (age > maxCacheAge) {
       _cache.remove(cacheKey);
       _metadata.remove(cacheKey);
       _totalMisses++;
       _updateMetadata(cacheKey, hit: false, expired: true);
-      
-      EnhancedLogger.debug('Cache entry expired', 
-        tag: 'SEARCH_CACHE_MANAGER',
-        data: {
-          'cacheKey': cacheKey,
-          'age': age.inSeconds,
-          'maxAge': maxCacheAge.inSeconds,
-        }
-      );
-      
+
+      EnhancedLogger.debug('Cache entry expired',
+          tag: 'SEARCH_CACHE_MANAGER',
+          data: {
+            'cacheKey': cacheKey,
+            'age': age.inSeconds,
+            'maxAge': maxCacheAge.inSeconds,
+          });
+
       return null;
     }
-    
+
     // Atualizar estatísticas de acesso
     cached.accessCount++;
     cached.lastAccessed = DateTime.now();
     _totalHits++;
     _updateMetadata(cacheKey, hit: true);
-    
-    EnhancedLogger.debug('Cache hit', 
-      tag: 'SEARCH_CACHE_MANAGER',
-      data: {
-        'cacheKey': cacheKey,
-        'age': age.inSeconds,
-        'accessCount': cached.accessCount,
-        'resultCount': cached.result.profiles.length,
-      }
-    );
-    
+
+    EnhancedLogger.debug('Cache hit', tag: 'SEARCH_CACHE_MANAGER', data: {
+      'cacheKey': cacheKey,
+      'age': age.inSeconds,
+      'accessCount': cached.accessCount,
+      'resultCount': cached.result.profiles.length,
+    });
+
     return cached.result.copyWith(fromCache: true);
   }
 
@@ -132,14 +127,14 @@ class SearchCacheManager {
   }) async {
     // Não cachear resultados vazios ou com erro
     if (result.profiles.isEmpty) return;
-    
+
     final cacheKey = _generateCacheKey(query, filters, limit);
-    
+
     // Verificar limite do cache
     if (_cache.length >= maxCacheSize) {
       _evictLeastRecentlyUsed();
     }
-    
+
     final now = DateTime.now();
     _cache[cacheKey] = CachedSearchResult(
       result: result,
@@ -150,24 +145,21 @@ class SearchCacheManager {
       filters: filters,
       limit: limit,
     );
-    
+
     // Adicionar ao cache específico por tipo de filtro
     _addToFilterTypeCache(query, filters, limit, result);
-    
+
     _totalStores++;
     _updateMetadata(cacheKey, stored: true);
-    
-    EnhancedLogger.debug('Result cached', 
-      tag: 'SEARCH_CACHE_MANAGER',
-      data: {
-        'cacheKey': cacheKey,
-        'query': query,
-        'hasFilters': filters != null,
-        'resultCount': result.profiles.length,
-        'cacheSize': _cache.length,
-        'strategy': result.strategy,
-      }
-    );
+
+    EnhancedLogger.debug('Result cached', tag: 'SEARCH_CACHE_MANAGER', data: {
+      'cacheKey': cacheKey,
+      'query': query,
+      'hasFilters': filters != null,
+      'resultCount': result.profiles.length,
+      'cacheSize': _cache.length,
+      'strategy': result.strategy,
+    });
   }
 
   /// Remove entrada específica do cache
@@ -179,18 +171,17 @@ class SearchCacheManager {
     final cacheKey = _generateCacheKey(query, filters, limit);
     _cache.remove(cacheKey);
     _metadata.remove(cacheKey);
-    
+
     // Remover do cache por tipo de filtro também
     _removeFromFilterTypeCache(query, filters, limit);
-    
-    EnhancedLogger.debug('Cache entry removed', 
-      tag: 'SEARCH_CACHE_MANAGER',
-      data: {
-        'cacheKey': cacheKey,
-        'query': query,
-        'hasFilters': filters != null,
-      }
-    );
+
+    EnhancedLogger.debug('Cache entry removed',
+        tag: 'SEARCH_CACHE_MANAGER',
+        data: {
+          'cacheKey': cacheKey,
+          'query': query,
+          'hasFilters': filters != null,
+        });
   }
 
   /// Limpa todo o cache
@@ -199,18 +190,16 @@ class SearchCacheManager {
     _cache.clear();
     _metadata.clear();
     _filterTypeCache.clear();
-    
+
     // Reset estatísticas
     _totalRequests = 0;
     _totalHits = 0;
     _totalMisses = 0;
     _totalStores = 0;
     _totalEvictions = 0;
-    
-    EnhancedLogger.info('Cache cleared completely', 
-      tag: 'SEARCH_CACHE_MANAGER',
-      data: {'entriesRemoved': size}
-    );
+
+    EnhancedLogger.info('Cache cleared completely',
+        tag: 'SEARCH_CACHE_MANAGER', data: {'entriesRemoved': size});
   }
 
   /// Limpa entradas expiradas
@@ -218,70 +207,69 @@ class SearchCacheManager {
     final now = DateTime.now();
     final maxCacheAge = maxAge ?? defaultCacheDuration;
     final keysToRemove = <String>[];
-    
+
     _cache.forEach((key, cached) {
       final age = now.difference(cached.cachedAt);
       if (age > maxCacheAge) {
         keysToRemove.add(key);
       }
     });
-    
+
     for (final key in keysToRemove) {
       _cache.remove(key);
       _metadata.remove(key);
     }
-    
+
     if (keysToRemove.isNotEmpty) {
-      EnhancedLogger.debug('Expired entries cleaned', 
-        tag: 'SEARCH_CACHE_MANAGER',
-        data: {'entriesRemoved': keysToRemove.length}
-      );
+      EnhancedLogger.debug('Expired entries cleaned',
+          tag: 'SEARCH_CACHE_MANAGER',
+          data: {'entriesRemoved': keysToRemove.length});
     }
   }
 
   /// Remove entrada menos recentemente usada
   void _evictLeastRecentlyUsed() {
     if (_cache.isEmpty) return;
-    
+
     String? lruKey;
     DateTime? oldestAccess;
-    
+
     _cache.forEach((key, cached) {
       if (oldestAccess == null || cached.lastAccessed.isBefore(oldestAccess!)) {
         oldestAccess = cached.lastAccessed;
         lruKey = key;
       }
     });
-    
+
     if (lruKey != null) {
       final cached = _cache[lruKey];
       _cache.remove(lruKey);
       _metadata.remove(lruKey);
-      
+
       // Remover do cache por tipo de filtro também
       if (cached != null) {
         _removeFromFilterTypeCache(cached.query, cached.filters, cached.limit);
       }
-      
+
       _totalEvictions++;
-      
-      EnhancedLogger.debug('LRU entry evicted', 
-        tag: 'SEARCH_CACHE_MANAGER',
-        data: {
-          'evictedKey': lruKey,
-          'age': oldestAccess != null ? 
-            DateTime.now().difference(oldestAccess!).inSeconds : 0,
-        }
-      );
+
+      EnhancedLogger.debug('LRU entry evicted',
+          tag: 'SEARCH_CACHE_MANAGER',
+          data: {
+            'evictedKey': lruKey,
+            'age': oldestAccess != null
+                ? DateTime.now().difference(oldestAccess!).inSeconds
+                : 0,
+          });
     }
   }
-  
+
   /// Gera chave de cache baseada nos parâmetros
   String _generateCacheKey(String query, SearchFilters? filters, int limit) {
     final buffer = StringBuffer();
     buffer.write('q:${query.toLowerCase()}');
     buffer.write('|l:$limit');
-    
+
     if (filters != null) {
       if (filters.minAge != null) buffer.write('|minAge:${filters.minAge}');
       if (filters.maxAge != null) buffer.write('|maxAge:${filters.maxAge}');
@@ -304,16 +292,17 @@ class SearchCacheManager {
         buffer.write('|course:${filters.hasCompletedCourse}');
       }
     }
-    
+
     return buffer.toString();
   }
-  
+
   /// Adiciona ao cache específico por tipo de filtro
-  void _addToFilterTypeCache(String query, SearchFilters? filters, int limit, SearchResult result) {
+  void _addToFilterTypeCache(
+      String query, SearchFilters? filters, int limit, SearchResult result) {
     final filterType = _getFilterType(filters);
     final filterCache = _filterTypeCache[filterType] ??= {};
     final cacheKey = _generateCacheKey(query, filters, limit);
-    
+
     filterCache[cacheKey] = CachedSearchResult(
       result: result,
       cachedAt: DateTime.now(),
@@ -324,38 +313,40 @@ class SearchCacheManager {
       limit: limit,
     );
   }
-  
+
   /// Remove do cache específico por tipo de filtro
-  void _removeFromFilterTypeCache(String query, SearchFilters? filters, int limit) {
+  void _removeFromFilterTypeCache(
+      String query, SearchFilters? filters, int limit) {
     final filterType = _getFilterType(filters);
     final filterCache = _filterTypeCache[filterType];
     if (filterCache != null) {
       final cacheKey = _generateCacheKey(query, filters, limit);
       filterCache.remove(cacheKey);
-      
+
       // Remover cache vazio
       if (filterCache.isEmpty) {
         _filterTypeCache.remove(filterType);
       }
     }
   }
-  
+
   /// Determina o tipo de filtro para cache específico
   String _getFilterType(SearchFilters? filters) {
     if (filters == null) return 'no_filters';
-    
+
     final types = <String>[];
-    
+
     if (filters.minAge != null || filters.maxAge != null) types.add('age');
     if (filters.city != null && filters.city!.isNotEmpty) types.add('city');
     if (filters.state != null && filters.state!.isNotEmpty) types.add('state');
-    if (filters.interests != null && filters.interests!.isNotEmpty) types.add('interests');
+    if (filters.interests != null && filters.interests!.isNotEmpty)
+      types.add('interests');
     if (filters.isVerified == true) types.add('verified');
     if (filters.hasCompletedCourse == true) types.add('course');
-    
+
     return types.isEmpty ? 'no_filters' : types.join('_');
   }
-  
+
   /// Invalida cache baseado em tipo de filtro
   void invalidateByFilterType(String filterType) {
     final filterCache = _filterTypeCache[filterType];
@@ -365,28 +356,28 @@ class SearchCacheManager {
         _cache.remove(key);
         _metadata.remove(key);
       }
-      
+
       // Limpar cache específico
       _filterTypeCache.remove(filterType);
-      
-      EnhancedLogger.info('Cache invalidated by filter type', 
-        tag: 'SEARCH_CACHE_MANAGER',
-        data: {
-          'filterType': filterType,
-          'entriesRemoved': filterCache.length,
-        }
-      );
+
+      EnhancedLogger.info('Cache invalidated by filter type',
+          tag: 'SEARCH_CACHE_MANAGER',
+          data: {
+            'filterType': filterType,
+            'entriesRemoved': filterCache.length,
+          });
     }
   }
 
   /// Atualiza metadados de cache
-  void _updateMetadata(String cacheKey, {
+  void _updateMetadata(
+    String cacheKey, {
     bool hit = false,
     bool expired = false,
     bool stored = false,
   }) {
     final metadata = _metadata[cacheKey] ??= CacheMetadata();
-    
+
     if (hit) metadata.hits++;
     if (expired) metadata.expirations++;
     if (stored) metadata.stores++;
@@ -403,40 +394,47 @@ class SearchCacheManager {
   /// Obtém estatísticas completas do cache
   Map<String, dynamic> getStats() {
     final now = DateTime.now();
-    
+
     // Estatísticas de metadados
     int metadataHits = 0;
     int metadataMisses = 0;
     int metadataStores = 0;
     int metadataExpirations = 0;
-    
+
     _metadata.values.forEach((meta) {
       metadataHits += meta.hits;
       metadataMisses += meta.misses;
       metadataStores += meta.stores;
       metadataExpirations += meta.expirations;
     });
-    
+
     // Calcular idade média das entradas
     double averageAge = 0.0;
     if (_cache.isNotEmpty) {
-      final totalAge = _cache.values.fold(0, (sum, cached) => 
-        sum + now.difference(cached.cachedAt).inMilliseconds);
+      final totalAge = _cache.values.fold(
+          0,
+          (sum, cached) =>
+              sum + now.difference(cached.cachedAt).inMilliseconds);
       averageAge = totalAge / _cache.length;
     }
-    
+
     // Estatísticas por tipo de filtro
     final filterTypeStats = <String, Map<String, dynamic>>{};
     _filterTypeCache.forEach((filterType, cache) {
       filterTypeStats[filterType] = {
         'entries': cache.length,
-        'averageAge': cache.isEmpty ? 0 : cache.values.fold(0, (sum, cached) => 
-          sum + now.difference(cached.cachedAt).inMilliseconds) / cache.length,
+        'averageAge': cache.isEmpty
+            ? 0
+            : cache.values.fold(
+                    0,
+                    (sum, cached) =>
+                        sum + now.difference(cached.cachedAt).inMilliseconds) /
+                cache.length,
       };
     });
-    
+
     final hitRate = _totalRequests == 0 ? 0.0 : _totalHits / _totalRequests;
-    
+
     return {
       'timestamp': now.toIso8601String(),
       'size': _cache.length,
@@ -474,9 +472,9 @@ class SearchCacheManager {
     final cacheKey = _generateCacheKey(query, filters, limit);
     final cached = _cache[cacheKey];
     final metadata = _metadata[cacheKey];
-    
+
     if (cached == null) return null;
-    
+
     final now = DateTime.now();
     return CacheEntryInfo(
       cacheKey: cacheKey,
@@ -491,12 +489,12 @@ class SearchCacheManager {
       strategy: cached.result.strategy,
     );
   }
-  
+
   /// Lista todas as entradas do cache
   List<CacheEntryInfo> getAllEntries() {
     final entries = <CacheEntryInfo>[];
     final now = DateTime.now();
-    
+
     _cache.forEach((cacheKey, cached) {
       final metadata = _metadata[cacheKey];
       entries.add(CacheEntryInfo(
@@ -512,25 +510,21 @@ class SearchCacheManager {
         strategy: cached.result.strategy,
       ));
     });
-    
+
     // Ordenar por último acesso (mais recente primeiro)
     entries.sort((a, b) => b.lastAccessed.compareTo(a.lastAccessed));
-    
+
     return entries;
   }
-  
+
   /// Pré-aquece o cache com buscas comuns
   Future<void> warmupCache() async {
-    EnhancedLogger.info('Starting cache warmup', 
-      tag: 'SEARCH_CACHE_MANAGER'
-    );
-    
+    EnhancedLogger.info('Starting cache warmup', tag: 'SEARCH_CACHE_MANAGER');
+
     // Aqui você pode adicionar buscas comuns para pré-aquecer o cache
     // Por exemplo, perfis verificados sem filtros
-    
-    EnhancedLogger.info('Cache warmup completed', 
-      tag: 'SEARCH_CACHE_MANAGER'
-    );
+
+    EnhancedLogger.info('Cache warmup completed', tag: 'SEARCH_CACHE_MANAGER');
   }
 }
 
@@ -562,8 +556,6 @@ class CacheMetadata {
   int stores = 0;
   int expirations = 0;
 }
-
-
 
 /// Informações sobre uma entrada específica do cache
 class CacheEntryInfo {
@@ -607,17 +599,18 @@ class CacheEntryInfo {
       'filterType': filters != null ? _getFilterTypeSummary(filters!) : 'none',
     };
   }
-  
+
   String _getFilterTypeSummary(SearchFilters filters) {
     final types = <String>[];
-    
+
     if (filters.minAge != null || filters.maxAge != null) types.add('age');
     if (filters.city != null && filters.city!.isNotEmpty) types.add('city');
     if (filters.state != null && filters.state!.isNotEmpty) types.add('state');
-    if (filters.interests != null && filters.interests!.isNotEmpty) types.add('interests');
+    if (filters.interests != null && filters.interests!.isNotEmpty)
+      types.add('interests');
     if (filters.isVerified == true) types.add('verified');
     if (filters.hasCompletedCourse == true) types.add('course');
-    
+
     return types.isEmpty ? 'none' : types.join('+');
   }
 }

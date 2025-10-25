@@ -62,7 +62,8 @@ class _EnhancedInterestNotificationCardState
 
       if (userDoc.exists) {
         final userData = userDoc.data()!;
-        final name = userData['nome'] ?? userData['username'] ?? 'Usuário Anônimo';
+        final name =
+            userData['nome'] ?? userData['username'] ?? 'Usuário Anônimo';
         final age = userData['idade'] as int?;
 
         print('✅ [CARD] Dados encontrados: $name, idade: $age');
@@ -91,7 +92,7 @@ class _EnhancedInterestNotificationCardState
   /// Nome para exibição
   String get displayName =>
       _senderName ?? widget.notification.fromUserName ?? 'Usuário';
-  
+
   /// Nome com idade para exibição
   String get displayNameWithAge {
     final name = displayName;
@@ -128,7 +129,7 @@ class _EnhancedInterestNotificationCardState
         ),
         boxShadow: [
           BoxShadow(
-            color: isNew 
+            color: isNew
                 ? Colors.pink.withOpacity(0.2)
                 : Colors.black.withOpacity(0.08),
             blurRadius: isNew ? 16 : 12,
@@ -207,7 +208,9 @@ class _EnhancedInterestNotificationCardState
                             ),
                           ),
                           // Badge de match
-                          if (isMutualMatch || isAccepted || widget.notification.type == 'acceptance')
+                          if (isMutualMatch ||
+                              isAccepted ||
+                              widget.notification.type == 'acceptance')
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -367,7 +370,9 @@ class _EnhancedInterestNotificationCardState
     final type = widget.notification.type;
 
     // Match mútuo, aceitação ou aceito - botões de ver perfil e conversar
-    if (type == 'mutual_match' || type == 'acceptance' || status == 'accepted') {
+    if (type == 'mutual_match' ||
+        type == 'acceptance' ||
+        status == 'accepted') {
       return Row(
         children: [
           Expanded(
@@ -470,7 +475,8 @@ class _EnhancedInterestNotificationCardState
     Get.toNamed('/vitrine-display', arguments: {
       'userId': fromUserId,
       'isOwnProfile': false,
-      'interestStatus': widget.notification.status, // Passar status para determinar botão
+      'interestStatus':
+          widget.notification.status, // Passar status para determinar botão
     });
   }
 
@@ -486,14 +492,16 @@ class _EnhancedInterestNotificationCardState
       }
 
       // Marcar notificação como "viewed" se estiver como "new"
-      if (widget.notification.status == 'new' && widget.notification.id != null) {
+      if (widget.notification.status == 'new' &&
+          widget.notification.id != null) {
         try {
           await FirebaseFirestore.instance
               .collection('interest_notifications')
               .doc(widget.notification.id)
               .update({'status': 'viewed'});
-          
-          print('✅ [CARD] Notificação marcada como viewed: ${widget.notification.id}');
+
+          print(
+              '✅ [CARD] Notificação marcada como viewed: ${widget.notification.id}');
         } catch (e) {
           print('⚠️ [CARD] Erro ao marcar como viewed: $e');
         }
@@ -529,7 +537,8 @@ class _EnhancedInterestNotificationCardState
     try {
       final action = accept ? 'accepted' : 'rejected';
 
-      print('💬 [CARD] Respondendo à notificação ${widget.notification.id} com ação: $action');
+      print(
+          '💬 [CARD] Respondendo à notificação ${widget.notification.id} com ação: $action');
 
       await InterestNotificationRepository.respondToInterestNotification(
         widget.notification.id!,
@@ -572,9 +581,9 @@ class _EnhancedInterestNotificationCardState
 /// Widget que cria efeito pulsante contínuo
 class _PulsingWidget extends StatefulWidget {
   final Widget child;
-  
+
   const _PulsingWidget({required this.child});
-  
+
   @override
   State<_PulsingWidget> createState() => _PulsingWidgetState();
 }
@@ -583,7 +592,7 @@ class _PulsingWidgetState extends State<_PulsingWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -591,7 +600,7 @@ class _PulsingWidgetState extends State<_PulsingWidget>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _animation = Tween<double>(
       begin: 1.0,
       end: 1.03,
@@ -599,17 +608,17 @@ class _PulsingWidgetState extends State<_PulsingWidget>
       parent: _controller,
       curve: Curves.easeInOut,
     ));
-    
+
     // Repetir a animação infinitamente
     _controller.repeat(reverse: true);
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(

@@ -8,11 +8,7 @@ import '../models/real_notification_model.dart';
 import '../utils/enhanced_logger.dart';
 
 /// Status de conectividade
-enum ConnectivityStatus {
-  online,
-  offline,
-  limited
-}
+enum ConnectivityStatus { online, offline, limited }
 
 /// Operação pendente de sincronização
 class PendingOperation {
@@ -33,31 +29,32 @@ class PendingOperation {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'userId': userId,
-    'type': type,
-    'data': data,
-    'timestamp': timestamp.toIso8601String(),
-    'retryCount': retryCount,
-  };
+        'id': id,
+        'userId': userId,
+        'type': type,
+        'data': data,
+        'timestamp': timestamp.toIso8601String(),
+        'retryCount': retryCount,
+      };
 
-  factory PendingOperation.fromJson(Map<String, dynamic> json) => PendingOperation(
-    id: json['id'],
-    userId: json['userId'],
-    type: json['type'],
-    data: Map<String, dynamic>.from(json['data']),
-    timestamp: DateTime.parse(json['timestamp']),
-    retryCount: json['retryCount'] ?? 0,
-  );
+  factory PendingOperation.fromJson(Map<String, dynamic> json) =>
+      PendingOperation(
+        id: json['id'],
+        userId: json['userId'],
+        type: json['type'],
+        data: Map<String, dynamic>.from(json['data']),
+        timestamp: DateTime.parse(json['timestamp']),
+        retryCount: json['retryCount'] ?? 0,
+      );
 
   PendingOperation copyWith({int? retryCount}) => PendingOperation(
-    id: id,
-    userId: userId,
-    type: type,
-    data: data,
-    timestamp: timestamp,
-    retryCount: retryCount ?? this.retryCount,
-  );
+        id: id,
+        userId: userId,
+        type: type,
+        data: data,
+        timestamp: timestamp,
+        retryCount: retryCount ?? this.retryCount,
+      );
 }
 
 /// Gerenciador de sincronização offline/online
@@ -67,7 +64,8 @@ class OfflineSyncManager {
   OfflineSyncManager._internal();
 
   final NotificationLocalStorage _localStorage = NotificationLocalStorage();
-  final UnifiedNotificationInterface _unifiedInterface = UnifiedNotificationInterface();
+  final UnifiedNotificationInterface _unifiedInterface =
+      UnifiedNotificationInterface();
   final NotificationSyncLogger _logger = NotificationSyncLogger();
   final Connectivity _connectivity = Connectivity();
 
@@ -77,8 +75,10 @@ class OfflineSyncManager {
   Timer? _retryTimer;
 
   final Map<String, List<PendingOperation>> _pendingOperations = {};
-  final StreamController<ConnectivityStatus> _statusController = StreamController.broadcast();
-  final StreamController<SyncProgress> _progressController = StreamController.broadcast();
+  final StreamController<ConnectivityStatus> _statusController =
+      StreamController.broadcast();
+  final StreamController<SyncProgress> _progressController =
+      StreamController.broadcast();
 
   bool _isInitialized = false;
   bool _isSyncing = false;
@@ -103,7 +103,8 @@ class OfflineSyncManager {
     if (_isInitialized) return;
 
     try {
-      EnhancedLogger.log('🔄 [OFFLINE_SYNC] Inicializando gerenciador de sincronização');
+      EnhancedLogger.log(
+          '🔄 [OFFLINE_SYNC] Inicializando gerenciador de sincronização');
 
       // Inicializa armazenamento local
       await _localStorage.initialize();
@@ -121,11 +122,12 @@ class OfflineSyncManager {
       _startAutomaticSync();
 
       _isInitialized = true;
-      EnhancedLogger.log('✅ [OFFLINE_SYNC] Gerenciador inicializado com sucesso');
-
+      EnhancedLogger.log(
+          '✅ [OFFLINE_SYNC] Gerenciador inicializado com sucesso');
     } catch (e) {
       EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro na inicialização: $e');
-      throw Exception('Falha na inicialização do gerenciador de sincronização: $e');
+      throw Exception(
+          'Falha na inicialização do gerenciador de sincronização: $e');
     }
   }
 
@@ -135,7 +137,8 @@ class OfflineSyncManager {
       await initialize();
     }
 
-    EnhancedLogger.log('🔄 [OFFLINE_SYNC] Iniciando sincronização para: $userId');
+    EnhancedLogger.log(
+        '🔄 [OFFLINE_SYNC] Iniciando sincronização para: $userId');
 
     try {
       _isSyncing = true;
@@ -150,13 +153,14 @@ class OfflineSyncManager {
 
       _emitProgress(SyncProgress(
         userId: userId,
-        status: result.success ? SyncProgressStatus.completed : SyncProgressStatus.failed,
+        status: result.success
+            ? SyncProgressStatus.completed
+            : SyncProgressStatus.failed,
         progress: 1.0,
         message: result.message,
       ));
 
       return result;
-
     } catch (e) {
       EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro na sincronização: $e');
 
@@ -173,7 +177,6 @@ class OfflineSyncManager {
         syncedCount: 0,
         failedCount: 0,
       );
-
     } finally {
       _isSyncing = false;
     }
@@ -189,15 +192,16 @@ class OfflineSyncManager {
       _pendingOperations[operation.userId]!.add(operation);
       await _savePendingOperations(operation.userId);
 
-      EnhancedLogger.log('📝 [OFFLINE_SYNC] Operação pendente adicionada: ${operation.type}');
+      EnhancedLogger.log(
+          '📝 [OFFLINE_SYNC] Operação pendente adicionada: ${operation.type}');
 
       // Tenta sincronizar se estiver online
       if (isOnline) {
         _scheduleSyncRetry(operation.userId);
       }
-
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao adicionar operação pendente: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao adicionar operação pendente: $e');
     }
   }
 
@@ -212,10 +216,11 @@ class OfflineSyncManager {
       _pendingOperations[userId]?.clear();
       await _savePendingOperations(userId);
 
-      EnhancedLogger.log('🧹 [OFFLINE_SYNC] Operações pendentes limpas para: $userId');
-
+      EnhancedLogger.log(
+          '🧹 [OFFLINE_SYNC] Operações pendentes limpas para: $userId');
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao limpar operações pendentes: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao limpar operações pendentes: $e');
     }
   }
 
@@ -252,7 +257,6 @@ class OfflineSyncManager {
         'storageStats': storageStats,
         'pendingOperationsByType': _groupOperationsByType(pendingOps),
       };
-
     } catch (e) {
       EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao obter estatísticas: $e');
       return {};
@@ -285,7 +289,8 @@ class OfflineSyncManager {
         message: 'Resolvendo conflitos...',
       ));
 
-      final mergedNotifications = await _mergeNotifications(localNotifications, serverNotifications);
+      final mergedNotifications =
+          await _mergeNotifications(localNotifications, serverNotifications);
 
       // 3. Processa operações pendentes
       _emitProgress(SyncProgress(
@@ -317,12 +322,14 @@ class OfflineSyncManager {
       await _localStorage.saveNotifications(userId, mergedNotifications);
 
       // 5. Atualiza status de sincronização
-      await _localStorage.updateSyncStatus(userId, SyncData(
-        lastSync: DateTime.now(),
-        status: failedCount == 0 ? SyncStatus.synced : SyncStatus.error,
-        pendingChanges: failedCount,
-        errorMessage: errors.isNotEmpty ? errors.join('; ') : null,
-      ));
+      await _localStorage.updateSyncStatus(
+          userId,
+          SyncData(
+            lastSync: DateTime.now(),
+            status: failedCount == 0 ? SyncStatus.synced : SyncStatus.error,
+            pendingChanges: failedCount,
+            errorMessage: errors.isNotEmpty ? errors.join('; ') : null,
+          ));
 
       // 6. Remove operações processadas com sucesso
       if (syncedCount > 0) {
@@ -330,7 +337,7 @@ class OfflineSyncManager {
       }
 
       final success = failedCount == 0;
-      final message = success 
+      final message = success
           ? 'Sincronização concluída com sucesso'
           : 'Sincronização concluída com $failedCount falhas';
 
@@ -343,7 +350,6 @@ class OfflineSyncManager {
         failedCount: failedCount,
         errors: errors,
       );
-
     } catch (e) {
       _logger.logError(userId, 'Sync failed', data: {'error': e.toString()});
 
@@ -372,10 +378,11 @@ class OfflineSyncManager {
       }
 
       _statusController.add(_currentStatus);
-      EnhancedLogger.log('📶 [OFFLINE_SYNC] Status inicial de conectividade: $_currentStatus');
-
+      EnhancedLogger.log(
+          '📶 [OFFLINE_SYNC] Status inicial de conectividade: $_currentStatus');
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao verificar conectividade: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao verificar conectividade: $e');
       _currentStatus = ConnectivityStatus.offline;
     }
   }
@@ -389,15 +396,16 @@ class OfflineSyncManager {
         // Verifica conectividade real se necessário
         if (newStatus == ConnectivityStatus.online) {
           final hasRealConnection = await _testRealConnectivity();
-          _currentStatus = hasRealConnection 
-              ? ConnectivityStatus.online 
+          _currentStatus = hasRealConnection
+              ? ConnectivityStatus.online
               : ConnectivityStatus.limited;
         } else {
           _currentStatus = newStatus;
         }
 
         _statusController.add(_currentStatus);
-        EnhancedLogger.log('📶 [OFFLINE_SYNC] Status de conectividade alterado: $_currentStatus');
+        EnhancedLogger.log(
+            '📶 [OFFLINE_SYNC] Status de conectividade alterado: $_currentStatus');
 
         // Inicia sincronização se ficou online
         if (_currentStatus == ConnectivityStatus.online) {
@@ -405,7 +413,8 @@ class OfflineSyncManager {
         }
       },
       onError: (error) {
-        EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro no monitoramento de conectividade: $error');
+        EnhancedLogger.log(
+            '❌ [OFFLINE_SYNC] Erro no monitoramento de conectividade: $error');
       },
     );
   }
@@ -454,9 +463,9 @@ class OfflineSyncManager {
           await syncNotifications(userId);
         }
       }
-
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro na sincronização automática: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro na sincronização automática: $e');
     }
   }
 
@@ -494,7 +503,8 @@ class OfflineSyncManager {
     // Mescla com notificações locais (local tem prioridade se mais recente)
     for (final notification in local) {
       final existing = merged[notification.id];
-      if (existing == null || notification.timestamp.isAfter(existing.timestamp)) {
+      if (existing == null ||
+          notification.timestamp.isAfter(existing.timestamp)) {
         merged[notification.id] = notification;
       }
     }
@@ -512,12 +522,14 @@ class OfflineSyncManager {
 
       case 'update':
         final notification = RealNotificationModel.fromJson(operation.data);
-        await _unifiedInterface.updateNotification(operation.userId, notification);
+        await _unifiedInterface.updateNotification(
+            operation.userId, notification);
         break;
 
       case 'delete':
         final notificationId = operation.data['id'] as String;
-        await _unifiedInterface.removeNotification(operation.userId, notificationId);
+        await _unifiedInterface.removeNotification(
+            operation.userId, notificationId);
         break;
 
       default:
@@ -534,7 +546,8 @@ class OfflineSyncManager {
         await _savePendingOperations(userId);
       }
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao remover operações sincronizadas: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao remover operações sincronizadas: $e');
     }
   }
 
@@ -544,7 +557,8 @@ class OfflineSyncManager {
       // Implementação simplificada - em produção, carregaria do armazenamento persistente
       EnhancedLogger.log('📂 [OFFLINE_SYNC] Operações pendentes carregadas');
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao carregar operações pendentes: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao carregar operações pendentes: $e');
     }
   }
 
@@ -552,9 +566,11 @@ class OfflineSyncManager {
   Future<void> _savePendingOperations(String userId) async {
     try {
       // Implementação simplificada - em produção, salvaria no armazenamento persistente
-      EnhancedLogger.log('💾 [OFFLINE_SYNC] Operações pendentes salvas para: $userId');
+      EnhancedLogger.log(
+          '💾 [OFFLINE_SYNC] Operações pendentes salvas para: $userId');
     } catch (e) {
-      EnhancedLogger.log('❌ [OFFLINE_SYNC] Erro ao salvar operações pendentes: $e');
+      EnhancedLogger.log(
+          '❌ [OFFLINE_SYNC] Erro ao salvar operações pendentes: $e');
     }
   }
 
@@ -618,9 +634,4 @@ class SyncProgress {
 }
 
 /// Status do progresso de sincronização
-enum SyncProgressStatus {
-  idle,
-  syncing,
-  completed,
-  failed
-}
+enum SyncProgressStatus { idle, syncing, completed, failed }

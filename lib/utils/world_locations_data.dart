@@ -12,7 +12,7 @@ class WorldLocationsData {
     {'code': 'ST', 'name': 'São Tomé e Príncipe', 'flag': '🇸🇹'},
     {'code': 'TL', 'name': 'Timor-Leste', 'flag': '🇹🇱'},
     {'code': 'GQ', 'name': 'Guiné Equatorial', 'flag': '🇬🇶'},
-    
+
     // Américas
     {'code': 'US', 'name': 'Estados Unidos', 'flag': '🇺🇸'},
     {'code': 'CA', 'name': 'Canadá', 'flag': '🇨🇦'},
@@ -36,7 +36,7 @@ class WorldLocationsData {
     {'code': 'NI', 'name': 'Nicarágua', 'flag': '🇳🇮'},
     {'code': 'JM', 'name': 'Jamaica', 'flag': '🇯🇲'},
     {'code': 'TT', 'name': 'Trinidad e Tobago', 'flag': '🇹🇹'},
-    
+
     // Europa
     {'code': 'GB', 'name': 'Reino Unido', 'flag': '🇬🇧'},
     {'code': 'DE', 'name': 'Alemanha', 'flag': '🇩🇪'},
@@ -59,7 +59,7 @@ class WorldLocationsData {
     {'code': 'GR', 'name': 'Grécia', 'flag': '🇬🇷'},
     {'code': 'RU', 'name': 'Rússia', 'flag': '🇷🇺'},
     {'code': 'UA', 'name': 'Ucrânia', 'flag': '🇺🇦'},
-    
+
     // Ásia
     {'code': 'CN', 'name': 'China', 'flag': '🇨🇳'},
     {'code': 'JP', 'name': 'Japão', 'flag': '🇯🇵'},
@@ -79,11 +79,11 @@ class WorldLocationsData {
     {'code': 'AE', 'name': 'Emirados Árabes', 'flag': '🇦🇪'},
     {'code': 'IQ', 'name': 'Iraque', 'flag': '🇮🇶'},
     {'code': 'IR', 'name': 'Irã', 'flag': '🇮🇷'},
-    
+
     // Oceania
     {'code': 'AU', 'name': 'Austrália', 'flag': '🇦🇺'},
     {'code': 'NZ', 'name': 'Nova Zelândia', 'flag': '🇳🇿'},
-    
+
     // África
     {'code': 'ZA', 'name': 'África do Sul', 'flag': '🇿🇦'},
     {'code': 'EG', 'name': 'Egito', 'flag': '🇪🇬'},
@@ -98,7 +98,7 @@ class WorldLocationsData {
     {'code': 'UG', 'name': 'Uganda', 'flag': '🇺🇬'},
     {'code': 'TZ', 'name': 'Tanzânia', 'flag': '🇹🇿'},
     {'code': 'ZW', 'name': 'Zimbábue', 'flag': '🇿🇼'},
-    
+
     // Outros países relevantes
     {'code': 'AF', 'name': 'Afeganistão', 'flag': '🇦🇫'},
     {'code': 'AL', 'name': 'Albânia', 'flag': '🇦🇱'},
@@ -201,12 +201,12 @@ class WorldLocationsData {
     {'code': 'YE', 'name': 'Iêmen', 'flag': '🇾🇪'},
     {'code': 'ZM', 'name': 'Zâmbia', 'flag': '🇿🇲'},
   ];
-  
+
   /// Retorna a lista de nomes dos países
   static List<String> getCountryNames() {
     return countries.map((country) => country['name']!).toList();
   }
-  
+
   /// Retorna o nome do país pelo código
   static String getCountryName(String code) {
     final country = countries.firstWhere(
@@ -215,7 +215,7 @@ class WorldLocationsData {
     );
     return country['name']!;
   }
-  
+
   /// Retorna a bandeira do país pelo código
   static String getCountryFlag(String code) {
     final country = countries.firstWhere(
@@ -224,7 +224,7 @@ class WorldLocationsData {
     );
     return country['flag']!;
   }
-  
+
   /// Retorna o código do país pelo nome
   static String? getCountryCode(String name) {
     final country = countries.firstWhere(
@@ -233,7 +233,7 @@ class WorldLocationsData {
     );
     return country['code'];
   }
-  
+
   /// Verifica se é um país de língua portuguesa
   static bool isPortugueseSpeakingCountry(String countryName) {
     const portugueseCountries = [

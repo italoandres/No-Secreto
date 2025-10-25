@@ -1,4 +1,3 @@
-
 class EmojiModel {
   String? codes;
   String? char;
@@ -17,7 +16,6 @@ class EmojiModel {
   });
 
   static EmojiModel fromJson(Map<String, dynamic> json) {
-
     return EmojiModel(
       codes: json['codes'],
       char: json['char'],

@@ -21,10 +21,12 @@ class MutualMatchNotificationCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<MutualMatchNotificationCard> createState() => _MutualMatchNotificationCardState();
+  State<MutualMatchNotificationCard> createState() =>
+      _MutualMatchNotificationCardState();
 }
 
-class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCard> {
+class _MutualMatchNotificationCardState
+    extends State<MutualMatchNotificationCard> {
   bool _isLoading = false;
 
   @override
@@ -177,7 +179,7 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
         Expanded(
           child: ElevatedButton.icon(
             onPressed: _isLoading ? null : _handleStartChat,
-            icon: _isLoading 
+            icon: _isLoading
                 ? const SizedBox(
                     width: 18,
                     height: 18,
@@ -227,13 +229,12 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
     try {
       // Marcar notificação como visualizada
       await NotificationOrchestrator.markAsViewed(widget.notification.id);
-      
+
       // Chamar callback de visualização de perfil
       widget.onProfileView?.call();
-      
+
       // Atualizar estado da notificação
       widget.onNotificationUpdate?.call();
-      
     } catch (e) {
       print('❌ Erro ao visualizar perfil: $e');
       _showErrorSnackBar('Erro ao abrir perfil. Tente novamente.');
@@ -242,7 +243,7 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
 
   Future<void> _handleStartChat() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -250,19 +251,20 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
     try {
       // Marcar notificação como visualizada
       await NotificationOrchestrator.markAsViewed(widget.notification.id);
-      
+
       // Obter ID do chat dos metadados ou gerar
       String? chatId = widget.notification.chatId;
-      
+
       if (chatId == null) {
         // Gerar ID determinístico do chat
-        final otherUserId = widget.notification.otherUserId ?? widget.notification.fromUserId;
+        final otherUserId =
+            widget.notification.otherUserId ?? widget.notification.fromUserId;
         chatId = 'match_${widget.notification.toUserId}_$otherUserId';
       }
-      
+
       // Garantir que o chat existe
       await ChatSystemManager.ensureChatExists(chatId);
-      
+
       // Navegar para a view de chat romântico
       Get.to(
         () => RomanticMatchChatView(
@@ -273,16 +275,16 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
         ),
         transition: Transition.rightToLeft,
       );
-      
+
       // Chamar callback de abertura do chat
       widget.onChatOpen?.call();
-      
+
       // Atualizar estado da notificação
       widget.onNotificationUpdate?.call();
-      
     } catch (e) {
       print('❌ Erro ao abrir chat: $e');
-      _showErrorSnackBar('Erro ao preparar chat. Tente novamente em alguns segundos.');
+      _showErrorSnackBar(
+          'Erro ao preparar chat. Tente novamente em alguns segundos.');
     } finally {
       if (mounted) {
         setState(() {
@@ -294,7 +296,7 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
 
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -312,7 +314,7 @@ class _MutualMatchNotificationCardState extends State<MutualMatchNotificationCar
 
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(

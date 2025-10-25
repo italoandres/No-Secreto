@@ -12,8 +12,8 @@ import 'package:whatsapp_chat/utils/enhanced_image_loader.dart';
 
 class StoriesView extends StatelessWidget {
   final String? contexto; // Novo parâmetro para filtrar por contexto
-  
-  const StoriesView({ Key? key, this.contexto }) : super(key: key);
+
+  const StoriesView({Key? key, this.contexto}) : super(key: key);
 
   Widget _buildStoryItem(StorieFileModel item) {
     return Column(
@@ -22,36 +22,36 @@ class StoriesView extends StatelessWidget {
           children: [
             Container(
               width: ((Get.width - 56) / 3),
-              height: ((Get.width - 56) / 3) * (16/9),
+              height: ((Get.width - 56) / 3) * (16 / 9),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.black12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: item.fileType == StorieFileType.img 
-                  ? EnhancedImageLoader.buildCachedImage(
-                      imageUrl: item.fileUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error, color: Colors.red),
-                            Text('Erro ao carregar', style: TextStyle(fontSize: 10)),
-                          ],
+                child: item.fileType == StorieFileType.img
+                    ? EnhancedImageLoader.buildCachedImage(
+                        imageUrl: item.fileUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: const Center(
+                          child: CircularProgressIndicator(),
                         ),
-                      ),
-                    )
-                  : VideoPlayer(
-                      url: item.fileUrl!, 
-                      isLoacal: false, 
-                      width: ((Get.width - 56) / 3), 
-                      height: ((Get.width - 56) / 3) * (16/9)
-                    ),
+                        errorWidget: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error, color: Colors.red),
+                              Text('Erro ao carregar',
+                                  style: TextStyle(fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      )
+                    : VideoPlayer(
+                        url: item.fileUrl!,
+                        isLoacal: false,
+                        width: ((Get.width - 56) / 3),
+                        height: ((Get.width - 56) / 3) * (16 / 9)),
               ),
             ),
             Positioned.fill(
@@ -60,13 +60,9 @@ class StoriesView extends StatelessWidget {
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.black54,
-                          Colors.transparent
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter
-                      ),
+                          colors: [Colors.black54, Colors.transparent],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(8),
                         topRight: Radius.circular(8),
@@ -75,36 +71,37 @@ class StoriesView extends StatelessWidget {
                     height: 38,
                     width: Get.width,
                     child: Center(
-                      child: Text(
-                        StoriesController.formatarDataParaHorasAtras(item.dataCadastro!.toDate()), 
-                        style: const TextStyle(fontSize: 12, color: Colors.white)
-                      )
-                    ),
+                        child: Text(
+                            StoriesController.formatarDataParaHorasAtras(
+                                item.dataCadastro!.toDate()),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white))),
                   ),
                 ],
               ),
             ),
-            
+
             // Indicador de contexto
             if (item.contexto != null)
               Positioned(
                 bottom: 4,
                 right: 4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: item.contexto == 'sinais_isaque' 
-                        ? Colors.pink 
-                        : item.contexto == 'sinais_rebeca' 
-                            ? Colors.blue 
+                    color: item.contexto == 'sinais_isaque'
+                        ? Colors.pink
+                        : item.contexto == 'sinais_rebeca'
+                            ? Colors.blue
                             : Colors.green,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    item.contexto == 'sinais_isaque' 
-                        ? '🤵' 
-                        : item.contexto == 'sinais_rebeca' 
-                            ? '👰‍♀️' 
+                    item.contexto == 'sinais_isaque'
+                        ? '🤵'
+                        : item.contexto == 'sinais_rebeca'
+                            ? '👰‍♀️'
                             : item.contexto == 'nosso_proposito'
                                 ? '💕'
                                 : '💬',
@@ -130,7 +127,7 @@ class StoriesView extends StatelessWidget {
       ],
     );
   }
-  
+
   // Cor do botão de favoritos baseada no contexto
   Color _getFavoritesButtonColor() {
     switch (contexto) {
@@ -212,7 +209,7 @@ class StoriesView extends StatelessWidget {
         ElevatedButton(
           onPressed: () async {
             Get.back(); // Fechar dialog
-            
+
             try {
               await StoriesRepository.delete(id: item.id!, contexto: contexto);
               Get.rawSnackbar(
@@ -236,23 +233,21 @@ class StoriesView extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     try {
       // Garantir que o controller está registrado
       if (!Get.isRegistered<StoriesGalleryController>()) {
         Get.put(StoriesGalleryController());
       }
-      
 
-    
-      String titulo = contexto == 'sinais_isaque' 
-          ? 'Stories - Sinais de Meu Isaque' 
-          : contexto == 'sinais_rebeca' 
-              ? 'Stories - Sinais de Minha Rebeca' 
+      String titulo = contexto == 'sinais_isaque'
+          ? 'Stories - Sinais de Meu Isaque'
+          : contexto == 'sinais_rebeca'
+              ? 'Stories - Sinais de Minha Rebeca'
               : contexto == 'nosso_proposito'
                   ? 'Stories - Nosso Propósito'
                   : 'Stories';
-      
+
       return Scaffold(
         appBar: AppBar(
           title: Text(titulo),
@@ -270,7 +265,8 @@ class StoriesView extends StatelessWidget {
               heroTag: "favorites",
               onPressed: () {
                 final contextoAtual = contexto ?? 'principal';
-                print('🟡 BOTÃO AMARELO: Abrindo favoritos do contexto: $contextoAtual');
+                print(
+                    '🟡 BOTÃO AMARELO: Abrindo favoritos do contexto: $contextoAtual');
                 Get.to(() => StoryFavoritesView(contexto: contextoAtual));
               },
               backgroundColor: _getFavoritesButtonColor(),
@@ -297,13 +293,14 @@ class StoriesView extends StatelessWidget {
             ),
           ],
         ),
-        body: GetX<StoriesGalleryController>(
-          builder: (controller) {
-            // O refreshTrigger força rebuild quando há mudanças
-            controller.refreshTrigger;
-            
-            return StreamBuilder<List<StorieFileModel>>(
-              stream: contexto != null ? StoriesRepository.getAllByContext(contexto!) : StoriesRepository.getAll(),
+        body: GetX<StoriesGalleryController>(builder: (controller) {
+          // O refreshTrigger força rebuild quando há mudanças
+          controller.refreshTrigger;
+
+          return StreamBuilder<List<StorieFileModel>>(
+              stream: contexto != null
+                  ? StoriesRepository.getAllByContext(contexto!)
+                  : StoriesRepository.getAll(),
               builder: (context, snapshot) {
                 // Estado de loading
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -318,14 +315,15 @@ class StoriesView extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 // Estado de erro
                 if (snapshot.hasError) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                        const Icon(Icons.error_outline,
+                            size: 64, color: Colors.red),
                         const SizedBox(height: 16),
                         Text('Erro ao carregar stories: ${snapshot.error}'),
                         const SizedBox(height: 16),
@@ -340,7 +338,7 @@ class StoriesView extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 // Verificar se há dados
                 if (!snapshot.hasData) {
                   return const Center(
@@ -354,24 +352,25 @@ class StoriesView extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 List<StorieFileModel> all = snapshot.data!;
-                
+
                 // Ordenar por data (mais recentes primeiro)
                 all.sort((a, b) => b.dataCadastro!.compareTo(a.dataCadastro!));
-                
+
                 // Estado vazio
                 if (all.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.photo_library_outlined, size: 64, color: Colors.grey),
+                        const Icon(Icons.photo_library_outlined,
+                            size: 64, color: Colors.grey),
                         const SizedBox(height: 16),
                         Text(
-                          contexto == 'sinais_isaque' 
-                            ? 'Nenhum story encontrado para "Sinais de Meu Isaque"'
-                            : 'Nenhum story encontrado',
+                          contexto == 'sinais_isaque'
+                              ? 'Nenhum story encontrado para "Sinais de Meu Isaque"'
+                              : 'Nenhum story encontrado',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
@@ -384,7 +383,7 @@ class StoriesView extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 // Lista de stories
                 return RefreshIndicator(
                   onRefresh: () async {
@@ -409,7 +408,8 @@ class StoriesView extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline, color: Colors.blue.shade700),
+                              Icon(Icons.info_outline,
+                                  color: Colors.blue.shade700),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -420,21 +420,20 @@ class StoriesView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        
+
                         // Grid de stories
                         Wrap(
-                          spacing: 12, 
+                          spacing: 12,
                           runSpacing: 16,
-                          children: all.map((item) => _buildStoryItem(item)).toList(),
+                          children:
+                              all.map((item) => _buildStoryItem(item)).toList(),
                         ),
                       ],
                     ),
                   ),
                 );
-              }
-            );
-          }
-        ),
+              });
+        }),
       );
     } catch (e) {
       debugPrint('Erro na tela de stories: $e');

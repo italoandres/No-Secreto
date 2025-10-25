@@ -118,13 +118,13 @@ class EmailService {
     // 2. Firebase Functions com Nodemailer
     // 3. Cloud Functions com Gmail API
     // 4. Serviço externo como EmailJS
-    
+
     // Por enquanto, apenas log para desenvolvimento
     print('📧 EMAIL ENVIADO:');
     print('Para: $to');
     print('Assunto: $subject');
     print('Corpo: ${htmlBody.substring(0, 100)}...');
-    
+
     // Simular delay de envio
     await Future.delayed(const Duration(milliseconds: 500));
   }
@@ -139,7 +139,7 @@ class EmailService {
   }) {
     final requestDate = DateTime.now().toLocal().toString().split(' ')[0];
     const adminPanelUrl = 'https://sinais.app/admin/certifications';
-    
+
     return '''
 <!DOCTYPE html>
 <html>
@@ -379,14 +379,16 @@ class EmailService {
   }
 
   // Métodos de compatibilidade com a API antiga
-  static Future<void> sendApprovalNotification(CertificationRequestModel request) async {
+  static Future<void> sendApprovalNotification(
+      CertificationRequestModel request) async {
     await notifyUserApproval(
       userEmail: request.userEmail,
       userName: request.userDisplayName,
     );
   }
 
-  static Future<void> sendRejectionNotification(CertificationRequestModel request) async {
+  static Future<void> sendRejectionNotification(
+      CertificationRequestModel request) async {
     await notifyUserRejection(
       userEmail: request.userEmail,
       userName: request.userDisplayName,
@@ -394,7 +396,8 @@ class EmailService {
     );
   }
 
-  static Future<void> sendNewRequestNotification(CertificationRequestModel request) async {
+  static Future<void> sendNewRequestNotification(
+      CertificationRequestModel request) async {
     await notifyAdminNewRequest(
       userName: request.userDisplayName,
       userEmail: request.userEmail,

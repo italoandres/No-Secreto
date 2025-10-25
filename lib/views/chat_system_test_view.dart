@@ -57,7 +57,6 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
 
       _updateStep('✅ Concluído com sucesso!');
       _addLog('🎉 SISTEMA COMPLETAMENTE CORRIGIDO!');
-
     } catch (e) {
       _addLog('❌ Erro: $e');
       _updateStep('❌ Erro na execução');
@@ -103,7 +102,8 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                   children: [
                     Text(
                       'Status Atual:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     SizedBox(height: 8),
                     Row(
@@ -139,13 +139,17 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                   children: [
                     Text(
                       'Problemas Identificados:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     SizedBox(height: 8),
-                    Text('❌ TypeError: null is not a subtype of type \'Timestamp\''),
-                    Text('❌ Chat não encontrado: match_St2kw3cgX2MMPxlLRmBDjYm2nO22_dLHuF1kUDTNe7PgdBLbmynrdpft1'),
+                    Text(
+                        '❌ TypeError: null is not a subtype of type \'Timestamp\''),
+                    Text(
+                        '❌ Chat não encontrado: match_St2kw3cgX2MMPxlLRmBDjYm2nO22_dLHuF1kUDTNe7PgdBLbmynrdpft1'),
                     Text('❌ Notificação já respondida'),
-                    Text('❌ Índice Firebase faltando para interest_notifications'),
+                    Text(
+                        '❌ Índice Firebase faltando para interest_notifications'),
                     Text('❌ Erro ao inicializar chat'),
                   ],
                 ),
@@ -163,7 +167,8 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                   children: [
                     Text(
                       'Correções que serão aplicadas:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     SizedBox(height: 8),
                     Text('✅ Corrigir todos os timestamps null'),
@@ -189,7 +194,9 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Icon(Icons.play_arrow),
-              label: Text(_isRunning ? 'Executando Correções...' : 'Executar Correção Completa'),
+              label: Text(_isRunning
+                  ? 'Executando Correções...'
+                  : 'Executar Correção Completa'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -204,10 +211,13 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _isRunning ? null : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TimestampFixerWidget()),
-                    ),
+                    onPressed: _isRunning
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TimestampFixerWidget()),
+                            ),
                     child: Text('Timestamps'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
@@ -218,10 +228,14 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                 SizedBox(width: 4),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _isRunning ? null : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatSystemFixerWidget()),
-                    ),
+                    onPressed: _isRunning
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChatSystemFixerWidget()),
+                            ),
                     child: Text('Geral'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
@@ -232,10 +246,14 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                 SizedBox(width: 4),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _isRunning ? null : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SpecificChatFixerWidget()),
-                    ),
+                    onPressed: _isRunning
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SpecificChatFixerWidget()),
+                            ),
                     child: Text('Específico'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -268,7 +286,7 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                     itemBuilder: (context, index) {
                       final log = _logs[index];
                       Color? textColor;
-                      
+
                       if (log.contains('❌')) {
                         textColor = Colors.red;
                       } else if (log.contains('✅')) {
@@ -276,7 +294,7 @@ class _ChatSystemTestViewState extends State<ChatSystemTestView> {
                       } else if (log.contains('🎉')) {
                         textColor = Colors.blue;
                       }
-                      
+
                       return Text(
                         log,
                         style: TextStyle(

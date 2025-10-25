@@ -5,7 +5,8 @@ import '../utils/enhanced_logger.dart';
 
 /// Serviço de cache local para notificações de interesse
 class InterestCacheService {
-  static final InterestCacheService _instance = InterestCacheService._internal();
+  static final InterestCacheService _instance =
+      InterestCacheService._internal();
   factory InterestCacheService() => _instance;
   InterestCacheService._internal();
 
@@ -15,21 +16,19 @@ class InterestCacheService {
   static const String _userStatsKey = 'user_stats';
 
   /// Salvar notificações no cache
-  Future<void> cacheNotifications(List<InterestNotificationModel> notifications) async {
+  Future<void> cacheNotifications(
+      List<InterestNotificationModel> notifications) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final notificationsJson = notifications.map((n) => n.toJson()).toList();
       await prefs.setString(_notificationsKey, jsonEncode(notificationsJson));
       await prefs.setInt(_lastSyncKey, DateTime.now().millisecondsSinceEpoch);
-      
-      EnhancedLogger.info('Notificações salvas no cache', 
-        tag: 'INTEREST_CACHE',
-        data: {'count': notifications.length}
-      );
+
+      EnhancedLogger.info('Notificações salvas no cache',
+          tag: 'INTEREST_CACHE', data: {'count': notifications.length});
     } catch (e) {
-      EnhancedLogger.error('Erro ao salvar notificações no cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao salvar notificações no cache: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -38,26 +37,24 @@ class InterestCacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final notificationsString = prefs.getString(_notificationsKey);
-      
+
       if (notificationsString == null) {
         return [];
       }
 
       final notificationsJson = jsonDecode(notificationsString) as List;
       final notifications = notificationsJson
-          .map((json) => InterestNotificationModel.fromJson(json as Map<String, dynamic>))
+          .map((json) =>
+              InterestNotificationModel.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      EnhancedLogger.info('Notificações carregadas do cache', 
-        tag: 'INTEREST_CACHE',
-        data: {'count': notifications.length}
-      );
+      EnhancedLogger.info('Notificações carregadas do cache',
+          tag: 'INTEREST_CACHE', data: {'count': notifications.length});
 
       return notifications;
     } catch (e) {
-      EnhancedLogger.error('Erro ao carregar notificações do cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao carregar notificações do cache: $e',
+          tag: 'INTEREST_CACHE');
       return [];
     }
   }
@@ -67,7 +64,7 @@ class InterestCacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final existingSentString = prefs.getString(_sentInterestsKey);
-      
+
       List<Map<String, dynamic>> sentInterests = [];
       if (existingSentString != null) {
         final existingSent = jsonDecode(existingSentString) as List;
@@ -83,15 +80,12 @@ class InterestCacheService {
       }
 
       await prefs.setString(_sentInterestsKey, jsonEncode(sentInterests));
-      
-      EnhancedLogger.info('Interesse enviado salvo no cache', 
-        tag: 'INTEREST_CACHE',
-        data: {'targetUserId': interest.toUserId}
-      );
+
+      EnhancedLogger.info('Interesse enviado salvo no cache',
+          tag: 'INTEREST_CACHE', data: {'targetUserId': interest.toUserId});
     } catch (e) {
-      EnhancedLogger.error('Erro ao salvar interesse enviado no cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao salvar interesse enviado no cache: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -100,19 +94,17 @@ class InterestCacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final sentInterestsString = prefs.getString(_sentInterestsKey);
-      
+
       if (sentInterestsString == null) {
         return false;
       }
 
       final sentInterests = jsonDecode(sentInterestsString) as List;
-      return sentInterests.any((interest) => 
-        interest['toUserId'] == targetUserId
-      );
+      return sentInterests
+          .any((interest) => interest['toUserId'] == targetUserId);
     } catch (e) {
-      EnhancedLogger.error('Erro ao verificar interesse enviado no cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao verificar interesse enviado no cache: $e',
+          tag: 'INTEREST_CACHE');
       return false;
     }
   }
@@ -123,15 +115,12 @@ class InterestCacheService {
       final prefs = await SharedPreferences.getInstance();
       final statsKey = '${_userStatsKey}_$userId';
       await prefs.setString(statsKey, jsonEncode(stats));
-      
-      EnhancedLogger.info('Estatísticas do usuário salvas no cache', 
-        tag: 'INTEREST_CACHE',
-        data: {'userId': userId, 'stats': stats}
-      );
+
+      EnhancedLogger.info('Estatísticas do usuário salvas no cache',
+          tag: 'INTEREST_CACHE', data: {'userId': userId, 'stats': stats});
     } catch (e) {
-      EnhancedLogger.error('Erro ao salvar estatísticas no cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao salvar estatísticas no cache: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -141,7 +130,7 @@ class InterestCacheService {
       final prefs = await SharedPreferences.getInstance();
       final statsKey = '${_userStatsKey}_$userId';
       final statsString = prefs.getString(statsKey);
-      
+
       if (statsString == null) {
         return null;
       }
@@ -149,31 +138,30 @@ class InterestCacheService {
       final stats = jsonDecode(statsString) as Map<String, dynamic>;
       return stats.map((key, value) => MapEntry(key, value as int));
     } catch (e) {
-      EnhancedLogger.error('Erro ao carregar estatísticas do cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao carregar estatísticas do cache: $e',
+          tag: 'INTEREST_CACHE');
       return null;
     }
   }
 
   /// Verificar se o cache está desatualizado
-  Future<bool> isCacheStale({Duration maxAge = const Duration(minutes: 5)}) async {
+  Future<bool> isCacheStale(
+      {Duration maxAge = const Duration(minutes: 5)}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastSync = prefs.getInt(_lastSyncKey);
-      
+
       if (lastSync == null) {
         return true; // Nunca sincronizou
       }
 
       final lastSyncTime = DateTime.fromMillisecondsSinceEpoch(lastSync);
       final now = DateTime.now();
-      
+
       return now.difference(lastSyncTime) > maxAge;
     } catch (e) {
-      EnhancedLogger.error('Erro ao verificar idade do cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao verificar idade do cache: $e',
+          tag: 'INTEREST_CACHE');
       return true; // Em caso de erro, considerar desatualizado
     }
   }
@@ -184,12 +172,11 @@ class InterestCacheService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_notificationsKey);
       await prefs.remove(_lastSyncKey);
-      
+
       EnhancedLogger.info('Cache de notificações limpo', tag: 'INTEREST_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Erro ao limpar cache de notificações: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao limpar cache de notificações: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -198,12 +185,12 @@ class InterestCacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_sentInterestsKey);
-      
-      EnhancedLogger.info('Cache de interesses enviados limpo', tag: 'INTEREST_CACHE');
+
+      EnhancedLogger.info('Cache de interesses enviados limpo',
+          tag: 'INTEREST_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Erro ao limpar cache de interesses enviados: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao limpar cache de interesses enviados: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -211,25 +198,24 @@ class InterestCacheService {
   Future<void> clearAllCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys().where((key) => 
-        key.startsWith(_notificationsKey) ||
-        key.startsWith(_sentInterestsKey) ||
-        key.startsWith(_lastSyncKey) ||
-        key.startsWith(_userStatsKey)
-      ).toList();
+      final keys = prefs
+          .getKeys()
+          .where((key) =>
+              key.startsWith(_notificationsKey) ||
+              key.startsWith(_sentInterestsKey) ||
+              key.startsWith(_lastSyncKey) ||
+              key.startsWith(_userStatsKey))
+          .toList();
 
       for (final key in keys) {
         await prefs.remove(key);
       }
-      
-      EnhancedLogger.info('Todo o cache limpo', 
-        tag: 'INTEREST_CACHE',
-        data: {'keysRemoved': keys.length}
-      );
+
+      EnhancedLogger.info('Todo o cache limpo',
+          tag: 'INTEREST_CACHE', data: {'keysRemoved': keys.length});
     } catch (e) {
-      EnhancedLogger.error('Erro ao limpar todo o cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao limpar todo o cache: $e',
+          tag: 'INTEREST_CACHE');
     }
   }
 
@@ -255,17 +241,16 @@ class InterestCacheService {
       }
 
       return {
-        'lastSync': lastSync != null 
-          ? DateTime.fromMillisecondsSinceEpoch(lastSync).toIso8601String()
-          : null,
+        'lastSync': lastSync != null
+            ? DateTime.fromMillisecondsSinceEpoch(lastSync).toIso8601String()
+            : null,
         'notificationsCount': notificationsCount,
         'sentInterestsCount': sentInterestsCount,
         'isStale': await isCacheStale(),
       };
     } catch (e) {
-      EnhancedLogger.error('Erro ao obter informações do cache: $e', 
-        tag: 'INTEREST_CACHE'
-      );
+      EnhancedLogger.error('Erro ao obter informações do cache: $e',
+          tag: 'INTEREST_CACHE');
       return {};
     }
   }

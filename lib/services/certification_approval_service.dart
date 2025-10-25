@@ -4,7 +4,7 @@ import '../models/certification_request_model.dart';
 import 'certification_audit_service.dart';
 
 /// Serviço para aprovação e reprovação de certificações
-/// 
+///
 /// Fornece métodos para:
 /// - Aprovar certificações
 /// - Reprovar certificações com motivo
@@ -13,7 +13,7 @@ import 'certification_audit_service.dart';
 class CertificationApprovalService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CertificationAuditService _auditService = CertificationAuditService();
-  
+
   /// Stream de certificações pendentes em tempo real
   Stream<List<CertificationRequestModel>> getPendingCertificationsStream() {
     return _firestore
@@ -29,9 +29,9 @@ class CertificationApprovalService {
       }).toList();
     });
   }
-  
+
   /// Stream de histórico de certificações com filtros opcionais
-  /// 
+  ///
   /// [status] - Filtrar por status (approved, rejected, pending)
   /// [userId] - Filtrar por ID do usuário
   Stream<List<CertificationRequestModel>> getCertificationHistoryStream({
@@ -39,7 +39,7 @@ class CertificationApprovalService {
     String? userId,
   }) {
     Query query = _firestore.collection('spiritual_certifications');
-    
+
     // Aplicar filtro de status se fornecido
     if (status != null) {
       String statusString;
@@ -56,15 +56,15 @@ class CertificationApprovalService {
       }
       query = query.where('status', isEqualTo: statusString);
     }
-    
+
     // Aplicar filtro de userId se fornecido
     if (userId != null && userId.isNotEmpty) {
       query = query.where('userId', isEqualTo: userId);
     }
-    
+
     // Ordenar por data de processamento (mais recentes primeiro)
     query = query.orderBy('processedAt', descending: true);
-    
+
     return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -73,12 +73,12 @@ class CertificationApprovalService {
       }).toList();
     });
   }
-  
+
   /// Aprova uma certificação
-  /// 
+  ///
   /// [certificationId] - ID da certificação a ser aprovada
   /// [adminEmail] - Email do administrador que está aprovando
-  /// 
+  ///
   /// Retorna true se a aprovação foi bem-sucedida
   Future<bool> approveCertification(
     String certificationId,
@@ -90,16 +90,16 @@ class CertificationApprovalService {
           .collection('spiritual_certifications')
           .doc(certificationId)
           .get();
-          
+
       if (!certDoc.exists) {
         print('Erro: Certificação não encontrada');
         return false;
       }
-      
+
       final userId = certDoc.data()?['userId'] as String?;
-      
+
       final now = DateTime.now();
-      
+
       await _firestore
           .collection('spiritual_certifications')
           .doc(certificationId)
@@ -111,7 +111,7 @@ class CertificationApprovalService {
         'processedBy': adminEmail,
         'updatedAt': Timestamp.fromDate(now),
       });
-      
+
       // Registrar no log de auditoria
       if (userId != null) {
         await _auditService.logApproval(
@@ -121,7 +121,7 @@ class CertificationApprovalService {
           method: 'panel',
         );
       }
-      
+
       print('Certificação $certificationId aprovada por $adminEmail');
       return true;
     } catch (e) {
@@ -129,13 +129,13 @@ class CertificationApprovalService {
       return false;
     }
   }
-  
+
   /// Reprova uma certificação com motivo
-  /// 
+  ///
   /// [certificationId] - ID da certificação a ser reprovada
   /// [adminEmail] - Email do administrador que está reprovando
   /// [rejectionReason] - Motivo da reprovação
-  /// 
+  ///
   /// Retorna true se a reprovação foi bem-sucedida
   Future<bool> rejectCertification(
     String certificationId,
@@ -148,22 +148,22 @@ class CertificationApprovalService {
         print('Erro: Motivo da reprovação não pode estar vazio');
         return false;
       }
-      
+
       // Obter dados da certificação para o log
       final certDoc = await _firestore
           .collection('spiritual_certifications')
           .doc(certificationId)
           .get();
-          
+
       if (!certDoc.exists) {
         print('Erro: Certificação não encontrada');
         return false;
       }
-      
+
       final userId = certDoc.data()?['userId'] as String?;
-      
+
       final now = DateTime.now();
-      
+
       await _firestore
           .collection('spiritual_certifications')
           .doc(certificationId)
@@ -176,7 +176,7 @@ class CertificationApprovalService {
         'rejectionReason': rejectionReason,
         'updatedAt': Timestamp.fromDate(now),
       });
-      
+
       // Registrar no log de auditoria
       if (userId != null) {
         await _auditService.logRejection(
@@ -187,7 +187,7 @@ class CertificationApprovalService {
           reason: rejectionReason,
         );
       }
-      
+
       print('Certificação $certificationId reprovada por $adminEmail');
       return true;
     } catch (e) {
@@ -195,7 +195,7 @@ class CertificationApprovalService {
       return false;
     }
   }
-  
+
   /// Obtém uma certificação específica por ID
   Future<CertificationRequestModel?> getCertificationById(
     String certificationId,
@@ -205,11 +205,11 @@ class CertificationApprovalService {
           .collection('spiritual_certifications')
           .doc(certificationId)
           .get();
-      
+
       if (!doc.exists) {
         return null;
       }
-      
+
       final data = doc.data()!;
       data['id'] = doc.id;
       return CertificationRequestModel.fromMap(data);
@@ -218,7 +218,7 @@ class CertificationApprovalService {
       return null;
     }
   }
-  
+
   /// Obtém o total de certificações pendentes
   Future<int> getPendingCount() async {
     try {
@@ -226,14 +226,14 @@ class CertificationApprovalService {
           .collection('spiritual_certifications')
           .where('status', isEqualTo: 'pending')
           .get();
-      
+
       return snapshot.docs.length;
     } catch (e) {
       print('Erro ao obter contagem de pendentes: $e');
       return 0;
     }
   }
-  
+
   /// Stream do total de certificações pendentes
   Stream<int> getPendingCountStream() {
     return _firestore
@@ -242,7 +242,7 @@ class CertificationApprovalService {
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }
-  
+
   /// Verifica se um usuário já tem uma certificação aprovada
   Future<bool> hasApprovedCertification(String userId) async {
     try {
@@ -252,14 +252,14 @@ class CertificationApprovalService {
           .where('status', isEqualTo: 'approved')
           .limit(1)
           .get();
-      
+
       return snapshot.docs.isNotEmpty;
     } catch (e) {
       print('Erro ao verificar certificação aprovada: $e');
       return false;
     }
   }
-  
+
   /// Obtém todas as certificações de um usuário
   Future<List<CertificationRequestModel>> getUserCertifications(
     String userId,
@@ -270,7 +270,7 @@ class CertificationApprovalService {
           .where('userId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
-      
+
       return snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;

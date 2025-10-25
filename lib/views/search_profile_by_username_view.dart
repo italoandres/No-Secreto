@@ -16,7 +16,7 @@ class _SearchProfileByUsernameViewState
     extends State<SearchProfileByUsernameView> {
   final TextEditingController _searchController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   bool _isSearching = false;
   Map<String, dynamic>? _foundProfile;
   String? _errorMessage;
@@ -29,7 +29,7 @@ class _SearchProfileByUsernameViewState
 
   Future<void> _searchByUsername() async {
     final username = _searchController.text.trim();
-    
+
     if (username.isEmpty) {
       setState(() {
         _errorMessage = 'Digite um username para buscar';
@@ -39,9 +39,8 @@ class _SearchProfileByUsernameViewState
     }
 
     // Remove @ se o usuário digitou
-    final cleanUsername = username.startsWith('@') 
-        ? username.substring(1) 
-        : username;
+    final cleanUsername =
+        username.startsWith('@') ? username.substring(1) : username;
 
     setState(() {
       _isSearching = true;
@@ -67,7 +66,7 @@ class _SearchProfileByUsernameViewState
 
       final doc = querySnapshot.docs.first;
       final data = doc.data();
-      
+
       setState(() {
         _foundProfile = {
           'userId': data['userId'] ?? doc.id,
@@ -285,9 +284,8 @@ class _SearchProfileByUsernameViewState
               CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.grey.shade200,
-                backgroundImage: mainPhotoUrl.isNotEmpty
-                    ? NetworkImage(mainPhotoUrl)
-                    : null,
+                backgroundImage:
+                    mainPhotoUrl.isNotEmpty ? NetworkImage(mainPhotoUrl) : null,
                 child: mainPhotoUrl.isEmpty
                     ? Icon(Icons.person, size: 40, color: Colors.grey.shade400)
                     : null,

@@ -25,12 +25,14 @@ class ChildrenPreferenceToggleCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isEnabled ? Colors.teal.shade50 : Colors.grey.shade100,
+                    color:
+                        isEnabled ? Colors.teal.shade50 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isEnabled ? Icons.check_circle : Icons.child_care,
-                    color: isEnabled ? Colors.teal.shade600 : Colors.grey.shade400,
+                    color:
+                        isEnabled ? Colors.teal.shade600 : Colors.grey.shade400,
                     size: 24,
                   ),
                 ),
@@ -52,7 +54,9 @@ class ChildrenPreferenceToggleCard extends StatelessWidget {
                         isEnabled ? 'Ativado' : 'Desativado',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isEnabled ? Colors.teal.shade600 : Colors.grey.shade500,
+                          color: isEnabled
+                              ? Colors.teal.shade600
+                              : Colors.grey.shade500,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -82,7 +86,8 @@ class ChildrenPreferenceToggleCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.teal.shade700, size: 20),
+                    Icon(Icons.info_outline,
+                        color: Colors.teal.shade700, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(

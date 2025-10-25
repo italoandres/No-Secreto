@@ -16,54 +16,50 @@ class VitrineNavigationHelper {
   /// Verifica se pode mostrar a vitrine
   static Future<bool> canShowVitrine(String userId) async {
     return await ErrorHandler.safeExecute<bool>(
-      () async {
-        EnhancedLogger.info('Checking if can show vitrine', 
-          tag: _tag, 
-          data: {'userId': userId}
-        );
+          () async {
+            EnhancedLogger.info('Checking if can show vitrine',
+                tag: _tag, data: {'userId': userId});
 
-        // Verificar se o perfil está completo
-        final isComplete = await ProfileCompletionDetector.isProfileComplete(userId);
-        
-        if (!isComplete) {
-          EnhancedLogger.warning('Cannot show vitrine - profile not complete', 
-            tag: _tag, 
-            data: {'userId': userId}
-          );
-          return false;
-        }
+            // Verificar se o perfil está completo
+            final isComplete =
+                await ProfileCompletionDetector.isProfileComplete(userId);
 
-        // Verificar se pode ativar a vitrine usando o status manager existente
-        final canActivate = await _statusManager.canActivateVitrine(userId);
-        
-        if (!canActivate) {
-          EnhancedLogger.warning('Cannot show vitrine - status manager validation failed', 
-            tag: _tag, 
-            data: {'userId': userId}
-          );
-          return false;
-        }
+            if (!isComplete) {
+              EnhancedLogger.warning(
+                  'Cannot show vitrine - profile not complete',
+                  tag: _tag,
+                  data: {'userId': userId});
+              return false;
+            }
 
-        EnhancedLogger.success('Can show vitrine', 
-          tag: _tag, 
-          data: {'userId': userId}
-        );
-        
-        return true;
-      },
-      context: 'VitrineNavigationHelper.canShowVitrine',
-      fallbackValue: false,
-    ) ?? false;
+            // Verificar se pode ativar a vitrine usando o status manager existente
+            final canActivate = await _statusManager.canActivateVitrine(userId);
+
+            if (!canActivate) {
+              EnhancedLogger.warning(
+                  'Cannot show vitrine - status manager validation failed',
+                  tag: _tag,
+                  data: {'userId': userId});
+              return false;
+            }
+
+            EnhancedLogger.success('Can show vitrine',
+                tag: _tag, data: {'userId': userId});
+
+            return true;
+          },
+          context: 'VitrineNavigationHelper.canShowVitrine',
+          fallbackValue: false,
+        ) ??
+        false;
   }
 
   /// Navega para a tela de confirmação da vitrine
   static Future<void> navigateToVitrineConfirmation(String userId) async {
     await ErrorHandler.safeExecute(
       () async {
-        EnhancedLogger.info('Navigating to vitrine confirmation', 
-          tag: _tag,
-          data: {'userId': userId}
-        );
+        EnhancedLogger.info('Navigating to vitrine confirmation',
+            tag: _tag, data: {'userId': userId});
 
         // Verificar se pode mostrar a vitrine
         final canShow = await canShowVitrine(userId);
@@ -74,10 +70,8 @@ class VitrineNavigationHelper {
         // Por enquanto, vamos direto para a vitrine até criarmos a tela de confirmação
         await navigateToVitrineDisplay(userId);
 
-        EnhancedLogger.success('Successfully navigated to vitrine confirmation', 
-          tag: _tag,
-          data: {'userId': userId}
-        );
+        EnhancedLogger.success('Successfully navigated to vitrine confirmation',
+            tag: _tag, data: {'userId': userId});
       },
       context: 'VitrineNavigationHelper.navigateToVitrineConfirmation',
       showUserMessage: true,
@@ -85,13 +79,13 @@ class VitrineNavigationHelper {
   }
 
   /// Navega para a visualização da vitrine
-  static Future<void> navigateToVitrineDisplay(String userId, {bool fromCelebration = false}) async {
+  static Future<void> navigateToVitrineDisplay(String userId,
+      {bool fromCelebration = false}) async {
     await ErrorHandler.safeExecute(
       () async {
-        EnhancedLogger.info('Navigating to vitrine display', 
-          tag: _tag,
-          data: {'userId': userId, 'fromCelebration': fromCelebration}
-        );
+        EnhancedLogger.info('Navigating to vitrine display',
+            tag: _tag,
+            data: {'userId': userId, 'fromCelebration': fromCelebration});
 
         // Verificar se pode mostrar a vitrine
         final canShow = await canShowVitrine(userId);
@@ -106,10 +100,9 @@ class VitrineNavigationHelper {
           'fromCelebration': fromCelebration,
         });
 
-        EnhancedLogger.success('Successfully navigated to vitrine display', 
-          tag: _tag,
-          data: {'userId': userId, 'fromCelebration': fromCelebration}
-        );
+        EnhancedLogger.success('Successfully navigated to vitrine display',
+            tag: _tag,
+            data: {'userId': userId, 'fromCelebration': fromCelebration});
       },
       context: 'VitrineNavigationHelper.navigateToVitrineDisplay',
       showUserMessage: true,
@@ -118,20 +111,21 @@ class VitrineNavigationHelper {
 
   /// Trata erros de navegação
   static Future<void> handleNavigationError(String error) async {
-    EnhancedLogger.error('Navigation error occurred', 
-      tag: _tag,
-      error: Exception(error)
-    );
+    EnhancedLogger.error('Navigation error occurred',
+        tag: _tag, error: Exception(error));
 
     // Mostrar mensagem de erro apropriada
     String userMessage;
-    
+
     if (error.contains('profile not ready') || error.contains('not complete')) {
-      userMessage = 'Seu perfil ainda não está completo. Complete todas as tarefas primeiro.';
+      userMessage =
+          'Seu perfil ainda não está completo. Complete todas as tarefas primeiro.';
     } else if (error.contains('network') || error.contains('connection')) {
-      userMessage = 'Problema de conexão. Verifique sua internet e tente novamente.';
+      userMessage =
+          'Problema de conexão. Verifique sua internet e tente novamente.';
     } else {
-      userMessage = 'Não foi possível abrir a vitrine. Tente novamente em alguns instantes.';
+      userMessage =
+          'Não foi possível abrir a vitrine. Tente novamente em alguns instantes.';
     }
 
     Get.snackbar(
@@ -153,10 +147,11 @@ class VitrineNavigationHelper {
     await ErrorHandler.safeExecute(
       () async {
         EnhancedLogger.info('Navigating to profile completion', tag: _tag);
-        
+
         Get.toNamed('/profile-completion');
-        
-        EnhancedLogger.success('Successfully navigated to profile completion', tag: _tag);
+
+        EnhancedLogger.success('Successfully navigated to profile completion',
+            tag: _tag);
       },
       context: 'VitrineNavigationHelper.navigateToProfileCompletion',
       showUserMessage: true,
@@ -164,7 +159,8 @@ class VitrineNavigationHelper {
   }
 
   /// Cria dados de confirmação a partir de informações do usuário
-  static Future<VitrineConfirmationData?> createConfirmationData(String userId) async {
+  static Future<VitrineConfirmationData?> createConfirmationData(
+      String userId) async {
     return await ErrorHandler.safeExecute<VitrineConfirmationData?>(
       () async {
         // Aqui você pode buscar dados do usuário do repositório
@@ -194,39 +190,34 @@ class VitrineNavigationHelper {
         );
         return;
       }
-      
-      EnhancedLogger.info('Navigating to user vitrine', 
-        tag: _tag,
-        data: {'userId': user.uid}
-      );
-      
+
+      EnhancedLogger.info('Navigating to user vitrine',
+          tag: _tag, data: {'userId': user.uid});
+
       // Usar o novo método de verificação
       final canShow = await canShowVitrine(user.uid);
       if (!canShow) {
-        final missingFields = await _statusManager.getMissingRequiredFields(user.uid);
-        
+        final missingFields =
+            await _statusManager.getMissingRequiredFields(user.uid);
+
         Get.snackbar(
           'Perfil Incompleto',
           'Complete seu perfil para ativar sua vitrine: ${missingFields.take(2).join(', ')}',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 4),
         );
-        
+
         // Navegar para completar perfil
         Get.toNamed('/profile-completion');
         return;
       }
-      
+
       // Usar o novo método de navegação
       await navigateToVitrineDisplay(user.uid);
-      
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Failed to navigate to vitrine', 
-        tag: _tag,
-        error: e,
-        stackTrace: stackTrace
-      );
-      
+      EnhancedLogger.error('Failed to navigate to vitrine',
+          tag: _tag, error: e, stackTrace: stackTrace);
+
       Get.snackbar(
         'Erro',
         'Não foi possível acessar sua vitrine. Tente novamente.',
@@ -234,15 +225,13 @@ class VitrineNavigationHelper {
       );
     }
   }
-  
+
   /// Navega para a vitrine de outro usuário
   static Future<void> navigateToUserVitrine(String userId) async {
     try {
-      EnhancedLogger.info('Navigating to user vitrine', 
-        tag: _tag,
-        data: {'targetUserId': userId}
-      );
-      
+      EnhancedLogger.info('Navigating to user vitrine',
+          tag: _tag, data: {'targetUserId': userId});
+
       // Verificar se a vitrine está ativa
       final status = await _statusManager.getVitrineStatus(userId);
       if (!status.isPubliclyVisible) {
@@ -253,23 +242,19 @@ class VitrineNavigationHelper {
         );
         return;
       }
-      
+
       // Navegar diretamente para a visualização da vitrine
       Get.toNamed('/vitrine-display', arguments: {'userId': userId});
-      
-      EnhancedLogger.success('Successfully navigated to user vitrine', 
-        tag: _tag,
-        data: {'targetUserId': userId}
-      );
-      
+
+      EnhancedLogger.success('Successfully navigated to user vitrine',
+          tag: _tag, data: {'targetUserId': userId});
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Failed to navigate to user vitrine', 
-        tag: _tag,
-        error: e,
-        stackTrace: stackTrace,
-        data: {'targetUserId': userId}
-      );
-      
+      EnhancedLogger.error('Failed to navigate to user vitrine',
+          tag: _tag,
+          error: e,
+          stackTrace: stackTrace,
+          data: {'targetUserId': userId});
+
       Get.snackbar(
         'Erro',
         'Não foi possível acessar esta vitrine. Tente novamente.',
@@ -277,44 +262,44 @@ class VitrineNavigationHelper {
       );
     }
   }
-  
+
   /// Verifica se o usuário atual pode acessar sua vitrine
   static Future<bool> canAccessMyVitrine() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return false;
-      
+
       return await canShowVitrine(user.uid);
     } catch (e) {
       return false;
     }
   }
-  
+
   /// Obtém o status da vitrine do usuário atual
   static Future<String> getMyVitrineStatusText() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return 'Não logado';
-      
+
       final status = await _statusManager.getVitrineStatus(user.uid);
       return status.displayName;
     } catch (e) {
       return 'Erro';
     }
   }
-  
+
   /// Obtém campos faltantes para ativar a vitrine
   static Future<List<String>> getMissingFieldsForVitrine() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return ['Usuário não logado'];
-      
+
       return await _statusManager.getMissingRequiredFields(user.uid);
     } catch (e) {
       return ['Erro ao verificar campos'];
     }
   }
-  
+
   /// Navega para a tela de configurações da vitrine
   static Future<void> navigateToVitrineSettings() async {
     try {
@@ -327,17 +312,13 @@ class VitrineNavigationHelper {
         );
         return;
       }
-      
+
       // Por enquanto, navegar para a demonstração que inclui controles
       await navigateToMyVitrine();
-      
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Failed to navigate to vitrine settings', 
-        tag: _tag,
-        error: e,
-        stackTrace: stackTrace
-      );
-      
+      EnhancedLogger.error('Failed to navigate to vitrine settings',
+          tag: _tag, error: e, stackTrace: stackTrace);
+
       Get.snackbar(
         'Erro',
         'Não foi possível acessar as configurações da vitrine',
@@ -345,7 +326,7 @@ class VitrineNavigationHelper {
       );
     }
   }
-  
+
   /// Cria um botão para acessar a vitrine
   static Widget createVitrineAccessButton({
     String? text,
@@ -356,7 +337,7 @@ class VitrineNavigationHelper {
       future: canAccessMyVitrine(),
       builder: (context, snapshot) {
         final canAccess = snapshot.data ?? false;
-        
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -365,7 +346,8 @@ class VitrineNavigationHelper {
               icon: Icon(canAccess ? Icons.visibility : Icons.visibility_off),
               label: Text(text ?? 'Minha Vitrine de Propósito'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: canAccess ? Colors.blue[700] : Colors.grey[600],
+                backgroundColor:
+                    canAccess ? Colors.blue[700] : Colors.grey[600],
                 foregroundColor: Colors.white,
               ),
             ),

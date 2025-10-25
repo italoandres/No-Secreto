@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Componente para destacar termos de busca em texto
-/// 
+///
 /// Destaca visualmente os termos encontrados nos resultados de busca
 class HighlightedCertificationText extends StatelessWidget {
   final String text;
@@ -10,7 +10,7 @@ class HighlightedCertificationText extends StatelessWidget {
   final TextStyle? highlightStyle;
   final int? maxLines;
   final TextOverflow? overflow;
-  
+
   const HighlightedCertificationText({
     Key? key,
     required this.text,
@@ -20,7 +20,7 @@ class HighlightedCertificationText extends StatelessWidget {
     this.maxLines,
     this.overflow,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     // Se não há termo de busca, retorna texto normal
@@ -32,14 +32,15 @@ class HighlightedCertificationText extends StatelessWidget {
         overflow: overflow,
       );
     }
-    
+
     final defaultStyle = style ?? TextStyle();
-    final defaultHighlightStyle = highlightStyle ?? TextStyle(
-      backgroundColor: Colors.yellow.shade200,
-      fontWeight: FontWeight.bold,
-      color: Colors.black87,
-    );
-    
+    final defaultHighlightStyle = highlightStyle ??
+        TextStyle(
+          backgroundColor: Colors.yellow.shade200,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        );
+
     // Criar spans com destaque
     final spans = _buildHighlightedSpans(
       text,
@@ -47,14 +48,14 @@ class HighlightedCertificationText extends StatelessWidget {
       defaultStyle,
       defaultHighlightStyle,
     );
-    
+
     return RichText(
       text: TextSpan(children: spans),
       maxLines: maxLines,
       overflow: overflow ?? TextOverflow.clip,
     );
   }
-  
+
   /// Constrói spans com destaque para os termos encontrados
   List<TextSpan> _buildHighlightedSpans(
     String text,
@@ -65,10 +66,10 @@ class HighlightedCertificationText extends StatelessWidget {
     final List<TextSpan> spans = [];
     final lowerText = text.toLowerCase();
     final lowerSearch = searchTerm.toLowerCase();
-    
+
     int start = 0;
     int index = lowerText.indexOf(lowerSearch);
-    
+
     while (index != -1) {
       // Adicionar texto antes do match
       if (index > start) {
@@ -77,17 +78,17 @@ class HighlightedCertificationText extends StatelessWidget {
           style: normalStyle,
         ));
       }
-      
+
       // Adicionar texto destacado
       spans.add(TextSpan(
         text: text.substring(index, index + searchTerm.length),
         style: highlightStyle,
       ));
-      
+
       start = index + searchTerm.length;
       index = lowerText.indexOf(lowerSearch, start);
     }
-    
+
     // Adicionar texto restante
     if (start < text.length) {
       spans.add(TextSpan(
@@ -95,7 +96,7 @@ class HighlightedCertificationText extends StatelessWidget {
         style: normalStyle,
       ));
     }
-    
+
     return spans;
   }
 }
@@ -107,7 +108,7 @@ class CertificationHighlight extends StatelessWidget {
   final Color? highlightColor;
   final double? fontSize;
   final FontWeight? fontWeight;
-  
+
   const CertificationHighlight({
     Key? key,
     required this.text,
@@ -116,7 +117,7 @@ class CertificationHighlight extends StatelessWidget {
     this.fontSize,
     this.fontWeight,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return HighlightedCertificationText(

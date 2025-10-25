@@ -12,7 +12,7 @@ class FirebaseImageLoader {
     Widget? errorWidget,
   }) {
     debugPrint('🔥 FIREBASE IMAGE: Carregando $imageUrl');
-    
+
     // Para Flutter Web, usar Image.network com headers específicos
     return Image.network(
       imageUrl,
@@ -22,57 +22,63 @@ class FirebaseImageLoader {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization, X-Requested-With',
+        'Access-Control-Allow-Headers':
+            'Origin, Content-Type, Accept, Authorization, X-Requested-With',
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
           debugPrint('✅ FIREBASE IMAGE: Carregada com sucesso');
           return child;
         }
-        
+
         final progress = loadingProgress.expectedTotalBytes != null
-            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+            ? loadingProgress.cumulativeBytesLoaded /
+                loadingProgress.expectedTotalBytes!
             : null;
-            
-        return placeholder ?? Center(
-          child: CircularProgressIndicator(
-            value: progress,
-            color: Colors.white,
-          ),
-        );
+
+        return placeholder ??
+            Center(
+              child: CircularProgressIndicator(
+                value: progress,
+                color: Colors.white,
+              ),
+            );
       },
       errorBuilder: (context, error, stackTrace) {
         debugPrint('❌ FIREBASE IMAGE ERROR: $error');
         debugPrint('❌ STACK: $stackTrace');
-        
+
         // Tentar com CachedNetworkImage como fallback
         return CachedNetworkImage(
           imageUrl: imageUrl,
           width: width,
           height: height,
           fit: fit,
-          placeholder: (context, url) => placeholder ?? const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
+          placeholder: (context, url) =>
+              placeholder ??
+              const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
           errorWidget: (context, url, error) {
             debugPrint('❌ CACHED IMAGE ERROR: $error');
-            return errorWidget ?? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.broken_image,
-                    color: Colors.red,
-                    size: 64,
+            return errorWidget ??
+                const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.broken_image,
+                        color: Colors.red,
+                        size: 64,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Erro ao carregar',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Erro ao carregar',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            );
+                );
           },
         );
       },
@@ -85,7 +91,7 @@ class FirebaseImageLoader {
     BoxFit fit = BoxFit.contain,
   }) {
     debugPrint('🔥 SIMPLE IMAGE: Carregando $imageUrl');
-    
+
     return Container(
       color: Colors.black,
       child: Center(
@@ -129,7 +135,7 @@ class FirebaseImageLoader {
                 fit: fit,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
-                  
+
                   return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -163,7 +169,8 @@ class FirebaseImageLoader {
                         const SizedBox(height: 8),
                         Text(
                           'Erro: $error',
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),

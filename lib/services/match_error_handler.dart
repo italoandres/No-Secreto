@@ -64,11 +64,12 @@ class MatchErrorHandler {
     bool showSnackbar = true,
     VoidCallback? onRetry,
   }) {
-    final matchError = _parseError(error, context: context, userId: userId, chatId: chatId);
-    
+    final matchError =
+        _parseError(error, context: context, userId: userId, chatId: chatId);
+
     // Adicionar ao histórico
     _addToHistory(matchError);
-    
+
     // Log do erro
     EnhancedLogger.error(
       'Match Error: ${matchError.message}${matchError.details != null ? ' - ${matchError.details}' : ''}',
@@ -98,32 +99,32 @@ class MatchErrorHandler {
     String? details = error.toString();
 
     // Identificar tipo de erro baseado na mensagem
-    if (errorMessage.contains('network') || 
+    if (errorMessage.contains('network') ||
         errorMessage.contains('connection') ||
         errorMessage.contains('timeout')) {
       type = MatchErrorType.networkError;
       userMessage = 'Problema de conexão. Verifique sua internet.';
-    } else if (errorMessage.contains('permission') || 
-               errorMessage.contains('denied')) {
+    } else if (errorMessage.contains('permission') ||
+        errorMessage.contains('denied')) {
       type = MatchErrorType.permissionDenied;
       userMessage = 'Você não tem permissão para esta ação.';
-    } else if (errorMessage.contains('user') && 
-               errorMessage.contains('not found')) {
+    } else if (errorMessage.contains('user') &&
+        errorMessage.contains('not found')) {
       type = MatchErrorType.userNotFound;
       userMessage = 'Usuário não encontrado.';
-    } else if (errorMessage.contains('chat') && 
-               errorMessage.contains('not found')) {
+    } else if (errorMessage.contains('chat') &&
+        errorMessage.contains('not found')) {
       type = MatchErrorType.chatNotFound;
       userMessage = 'Chat não encontrado.';
-    } else if (errorMessage.contains('message') && 
-               errorMessage.contains('not found')) {
+    } else if (errorMessage.contains('message') &&
+        errorMessage.contains('not found')) {
       type = MatchErrorType.messageNotFound;
       userMessage = 'Mensagem não encontrada.';
     } else if (errorMessage.contains('expired')) {
       type = MatchErrorType.chatExpired;
       userMessage = 'Este chat expirou.';
-    } else if (errorMessage.contains('firebase') || 
-               errorMessage.contains('firestore')) {
+    } else if (errorMessage.contains('firebase') ||
+        errorMessage.contains('firestore')) {
       type = MatchErrorType.firebaseError;
       userMessage = 'Erro no servidor. Tente novamente.';
     } else if (errorMessage.contains('validation')) {
@@ -203,7 +204,7 @@ class MatchErrorHandler {
   /// Adicionar erro ao histórico
   static void _addToHistory(MatchError error) {
     _errorHistory.add(error);
-    
+
     // Manter apenas os últimos erros
     if (_errorHistory.length > _maxHistorySize) {
       _errorHistory.removeAt(0);
@@ -226,8 +227,10 @@ class MatchErrorHandler {
     final last24Hours = now.subtract(const Duration(hours: 24));
     final lastHour = now.subtract(const Duration(hours: 1));
 
-    final errors24h = _errorHistory.where((e) => e.timestamp.isAfter(last24Hours)).toList();
-    final errors1h = _errorHistory.where((e) => e.timestamp.isAfter(lastHour)).toList();
+    final errors24h =
+        _errorHistory.where((e) => e.timestamp.isAfter(last24Hours)).toList();
+    final errors1h =
+        _errorHistory.where((e) => e.timestamp.isAfter(lastHour)).toList();
 
     // Contar por tipo
     final errorsByType = <MatchErrorType, int>{};
@@ -240,8 +243,11 @@ class MatchErrorHandler {
       'errorsLast24Hours': errors24h.length,
       'errorsLastHour': errors1h.length,
       'errorsByType': errorsByType.map((k, v) => MapEntry(k.toString(), v)),
-      'mostCommonError': errorsByType.isNotEmpty 
-          ? errorsByType.entries.reduce((a, b) => a.value > b.value ? a : b).key.toString()
+      'mostCommonError': errorsByType.isNotEmpty
+          ? errorsByType.entries
+              .reduce((a, b) => a.value > b.value ? a : b)
+              .key
+              .toString()
           : null,
     };
   }
@@ -252,7 +258,8 @@ class MatchErrorHandler {
     threshold ??= 5;
 
     final cutoff = DateTime.now().subtract(timeWindow);
-    final recentErrors = _errorHistory.where((e) => e.timestamp.isAfter(cutoff)).length;
+    final recentErrors =
+        _errorHistory.where((e) => e.timestamp.isAfter(cutoff)).length;
 
     return recentErrors >= threshold;
   }

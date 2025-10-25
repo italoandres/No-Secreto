@@ -24,14 +24,22 @@ class _EducationSelectorComponentState
 
   // Níveis educacionais disponíveis
   final List<Map<String, String>> _educationLevels = [
-    {'value': 'ensino_fundamental', 'label': 'Ensino Fundamental', 'icon': '📚'},
+    {
+      'value': 'ensino_fundamental',
+      'label': 'Ensino Fundamental',
+      'icon': '📚'
+    },
     {'value': 'ensino_medio', 'label': 'Ensino Médio', 'icon': '🎓'},
     {'value': 'ensino_tecnico', 'label': 'Ensino Técnico', 'icon': '🔧'},
     {'value': 'ensino_superior', 'label': 'Ensino Superior', 'icon': '🎓'},
     {'value': 'pos_graduacao', 'label': 'Pós-Graduação', 'icon': '📖'},
     {'value': 'mestrado', 'label': 'Mestrado', 'icon': '🎯'},
     {'value': 'doutorado', 'label': 'Doutorado', 'icon': '🏆'},
-    {'value': 'prefiro_nao_informar', 'label': 'Prefiro não informar', 'icon': '🔒'},
+    {
+      'value': 'prefiro_nao_informar',
+      'label': 'Prefiro não informar',
+      'icon': '🔒'
+    },
   ];
 
   @override
@@ -72,9 +80,7 @@ class _EducationSelectorComponentState
                   decoration: BoxDecoration(
                     color: isSelected
                         ? widget.primaryColor.withOpacity(0.1)
-                        : (isSpecial
-                            ? Colors.orange.shade50
-                            : Colors.white),
+                        : (isSpecial ? Colors.orange.shade50 : Colors.white),
                     border: Border.all(
                       color: isSelected
                           ? widget.primaryColor
@@ -93,15 +99,16 @@ class _EducationSelectorComponentState
                         style: const TextStyle(fontSize: 24),
                       ),
                       const SizedBox(width: 16),
-                      
+
                       // Label
                       Expanded(
                         child: Text(
                           level['label']!,
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             color: isSelected
                                 ? widget.primaryColor
                                 : (isSpecial
@@ -110,7 +117,7 @@ class _EducationSelectorComponentState
                           ),
                         ),
                       ),
-                      
+
                       // Check icon
                       if (isSelected)
                         Icon(

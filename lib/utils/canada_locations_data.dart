@@ -104,7 +104,7 @@ class CanadaLocationsData {
   static List<String> getCitiesForProvince(String province) {
     return citiesByProvince[province] ?? [];
   }
-  
+
   /// Retorna a sigla de uma província/território
   static String? getProvinceAbbreviation(String province) {
     return provinceAbbreviations[province];

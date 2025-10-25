@@ -23,7 +23,7 @@ export 'context_utils_test.dart';
 export 'context_isolation_tests.dart';
 
 /// Classe principal para acesso às utilidades de contexto
-/// 
+///
 /// Esta classe fornece uma interface unificada para acessar
 /// todas as funcionalidades de contexto.
 class ContextUtils {
@@ -31,61 +31,61 @@ class ContextUtils {
   static bool isValid(String? contexto) {
     return ContextValidator.isValidContext(contexto);
   }
-  
+
   /// Normaliza um contexto
   static String normalize(String? contexto) {
     return ContextValidator.normalizeContext(contexto);
   }
-  
+
   /// Obtém a coleção para um contexto
   static String getCollection(String contexto) {
     return ContextValidator.getCollectionForContext(contexto);
   }
-  
+
   /// Filtra stories por contexto
-  static List<T> filter<T>(List<T> items, String context, bool Function(T, String) validator) {
+  static List<T> filter<T>(
+      List<T> items, String context, bool Function(T, String) validator) {
     return items.where((item) => validator(item, context)).toList();
   }
-  
+
   /// Executa testes das utilidades
   static void runTests() {
     ContextUtilsTest.runAllTests();
   }
-  
+
   /// Simula vazamento de contexto para testes
   static void simulateLeak() {
     ContextUtilsTest.simulateContextLeak();
   }
-  
+
   /// Analisa uma lista de stories e gera relatório
-  static Map<String, dynamic> analyzeStories(List<StorieFileModel> stories, String expectedContext) {
+  static Map<String, dynamic> analyzeStories(
+      List<StorieFileModel> stories, String expectedContext) {
     return ContextLogAnalyzer.analyzeStories(stories, expectedContext);
   }
-  
+
   /// Gera relatório de saúde do sistema
   static Map<String, dynamic> generateHealthReport() {
     return ContextLogAnalyzer.generateHealthReport();
   }
-  
+
   /// Executa testes do sistema
   static Map<String, dynamic> runSystemTests() {
     return ContextLogAnalyzer.runSystemTests();
   }
-  
+
   /// Imprime relatório formatado
   static void printReport(Map<String, dynamic> report) {
     ContextLogAnalyzer.printReport(report);
   }
-  
+
   /// Executa testes completos de isolamento de contexto
   static Future<Map<String, dynamic>> runIsolationTests() async {
     return await ContextIsolationTests.runAllTests();
   }
-  
+
   /// Imprime relatório de testes de isolamento
   static void printTestReport(Map<String, dynamic> report) {
     ContextIsolationTests.printTestReport(report);
   }
-  
-
 }

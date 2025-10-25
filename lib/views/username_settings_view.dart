@@ -14,11 +14,9 @@ import '../views/select_language_view.dart';
 import '../repositories/purpose_partnership_repository.dart';
 import '../models/purpose_partnership_model.dart';
 
-
-
 class UsernameSettingsView extends StatefulWidget {
   final UsuarioModel user;
-  
+
   const UsernameSettingsView({super.key, required this.user});
 
   @override
@@ -29,13 +27,12 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   Timer? _debounceTimer;
   UsernameValidationResult _usernameValidation = const UsernameValidationResult(
     isValid: false,
     isAvailable: false,
   );
-  
 
   bool _isSaving = false;
   bool _passwordEnabled = false;
@@ -47,51 +44,51 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
     _initializeImageControllers();
     _loadPasswordSettings();
   }
-  
+
   void _loadPasswordSettings() async {
     // Verificar se o usuário tem senha configurada (se não é login social)
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Se o usuário tem providerData com password, significa que tem senha
-      bool hasPassword = user.providerData.any((provider) => provider.providerId == 'password');
+      bool hasPassword = user.providerData
+          .any((provider) => provider.providerId == 'password');
       setState(() {
         _passwordEnabled = hasPassword;
       });
     }
   }
-  
+
   void _initializeImageControllers() {
     // Limpar dados anteriores (apenas papel de parede, não mais foto de perfil)
     CompletarPerfilController.imgBgPath.value = '';
     CompletarPerfilController.imgBgData = null;
     // Não limpar mais imgPath e imgData pois não são usados aqui
   }
-  
+
   Future<void> _saveOnlyImages() async {
     setState(() {
       _isSaving = true;
     });
-    
+
     try {
       // Salvar apenas papel de parede do chat (não mais foto de perfil)
       if (CompletarPerfilController.imgBgData != null) {
         await UsuarioRepository.completarPerfil(
-          imgBgData: CompletarPerfilController.imgBgData,
-          imgData: null, // Não salvar mais foto de perfil aqui
-          sexo: widget.user.sexo!
-        );
-        
+            imgBgData: CompletarPerfilController.imgBgData,
+            imgData: null, // Não salvar mais foto de perfil aqui
+            sexo: widget.user.sexo!);
+
         // Limpar os dados do controller após salvar
         CompletarPerfilController.imgBgPath.value = '';
         CompletarPerfilController.imgBgData = null;
       }
-      
+
       Get.rawSnackbar(
         message: 'Papel de parede atualizado com sucesso!',
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 500));
       Get.back();
     } catch (e) {
@@ -120,7 +117,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   void _initializeFields() {
     _nameController.text = widget.user.nome ?? '';
     _usernameController.text = widget.user.username ?? '';
-    
+
     // Se já tem username, validar
     if (widget.user.username?.isNotEmpty == true) {
       _validateUsername(widget.user.username!);
@@ -129,18 +126,18 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
 
   void _onUsernameChanged(String value) {
     _debounceTimer?.cancel();
-    
+
     if (value.isEmpty) {
       setState(() {
         _usernameValidation = UsernameValidationResult.empty;
       });
       return;
     }
-    
+
     setState(() {
       _usernameValidation = UsernameValidationResult.checking;
     });
-    
+
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       _validateUsername(value);
     });
@@ -148,7 +145,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
 
   Future<void> _validateUsername(String username) async {
     if (!mounted) return;
-    
+
     // Primeiro validar formato
     final formatValidation = UsernameValidator.validate(username);
     if (!formatValidation.isValid) {
@@ -162,11 +159,11 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       });
       return;
     }
-    
+
     // Depois verificar disponibilidade
     try {
       final isAvailable = await UsernameRepository.canUserUseUsername(username);
-      
+
       if (mounted) {
         setState(() {
           _usernameValidation = UsernameValidationResult(
@@ -193,24 +190,26 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   Future<void> _saveChanges() async {
     // Verificar se há mudanças no papel de parede (não mais foto de perfil)
     bool hasImageChanges = CompletarPerfilController.imgBgData != null;
-    
+
     // Lista de problemas encontrados
     List<String> problemas = [];
-    
+
     // Validar nome
     if (_nameController.text.trim().isEmpty) {
       problemas.add('• Nome de exibição é obrigatório');
     }
-    
+
     // Validar username
     if (_usernameController.text.trim().isEmpty) {
       problemas.add('• Username é obrigatório');
     } else if (!_usernameValidation.isValid) {
-      problemas.add('• Username inválido: ${_usernameValidation.errorMessage ?? "formato incorreto"}');
+      problemas.add(
+          '• Username inválido: ${_usernameValidation.errorMessage ?? "formato incorreto"}');
     } else if (!_usernameValidation.isAvailable) {
-      problemas.add('• Username não disponível: ${_usernameValidation.errorMessage ?? "já está em uso"}');
+      problemas.add(
+          '• Username não disponível: ${_usernameValidation.errorMessage ?? "já está em uso"}');
     }
-    
+
     // Se há problemas nos campos obrigatórios e não há mudanças de imagem, mostrar aviso
     if (problemas.isNotEmpty && !hasImageChanges) {
       Get.defaultDialog(
@@ -225,12 +224,12 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             ),
             const SizedBox(height: 12),
             ...problemas.map((problema) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                problema,
-                style: const TextStyle(color: Colors.red, fontSize: 14),
-              ),
-            )),
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    problema,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+                )),
           ],
         ),
         actions: [
@@ -242,7 +241,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       );
       return;
     }
-    
+
     // Se há mudanças de imagem mas problemas nos campos, perguntar se quer salvar só as imagens
     if (problemas.isNotEmpty && hasImageChanges) {
       // Usar um dialog mais simples para evitar crashes
@@ -279,11 +278,11 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       );
       return;
     }
-    
+
     setState(() {
       _isSaving = true;
     });
-    
+
     try {
       // Salvar dados de texto apenas se não há problemas
       if (problemas.isEmpty) {
@@ -292,31 +291,31 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
           widget.user.id!,
           _usernameController.text,
         );
-        
+
         // Atualizar nome no perfil do usuário
         await UsuarioRepository.updateUser({
           'nome': _nameController.text.trim(),
         });
       }
-      
+
       // Salvar papel de parede se foi alterado (não mais foto de perfil)
       if (CompletarPerfilController.imgBgData != null) {
         print('DEBUG: Salvando papel de parede...');
-        print('DEBUG: imgBgData != null: ${CompletarPerfilController.imgBgData != null}');
-        
+        print(
+            'DEBUG: imgBgData != null: ${CompletarPerfilController.imgBgData != null}');
+
         await UsuarioRepository.completarPerfil(
-          imgBgData: CompletarPerfilController.imgBgData,
-          imgData: null, // Não salvar mais foto de perfil aqui
-          sexo: widget.user.sexo!
-        );
-        
+            imgBgData: CompletarPerfilController.imgBgData,
+            imgData: null, // Não salvar mais foto de perfil aqui
+            sexo: widget.user.sexo!);
+
         print('DEBUG: Papel de parede salvo com sucesso!');
-        
+
         // Limpar os dados do controller após salvar
         CompletarPerfilController.imgBgPath.value = '';
         CompletarPerfilController.imgBgData = null;
       }
-      
+
       // Mensagem de sucesso específica
       String mensagem;
       if (problemas.isEmpty && hasImageChanges) {
@@ -328,16 +327,16 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       } else {
         mensagem = 'Atualização realizada!';
       }
-      
+
       Get.rawSnackbar(
         message: mensagem,
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       );
-      
+
       // Aguardar um pouco para garantir que o Firestore foi atualizado
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       Get.back();
     } catch (e) {
       print('ERRO AO SALVAR: $e');
@@ -409,15 +408,15 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         child: CircularProgressIndicator(strokeWidth: 2),
       );
     }
-    
+
     if (_usernameValidation.isValid && _usernameValidation.isAvailable) {
       return const Icon(Icons.check_circle, color: Colors.green);
     }
-    
+
     if (_usernameValidation.errorMessage != null) {
       return const Icon(Icons.error, color: Colors.red);
     }
-    
+
     return null;
   }
 
@@ -438,7 +437,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         ],
       );
     }
-    
+
     if (_usernameValidation.isValid && _usernameValidation.isAvailable) {
       return Row(
         children: [
@@ -451,7 +450,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         ],
       );
     }
-    
+
     if (_usernameValidation.errorMessage != null) {
       return Row(
         children: [
@@ -466,7 +465,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         ],
       );
     }
-    
+
     return const SizedBox();
   }
 
@@ -495,7 +494,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ],
     );
   }
-  
+
   Widget _buildLanguageSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -522,7 +521,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Botão para alterar idioma
           SizedBox(
             width: double.infinity,
@@ -538,9 +537,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'Altere o idioma do aplicativo',
             style: TextStyle(
@@ -552,7 +551,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ),
     );
   }
-  
+
   Widget _buildAccountSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -579,7 +578,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Botão para deletar conta
           SizedBox(
             width: double.infinity,
@@ -595,9 +594,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'Esta ação não pode ser desfeita',
             style: TextStyle(
@@ -610,14 +609,12 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ),
     );
   }
-  
+
   void _showDeleteAccountDialog() {
     Get.defaultDialog(
       title: AppLanguage.lang('aviso'),
-      content: Text(
-        AppLanguage.lang('aviso_delete_conta'), 
-        textAlign: TextAlign.center
-      ),
+      content: Text(AppLanguage.lang('aviso_delete_conta'),
+          textAlign: TextAlign.center),
       actions: [
         TextButton(
           onPressed: () => Get.back(),
@@ -626,7 +623,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         ElevatedButton(
           onPressed: () async {
             Get.back(); // Fechar dialog
-            
+
             try {
               // Mostrar loading
               Get.defaultDialog(
@@ -641,21 +638,21 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 ),
                 barrierDismissible: false,
               );
-              
+
               // Deletar dados do Firestore
               await FirebaseFirestore.instance
                   .collection('usuarios')
                   .doc(FirebaseAuth.instance.currentUser!.uid)
                   .delete();
-              
+
               // Fazer logout
               await FirebaseAuth.instance.signOut();
-              
+
               Get.back(); // Fechar loading
-              
+
               // Ir para tela de login
               Get.offAll(() => const LoginView());
-              
+
               Get.rawSnackbar(
                 message: 'Conta deletada com sucesso',
                 backgroundColor: Colors.green,
@@ -669,15 +666,13 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             }
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: Text(
-            AppLanguage.lang('sim'), 
-            style: const TextStyle(color: Colors.white)
-          ),
+          child: Text(AppLanguage.lang('sim'),
+              style: const TextStyle(color: Colors.white)),
         ),
       ],
     );
   }
-  
+
   Widget _buildSecuritySection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -704,7 +699,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Switch para ativar/desativar senha
           Row(
             children: [
@@ -721,12 +716,14 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _passwordEnabled 
-                        ? 'App protegido com senha ao abrir'
-                        : 'App sem proteção por senha',
+                      _passwordEnabled
+                          ? 'App protegido com senha ao abrir'
+                          : 'App sem proteção por senha',
                       style: TextStyle(
                         fontSize: 12,
-                        color: _passwordEnabled ? Colors.green.shade600 : Colors.grey.shade600,
+                        color: _passwordEnabled
+                            ? Colors.green.shade600
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -746,9 +743,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Botão para criar/editar senha
           SizedBox(
             width: double.infinity,
@@ -768,7 +765,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ),
     );
   }
-  
+
   void _showDisablePasswordDialog() {
     Get.defaultDialog(
       title: 'Desativar Senha',
@@ -811,7 +808,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ],
     );
   }
-  
+
   void _savePassword(String password) async {
     try {
       Get.defaultDialog(
@@ -826,12 +823,13 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         ),
         barrierDismissible: false,
       );
-      
+
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         // Se o usuário não tem senha (login social), criar uma
-        bool hasPassword = user.providerData.any((provider) => provider.providerId == 'password');
-        
+        bool hasPassword = user.providerData
+            .any((provider) => provider.providerId == 'password');
+
         if (!hasPassword) {
           // Usuário logou com Google/Apple, precisa criar senha
           await user.updatePassword(password);
@@ -839,11 +837,11 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
           // Usuário já tem senha, apenas atualizar
           await user.updatePassword(password);
         }
-        
+
         setState(() {
           _passwordEnabled = true;
         });
-        
+
         Get.back(); // Fechar dialog de loading
         Get.rawSnackbar(
           message: 'Senha configurada com sucesso!',
@@ -858,13 +856,13 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       );
     }
   }
-  
+
   void _showPasswordDialog() {
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     bool obscurePassword = true;
     bool obscureConfirm = true;
-    
+
     Get.defaultDialog(
       title: 'Configurar Senha',
       content: StatefulBuilder(
@@ -878,7 +876,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 style: TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
-              
+
               // Campo de senha
               TextField(
                 controller: passwordController,
@@ -887,7 +885,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   labelText: 'Nova Senha',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: Icon(obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    icon: Icon(obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         obscurePassword = !obscurePassword;
@@ -896,9 +896,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Campo de confirmação
               TextField(
                 controller: confirmPasswordController,
@@ -907,7 +907,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   labelText: 'Confirmar Senha',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: Icon(obscureConfirm ? Icons.visibility : Icons.visibility_off),
+                    icon: Icon(obscureConfirm
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         obscureConfirm = !obscureConfirm;
@@ -934,7 +936,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               );
               return;
             }
-            
+
             if (passwordController.text != confirmPasswordController.text) {
               Get.rawSnackbar(
                 message: 'Senhas não coincidem',
@@ -942,7 +944,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               );
               return;
             }
-            
+
             if (passwordController.text.length < 4) {
               Get.rawSnackbar(
                 message: 'Senha deve ter pelo menos 4 caracteres',
@@ -950,7 +952,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               );
               return;
             }
-            
+
             // Salvar senha usando o sistema existente do Firebase
             _savePassword(passwordController.text);
             Get.back();
@@ -960,7 +962,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       ],
     );
   }
-  
+
   Widget _buildWallpaperSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -985,23 +987,25 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Obx(() => CompletarPerfilController.imgBgPath.value.isNotEmpty && CompletarPerfilController.imgBgData != null
-                      ? Image.memory(
-                          CompletarPerfilController.imgBgData!,
-                          fit: BoxFit.cover,
-                        )
-                      : widget.user.imgBgUrl != null
-                          ? Image.network(
-                              widget.user.imgBgUrl!,
+                  child: Obx(() =>
+                      CompletarPerfilController.imgBgPath.value.isNotEmpty &&
+                              CompletarPerfilController.imgBgData != null
+                          ? Image.memory(
+                              CompletarPerfilController.imgBgData!,
                               fit: BoxFit.cover,
                             )
-                          : Opacity(
-                              opacity: 0.3,
-                              child: Image.asset(
-                                'lib/assets/img/bg_wallpaper.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                            )),
+                          : widget.user.imgBgUrl != null
+                              ? Image.network(
+                                  widget.user.imgBgUrl!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Opacity(
+                                  opacity: 0.3,
+                                  child: Image.asset(
+                                    'lib/assets/img/bg_wallpaper.jpg',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )),
                 ),
               ),
               Positioned.fill(
@@ -1063,9 +1067,11 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         backgroundColor: Colors.blue,
         actions: [
           TextButton(
-            onPressed: _isSaving || 
-                      (!_usernameValidation.isValid || !_usernameValidation.isAvailable) &&
-                      (CompletarPerfilController.imgData == null && CompletarPerfilController.imgBgData == null)
+            onPressed: _isSaving ||
+                    (!_usernameValidation.isValid ||
+                            !_usernameValidation.isAvailable) &&
+                        (CompletarPerfilController.imgData == null &&
+                            CompletarPerfilController.imgBgData == null)
                 ? null
                 : _saveChanges,
             child: _isSaving
@@ -1079,7 +1085,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   )
                 : const Text(
                     'Salvar',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
           ),
         ],
@@ -1115,15 +1122,15 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Papel de Parede
                   _buildWallpaperSection(),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Informações do Perfil
             Container(
               padding: const EdgeInsets.all(16),
@@ -1159,7 +1166,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                        const Icon(Icons.info_outline,
+                            color: Colors.orange, size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -1174,7 +1182,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Nome
                   TextFormField(
                     controller: _nameController,
@@ -1186,7 +1194,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                         borderSide: BorderSide(color: Colors.blue),
                       ),
                       helperText: 'Campo obrigatório',
-                      helperStyle: const TextStyle(color: Colors.red, fontSize: 12),
+                      helperStyle:
+                          const TextStyle(color: Colors.red, fontSize: 12),
                     ),
                     validator: (value) {
                       if (value?.trim().isEmpty == true) {
@@ -1195,17 +1204,17 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Username
                   _buildUsernameField(),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Informações sobre username
             Container(
               padding: const EdgeInsets.all(16),
@@ -1238,24 +1247,24 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Idioma
             _buildLanguageSection(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Segurança
             _buildSecuritySection(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Parceria (Nosso Propósito)
             _buildPartnershipSection(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Conta (Deletar)
             _buildAccountSection(),
           ],
@@ -1269,12 +1278,14 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
       future: PurposePartnershipRepository.getUserPartnership(widget.user.id!),
       builder: (context, snapshot) {
         // Se não há parceria ativa, não mostrar a seção
-        if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.isActivePartnership) {
+        if (!snapshot.hasData ||
+            snapshot.data == null ||
+            !snapshot.data!.isActivePartnership) {
           return const SizedBox();
         }
 
         final partnership = snapshot.data!;
-        
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -1300,7 +1311,7 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Informações da parceria
               Container(
                 padding: const EdgeInsets.all(12),
@@ -1335,9 +1346,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Botão de excluir parceiro
               SizedBox(
                 width: double.infinity,
@@ -1352,9 +1363,9 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Aviso
               Container(
                 padding: const EdgeInsets.all(8),
@@ -1365,7 +1376,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_amber, color: Colors.orange, size: 16),
+                    const Icon(Icons.warning_amber,
+                        color: Colors.orange, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1389,8 +1401,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   void _showDeletePartnershipDialog(PurposePartnershipModel partnership) {
     // Buscar informações do parceiro
     final currentUserId = widget.user.id!;
-    final partnerId = partnership.user1Id == currentUserId 
-        ? partnership.user2Id 
+    final partnerId = partnership.user1Id == currentUserId
+        ? partnership.user2Id
         : partnership.user1Id;
 
     Get.dialog(
@@ -1423,7 +1435,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, color: Colors.red, size: 16),
+                      const Icon(Icons.info_outline,
+                          color: Colors.red, size: 16),
                       const SizedBox(width: 8),
                       const Text(
                         'Consequências:',
@@ -1480,10 +1493,10 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
 
       // Desconectar parceria
       await PurposePartnershipRepository.disconnectPartnership(partnership.id!);
-      
+
       // Fechar loading
       Get.back();
-      
+
       // Mostrar sucesso
       Get.snackbar(
         'Parceiro Excluído! 💔',
@@ -1493,16 +1506,15 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
         icon: const Icon(Icons.person_remove, color: Colors.white),
         duration: const Duration(seconds: 4),
       );
-      
+
       // Atualizar a tela
       setState(() {});
-      
     } catch (e) {
       // Fechar loading se ainda estiver aberto
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      
+
       // Mostrar erro
       Get.snackbar(
         'Erro ao Excluir Parceiro',

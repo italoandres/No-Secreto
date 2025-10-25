@@ -38,7 +38,7 @@ class HobbiesChipsModern extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hobbies = profile.hobbies;
-    
+
     if (hobbies.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -55,7 +55,7 @@ class HobbiesChipsModern extends StatelessWidget {
 
   Widget _buildHobbyChip(String hobby) {
     final emoji = _getEmojiForHobby(hobby);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(

@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StorieVistoModel {
@@ -17,12 +16,12 @@ class StorieVistoModel {
   });
 
   static StorieVistoModel fromJson(Map<String, dynamic> json) {
-
     return StorieVistoModel(
       idStore: json['idStore'] ?? '',
       idUser: json['idUser'],
       data: json['data'],
-      contexto: json['contexto'] ?? 'principal', // Default para contexto principal
+      contexto:
+          json['contexto'] ?? 'principal', // Default para contexto principal
     );
   }
 

@@ -277,7 +277,8 @@ class SinaisController extends GetxController {
   void _moveToNextProfile() {
     if (currentProfileIndex.value < recommendations.length - 1) {
       currentProfileIndex.value++;
-      remainingProfiles.value = recommendations.length - currentProfileIndex.value;
+      remainingProfiles.value =
+          recommendations.length - currentProfileIndex.value;
     } else {
       // Acabaram as recomendações
       remainingProfiles.value = 0;
@@ -394,8 +395,10 @@ class SinaisController extends GetxController {
   }
 
   // Mapas para armazenar perfis dos interesses e matches
-  final RxMap<String, ScoredProfile> interestProfiles = <String, ScoredProfile>{}.obs;
-  final RxMap<String, ScoredProfile> matchProfiles = <String, ScoredProfile>{}.obs;
+  final RxMap<String, ScoredProfile> interestProfiles =
+      <String, ScoredProfile>{}.obs;
+  final RxMap<String, ScoredProfile> matchProfiles =
+      <String, ScoredProfile>{}.obs;
 
   /// Carrega perfis completos dos interesses
   Future<void> loadInterestProfiles() async {
@@ -403,7 +406,8 @@ class SinaisController extends GetxController {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) return;
 
-      final profiles = await WeeklyRecommendationsService.getProfilesForInterests(
+      final profiles =
+          await WeeklyRecommendationsService.getProfilesForInterests(
         userId,
         pendingInterests,
       );
@@ -534,7 +538,7 @@ class SinaisController extends GetxController {
       if (userId == null) return;
 
       final otherUserId = match.getOtherUserId(userId);
-      
+
       EnhancedLogger.info(
         'Opening chat',
         tag: 'SINAIS_CONTROLLER',

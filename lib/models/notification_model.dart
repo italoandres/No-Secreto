@@ -2,20 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationModel {
   final String id;
-  final String userId;           // Destinatário da notificação
-  final String type;             // 'story_comment' ou 'interest'
-  final String relatedId;        // ID do story
-  final String fromUserId;       // Usuário que gerou a notificação
-  final String fromUserName;     // Nome do usuário
-  final String fromUserAvatar;   // Avatar do usuário
-  final String content;          // Conteúdo da notificação
-  final bool isRead;             // Status de lida
-  final DateTime timestamp;      // Data de criação (padronizado como timestamp)
-  final String? contexto;        // Contexto da notificação (nosso_proposito, sinais_isaque, etc.)
-  
+  final String userId; // Destinatário da notificação
+  final String type; // 'story_comment' ou 'interest'
+  final String relatedId; // ID do story
+  final String fromUserId; // Usuário que gerou a notificação
+  final String fromUserName; // Nome do usuário
+  final String fromUserAvatar; // Avatar do usuário
+  final String content; // Conteúdo da notificação
+  final bool isRead; // Status de lida
+  final DateTime timestamp; // Data de criação (padronizado como timestamp)
+  final String?
+      contexto; // Contexto da notificação (nosso_proposito, sinais_isaque, etc.)
+
   // Campos adicionais para compatibilidade
-  final String? title;           // Título da notificação
-  final String? message;         // Mensagem da notificação
+  final String? title; // Título da notificação
+  final String? message; // Mensagem da notificação
   final Map<String, dynamic>? data; // Dados adicionais
 
   NotificationModel({

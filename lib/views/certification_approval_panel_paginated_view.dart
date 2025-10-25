@@ -5,7 +5,7 @@ import '../components/paginated_certification_list.dart';
 import '../components/certification_filters_component.dart';
 
 /// Painel administrativo para aprovação de certificações espirituais com paginação
-/// 
+///
 /// Esta view permite que administradores:
 /// - Visualizem certificações pendentes em tempo real com paginação
 /// - Aprovem ou reprovem certificações
@@ -13,45 +13,44 @@ import '../components/certification_filters_component.dart';
 /// - Filtrem certificações por status, data e admin
 class CertificationApprovalPanelPaginatedView extends StatefulWidget {
   @override
-  _CertificationApprovalPanelPaginatedViewState createState() => 
+  _CertificationApprovalPanelPaginatedViewState createState() =>
       _CertificationApprovalPanelPaginatedViewState();
 }
 
-class _CertificationApprovalPanelPaginatedViewState 
-    extends State<CertificationApprovalPanelPaginatedView> 
+class _CertificationApprovalPanelPaginatedViewState
+    extends State<CertificationApprovalPanelPaginatedView>
     with SingleTickerProviderStateMixin {
-  
   final CertificationApprovalService _service = CertificationApprovalService();
   late TabController _tabController;
-  
+
   // Controllers de paginação
   late CertificationPaginationController _pendingController;
   late CertificationPaginationController _approvedController;
   late CertificationPaginationController _rejectedController;
   late CertificationPaginationController _allHistoryController;
-  
+
   // Estado
   bool _isAdmin = false;
   bool _isLoadingPermissions = true;
   CertificationFilters _currentFilters = const CertificationFilters();
   List<String> _availableAdmins = [];
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Inicializar controllers de paginação
     _pendingController = CertificationPaginationController();
     _approvedController = CertificationPaginationController();
     _rejectedController = CertificationPaginationController();
     _allHistoryController = CertificationPaginationController();
-    
+
     _checkAdminPermissions();
     _loadAvailableAdmins();
     _initializeControllers();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -61,7 +60,7 @@ class _CertificationApprovalPanelPaginatedViewState
     _allHistoryController.dispose();
     super.dispose();
   }
-  
+
   /// Inicializa os controllers com os filtros apropriados
   void _initializeControllers() {
     _pendingController.initialize(status: 'pending');
@@ -69,11 +68,11 @@ class _CertificationApprovalPanelPaginatedViewState
     _rejectedController.initialize(status: 'rejected');
     _allHistoryController.initialize(); // Sem filtro de status = todas
   }
-  
+
   /// Verifica se o usuário atual é administrador
   Future<void> _checkAdminPermissions() async {
     final isAdmin = await _service.isCurrentUserAdmin();
-    
+
     if (mounted) {
       setState(() {
         _isAdmin = isAdmin;
@@ -88,7 +87,7 @@ class _CertificationApprovalPanelPaginatedViewState
             duration: Duration(seconds: 3),
           ),
         );
-        
+
         Future.delayed(Duration(seconds: 2), () {
           if (mounted) {
             Navigator.pop(context);
@@ -97,7 +96,7 @@ class _CertificationApprovalPanelPaginatedViewState
       }
     }
   }
-  
+
   /// Carrega a lista de administradores disponíveis para filtro
   Future<void> _loadAvailableAdmins() async {
     try {
@@ -111,36 +110,36 @@ class _CertificationApprovalPanelPaginatedViewState
       print('Erro ao carregar admins: $e');
     }
   }
-  
+
   /// Atualiza os filtros aplicados
   void _onFiltersChanged(CertificationFilters filters) {
     setState(() {
       _currentFilters = filters;
     });
-    
+
     // Atualizar controllers com novos filtros
     final filtersMap = _buildFiltersMap(filters);
-    
+
     _pendingController.updateFilters(
       status: 'pending',
       filters: filtersMap,
     );
-    
+
     _approvedController.updateFilters(
       status: 'approved',
       filters: filtersMap,
     );
-    
+
     _rejectedController.updateFilters(
       status: 'rejected',
       filters: filtersMap,
     );
-    
+
     _allHistoryController.updateFilters(
       filters: filtersMap,
     );
   }
-  
+
   /// Converte CertificationFilters para Map
   Map<String, dynamic> _buildFiltersMap(CertificationFilters filters) {
     return {
@@ -151,7 +150,7 @@ class _CertificationApprovalPanelPaginatedViewState
         'searchText': filters.searchText,
     };
   }
-  
+
   /// Callback quando uma certificação é processada
   void _onCertificationProcessed() {
     // Recarregar as listas
@@ -160,7 +159,7 @@ class _CertificationApprovalPanelPaginatedViewState
     _rejectedController.refresh();
     _allHistoryController.refresh();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (_isLoadingPermissions) {
@@ -238,9 +237,9 @@ class _CertificationApprovalPanelPaginatedViewState
             stream: _service.getPendingCertificationsCountStream(),
             builder: (context, snapshot) {
               final count = snapshot.data ?? 0;
-              
+
               if (count == 0) return SizedBox.shrink();
-              
+
               return Padding(
                 padding: EdgeInsets.only(right: 16),
                 child: Center(
@@ -272,7 +271,7 @@ class _CertificationApprovalPanelPaginatedViewState
             onFiltersChanged: _onFiltersChanged,
             availableAdmins: _availableAdmins,
           ),
-          
+
           // Conteúdo das abas
           Expanded(
             child: TabBarView(
@@ -284,19 +283,19 @@ class _CertificationApprovalPanelPaginatedViewState
                   isPendingList: true,
                   onCertificationProcessed: _onCertificationProcessed,
                 ),
-                
+
                 // Aba Aprovadas
                 PaginatedCertificationList(
                   controller: _approvedController,
                   isPendingList: false,
                 ),
-                
+
                 // Aba Reprovadas
                 PaginatedCertificationList(
                   controller: _rejectedController,
                   isPendingList: false,
                 ),
-                
+
                 // Aba Todas (Histórico Completo)
                 PaginatedCertificationList(
                   controller: _allHistoryController,

@@ -77,7 +77,7 @@ class NotificationRepository {
   static Future<void> markAllAsRead(String userId) async {
     try {
       final batch = _firestore.batch();
-      
+
       final snapshot = await _firestore
           .collection(_collection)
           .where('userId', isEqualTo: userId)
@@ -108,10 +108,7 @@ class NotificationRepository {
   // Deletar notificação
   static Future<void> deleteNotification(String notificationId) async {
     try {
-      await _firestore
-          .collection(_collection)
-          .doc(notificationId)
-          .delete();
+      await _firestore.collection(_collection).doc(notificationId).delete();
     } catch (e) {
       print('Erro ao deletar notificação: $e');
       rethrow;
@@ -122,7 +119,7 @@ class NotificationRepository {
   static Future<void> deleteAllUserNotifications(String userId) async {
     try {
       final batch = _firestore.batch();
-      
+
       final snapshot = await _firestore
           .collection(_collection)
           .where('userId', isEqualTo: userId)
@@ -144,7 +141,7 @@ class NotificationRepository {
     try {
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final batch = _firestore.batch();
-      
+
       final snapshot = await _firestore
           .collection(_collection)
           .where('createdAt', isLessThan: Timestamp.fromDate(thirtyDaysAgo))
@@ -155,7 +152,8 @@ class NotificationRepository {
       }
 
       await batch.commit();
-      print('Limpeza de notificações antigas concluída: ${snapshot.docs.length} removidas');
+      print(
+          'Limpeza de notificações antigas concluída: ${snapshot.docs.length} removidas');
     } catch (e) {
       print('Erro ao limpar notificações antigas: $e');
     }
@@ -164,10 +162,8 @@ class NotificationRepository {
   // Verificar se uma notificação específica existe
   static Future<bool> notificationExists(String notificationId) async {
     try {
-      final doc = await _firestore
-          .collection(_collection)
-          .doc(notificationId)
-          .get();
+      final doc =
+          await _firestore.collection(_collection).doc(notificationId).get();
       return doc.exists;
     } catch (e) {
       print('Erro ao verificar existência da notificação: $e');
@@ -176,13 +172,12 @@ class NotificationRepository {
   }
 
   // Buscar notificação por ID
-  static Future<NotificationModel?> getNotificationById(String notificationId) async {
+  static Future<NotificationModel?> getNotificationById(
+      String notificationId) async {
     try {
-      final doc = await _firestore
-          .collection(_collection)
-          .doc(notificationId)
-          .get();
-      
+      final doc =
+          await _firestore.collection(_collection).doc(notificationId).get();
+
       if (doc.exists) {
         return NotificationModel.fromDocument(doc);
       }
@@ -194,7 +189,8 @@ class NotificationRepository {
   }
 
   // Buscar notificações do usuário para um contexto específico
-  static Stream<List<NotificationModel>> getContextNotifications(String userId, String contexto) {
+  static Stream<List<NotificationModel>> getContextNotifications(
+      String userId, String contexto) {
     return _firestore
         .collection(_collection)
         .where('userId', isEqualTo: userId)
@@ -224,7 +220,7 @@ class NotificationRepository {
   static Future<void> markContextAsRead(String userId, String contexto) async {
     try {
       final batch = _firestore.batch();
-      
+
       final snapshot = await _firestore
           .collection(_collection)
           .where('userId', isEqualTo: userId)
@@ -244,10 +240,11 @@ class NotificationRepository {
   }
 
   // Deletar todas as notificações de um contexto específico
-  static Future<void> deleteContextNotifications(String userId, String contexto) async {
+  static Future<void> deleteContextNotifications(
+      String userId, String contexto) async {
     try {
       final batch = _firestore.batch();
-      
+
       final snapshot = await _firestore
           .collection(_collection)
           .where('userId', isEqualTo: userId)

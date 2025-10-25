@@ -5,26 +5,26 @@ import '../utils/brazil_locations_data.dart';
 class BrazilLocationData implements LocationDataInterface {
   @override
   String get countryName => 'Brasil';
-  
+
   @override
   String get countryCode => 'BR';
-  
+
   @override
   String get stateLabel => 'Estado';
-  
+
   @override
   bool get useStateAbbreviation => true;
-  
+
   @override
   List<String> getStates() {
     return BrazilLocationsData.states;
   }
-  
+
   @override
   List<String> getCitiesForState(String state) {
     return BrazilLocationsData.getCitiesForState(state);
   }
-  
+
   @override
   String formatLocation(String city, String state) {
     final abbr = getStateAbbreviation(state);
@@ -33,7 +33,7 @@ class BrazilLocationData implements LocationDataInterface {
     }
     return '$city, $state';
   }
-  
+
   @override
   String? getStateAbbreviation(String state) {
     return BrazilLocationsData.getStateAbbreviation(state);

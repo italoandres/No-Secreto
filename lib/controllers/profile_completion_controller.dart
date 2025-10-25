@@ -25,7 +25,8 @@ class ProfileCompletionController extends GetxController {
   final Rx<SpiritualProfileModel?> profile = Rx<SpiritualProfileModel?>(null);
   final RxBool isLoading = true.obs;
   final RxString errorMessage = ''.obs;
-  final Rx<ProfileCompletionStatus?> completionStatus = Rx<ProfileCompletionStatus?>(null);
+  final Rx<ProfileCompletionStatus?> completionStatus =
+      Rx<ProfileCompletionStatus?>(null);
   final RxBool hasShownConfirmation = false.obs;
 
   @override
@@ -39,41 +40,50 @@ class ProfileCompletionController extends GetxController {
       () async {
         isLoading.value = true;
         errorMessage.value = '';
-        
-        EnhancedLogger.info('Loading spiritual profile', tag: 'PROFILE_COMPLETION');
-        
+
+        EnhancedLogger.info('Loading spiritual profile',
+            tag: 'PROFILE_COMPLETION');
+
         // Get or create profile for current user
-        final userProfile = await SpiritualProfileRepository.getOrCreateCurrentUserProfile();
-        
+        final userProfile =
+            await SpiritualProfileRepository.getOrCreateCurrentUserProfile();
+
         // Sync with user data using the new synchronizer
         await ProfileDataSynchronizer.syncUserData(userProfile.userId!);
-        
+
         // Reload profile after sync to get updated data
-        final syncedProfile = await SpiritualProfileRepository.getProfileByUserId(userProfile.userId!);
-        
+        final syncedProfile =
+            await SpiritualProfileRepository.getProfileByUserId(
+                userProfile.userId!);
+
         profile.value = syncedProfile ?? userProfile;
-        
-        EnhancedLogger.success('Profile loaded successfully', tag: 'PROFILE_COMPLETION', data: {
-          'profileId': profile.value?.id,
-          'progress': (profile.value?.completionPercentage ?? 0) * 100,
-        });
-        
+
+        EnhancedLogger.success('Profile loaded successfully',
+            tag: 'PROFILE_COMPLETION',
+            data: {
+              'profileId': profile.value?.id,
+              'progress': (profile.value?.completionPercentage ?? 0) * 100,
+            });
+
         // Log user data for debugging
-        final userData = await UsuarioRepository.getUserById(userProfile.userId!);
-        EnhancedLogger.debug('User data loaded', tag: 'PROFILE_COMPLETION', data: {
-          'userId': userProfile.userId,
-          'nome': userData?.nome,
-          'username': userData?.username,
-          'email': userData?.email,
-          'hasPhoto': userData?.imgUrl != null,
-        });
+        final userData =
+            await UsuarioRepository.getUserById(userProfile.userId!);
+        EnhancedLogger.debug('User data loaded',
+            tag: 'PROFILE_COMPLETION',
+            data: {
+              'userId': userProfile.userId,
+              'nome': userData?.nome,
+              'username': userData?.username,
+              'email': userData?.email,
+              'hasPhoto': userData?.imgUrl != null,
+            });
       },
       context: 'ProfileCompletionController.loadProfile',
       showUserMessage: true,
     );
-    
+
     isLoading.value = false;
-    
+
     // Verificar se o perfil foi completado após o carregamento inicial
     await _checkAndHandleProfileCompletion();
   }
@@ -82,45 +92,45 @@ class ProfileCompletionController extends GetxController {
   Future<void> _syncWithUserData(SpiritualProfileModel spiritualProfile) async {
     try {
       debugPrint('🔄 Sincronizando dados do usuário...');
-      
+
       // Get user data from "Editar Perfil"
       final userStream = UsuarioRepository.getUser();
       final userData = await userStream.first;
-      
+
       if (userData == null) {
         debugPrint('⚠️ Dados do usuário não encontrados');
         return;
       }
-      
+
       // Check if we need to update spiritual profile with user data
       bool needsUpdate = false;
       Map<String, dynamic> updates = {};
-      
+
       // Sync main photo if spiritual profile doesn't have one but user does
-      if ((spiritualProfile.mainPhotoUrl?.isEmpty ?? true) && 
+      if ((spiritualProfile.mainPhotoUrl?.isEmpty ?? true) &&
           (userData.imgUrl?.isNotEmpty ?? false)) {
         updates['mainPhotoUrl'] = userData.imgUrl;
         needsUpdate = true;
         debugPrint('📸 Sincronizando foto principal: ${userData.imgUrl}');
       }
-      
+
       // Force sync user data for display (não salva no perfil espiritual, apenas para exibição)
       debugPrint('👤 Dados do usuário carregados:');
       debugPrint('   Nome: ${userData.nome}');
       debugPrint('   Username: ${userData.username}');
       debugPrint('   Email: ${userData.email}');
       debugPrint('   Foto: ${userData.imgUrl}');
-      
+
       // Update spiritual profile if needed
       if (needsUpdate && spiritualProfile.id != null) {
-        await SpiritualProfileRepository.updateProfile(spiritualProfile.id!, updates);
-        
+        await SpiritualProfileRepository.updateProfile(
+            spiritualProfile.id!, updates);
+
         // Update local profile object
         spiritualProfile.mainPhotoUrl = updates['mainPhotoUrl'];
-        
+
         debugPrint('✅ Dados sincronizados com sucesso');
       }
-      
     } catch (e) {
       debugPrint('❌ Erro ao sincronizar dados: $e');
       // Don't throw error, just log it - sync is not critical
@@ -129,42 +139,41 @@ class ProfileCompletionController extends GetxController {
 
   Future<void> refreshProfile() async {
     await loadProfile();
-    
+
     // Verificar se o perfil foi completado após o refresh
     await _checkAndHandleProfileCompletion();
   }
-  
+
   /// Verifica se o perfil foi completado e trata adequadamente
   Future<void> _checkAndHandleProfileCompletion() async {
     await ErrorHandler.safeExecute(
       () async {
         if (profile.value?.userId == null) return;
 
-        EnhancedLogger.info('Checking profile completion after refresh', 
-          tag: 'PROFILE_COMPLETION',
-          data: {'userId': profile.value!.userId}
-        );
+        EnhancedLogger.info('Checking profile completion after refresh',
+            tag: 'PROFILE_COMPLETION', data: {'userId': profile.value!.userId});
 
         // Usar o novo detector de completude
-        final status = await ProfileCompletionDetector.getCompletionStatus(profile.value!.userId!);
+        final status = await ProfileCompletionDetector.getCompletionStatus(
+            profile.value!.userId!);
         completionStatus.value = status;
 
-        EnhancedLogger.info('Profile completion status updated', 
-          tag: 'PROFILE_COMPLETION',
-          data: {
-            'userId': profile.value!.userId,
-            'isComplete': status.isComplete,
-            'hasBeenShown': status.hasBeenShown,
-            'localHasShown': hasShownConfirmation.value,
-          }
-        );
+        EnhancedLogger.info('Profile completion status updated',
+            tag: 'PROFILE_COMPLETION',
+            data: {
+              'userId': profile.value!.userId,
+              'isComplete': status.isComplete,
+              'hasBeenShown': status.hasBeenShown,
+              'localHasShown': hasShownConfirmation.value,
+            });
 
         // Se o perfil está completo e ainda não foi mostrada a confirmação
-        if (status.isComplete && !status.hasBeenShown && !hasShownConfirmation.value) {
-          EnhancedLogger.info('Profile completed - showing confirmation', 
-            tag: 'PROFILE_COMPLETION',
-            data: {'userId': profile.value!.userId}
-          );
+        if (status.isComplete &&
+            !status.hasBeenShown &&
+            !hasShownConfirmation.value) {
+          EnhancedLogger.info('Profile completed - showing confirmation',
+              tag: 'PROFILE_COMPLETION',
+              data: {'userId': profile.value!.userId});
 
           // Marcar como mostrado localmente para evitar múltiplas exibições
           hasShownConfirmation.value = true;
@@ -175,31 +184,34 @@ class ProfileCompletionController extends GetxController {
           });
         } else {
           // Debug detalhado por que não está mostrando
-          EnhancedLogger.warning('Profile completion check - not showing confirmation', 
-            tag: 'PROFILE_COMPLETION',
-            data: {
-              'userId': profile.value!.userId,
-              'isComplete': status.isComplete,
-              'hasBeenShown': status.hasBeenShown,
-              'localHasShown': hasShownConfirmation.value,
-              'reason': !status.isComplete ? 'not_complete' : 
-                       status.hasBeenShown ? 'already_shown_remote' : 
-                       hasShownConfirmation.value ? 'already_shown_local' : 'unknown'
-            }
-          );
+          EnhancedLogger.warning(
+              'Profile completion check - not showing confirmation',
+              tag: 'PROFILE_COMPLETION',
+              data: {
+                'userId': profile.value!.userId,
+                'isComplete': status.isComplete,
+                'hasBeenShown': status.hasBeenShown,
+                'localHasShown': hasShownConfirmation.value,
+                'reason': !status.isComplete
+                    ? 'not_complete'
+                    : status.hasBeenShown
+                        ? 'already_shown_remote'
+                        : hasShownConfirmation.value
+                            ? 'already_shown_local'
+                            : 'unknown'
+              });
         }
-        
+
         if (!status.isComplete) {
           // Debug quando perfil não está completo
-          EnhancedLogger.warning('Profile not complete - debugging', 
-            tag: 'PROFILE_COMPLETION',
-            data: {
-              'userId': profile.value!.userId,
-              'percentage': (status.completionPercentage * 100).toInt(),
-              'missingTasks': status.missingTasks,
-            }
-          );
-          
+          EnhancedLogger.warning('Profile not complete - debugging',
+              tag: 'PROFILE_COMPLETION',
+              data: {
+                'userId': profile.value!.userId,
+                'percentage': (status.completionPercentage * 100).toInt(),
+                'missingTasks': status.missingTasks,
+              });
+
           // REMOVIDO: Debug detalhado (arquivo deletado)
           // DebugProfileCompletion.debugProfileStatus(profile.value!.userId!);
         }
@@ -220,36 +232,36 @@ class ProfileCompletionController extends GetxController {
 
   void openTask(String taskKey) {
     debugPrint('🎯 Abrindo tarefa: $taskKey');
-    
+
     switch (taskKey) {
       case 'photos':
         Get.to(() => ProfilePhotosTaskView(
-          profile: profile.value!,
-          onCompleted: _onTaskCompleted,
-        ));
+              profile: profile.value!,
+              onCompleted: _onTaskCompleted,
+            ));
         break;
-        
+
       case 'identity':
         Get.to(() => ProfileIdentityTaskView(
-          profile: profile.value!,
-          onCompleted: _onTaskCompleted,
-        ));
+              profile: profile.value!,
+              onCompleted: _onTaskCompleted,
+            ));
         break;
-        
+
       case 'biography':
         Get.to(() => ProfileBiographyTaskView(
-          profile: profile.value!,
-          onCompleted: _onTaskCompleted,
-        ));
+              profile: profile.value!,
+              onCompleted: _onTaskCompleted,
+            ));
         break;
-        
+
       case 'preferences':
         Get.to(() => PreferencesInteractionView(
-          profileId: profile.value!.id!,
-          onTaskCompleted: _onTaskCompleted,
-        ));
+              profileId: profile.value!.id!,
+              onTaskCompleted: _onTaskCompleted,
+            ));
         break;
-        
+
       case 'certification':
         // Navegar para tela de certificação
         try {
@@ -265,7 +277,7 @@ class ProfileCompletionController extends GetxController {
           );
         }
         break;
-        
+
       default:
         Get.snackbar(
           'Em Desenvolvimento',
@@ -278,11 +290,10 @@ class ProfileCompletionController extends GetxController {
   }
 
   void _onTaskCompleted(String taskKey) {
-    EnhancedLogger.info('Task completed', 
-      tag: 'PROFILE_COMPLETION',
-      data: {'taskKey': taskKey, 'userId': profile.value?.userId}
-    );
-    
+    EnhancedLogger.info('Task completed',
+        tag: 'PROFILE_COMPLETION',
+        data: {'taskKey': taskKey, 'userId': profile.value?.userId});
+
     // Show success message
     Get.snackbar(
       'Tarefa Concluída!',
@@ -292,16 +303,14 @@ class ProfileCompletionController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
-    
+
     // Refresh profile and check completion after a delay to allow Firestore to update
     Future.delayed(const Duration(milliseconds: 1500), () async {
-      EnhancedLogger.info('Refreshing profile after task completion', 
-        tag: 'PROFILE_COMPLETION',
-        data: {'taskKey': taskKey}
-      );
-      
+      EnhancedLogger.info('Refreshing profile after task completion',
+          tag: 'PROFILE_COMPLETION', data: {'taskKey': taskKey});
+
       await refreshProfile();
-      
+
       // Notificar o detector para verificar mudanças
       if (profile.value?.userId != null) {
         await ProfileCompletionDetector.checkAndNotify(profile.value!.userId!);
@@ -312,14 +321,13 @@ class ProfileCompletionController extends GetxController {
   /// Força navegação direta para vitrine (sem confirmação)
   Future<void> forceNavigateToVitrine() async {
     if (profile.value?.userId == null) return;
-    
-    EnhancedLogger.info('Forcing direct navigation to vitrine', 
-      tag: 'PROFILE_COMPLETION',
-      data: {'userId': profile.value!.userId}
-    );
-    
+
+    EnhancedLogger.info('Forcing direct navigation to vitrine',
+        tag: 'PROFILE_COMPLETION', data: {'userId': profile.value!.userId});
+
     try {
-      await VitrineNavigationHelper.navigateToVitrineDisplay(profile.value!.userId!);
+      await VitrineNavigationHelper.navigateToVitrineDisplay(
+          profile.value!.userId!);
     } catch (e) {
       _handleVitrineNavigationError('Erro ao navegar para vitrine: $e');
     }
@@ -328,15 +336,13 @@ class ProfileCompletionController extends GetxController {
   /// Força a exibição da confirmação da vitrine (para debug/correção)
   Future<void> forceShowVitrineConfirmation() async {
     if (profile.value?.userId == null) return;
-    
-    EnhancedLogger.info('Forcing vitrine confirmation display', 
-      tag: 'PROFILE_COMPLETION',
-      data: {'userId': profile.value!.userId}
-    );
-    
+
+    EnhancedLogger.info('Forcing vitrine confirmation display',
+        tag: 'PROFILE_COMPLETION', data: {'userId': profile.value!.userId});
+
     // Resetar flags
     hasShownConfirmation.value = false;
-    
+
     // Navegar para confirmação
     await _navigateToVitrineConfirmation();
   }
@@ -349,10 +355,8 @@ class ProfileCompletionController extends GetxController {
           throw Exception('User ID not found');
         }
 
-        EnhancedLogger.info('Navigating to vitrine confirmation', 
-          tag: 'PROFILE_COMPLETION',
-          data: {'userId': profile.value!.userId}
-        );
+        EnhancedLogger.info('Navigating to vitrine confirmation',
+            tag: 'PROFILE_COMPLETION', data: {'userId': profile.value!.userId});
 
         // Marcar como mostrado no Firestore para não mostrar novamente
         await SpiritualProfileRepository.updateProfile(profile.value!.id!, {
@@ -364,7 +368,8 @@ class ProfileCompletionController extends GetxController {
           userId: profile.value!.userId!,
           onContinue: () async {
             // Callback quando usuário escolhe ver a vitrine
-            await VitrineNavigationHelper.navigateToVitrineDisplay(profile.value!.userId!);
+            await VitrineNavigationHelper.navigateToVitrineDisplay(
+                profile.value!.userId!);
           },
           onSkip: () {
             // Callback quando usuário escolhe "Depois"
@@ -372,24 +377,20 @@ class ProfileCompletionController extends GetxController {
           },
         );
 
-        EnhancedLogger.success('Successfully navigated to vitrine confirmation', 
-          tag: 'PROFILE_COMPLETION',
-          data: {'userId': profile.value!.userId}
-        );
-
+        EnhancedLogger.success('Successfully navigated to vitrine confirmation',
+            tag: 'PROFILE_COMPLETION', data: {'userId': profile.value!.userId});
       },
       context: 'ProfileCompletionController._navigateToVitrineConfirmation',
       showUserMessage: false,
     );
   }
-  
+
   /// Trata erros de navegação para a vitrine
   void _handleVitrineNavigationError(String error) {
-    EnhancedLogger.error('Vitrine navigation error', 
-      tag: 'PROFILE_COMPLETION',
-      error: Exception(error),
-      data: {'userId': profile.value?.userId}
-    );
+    EnhancedLogger.error('Vitrine navigation error',
+        tag: 'PROFILE_COMPLETION',
+        error: Exception(error),
+        data: {'userId': profile.value?.userId});
 
     // Resetar flag para permitir nova tentativa
     hasShownConfirmation.value = false;
@@ -404,31 +405,25 @@ class ProfileCompletionController extends GetxController {
       debugPrint('🚀 DEBUG: Iniciando demonstração da vitrine...');
       final user = FirebaseAuth.instance.currentUser;
       debugPrint('🔍 DEBUG: User UID = ${user?.uid}');
-      
+
       if (user?.uid != null) {
-        EnhancedLogger.info('Starting vitrine demo after profile completion', 
-          tag: 'PROFILE_COMPLETION',
-          data: {'userId': user!.uid}
-        );
-        
+        EnhancedLogger.info('Starting vitrine demo after profile completion',
+            tag: 'PROFILE_COMPLETION', data: {'userId': user!.uid});
+
         // Usar o novo helper de navegação
         await VitrineNavigationHelper.navigateToVitrineDisplay(user.uid);
-        
-        EnhancedLogger.success('Vitrine demo started successfully', 
-          tag: 'PROFILE_COMPLETION',
-          data: {'userId': user.uid}
-        );
+
+        EnhancedLogger.success('Vitrine demo started successfully',
+            tag: 'PROFILE_COMPLETION', data: {'userId': user.uid});
       } else {
         throw Exception('User not found');
       }
     } catch (e, stackTrace) {
-      EnhancedLogger.error('Failed to start vitrine demo', 
-        tag: 'PROFILE_COMPLETION',
-        error: e,
-        stackTrace: stackTrace
-      );
-      
-      _handleVitrineNavigationError('Não foi possível mostrar a vitrine. Você pode acessá-la depois nas configurações.');
+      EnhancedLogger.error('Failed to start vitrine demo',
+          tag: 'PROFILE_COMPLETION', error: e, stackTrace: stackTrace);
+
+      _handleVitrineNavigationError(
+          'Não foi possível mostrar a vitrine. Você pode acessá-la depois nas configurações.');
     }
   }
 
@@ -439,27 +434,27 @@ class ProfileCompletionController extends GetxController {
       }
 
       debugPrint('🔄 Atualizando tarefa $taskKey: $isCompleted');
-      
+
       await SpiritualProfileRepository.updateTaskCompletion(
         profile.value!.id!,
         taskKey,
         isCompleted,
       );
-      
+
       // Update local profile
-      final updatedTasks = Map<String, bool>.from(profile.value!.completionTasks);
+      final updatedTasks =
+          Map<String, bool>.from(profile.value!.completionTasks);
       updatedTasks[taskKey] = isCompleted;
-      
+
       profile.value = profile.value!.copyWith(
         completionTasks: updatedTasks,
         updatedAt: DateTime.now(),
       );
-      
+
       debugPrint('✅ Tarefa atualizada localmente');
-      
     } catch (e) {
       debugPrint('❌ Erro ao atualizar tarefa: $e');
-      
+
       Get.snackbar(
         'Erro',
         'Não foi possível atualizar a tarefa. Tente novamente.',
@@ -511,7 +506,7 @@ class ProfileCompletionController extends GetxController {
   // Get completion status text
   String getCompletionStatusText() {
     final percentage = (getCompletionPercentage() * 100).toInt();
-    
+
     if (percentage == 100) {
       return 'Perfil Completo';
     } else if (percentage >= 75) {
@@ -528,104 +523,109 @@ class ProfileCompletionController extends GetxController {
   // Get next recommended task
   String? getNextRecommendedTask() {
     final tasks = profile.value?.completionTasks ?? {};
-    
+
     // Priority order for tasks
     const taskPriority = [
-      'photos',     // Most important - required for public profile
-      'identity',   // Basic info
-      'biography',  // Core spiritual content
+      'photos', // Most important - required for public profile
+      'identity', // Basic info
+      'biography', // Core spiritual content
       'preferences', // Interaction settings
       'certification', // Optional enhancement
     ];
-    
+
     for (final taskKey in taskPriority) {
       if (tasks[taskKey] != true) {
         return taskKey;
       }
     }
-    
+
     return null; // All tasks completed
   }
 
   // Username management methods
-  
+
   /// Atualiza o username do usuário
   Future<bool> updateUsername(String newUsername) async {
     return await ErrorHandler.safeExecute(
-      () async {
-        if (profile.value?.userId == null) {
-          throw Exception('Perfil não encontrado');
-        }
-        
-        final success = await UsernameManagementService.updateUsername(
-          profile.value!.userId!,
-          newUsername
-        );
-        
-        if (success) {
-          // Refresh profile to show updated data
-          await refreshProfile();
-        }
-        
-        return success;
-      },
-      context: 'ProfileCompletionController.updateUsername',
-      fallbackValue: false,
-    ) ?? false;
+          () async {
+            if (profile.value?.userId == null) {
+              throw Exception('Perfil não encontrado');
+            }
+
+            final success = await UsernameManagementService.updateUsername(
+                profile.value!.userId!, newUsername);
+
+            if (success) {
+              // Refresh profile to show updated data
+              await refreshProfile();
+            }
+
+            return success;
+          },
+          context: 'ProfileCompletionController.updateUsername',
+          fallbackValue: false,
+        ) ??
+        false;
   }
-  
+
   /// Obtém informações sobre alteração de username
   Future<UsernameChangeInfo> getUsernameChangeInfo() async {
     return await ErrorHandler.safeExecute(
-      () async {
-        if (profile.value?.userId == null) {
-          return UsernameChangeInfo(
+          () async {
+            if (profile.value?.userId == null) {
+              return UsernameChangeInfo(
+                canChange: false,
+                daysUntilNextChange: 30,
+                lastChangeDate: null,
+                currentUsername: null,
+              );
+            }
+
+            return await UsernameManagementService.getChangeInfo(
+                profile.value!.userId!);
+          },
+          context: 'ProfileCompletionController.getUsernameChangeInfo',
+          fallbackValue: UsernameChangeInfo(
             canChange: false,
             daysUntilNextChange: 30,
             lastChangeDate: null,
             currentUsername: null,
-          );
-        }
-        
-        return await UsernameManagementService.getChangeInfo(profile.value!.userId!);
-      },
-      context: 'ProfileCompletionController.getUsernameChangeInfo',
-      fallbackValue: UsernameChangeInfo(
-        canChange: false,
-        daysUntilNextChange: 30,
-        lastChangeDate: null,
-        currentUsername: null,
-      ),
-    ) ?? UsernameChangeInfo(
-      canChange: false,
-      daysUntilNextChange: 30,
-      lastChangeDate: null,
-      currentUsername: null,
-    );
+          ),
+        ) ??
+        UsernameChangeInfo(
+          canChange: false,
+          daysUntilNextChange: 30,
+          lastChangeDate: null,
+          currentUsername: null,
+        );
   }
-  
+
   /// Gera sugestões de username
   Future<List<String>> generateUsernameSuggestions() async {
     return await ErrorHandler.safeExecute(
-      () async {
-        // Usar nome do usuário como base para sugestões
-        final userData = await UsuarioRepository.getUserById(profile.value!.userId!);
-        final baseName = userData?.nome ?? 'user';
-        
-        return await UsernameManagementService.generateSuggestions(baseName);
-      },
-      context: 'ProfileCompletionController.generateUsernameSuggestions',
-      fallbackValue: <String>[],
-    ) ?? <String>[];
+          () async {
+            // Usar nome do usuário como base para sugestões
+            final userData =
+                await UsuarioRepository.getUserById(profile.value!.userId!);
+            final baseName = userData?.nome ?? 'user';
+
+            return await UsernameManagementService.generateSuggestions(
+                baseName);
+          },
+          context: 'ProfileCompletionController.generateUsernameSuggestions',
+          fallbackValue: <String>[],
+        ) ??
+        <String>[];
   }
-  
+
   /// Obtém dados do usuário atual
   Future<UsuarioModel?> getCurrentUserData() async {
     return await ErrorHandler.safeExecute<UsuarioModel?>(
       () async {
         if (profile.value?.userId == null) return null;
-        
-        final userData = await UsuarioRepository.getUserById(profile.value!.userId!);
+
+        final userData =
+            await UsuarioRepository.getUserById(profile.value!.userId!);
         return userData;
       },
       context: 'ProfileCompletionController.getCurrentUserData',

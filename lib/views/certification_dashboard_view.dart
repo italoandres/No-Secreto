@@ -3,7 +3,7 @@ import '../services/certification_statistics_service.dart';
 import '../components/certification_charts.dart';
 
 /// Dashboard de estatísticas de certificações
-/// 
+///
 /// Exibe métricas, gráficos e análises do sistema de certificações:
 /// - Visão geral com números principais
 /// - Gráficos de tendências e distribuição
@@ -11,47 +11,47 @@ import '../components/certification_charts.dart';
 /// - Métricas de performance
 class CertificationDashboardView extends StatefulWidget {
   @override
-  _CertificationDashboardViewState createState() => 
+  _CertificationDashboardViewState createState() =>
       _CertificationDashboardViewState();
 }
 
 class _CertificationDashboardViewState extends State<CertificationDashboardView>
     with SingleTickerProviderStateMixin {
-  
-  final CertificationStatisticsService _statsService = CertificationStatisticsService();
+  final CertificationStatisticsService _statsService =
+      CertificationStatisticsService();
   late TabController _tabController;
-  
+
   // Estados de carregamento
   bool _isLoadingOverall = true;
   bool _isLoadingDaily = true;
   bool _isLoadingAdmin = true;
   bool _isLoadingProcessing = true;
   bool _isLoadingMonthly = true;
-  
+
   // Dados
   CertificationOverallStats? _overallStats;
   List<DailyStats> _dailyStats = [];
   List<AdminStats> _adminStats = [];
   ProcessingTimeStats? _processingStats;
   List<MonthlyTrend> _monthlyTrends = [];
-  
+
   // Configurações
   int _selectedDays = 30;
   int _selectedMonths = 6;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadAllData();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _loadAllData() async {
     await Future.wait([
       _loadOverallStats(),
@@ -61,7 +61,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       _loadMonthlyTrends(),
     ]);
   }
-  
+
   Future<void> _loadOverallStats() async {
     setState(() => _isLoadingOverall = true);
     try {
@@ -79,7 +79,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       }
     }
   }
-  
+
   Future<void> _loadDailyStats() async {
     setState(() => _isLoadingDaily = true);
     try {
@@ -97,7 +97,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       }
     }
   }
-  
+
   Future<void> _loadAdminStats() async {
     setState(() => _isLoadingAdmin = true);
     try {
@@ -115,7 +115,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       }
     }
   }
-  
+
   Future<void> _loadProcessingStats() async {
     setState(() => _isLoadingProcessing = true);
     try {
@@ -133,7 +133,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       }
     }
   }
-  
+
   Future<void> _loadMonthlyTrends() async {
     setState(() => _isLoadingMonthly = true);
     try {
@@ -151,7 +151,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       }
     }
   }
-  
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -160,7 +160,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,7 +196,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildOverviewTab() {
     return RefreshIndicator(
       onRefresh: _loadOverallStats,
@@ -210,7 +210,6 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
             else if (_overallStats != null) ...[
               _buildMetricsGrid(_overallStats!),
               SizedBox(height: 24),
-              
               Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
@@ -231,7 +230,8 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
                           children: [
                             Expanded(
                               flex: 2,
-                              child: CertificationPieChart(stats: _overallStats!),
+                              child:
+                                  CertificationPieChart(stats: _overallStats!),
                             ),
                             Expanded(
                               child: Column(
@@ -241,15 +241,18 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
                                     items: [
                                       LegendItem(
                                         color: Colors.orange,
-                                        label: 'Pendentes (${_overallStats!.pending})',
+                                        label:
+                                            'Pendentes (${_overallStats!.pending})',
                                       ),
                                       LegendItem(
                                         color: Colors.green,
-                                        label: 'Aprovadas (${_overallStats!.approved})',
+                                        label:
+                                            'Aprovadas (${_overallStats!.approved})',
                                       ),
                                       LegendItem(
                                         color: Colors.red,
-                                        label: 'Reprovadas (${_overallStats!.rejected})',
+                                        label:
+                                            'Reprovadas (${_overallStats!.rejected})',
                                       ),
                                     ],
                                   ),
@@ -269,7 +272,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildTrendsTab() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -301,9 +304,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
                 ),
               ],
             ),
-            
             SizedBox(height: 16),
-            
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -330,14 +331,18 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
                         children: [
                           SizedBox(
                             height: 250,
-                            child: DailyTrendsLineChart(dailyStats: _dailyStats),
+                            child:
+                                DailyTrendsLineChart(dailyStats: _dailyStats),
                           ),
                           SizedBox(height: 16),
                           ChartLegend(
                             items: [
-                              LegendItem(color: Colors.blue, label: 'Solicitações'),
-                              LegendItem(color: Colors.green, label: 'Aprovações'),
-                              LegendItem(color: Colors.red, label: 'Reprovações'),
+                              LegendItem(
+                                  color: Colors.blue, label: 'Solicitações'),
+                              LegendItem(
+                                  color: Colors.green, label: 'Aprovações'),
+                              LegendItem(
+                                  color: Colors.red, label: 'Reprovações'),
                             ],
                           ),
                         ],
@@ -351,7 +356,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildRankingTab() {
     return RefreshIndicator(
       onRefresh: _loadAdminStats,
@@ -392,7 +397,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildPerformanceTab() {
     return RefreshIndicator(
       onRefresh: _loadProcessingStats,
@@ -439,7 +444,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildMetricsGrid(CertificationOverallStats stats) {
     return GridView.count(
       crossAxisCount: 2,
@@ -488,8 +493,9 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ],
     );
   }
-  
-  Widget _buildMetricCard(String label, String value, IconData icon, Color color) {
+
+  Widget _buildMetricCard(
+      String label, String value, IconData icon, Color color) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -521,7 +527,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ),
     );
   }
-  
+
   Widget _buildProcessingMetrics(ProcessingTimeStats stats) {
     return Column(
       children: [
@@ -565,7 +571,7 @@ class _CertificationDashboardViewState extends State<CertificationDashboardView>
       ],
     );
   }
-  
+
   Widget _buildStatItem(String label, String value, Color color) {
     return Container(
       padding: EdgeInsets.all(12),

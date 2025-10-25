@@ -31,7 +31,7 @@ class MatchChatModel {
   }) {
     final now = DateTime.now();
     final chatId = _generateChatId(user1Id, user2Id);
-    
+
     return MatchChatModel(
       id: chatId,
       user1Id: user1Id,
@@ -104,7 +104,8 @@ class MatchChatModel {
       'user2Id': user2Id,
       'createdAt': Timestamp.fromDate(createdAt),
       'expiresAt': Timestamp.fromDate(expiresAt),
-      'lastMessageAt': lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
+      'lastMessageAt':
+          lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
       'lastMessage': lastMessage,
       'isExpired': isExpired,
       'unreadCount': unreadCount,
@@ -119,8 +120,8 @@ class MatchChatModel {
       user2Id: map['user2Id'] ?? '',
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       expiresAt: (map['expiresAt'] as Timestamp).toDate(),
-      lastMessageAt: map['lastMessageAt'] != null 
-          ? (map['lastMessageAt'] as Timestamp).toDate() 
+      lastMessageAt: map['lastMessageAt'] != null
+          ? (map['lastMessageAt'] as Timestamp).toDate()
           : null,
       lastMessage: map['lastMessage'],
       isExpired: map['isExpired'] ?? false,
@@ -132,13 +133,14 @@ class MatchChatModel {
   Map<String, dynamic> toJson() => toMap();
 
   /// Cria instância a partir de JSON
-  factory MatchChatModel.fromJson(Map<String, dynamic> json) => MatchChatModel.fromMap(json);
+  factory MatchChatModel.fromJson(Map<String, dynamic> json) =>
+      MatchChatModel.fromMap(json);
 
   @override
   String toString() {
     return 'MatchChatModel(id: $id, user1Id: $user1Id, user2Id: $user2Id, '
-           'createdAt: $createdAt, expiresAt: $expiresAt, isExpired: $isExpired, '
-           'daysRemaining: $daysRemaining)';
+        'createdAt: $createdAt, expiresAt: $expiresAt, isExpired: $isExpired, '
+        'daysRemaining: $daysRemaining)';
   }
 
   @override

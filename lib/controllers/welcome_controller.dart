@@ -8,7 +8,7 @@ class WelcomeController extends GetxController {
   final PageController pageController = PageController();
   final RxBool showArrow = false.obs;
   Timer? _arrowTimer;
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -29,7 +29,7 @@ class WelcomeController extends GetxController {
     // Salvar que o usuário já viu o slide de boas-vindas
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('welcome_shown', true);
-    
+
     print('WelcomeController: Finalizando boas-vindas, indo para HomeView');
     // Navegar para o app principal
     Get.offAll(() => const HomeView());

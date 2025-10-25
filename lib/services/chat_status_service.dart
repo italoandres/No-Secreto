@@ -118,7 +118,8 @@ class ChatStatusService {
   }
 
   /// Constrói o texto de status sem a bolinha
-  static Widget buildStatusText(Timestamp? lastSeen, {
+  static Widget buildStatusText(
+    Timestamp? lastSeen, {
     double fontSize = 12,
     Color? textColor,
   }) {

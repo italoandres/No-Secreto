@@ -11,7 +11,8 @@ import '../utils/test_integration_system.dart';
 
 /// Controller para o dashboard de diagnóstico de notificações
 class NotificationDiagnosticController extends GetxController {
-  final UnifiedNotificationInterface _unifiedInterface = UnifiedNotificationInterface();
+  final UnifiedNotificationInterface _unifiedInterface =
+      UnifiedNotificationInterface();
   final ConflictResolver _conflictResolver = ConflictResolver();
   final DataRecoveryService _recoveryService = DataRecoveryService();
   final NotificationLocalStorage _localStorage = NotificationLocalStorage();
@@ -27,14 +28,16 @@ class NotificationDiagnosticController extends GetxController {
   final RxString cacheSize = '0 KB'.obs;
   final RxString operationsPerMinute = '0'.obs;
   final RxString lastSyncTime = 'Nunca'.obs;
-  
+
   final RxBool isRunningDiagnostic = false.obs;
   final RxBool isPerformingAction = false.obs;
   final RxString currentAction = ''.obs;
   final RxDouble diagnosticProgress = 0.0.obs;
-  
-  final RxList<Map<String, dynamic>> recentActions = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> systemAlerts = <Map<String, dynamic>>[].obs;
+
+  final RxList<Map<String, dynamic>> recentActions =
+      <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> systemAlerts =
+      <Map<String, dynamic>>[].obs;
   final RxMap<String, dynamic> performanceMetrics = <String, dynamic>{}.obs;
 
   Timer? _refreshTimer;
@@ -44,8 +47,9 @@ class NotificationDiagnosticController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    EnhancedLogger.log('🎛️ [DIAGNOSTIC_CONTROLLER] Inicializando controller de diagnóstico');
-    
+    EnhancedLogger.log(
+        '🎛️ [DIAGNOSTIC_CONTROLLER] Inicializando controller de diagnóstico');
+
     _initializeController();
     _startPeriodicRefresh();
     _startMetricsCollection();
@@ -63,9 +67,9 @@ class NotificationDiagnosticController extends GetxController {
     try {
       await _localStorage.initialize();
       await _syncManager.initialize();
-      
+
       await refreshAllData();
-      
+
       EnhancedLogger.log('✅ [DIAGNOSTIC_CONTROLLER] Controller inicializado');
     } catch (e) {
       EnhancedLogger.log('❌ [DIAGNOSTIC_CONTROLLER] Erro na inicialização: $e');
@@ -90,14 +94,14 @@ class NotificationDiagnosticController extends GetxController {
   /// Atualiza todos os dados
   Future<void> refreshAllData() async {
     try {
-      EnhancedLogger.log('🔄 [DIAGNOSTIC_CONTROLLER] Atualizando todos os dados');
-      
+      EnhancedLogger.log(
+          '🔄 [DIAGNOSTIC_CONTROLLER] Atualizando todos os dados');
+
       await _updateSystemStatus();
       await _updatePerformanceMetrics();
       _updateSystemInfo();
-      
+
       lastUpdate.value = _formatDateTime(DateTime.now());
-      
     } catch (e) {
       EnhancedLogger.log('❌ [DIAGNOSTIC_CONTROLLER] Erro na atualização: $e');
     }
@@ -109,7 +113,7 @@ class NotificationDiagnosticController extends GetxController {
       // Verifica saúde geral do sistema
       final isHealthy = await _checkSystemHealth();
       final hasWarnings = await _checkSystemWarnings();
-      
+
       if (!isHealthy) {
         _setSystemStatus('Erro', 'Sistema com problemas críticos');
       } else if (hasWarnings) {
@@ -117,7 +121,6 @@ class NotificationDiagnosticController extends GetxController {
       } else {
         _setSystemStatus('Saudável', 'Sistema funcionando normalmente');
       }
-      
     } catch (e) {
       _setSystemStatus('Erro', 'Falha na verificação de status');
     }
@@ -130,7 +133,7 @@ class NotificationDiagnosticController extends GetxController {
       final hasCache = _localStorage != null;
       final hasSyncManager = _syncManager != null;
       final hasUnifiedInterface = _unifiedInterface != null;
-      
+
       return hasCache && hasSyncManager && hasUnifiedInterface;
     } catch (e) {
       return false;
@@ -143,8 +146,9 @@ class NotificationDiagnosticController extends GetxController {
       // Verifica condições que geram avisos
       final cacheSize = await _getCacheSize();
       final pendingOperations = _getPendingOperationsCount();
-      
-      return cacheSize > 10 * 1024 * 1024 || pendingOperations > 100; // 10MB ou 100 ops
+
+      return cacheSize > 10 * 1024 * 1024 ||
+          pendingOperations > 100; // 10MB ou 100 ops
     } catch (e) {
       return false;
     }
@@ -154,21 +158,20 @@ class NotificationDiagnosticController extends GetxController {
   Future<void> _updatePerformanceMetrics() async {
     try {
       final metrics = <String, dynamic>{};
-      
+
       // Métricas de cache
       metrics['cacheSize'] = await _getCacheSize();
       metrics['cacheHitRate'] = await _getCacheHitRate();
-      
+
       // Métricas de sincronização
       metrics['pendingOperations'] = _getPendingOperationsCount();
       metrics['syncSuccessRate'] = await _getSyncSuccessRate();
-      
+
       // Métricas de performance
       metrics['averageResponseTime'] = await _getAverageResponseTime();
       metrics['operationsPerMinute'] = await _getOperationsPerMinute();
-      
+
       performanceMetrics.value = metrics;
-      
     } catch (e) {
       EnhancedLogger.log('❌ [DIAGNOSTIC_CONTROLLER] Erro nas métricas: $e');
     }
@@ -178,11 +181,13 @@ class NotificationDiagnosticController extends GetxController {
   void _updateSystemInfo() {
     final uptime = DateTime.now().difference(_startTime);
     systemUptime.value = _formatDuration(uptime);
-    
+
     // Simula uso de memória (em produção, seria real)
-    memoryUsage.value = '${(performanceMetrics['cacheSize'] ?? 0) ~/ (1024 * 1024)} MB';
+    memoryUsage.value =
+        '${(performanceMetrics['cacheSize'] ?? 0) ~/ (1024 * 1024)} MB';
     cacheSize.value = '${(performanceMetrics['cacheSize'] ?? 0) ~/ 1024} KB';
-    operationsPerMinute.value = '${performanceMetrics['operationsPerMinute'] ?? 0}';
+    operationsPerMinute.value =
+        '${performanceMetrics['operationsPerMinute'] ?? 0}';
   }
 
   /// Atualiza métricas em tempo real
@@ -194,7 +199,7 @@ class NotificationDiagnosticController extends GetxController {
   /// Define status do sistema
   void _setSystemStatus(String status, String message) {
     systemStatus.value = status;
-    
+
     // Adiciona alerta se necessário
     if (status != 'Saudável') {
       _addSystemAlert(status, message);
@@ -209,9 +214,9 @@ class NotificationDiagnosticController extends GetxController {
       'timestamp': DateTime.now().toIso8601String(),
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
     };
-    
+
     systemAlerts.insert(0, alert);
-    
+
     // Mantém apenas os últimos 10 alertas
     if (systemAlerts.length > 10) {
       systemAlerts.removeRange(10, systemAlerts.length);
@@ -219,7 +224,8 @@ class NotificationDiagnosticController extends GetxController {
   }
 
   /// Adiciona ação recente
-  void _addRecentAction(String action, String result, {Map<String, dynamic>? details}) {
+  void _addRecentAction(String action, String result,
+      {Map<String, dynamic>? details}) {
     final actionData = {
       'action': action,
       'result': result,
@@ -227,9 +233,9 @@ class NotificationDiagnosticController extends GetxController {
       'details': details ?? {},
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
     };
-    
+
     recentActions.insert(0, actionData);
-    
+
     // Mantém apenas as últimas 20 ações
     if (recentActions.length > 20) {
       recentActions.removeRange(20, recentActions.length);
@@ -239,50 +245,52 @@ class NotificationDiagnosticController extends GetxController {
   /// Executa diagnóstico completo
   Future<void> runFullDiagnostic(String? userId) async {
     if (isRunningDiagnostic.value) return;
-    
-    EnhancedLogger.log('🔍 [DIAGNOSTIC_CONTROLLER] Executando diagnóstico completo');
-    
+
+    EnhancedLogger.log(
+        '🔍 [DIAGNOSTIC_CONTROLLER] Executando diagnóstico completo');
+
     isRunningDiagnostic.value = true;
     diagnosticProgress.value = 0.0;
-    
+
     try {
       // Fase 1: Verificação de integridade
       currentAction.value = 'Verificando integridade do sistema...';
       diagnosticProgress.value = 0.2;
       await Future.delayed(Duration(milliseconds: 500));
-      
-      final integrityResult = await IntegrationSystemTester.runReliabilityTest();
-      
+
+      final integrityResult =
+          await IntegrationSystemTester.runReliabilityTest();
+
       // Fase 2: Teste de performance
       currentAction.value = 'Testando performance...';
       diagnosticProgress.value = 0.4;
       await Future.delayed(Duration(milliseconds: 500));
-      
-      final performanceResult = await IntegrationSystemTester.runPerformanceTest();
-      
+
+      final performanceResult =
+          await IntegrationSystemTester.runPerformanceTest();
+
       // Fase 3: Validação de consistência
       currentAction.value = 'Validando consistência...';
       diagnosticProgress.value = 0.6;
       await Future.delayed(Duration(milliseconds: 500));
-      
-      final consistencyResult = userId != null 
+
+      final consistencyResult = userId != null
           ? await _unifiedInterface.validateConsistency(userId)
           : true;
-      
+
       // Fase 4: Verificação de conflitos
       currentAction.value = 'Verificando conflitos...';
       diagnosticProgress.value = 0.8;
       await Future.delayed(Duration(milliseconds: 500));
-      
-      final conflictsResult = userId != null
-          ? await _conflictResolver.detectConflicts(userId)
-          : [];
-      
+
+      final conflictsResult =
+          userId != null ? await _conflictResolver.detectConflicts(userId) : [];
+
       // Fase 5: Relatório final
       currentAction.value = 'Gerando relatório...';
       diagnosticProgress.value = 1.0;
       await Future.delayed(Duration(milliseconds: 500));
-      
+
       final diagnosticResult = {
         'integrity': integrityResult,
         'performance': performanceResult,
@@ -290,40 +298,41 @@ class NotificationDiagnosticController extends GetxController {
         'conflicts': conflictsResult.length,
         'timestamp': DateTime.now().toIso8601String(),
       };
-      
+
       _addRecentAction(
         'Diagnóstico Completo',
         'Concluído com sucesso',
         details: diagnosticResult,
       );
-      
+
       // Atualiza status baseado nos resultados
-      if (!integrityResult || !consistencyResult || conflictsResult.isNotEmpty) {
+      if (!integrityResult ||
+          !consistencyResult ||
+          conflictsResult.isNotEmpty) {
         _setSystemStatus('Atenção', 'Problemas detectados no diagnóstico');
       } else {
         _setSystemStatus('Saudável', 'Diagnóstico passou em todos os testes');
       }
-      
+
       Get.snackbar(
         'Diagnóstico Completo',
         'Diagnóstico executado com sucesso',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      
     } catch (e) {
       EnhancedLogger.log('❌ [DIAGNOSTIC_CONTROLLER] Erro no diagnóstico: $e');
-      
-      _addRecentAction('Diagnóstico Completo', 'Falhou', details: {'error': e.toString()});
+
+      _addRecentAction('Diagnóstico Completo', 'Falhou',
+          details: {'error': e.toString()});
       _setSystemStatus('Erro', 'Falha no diagnóstico completo');
-      
+
       Get.snackbar(
         'Erro no Diagnóstico',
         'Falha na execução: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      
     } finally {
       isRunningDiagnostic.value = false;
       currentAction.value = '';
@@ -334,7 +343,7 @@ class NotificationDiagnosticController extends GetxController {
   /// Força sincronização
   Future<void> forceSync(String? userId) async {
     if (userId == null) return;
-    
+
     await _performAction('Força Sincronização', () async {
       final result = await _syncManager.forceSync(userId);
       if (!result.success) {
@@ -347,7 +356,7 @@ class NotificationDiagnosticController extends GetxController {
   /// Resolve conflitos
   Future<void> resolveConflicts(String? userId) async {
     if (userId == null) return;
-    
+
     await _performAction('Resolução de Conflitos', () async {
       final conflicts = await _conflictResolver.detectConflicts(userId);
       if (conflicts.isNotEmpty) {
@@ -362,7 +371,7 @@ class NotificationDiagnosticController extends GetxController {
   /// Recupera dados
   Future<void> recoverData(String? userId) async {
     if (userId == null) return;
-    
+
     await _performAction('Recuperação de Dados', () async {
       final result = await _recoveryService.recoverLostData(userId);
       if (!result.success) {
@@ -409,36 +418,35 @@ class NotificationDiagnosticController extends GetxController {
   }
 
   /// Executa ação com tratamento de erro
-  Future<void> _performAction(String actionName, Future<String> Function() action) async {
+  Future<void> _performAction(
+      String actionName, Future<String> Function() action) async {
     if (isPerformingAction.value) return;
-    
+
     isPerformingAction.value = true;
     currentAction.value = actionName;
-    
+
     try {
       final result = await action();
-      
+
       _addRecentAction(actionName, result);
-      
+
       Get.snackbar(
         actionName,
         result,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      
     } catch (e) {
       EnhancedLogger.log('❌ [DIAGNOSTIC_CONTROLLER] Erro em $actionName: $e');
-      
+
       _addRecentAction(actionName, 'Falhou', details: {'error': e.toString()});
-      
+
       Get.snackbar(
         'Erro em $actionName',
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      
     } finally {
       isPerformingAction.value = false;
       currentAction.value = '';
@@ -470,7 +478,7 @@ class NotificationDiagnosticController extends GetxController {
       backgroundColor: Colors.blue,
       colorText: Colors.white,
     );
-    
+
     _addRecentAction('Exportar Logs', 'Logs exportados');
   }
 
@@ -479,7 +487,8 @@ class NotificationDiagnosticController extends GetxController {
     Get.dialog(
       AlertDialog(
         title: Text('Reset do Sistema'),
-        content: Text('Tem certeza que deseja resetar o sistema? Esta ação não pode ser desfeita.'),
+        content: Text(
+            'Tem certeza que deseja resetar o sistema? Esta ação não pode ser desfeita.'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -503,15 +512,15 @@ class NotificationDiagnosticController extends GetxController {
     await _performAction('Reset do Sistema', () async {
       // Implementação simplificada do reset
       await Future.delayed(Duration(seconds: 1));
-      
+
       // Limpa dados
       recentActions.clear();
       systemAlerts.clear();
       performanceMetrics.clear();
-      
+
       // Reinicializa
       await _initializeController();
-      
+
       return 'Sistema resetado com sucesso';
     });
   }

@@ -55,27 +55,30 @@ class UIStateManager {
   factory UIStateManager() => _instance;
   UIStateManager._internal();
 
-  final Map<String, StreamController<NotificationUIState>> _stateControllers = {};
+  final Map<String, StreamController<NotificationUIState>> _stateControllers =
+      {};
   final Map<String, NotificationUIState> _currentStates = {};
   final NotificationSyncManager _syncManager = NotificationSyncManager();
 
   /// Obtém stream de estado para um usuário
   Stream<NotificationUIState> getStateStream(String userId) {
     EnhancedLogger.log('🎨 [UI_STATE] Obtendo stream de estado para: $userId');
-    
+
     if (!_stateControllers.containsKey(userId)) {
       _setupStateStream(userId);
     }
-    
+
     return _stateControllers[userId]!.stream;
   }
 
   /// Configura stream de estado para um usuário
   void _setupStateStream(String userId) {
-    EnhancedLogger.log('⚙️ [UI_STATE] Configurando stream de estado para: $userId');
-    
-    _stateControllers[userId] = StreamController<NotificationUIState>.broadcast();
-    
+    EnhancedLogger.log(
+        '⚙️ [UI_STATE] Configurando stream de estado para: $userId');
+
+    _stateControllers[userId] =
+        StreamController<NotificationUIState>.broadcast();
+
     // Estado inicial
     final initialState = NotificationUIState(
       isLoading: true,
@@ -84,21 +87,22 @@ class UIStateManager {
       totalCount: 0,
       lastUpdate: DateTime.now(),
     );
-    
+
     _currentStates[userId] = initialState;
     _stateControllers[userId]!.add(initialState);
 
     // Escuta mudanças do sync manager
     _syncManager.getNotificationsStream(userId).listen(
-      (notifications) => _handleDataUpdate(userId, notifications),
-      onError: (error) => _handleError(userId, error),
-    );
+          (notifications) => _handleDataUpdate(userId, notifications),
+          onError: (error) => _handleError(userId, error),
+        );
   }
 
   /// Manipula atualização de dados
   void _handleDataUpdate(String userId, List<NotificationModel> notifications) {
-    EnhancedLogger.log('📨 [UI_STATE] Atualização de dados: ${notifications.length} notificações');
-    
+    EnhancedLogger.log(
+        '📨 [UI_STATE] Atualização de dados: ${notifications.length} notificações');
+
     final currentState = _currentStates[userId];
     if (currentState == null) return;
 
@@ -121,7 +125,7 @@ class UIStateManager {
   /// Manipula erros
   void _handleError(String userId, dynamic error) {
     EnhancedLogger.log('❌ [UI_STATE] Erro nos dados: $error');
-    
+
     final currentState = _currentStates[userId];
     if (currentState == null) return;
 
@@ -147,8 +151,8 @@ class UIStateManager {
     final currentState = _currentStates[userId];
     if (currentState == null) return;
 
-    final hasChanges = current.length != updated.length ||
-        !_areListsEqual(current, updated);
+    final hasChanges =
+        current.length != updated.length || !_areListsEqual(current, updated);
 
     if (!hasChanges) return;
 
@@ -162,12 +166,14 @@ class UIStateManager {
     _currentStates[userId] = newState;
     _stateControllers[userId]?.add(newState);
 
-    EnhancedLogger.log('🎨 [UI_STATE] Estado atualizado: ${newState.syncStatus} | ${newState.totalCount} notificações');
+    EnhancedLogger.log(
+        '🎨 [UI_STATE] Estado atualizado: ${newState.syncStatus} | ${newState.totalCount} notificações');
   }
 
   /// Mostra feedback de atualização
   void _showUpdateFeedback(int count) {
-    EnhancedLogger.log('✨ [UI_STATE] Feedback de atualização: $count notificações');
+    EnhancedLogger.log(
+        '✨ [UI_STATE] Feedback de atualização: $count notificações');
   }
 
   /// Mostra feedback de erro
@@ -178,14 +184,14 @@ class UIStateManager {
   /// Força sincronização
   Future<void> forceSync(String userId) async {
     EnhancedLogger.log('🚀 [UI_STATE] Forçando sincronização para: $userId');
-    
+
     final currentState = _currentStates[userId];
     if (currentState != null) {
       final loadingState = currentState.copyWith(
         isLoading: true,
         syncStatus: SyncStatus.syncing,
       );
-      
+
       _currentStates[userId] = loadingState;
       _stateControllers[userId]?.add(loadingState);
     }
@@ -221,9 +227,11 @@ class UIStateManager {
   }
 
   /// Atualiza estado das notificações
-  void updateNotificationState(String userId, List<NotificationModel> notifications) {
-    EnhancedLogger.log('🔄 [UI_STATE] Atualizando estado das notificações: ${notifications.length}');
-    
+  void updateNotificationState(
+      String userId, List<NotificationModel> notifications) {
+    EnhancedLogger.log(
+        '🔄 [UI_STATE] Atualizando estado das notificações: ${notifications.length}');
+
     final currentState = _currentStates[userId];
     if (currentState == null) return;
 
@@ -241,27 +249,29 @@ class UIStateManager {
 
   /// Força atualização da interface
   void forceUIUpdate(String userId) {
-    EnhancedLogger.log('🔄 [UI_STATE] Forçando atualização da interface para: $userId');
-    
+    EnhancedLogger.log(
+        '🔄 [UI_STATE] Forçando atualização da interface para: $userId');
+
     final currentState = _currentStates[userId];
     if (currentState != null) {
       final updatedState = currentState.copyWith(
         lastUpdate: DateTime.now(),
       );
-      
+
       _currentStates[userId] = updatedState;
       _stateControllers[userId]?.add(updatedState);
     }
   }
 
   /// Verifica se duas listas são iguais
-  bool _areListsEqual(List<NotificationModel> list1, List<NotificationModel> list2) {
+  bool _areListsEqual(
+      List<NotificationModel> list1, List<NotificationModel> list2) {
     if (list1.length != list2.length) return false;
-    
+
     for (int i = 0; i < list1.length; i++) {
       if (list1[i].id != list2[i].id) return false;
     }
-    
+
     return true;
   }
 
@@ -278,7 +288,7 @@ class UIStateManager {
   /// Limpa recursos para um usuário
   void dispose(String userId) {
     EnhancedLogger.log('🧹 [UI_STATE] Limpando recursos para: $userId');
-    
+
     _stateControllers[userId]?.close();
     _stateControllers.remove(userId);
     _currentStates.remove(userId);
@@ -287,11 +297,11 @@ class UIStateManager {
   /// Limpa todos os recursos
   void disposeAll() {
     EnhancedLogger.log('🧹 [UI_STATE] Limpando todos os recursos');
-    
+
     for (final controller in _stateControllers.values) {
       controller.close();
     }
-    
+
     _stateControllers.clear();
     _currentStates.clear();
   }

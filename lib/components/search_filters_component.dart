@@ -67,14 +67,14 @@ class SearchFiltersComponent extends StatelessWidget {
                 children: [
                   // Filtro de idade
                   _buildAgeFilter(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Filtro de localização
                   _buildLocationFilter(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Filtro de interesses
                   _buildInterestsFilter(),
                 ],
@@ -99,41 +99,41 @@ class SearchFiltersComponent extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Obx(() => RangeSlider(
-          values: RangeValues(
-            controller.minAge.value.toDouble(),
-            controller.maxAge.value.toDouble(),
-          ),
-          min: 18,
-          max: 65,
-          divisions: 47,
-          labels: RangeLabels(
-            '${controller.minAge.value}',
-            '${controller.maxAge.value}',
-          ),
-          onChanged: (RangeValues values) {
-            controller.minAge.value = values.start.round();
-            controller.maxAge.value = values.end.round();
-          },
-        )),
+              values: RangeValues(
+                controller.minAge.value.toDouble(),
+                controller.maxAge.value.toDouble(),
+              ),
+              min: 18,
+              max: 65,
+              divisions: 47,
+              labels: RangeLabels(
+                '${controller.minAge.value}',
+                '${controller.maxAge.value}',
+              ),
+              onChanged: (RangeValues values) {
+                controller.minAge.value = values.start.round();
+                controller.maxAge.value = values.end.round();
+              },
+            )),
         Obx(() => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Mín: ${controller.minAge.value} anos',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            Text(
-              'Máx: ${controller.maxAge.value} anos',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        )),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Mín: ${controller.minAge.value} anos',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  'Máx: ${controller.maxAge.value} anos',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            )),
       ],
     );
   }
@@ -150,33 +150,34 @@ class SearchFiltersComponent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Estado
         Obx(() => DropdownButtonFormField<String>(
-          value: controller.selectedState.value.isEmpty 
-              ? null 
-              : controller.selectedState.value,
-          decoration: const InputDecoration(
-            labelText: 'Estado',
-            border: OutlineInputBorder(),
-          ),
-          items: [
-            const DropdownMenuItem<String>(
-              value: null,
-              child: Text('Todos os estados'),
-            ),
-            ...controller.availableStates.map((state) => DropdownMenuItem<String>(
-              value: state,
-              child: Text(state),
+              value: controller.selectedState.value.isEmpty
+                  ? null
+                  : controller.selectedState.value,
+              decoration: const InputDecoration(
+                labelText: 'Estado',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                const DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('Todos os estados'),
+                ),
+                ...controller.availableStates
+                    .map((state) => DropdownMenuItem<String>(
+                          value: state,
+                          child: Text(state),
+                        )),
+              ],
+              onChanged: (value) {
+                controller.selectedState.value = value ?? '';
+              },
             )),
-          ],
-          onChanged: (value) {
-            controller.selectedState.value = value ?? '';
-          },
-        )),
-        
+
         const SizedBox(height: 12),
-        
+
         // Cidade
         TextField(
           onChanged: (value) => controller.selectedCity.value = value,
@@ -204,25 +205,26 @@ class SearchFiltersComponent extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Obx(() => Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: controller.availableInterests.map((interest) {
-            final isSelected = controller.selectedInterests.contains(interest);
-            return FilterChip(
-              label: Text(interest),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  controller.addInterest(interest);
-                } else {
-                  controller.removeInterest(interest);
-                }
-              },
-              selectedColor: Colors.blue[100],
-              checkmarkColor: Colors.blue[600],
-            );
-          }).toList(),
-        )),
+              spacing: 8,
+              runSpacing: 8,
+              children: controller.availableInterests.map((interest) {
+                final isSelected =
+                    controller.selectedInterests.contains(interest);
+                return FilterChip(
+                  label: Text(interest),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      controller.addInterest(interest);
+                    } else {
+                      controller.removeInterest(interest);
+                    }
+                  },
+                  selectedColor: Colors.blue[100],
+                  checkmarkColor: Colors.blue[600],
+                );
+              }).toList(),
+            )),
         const SizedBox(height: 8),
         Obx(() => controller.selectedInterests.isNotEmpty
             ? Text(

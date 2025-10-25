@@ -13,23 +13,26 @@ import '../utils/enhanced_logger.dart';
 /// Controller para exploração de perfis
 class ExploreProfilesController extends GetxController {
   final RxList<SpiritualProfileModel> profiles = <SpiritualProfileModel>[].obs;
-  final RxList<SpiritualProfileModel> searchResults = <SpiritualProfileModel>[].obs;
+  final RxList<SpiritualProfileModel> searchResults =
+      <SpiritualProfileModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isSearching = false.obs;
   final RxString error = ''.obs;
   final RxString searchQuery = ''.obs;
-  
+
   // Filtros
   final RxInt minAge = 18.obs;
   final RxInt maxAge = 65.obs;
   final RxString selectedCity = ''.obs;
   final RxString selectedState = ''.obs;
   final RxList<String> selectedInterests = <String>[].obs;
-  
+
   // Tabs
   final RxInt currentTab = 0.obs;
-  final RxList<SpiritualProfileModel> popularProfiles = <SpiritualProfileModel>[].obs;
-  final RxList<SpiritualProfileModel> recentProfiles = <SpiritualProfileModel>[].obs;
+  final RxList<SpiritualProfileModel> popularProfiles =
+      <SpiritualProfileModel>[].obs;
+  final RxList<SpiritualProfileModel> recentProfiles =
+      <SpiritualProfileModel>[].obs;
 
   @override
   void onInit() {
@@ -43,36 +46,35 @@ class ExploreProfilesController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      EnhancedLogger.info('Loading initial profiles', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER'
-      );
+      EnhancedLogger.info('Loading initial profiles',
+          tag: 'EXPLORE_PROFILES_CONTROLLER');
 
       // Carregar perfis por engajamento (feed principal)
-      final engagementProfiles = await ExploreProfilesRepository.getProfilesByEngagement(limit: 20);
+      final engagementProfiles =
+          await ExploreProfilesRepository.getProfilesByEngagement(limit: 20);
       profiles.value = engagementProfiles;
 
       // Carregar perfis populares
-      final popular = await ExploreProfilesRepository.getPopularProfiles(limit: 10);
+      final popular =
+          await ExploreProfilesRepository.getPopularProfiles(limit: 10);
       popularProfiles.value = popular;
 
       // Carregar perfis recentes (verificados)
-      final recent = await ExploreProfilesRepository.getVerifiedProfiles(limit: 15);
+      final recent =
+          await ExploreProfilesRepository.getVerifiedProfiles(limit: 15);
       recentProfiles.value = recent;
 
-      EnhancedLogger.success('Initial profiles loaded', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {
-          'totalProfiles': profiles.length,
-          'popularProfiles': popularProfiles.length,
-          'recentProfiles': recentProfiles.length,
-        }
-      );
+      EnhancedLogger.success('Initial profiles loaded',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {
+            'totalProfiles': profiles.length,
+            'popularProfiles': popularProfiles.length,
+            'recentProfiles': recentProfiles.length,
+          });
     } catch (e) {
       error.value = 'Erro ao carregar perfis';
-      EnhancedLogger.error('Failed to load initial profiles', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
+      EnhancedLogger.error('Failed to load initial profiles',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
     } finally {
       isLoading.value = false;
     }
@@ -90,10 +92,8 @@ class ExploreProfilesController extends GetxController {
       isSearching.value = true;
       searchQuery.value = query;
 
-      EnhancedLogger.info('Searching profiles', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'query': query}
-      );
+      EnhancedLogger.info('Searching profiles',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', data: {'query': query});
 
       final results = await ExploreProfilesRepository.searchProfiles(
         query: query,
@@ -107,16 +107,12 @@ class ExploreProfilesController extends GetxController {
 
       searchResults.value = results;
 
-      EnhancedLogger.success('Profile search completed', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'query': query, 'results': results.length}
-      );
+      EnhancedLogger.success('Profile search completed',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'query': query, 'results': results.length});
     } catch (e) {
-      EnhancedLogger.error('Failed to search profiles', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e,
-        data: {'query': query}
-      );
+      EnhancedLogger.error('Failed to search profiles',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e, data: {'query': query});
     } finally {
       isSearching.value = false;
     }
@@ -133,16 +129,15 @@ class ExploreProfilesController extends GetxController {
     try {
       isLoading.value = true;
 
-      EnhancedLogger.info('Applying filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {
-          'minAge': minAge.value,
-          'maxAge': maxAge.value,
-          'city': selectedCity.value,
-          'state': selectedState.value,
-          'interests': selectedInterests,
-        }
-      );
+      EnhancedLogger.info('Applying filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {
+            'minAge': minAge.value,
+            'maxAge': maxAge.value,
+            'city': selectedCity.value,
+            'state': selectedState.value,
+            'interests': selectedInterests,
+          });
 
       final filteredProfiles = await ExploreProfilesRepository.searchProfiles(
         minAge: minAge.value,
@@ -155,15 +150,12 @@ class ExploreProfilesController extends GetxController {
 
       profiles.value = filteredProfiles;
 
-      EnhancedLogger.success('Filters applied', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'results': filteredProfiles.length}
-      );
+      EnhancedLogger.success('Filters applied',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'results': filteredProfiles.length});
     } catch (e) {
-      EnhancedLogger.error('Failed to apply filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
+      EnhancedLogger.error('Failed to apply filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
     } finally {
       isLoading.value = false;
     }
@@ -184,19 +176,17 @@ class ExploreProfilesController extends GetxController {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        await ExploreProfilesRepository.recordProfileView(currentUser.uid, profileId);
-        
-        EnhancedLogger.info('Profile view recorded', 
-          tag: 'EXPLORE_PROFILES_CONTROLLER',
-          data: {'profileId': profileId}
-        );
+        await ExploreProfilesRepository.recordProfileView(
+            currentUser.uid, profileId);
+
+        EnhancedLogger.info('Profile view recorded',
+            tag: 'EXPLORE_PROFILES_CONTROLLER', data: {'profileId': profileId});
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to record profile view', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e,
-        data: {'profileId': profileId}
-      );
+      EnhancedLogger.error('Failed to record profile view',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          error: e,
+          data: {'profileId': profileId});
     }
   }
 
@@ -210,7 +200,7 @@ class ExploreProfilesController extends GetxController {
     if (searchQuery.value.isNotEmpty) {
       return searchResults;
     }
-    
+
     switch (currentTab.value) {
       case 0: // Feed principal (por engajamento)
         return profiles;
@@ -242,26 +232,50 @@ class ExploreProfilesController extends GetxController {
 
   /// Lista de interesses disponíveis
   List<String> get availableInterests => [
-    'Oração',
-    'Estudo Bíblico',
-    'Música Gospel',
-    'Ministério',
-    'Evangelização',
-    'Jovens',
-    'Casais',
-    'Família',
-    'Liderança',
-    'Adoração',
-    'Missões',
-    'Discipulado',
-  ];
+        'Oração',
+        'Estudo Bíblico',
+        'Música Gospel',
+        'Ministério',
+        'Evangelização',
+        'Jovens',
+        'Casais',
+        'Família',
+        'Liderança',
+        'Adoração',
+        'Missões',
+        'Discipulado',
+      ];
 
   /// Lista de estados brasileiros
   List<String> get availableStates => [
-    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
-    'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
-    'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
-  ];
+        'AC',
+        'AL',
+        'AP',
+        'AM',
+        'BA',
+        'CE',
+        'DF',
+        'ES',
+        'GO',
+        'MA',
+        'MT',
+        'MS',
+        'MG',
+        'PA',
+        'PB',
+        'PR',
+        'PE',
+        'PI',
+        'RJ',
+        'RN',
+        'RS',
+        'RO',
+        'RR',
+        'SC',
+        'SP',
+        'SE',
+        'TO'
+      ];
 
   /// Obtém estatísticas dos perfis
   Map<String, dynamic> get profileStats {
@@ -270,62 +284,60 @@ class ExploreProfilesController extends GetxController {
       'popular': popularProfiles.length,
       'recent': recentProfiles.length,
       'searchResults': searchResults.length,
-      'hasFilters': selectedCity.value.isNotEmpty || 
-                   selectedState.value.isNotEmpty || 
-                   selectedInterests.isNotEmpty ||
-                   minAge.value != 18 ||
-                   maxAge.value != 65,
+      'hasFilters': selectedCity.value.isNotEmpty ||
+          selectedState.value.isNotEmpty ||
+          selectedInterests.isNotEmpty ||
+          minAge.value != 18 ||
+          maxAge.value != 65,
     };
   }
 
   // ===== LOCATION MANAGEMENT =====
-  
+
   /// Localizações adicionais do usuário
-  final Rx<List<AdditionalLocation>> additionalLocations = Rx<List<AdditionalLocation>>([]);
-  
+  final Rx<List<AdditionalLocation>> additionalLocations =
+      Rx<List<AdditionalLocation>>([]);
+
   /// Localização principal do usuário (do perfil)
   final RxString primaryCity = ''.obs;
   final RxString primaryState = ''.obs;
-  
+
   /// Carrega localizações do usuário
   Future<void> loadUserLocations() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
-      EnhancedLogger.info('Loading user locations', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'userId': currentUser.uid}
-      );
-      
+
+      EnhancedLogger.info('Loading user locations',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'userId': currentUser.uid});
+
       // Buscar perfil do usuário
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
-      
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+
       if (profile != null) {
         // Carregar localização principal
         primaryCity.value = profile.city ?? '';
         primaryState.value = profile.state ?? '';
-        
+
         // Carregar localizações adicionais
         additionalLocations.value = profile.additionalLocations ?? [];
-        
-        EnhancedLogger.success('User locations loaded', 
-          tag: 'EXPLORE_PROFILES_CONTROLLER',
-          data: {
-            'primaryCity': primaryCity.value,
-            'primaryState': primaryState.value,
-            'additionalLocations': additionalLocations.value.length,
-          }
-        );
+
+        EnhancedLogger.success('User locations loaded',
+            tag: 'EXPLORE_PROFILES_CONTROLLER',
+            data: {
+              'primaryCity': primaryCity.value,
+              'primaryState': primaryState.value,
+              'additionalLocations': additionalLocations.value.length,
+            });
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to load user locations', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
+      EnhancedLogger.error('Failed to load user locations',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
     }
   }
-  
+
   /// Adiciona localização adicional
   Future<void> addAdditionalLocation(String city, String state) async {
     try {
@@ -340,7 +352,7 @@ class ExploreProfilesController extends GetxController {
         );
         return;
       }
-      
+
       // Validar limite
       if (additionalLocations.value.length >= 2) {
         Get.snackbar(
@@ -352,36 +364,37 @@ class ExploreProfilesController extends GetxController {
         );
         return;
       }
-      
-      EnhancedLogger.info('Adding additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'city': city, 'state': state}
-      );
-      
+
+      EnhancedLogger.info('Adding additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'city': city, 'state': state});
+
       // Criar nova localização
       final newLocation = AdditionalLocation(
         city: city,
         state: state,
         addedAt: DateTime.now(),
       );
-      
+
       // Atualizar lista local
-      final updatedList = List<AdditionalLocation>.from(additionalLocations.value);
+      final updatedList =
+          List<AdditionalLocation>.from(additionalLocations.value);
       updatedList.add(newLocation);
       additionalLocations.value = updatedList;
-      
+
       // Salvar no Firestore
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
       if (profile != null) {
         await SpiritualProfileRepository.updateProfile(profile.id!, {
-          'additionalLocations': updatedList.map((loc) => loc.toJson()).toList(),
+          'additionalLocations':
+              updatedList.map((loc) => loc.toJson()).toList(),
         });
       }
-      
-      EnhancedLogger.success('Additional location added', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER'
-      );
-      
+
+      EnhancedLogger.success('Additional location added',
+          tag: 'EXPLORE_PROFILES_CONTROLLER');
+
       Get.snackbar(
         'Sucesso!',
         'Localização "$city - $state" adicionada',
@@ -391,11 +404,9 @@ class ExploreProfilesController extends GetxController {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      EnhancedLogger.error('Failed to add additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
-      
+      EnhancedLogger.error('Failed to add additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
+
       Get.snackbar(
         'Erro',
         'Não foi possível adicionar a localização',
@@ -405,39 +416,40 @@ class ExploreProfilesController extends GetxController {
       );
     }
   }
-  
+
   /// Remove localização adicional
   Future<void> removeAdditionalLocation(int index) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
+
       if (index < 0 || index >= additionalLocations.value.length) return;
-      
+
       final locationToRemove = additionalLocations.value[index];
-      
-      EnhancedLogger.info('Removing additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'index': index, 'location': locationToRemove.displayText}
-      );
-      
+
+      EnhancedLogger.info('Removing additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'index': index, 'location': locationToRemove.displayText});
+
       // Atualizar lista local
-      final updatedList = List<AdditionalLocation>.from(additionalLocations.value);
+      final updatedList =
+          List<AdditionalLocation>.from(additionalLocations.value);
       updatedList.removeAt(index);
       additionalLocations.value = updatedList;
-      
+
       // Salvar no Firestore
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
       if (profile != null) {
         await SpiritualProfileRepository.updateProfile(profile.id!, {
-          'additionalLocations': updatedList.map((loc) => loc.toJson()).toList(),
+          'additionalLocations':
+              updatedList.map((loc) => loc.toJson()).toList(),
         });
       }
-      
-      EnhancedLogger.success('Additional location removed', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER'
-      );
-      
+
+      EnhancedLogger.success('Additional location removed',
+          tag: 'EXPLORE_PROFILES_CONTROLLER');
+
       Get.snackbar(
         'Removido',
         'Localização "${locationToRemove.displayText}" removida',
@@ -447,11 +459,9 @@ class ExploreProfilesController extends GetxController {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      EnhancedLogger.error('Failed to remove additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
-      
+      EnhancedLogger.error('Failed to remove additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
+
       Get.snackbar(
         'Erro',
         'Não foi possível remover a localização',
@@ -461,17 +471,18 @@ class ExploreProfilesController extends GetxController {
       );
     }
   }
-  
+
   /// Edita localização adicional
-  Future<void> editAdditionalLocation(int index, String city, String state) async {
+  Future<void> editAdditionalLocation(
+      int index, String city, String state) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
+
       if (index < 0 || index >= additionalLocations.value.length) return;
-      
+
       final location = additionalLocations.value[index];
-      
+
       // Verificar se pode editar
       if (!location.canEdit) {
         Get.snackbar(
@@ -483,36 +494,37 @@ class ExploreProfilesController extends GetxController {
         );
         return;
       }
-      
-      EnhancedLogger.info('Editing additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'index': index, 'newCity': city, 'newState': state}
-      );
-      
+
+      EnhancedLogger.info('Editing additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'index': index, 'newCity': city, 'newState': state});
+
       // Atualizar localização
       final updatedLocation = location.copyWith(
         city: city,
         state: state,
         lastEditedAt: DateTime.now(),
       );
-      
+
       // Atualizar lista local
-      final updatedList = List<AdditionalLocation>.from(additionalLocations.value);
+      final updatedList =
+          List<AdditionalLocation>.from(additionalLocations.value);
       updatedList[index] = updatedLocation;
       additionalLocations.value = updatedList;
-      
+
       // Salvar no Firestore
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
       if (profile != null) {
         await SpiritualProfileRepository.updateProfile(profile.id!, {
-          'additionalLocations': updatedList.map((loc) => loc.toJson()).toList(),
+          'additionalLocations':
+              updatedList.map((loc) => loc.toJson()).toList(),
         });
       }
-      
-      EnhancedLogger.success('Additional location edited', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER'
-      );
-      
+
+      EnhancedLogger.success('Additional location edited',
+          tag: 'EXPLORE_PROFILES_CONTROLLER');
+
       Get.snackbar(
         'Atualizado!',
         'Localização alterada para "$city - $state"',
@@ -522,11 +534,9 @@ class ExploreProfilesController extends GetxController {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      EnhancedLogger.error('Failed to edit additional location', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
-      
+      EnhancedLogger.error('Failed to edit additional location',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
+
       Get.snackbar(
         'Erro',
         'Não foi possível editar a localização',
@@ -536,12 +546,12 @@ class ExploreProfilesController extends GetxController {
       );
     }
   }
-  
+
   /// Verifica se pode adicionar mais localizações
   bool canAddMoreLocations() {
     return additionalLocations.value.length < 2;
   }
-  
+
   /// Mostra dialog para adicionar localização
   void showAddLocationDialog(BuildContext context) {
     showDialog(
@@ -553,11 +563,11 @@ class ExploreProfilesController extends GetxController {
       ),
     );
   }
-  
+
   /// Mostra dialog para editar localização
   void showEditLocationDialog(BuildContext context, int index) {
     final location = additionalLocations.value[index];
-    
+
     if (!location.canEdit) {
       Get.snackbar(
         'Não Permitido',
@@ -568,7 +578,7 @@ class ExploreProfilesController extends GetxController {
       );
       return;
     }
-    
+
     showDialog(
       context: context,
       builder: (context) => LocationSelectorDialog(
@@ -580,104 +590,104 @@ class ExploreProfilesController extends GetxController {
   }
 
   // ===== DISTANCE FILTER MANAGEMENT =====
-  
+
   /// Filtros de busca atuais
   final Rx<SearchFilters> currentFilters = SearchFilters.defaultFilters().obs;
-  
+
   /// Filtros salvos (para comparação)
   final Rx<SearchFilters> savedFilters = SearchFilters.defaultFilters().obs;
-  
+
   /// Distância máxima (para binding com slider)
   final RxInt maxDistance = 50.obs;
-  
+
   /// Toggle de preferência de distância (para binding com switch)
   final RxBool prioritizeDistance = false.obs;
-  
+
   /// Toggle de preferência de idade (para binding com switch)
   final RxBool prioritizeAge = false.obs;
-  
+
   /// Altura mínima (para binding com slider)
   final RxInt minHeight = 150.obs;
-  
+
   /// Altura máxima (para binding com slider)
   final RxInt maxHeight = 190.obs;
-  
+
   /// Toggle de preferência de altura (para binding com switch)
   final RxBool prioritizeHeight = false.obs;
-  
+
   /// Idiomas selecionados (para binding com lista)
   final RxList<String> selectedLanguages = <String>[].obs;
-  
+
   /// Toggle de preferência de idiomas (para binding com switch)
   final RxBool prioritizeLanguages = false.obs;
-  
+
   /// Educação selecionada (para binding com dropdown/chips)
   final Rx<String?> selectedEducation = Rx<String?>(null);
-  
+
   /// Toggle de preferência de educação (para binding com switch)
   final RxBool prioritizeEducation = false.obs;
-  
+
   /// Filhos selecionado (para binding com chips)
   final Rx<String?> selectedChildren = Rx<String?>(null);
-  
+
   /// Toggle de preferência de filhos (para binding com switch)
   final RxBool prioritizeChildren = false.obs;
-  
+
   /// Beber selecionado (para binding com chips)
   final Rx<String?> selectedDrinking = Rx<String?>(null);
-  
+
   /// Toggle de preferência de beber (para binding com switch)
   final RxBool prioritizeDrinking = false.obs;
-  
+
   /// Fumar selecionado (para binding com chips)
   final Rx<String?> selectedSmoking = Rx<String?>(null);
-  
+
   /// Toggle de preferência de fumar (para binding com switch)
   final RxBool prioritizeSmoking = false.obs;
-  
+
   /// Certificação espiritual (para binding com chips)
   final Rx<bool?> requiresCertification = Rx<bool?>(null);
-  
+
   /// Toggle de preferência de certificação (para binding com switch)
   final RxBool prioritizeCertification = false.obs;
-  
+
   /// Movimento Deus é Pai (para binding com chips)
   final Rx<bool?> requiresDeusEPaiMember = Rx<bool?>(null);
-  
+
   /// Toggle de preferência de Deus é Pai (para binding com switch)
   final RxBool prioritizeDeusEPaiMember = false.obs;
-  
+
   /// Virgindade selecionada (para binding com chips)
   final Rx<String?> selectedVirginity = Rx<String?>(null);
-  
+
   /// Toggle de preferência de virgindade (para binding com switch)
   final RxBool prioritizeVirginity = false.obs;
-  
+
   /// Hobbies selecionados (para binding com chips)
   final RxList<String> selectedHobbies = <String>[].obs;
-  
+
   /// Toggle de preferência de hobbies (para binding com switch)
   final RxBool prioritizeHobbies = false.obs;
-  
+
   /// Verifica se há alterações não salvas
   RxBool get hasUnsavedChanges {
     return (currentFilters.value != savedFilters.value).obs;
   }
-  
+
   /// Carrega filtros salvos do Firestore
   Future<void> loadSearchFilters() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
-      EnhancedLogger.info('Loading search filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {'userId': currentUser.uid}
-      );
-      
+
+      EnhancedLogger.info('Loading search filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {'userId': currentUser.uid});
+
       // Buscar perfil do usuário
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
-      
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+
       if (profile != null && profile.searchFilters != null) {
         final filters = SearchFilters.fromJson(profile.searchFilters!);
         currentFilters.value = filters;
@@ -708,38 +718,37 @@ class ExploreProfilesController extends GetxController {
         prioritizeVirginity.value = filters.prioritizeVirginity;
         selectedHobbies.value = filters.selectedHobbies;
         prioritizeHobbies.value = filters.prioritizeHobbies;
-        
-        EnhancedLogger.success('Search filters loaded', 
-          tag: 'EXPLORE_PROFILES_CONTROLLER',
-          data: {
-            'maxDistance': filters.maxDistance,
-            'prioritizeDistance': filters.prioritizeDistance,
-            'minAge': filters.minAge,
-            'maxAge': filters.maxAge,
-            'prioritizeAge': filters.prioritizeAge,
-            'minHeight': filters.minHeight,
-            'maxHeight': filters.maxHeight,
-            'prioritizeHeight': filters.prioritizeHeight,
-            'selectedLanguages': filters.selectedLanguages,
-            'prioritizeLanguages': filters.prioritizeLanguages,
-            'selectedEducation': filters.selectedEducation,
-            'prioritizeEducation': filters.prioritizeEducation,
-            'selectedChildren': filters.selectedChildren,
-            'prioritizeChildren': filters.prioritizeChildren,
-            'selectedDrinking': filters.selectedDrinking,
-            'prioritizeDrinking': filters.prioritizeDrinking,
-            'selectedSmoking': filters.selectedSmoking,
-            'prioritizeSmoking': filters.prioritizeSmoking,
-            'requiresCertification': filters.requiresCertification,
-            'prioritizeCertification': filters.prioritizeCertification,
-            'requiresDeusEPaiMember': filters.requiresDeusEPaiMember,
-            'prioritizeDeusEPaiMember': filters.prioritizeDeusEPaiMember,
-            'selectedVirginity': filters.selectedVirginity,
-            'prioritizeVirginity': filters.prioritizeVirginity,
-            'selectedHobbies': filters.selectedHobbies,
-            'prioritizeHobbies': filters.prioritizeHobbies,
-          }
-        );
+
+        EnhancedLogger.success('Search filters loaded',
+            tag: 'EXPLORE_PROFILES_CONTROLLER',
+            data: {
+              'maxDistance': filters.maxDistance,
+              'prioritizeDistance': filters.prioritizeDistance,
+              'minAge': filters.minAge,
+              'maxAge': filters.maxAge,
+              'prioritizeAge': filters.prioritizeAge,
+              'minHeight': filters.minHeight,
+              'maxHeight': filters.maxHeight,
+              'prioritizeHeight': filters.prioritizeHeight,
+              'selectedLanguages': filters.selectedLanguages,
+              'prioritizeLanguages': filters.prioritizeLanguages,
+              'selectedEducation': filters.selectedEducation,
+              'prioritizeEducation': filters.prioritizeEducation,
+              'selectedChildren': filters.selectedChildren,
+              'prioritizeChildren': filters.prioritizeChildren,
+              'selectedDrinking': filters.selectedDrinking,
+              'prioritizeDrinking': filters.prioritizeDrinking,
+              'selectedSmoking': filters.selectedSmoking,
+              'prioritizeSmoking': filters.prioritizeSmoking,
+              'requiresCertification': filters.requiresCertification,
+              'prioritizeCertification': filters.prioritizeCertification,
+              'requiresDeusEPaiMember': filters.requiresDeusEPaiMember,
+              'prioritizeDeusEPaiMember': filters.prioritizeDeusEPaiMember,
+              'selectedVirginity': filters.selectedVirginity,
+              'prioritizeVirginity': filters.prioritizeVirginity,
+              'selectedHobbies': filters.selectedHobbies,
+              'prioritizeHobbies': filters.prioritizeHobbies,
+            });
       } else {
         // Usar filtros padrão
         final defaultFilters = SearchFilters.defaultFilters();
@@ -766,24 +775,22 @@ class ExploreProfilesController extends GetxController {
         requiresCertification.value = defaultFilters.requiresCertification;
         prioritizeCertification.value = defaultFilters.prioritizeCertification;
         requiresDeusEPaiMember.value = defaultFilters.requiresDeusEPaiMember;
-        prioritizeDeusEPaiMember.value = defaultFilters.prioritizeDeusEPaiMember;
+        prioritizeDeusEPaiMember.value =
+            defaultFilters.prioritizeDeusEPaiMember;
         selectedVirginity.value = defaultFilters.selectedVirginity;
         prioritizeVirginity.value = defaultFilters.prioritizeVirginity;
         selectedHobbies.value = defaultFilters.selectedHobbies;
         prioritizeHobbies.value = defaultFilters.prioritizeHobbies;
-        
-        EnhancedLogger.info('Using default search filters', 
-          tag: 'EXPLORE_PROFILES_CONTROLLER'
-        );
+
+        EnhancedLogger.info('Using default search filters',
+            tag: 'EXPLORE_PROFILES_CONTROLLER');
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to load search filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
+      EnhancedLogger.error('Failed to load search filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
     }
   }
-  
+
   /// Salva filtros no Firestore
   Future<void> saveSearchFilters() async {
     try {
@@ -798,39 +805,38 @@ class ExploreProfilesController extends GetxController {
         );
         return;
       }
-      
-      EnhancedLogger.info('Saving search filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        data: {
-          'maxDistance': maxDistance.value,
-          'prioritizeDistance': prioritizeDistance.value,
-          'minAge': minAge.value,
-          'maxAge': maxAge.value,
-          'prioritizeAge': prioritizeAge.value,
-          'minHeight': minHeight.value,
-          'maxHeight': maxHeight.value,
-          'prioritizeHeight': prioritizeHeight.value,
-          'selectedLanguages': selectedLanguages,
-          'prioritizeLanguages': prioritizeLanguages.value,
-          'selectedEducation': selectedEducation.value,
-          'prioritizeEducation': prioritizeEducation.value,
-          'selectedChildren': selectedChildren.value,
-          'prioritizeChildren': prioritizeChildren.value,
-          'selectedDrinking': selectedDrinking.value,
-          'prioritizeDrinking': prioritizeDrinking.value,
-          'selectedSmoking': selectedSmoking.value,
-          'prioritizeSmoking': prioritizeSmoking.value,
-          'requiresCertification': requiresCertification.value,
-          'prioritizeCertification': prioritizeCertification.value,
-          'requiresDeusEPaiMember': requiresDeusEPaiMember.value,
-          'prioritizeDeusEPaiMember': prioritizeDeusEPaiMember.value,
-          'selectedVirginity': selectedVirginity.value,
-          'prioritizeVirginity': prioritizeVirginity.value,
-          'selectedHobbies': selectedHobbies,
-          'prioritizeHobbies': prioritizeHobbies.value,
-        }
-      );
-      
+
+      EnhancedLogger.info('Saving search filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER',
+          data: {
+            'maxDistance': maxDistance.value,
+            'prioritizeDistance': prioritizeDistance.value,
+            'minAge': minAge.value,
+            'maxAge': maxAge.value,
+            'prioritizeAge': prioritizeAge.value,
+            'minHeight': minHeight.value,
+            'maxHeight': maxHeight.value,
+            'prioritizeHeight': prioritizeHeight.value,
+            'selectedLanguages': selectedLanguages,
+            'prioritizeLanguages': prioritizeLanguages.value,
+            'selectedEducation': selectedEducation.value,
+            'prioritizeEducation': prioritizeEducation.value,
+            'selectedChildren': selectedChildren.value,
+            'prioritizeChildren': prioritizeChildren.value,
+            'selectedDrinking': selectedDrinking.value,
+            'prioritizeDrinking': prioritizeDrinking.value,
+            'selectedSmoking': selectedSmoking.value,
+            'prioritizeSmoking': prioritizeSmoking.value,
+            'requiresCertification': requiresCertification.value,
+            'prioritizeCertification': prioritizeCertification.value,
+            'requiresDeusEPaiMember': requiresDeusEPaiMember.value,
+            'prioritizeDeusEPaiMember': prioritizeDeusEPaiMember.value,
+            'selectedVirginity': selectedVirginity.value,
+            'prioritizeVirginity': prioritizeVirginity.value,
+            'selectedHobbies': selectedHobbies,
+            'prioritizeHobbies': prioritizeHobbies.value,
+          });
+
       // Criar novo filtro com valores atuais
       final newFilters = SearchFilters(
         maxDistance: maxDistance.value,
@@ -861,23 +867,23 @@ class ExploreProfilesController extends GetxController {
         prioritizeHobbies: prioritizeHobbies.value,
         lastUpdated: DateTime.now(),
       );
-      
+
       // Salvar no Firestore
-      final profile = await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
+      final profile =
+          await SpiritualProfileRepository.getProfileByUserId(currentUser.uid);
       if (profile != null) {
         await SpiritualProfileRepository.updateProfile(profile.id!, {
           'searchFilters': newFilters.toJson(),
         });
       }
-      
+
       // Atualizar filtros salvos
       currentFilters.value = newFilters;
       savedFilters.value = newFilters;
-      
-      EnhancedLogger.success('Search filters saved', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER'
-      );
-      
+
+      EnhancedLogger.success('Search filters saved',
+          tag: 'EXPLORE_PROFILES_CONTROLLER');
+
       Get.snackbar(
         'Sucesso!',
         'Filtros de busca salvos',
@@ -888,11 +894,9 @@ class ExploreProfilesController extends GetxController {
         icon: const Icon(Icons.check_circle, color: Colors.green),
       );
     } catch (e) {
-      EnhancedLogger.error('Failed to save search filters', 
-        tag: 'EXPLORE_PROFILES_CONTROLLER',
-        error: e
-      );
-      
+      EnhancedLogger.error('Failed to save search filters',
+          tag: 'EXPLORE_PROFILES_CONTROLLER', error: e);
+
       Get.snackbar(
         'Erro',
         'Não foi possível salvar os filtros',
@@ -902,7 +906,7 @@ class ExploreProfilesController extends GetxController {
       );
     }
   }
-  
+
   /// Reseta filtros para valores padrão
   void resetFilters() {
     final defaultFilters = SearchFilters.defaultFilters();
@@ -933,12 +937,11 @@ class ExploreProfilesController extends GetxController {
     selectedHobbies.value = defaultFilters.selectedHobbies;
     prioritizeHobbies.value = defaultFilters.prioritizeHobbies;
     currentFilters.value = defaultFilters;
-    
-    EnhancedLogger.info('Filters reset to default', 
-      tag: 'EXPLORE_PROFILES_CONTROLLER'
-    );
+
+    EnhancedLogger.info('Filters reset to default',
+        tag: 'EXPLORE_PROFILES_CONTROLLER');
   }
-  
+
   /// Atualiza distância máxima
   void updateMaxDistance(int distance) {
     maxDistance.value = distance;
@@ -946,7 +949,7 @@ class ExploreProfilesController extends GetxController {
       maxDistance: distance,
     );
   }
-  
+
   /// Atualiza toggle de preferência de distância
   void updatePrioritizeDistance(bool value) {
     prioritizeDistance.value = value;
@@ -954,7 +957,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeDistance: value,
     );
   }
-  
+
   /// Atualiza faixa etária
   void updateAgeRange(int min, int max) {
     minAge.value = min;
@@ -964,7 +967,7 @@ class ExploreProfilesController extends GetxController {
       maxAge: max,
     );
   }
-  
+
   /// Atualiza toggle de preferência de idade
   void updatePrioritizeAge(bool value) {
     prioritizeAge.value = value;
@@ -972,7 +975,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeAge: value,
     );
   }
-  
+
   /// Atualiza faixa de altura
   void updateHeightRange(int min, int max) {
     minHeight.value = min;
@@ -982,7 +985,7 @@ class ExploreProfilesController extends GetxController {
       maxHeight: max,
     );
   }
-  
+
   /// Atualiza toggle de preferência de altura
   void updatePrioritizeHeight(bool value) {
     prioritizeHeight.value = value;
@@ -990,15 +993,15 @@ class ExploreProfilesController extends GetxController {
       prioritizeHeight: value,
     );
   }
-  
+
   /// Mostra dialog de confirmação ao voltar
   Future<bool> showSaveDialog(BuildContext context) async {
     if (currentFilters.value == savedFilters.value) {
       return true; // Sem alterações, pode voltar
     }
-    
+
     final result = await SaveFiltersDialog.show(context);
-    
+
     if (result == true) {
       // Salvar
       await saveSearchFilters();
@@ -1008,10 +1011,10 @@ class ExploreProfilesController extends GetxController {
       resetToSavedFilters();
       return true;
     }
-    
+
     return false; // Cancelou
   }
-  
+
   /// Restaura filtros para valores salvos
   void resetToSavedFilters() {
     maxDistance.value = savedFilters.value.maxDistance;
@@ -1035,18 +1038,18 @@ class ExploreProfilesController extends GetxController {
     requiresCertification.value = savedFilters.value.requiresCertification;
     prioritizeCertification.value = savedFilters.value.prioritizeCertification;
     requiresDeusEPaiMember.value = savedFilters.value.requiresDeusEPaiMember;
-    prioritizeDeusEPaiMember.value = savedFilters.value.prioritizeDeusEPaiMember;
+    prioritizeDeusEPaiMember.value =
+        savedFilters.value.prioritizeDeusEPaiMember;
     selectedVirginity.value = savedFilters.value.selectedVirginity;
     prioritizeVirginity.value = savedFilters.value.prioritizeVirginity;
     selectedHobbies.value = savedFilters.value.selectedHobbies;
     prioritizeHobbies.value = savedFilters.value.prioritizeHobbies;
     currentFilters.value = savedFilters.value;
-    
-    EnhancedLogger.info('Filters reset to saved values', 
-      tag: 'EXPLORE_PROFILES_CONTROLLER'
-    );
+
+    EnhancedLogger.info('Filters reset to saved values',
+        tag: 'EXPLORE_PROFILES_CONTROLLER');
   }
-  
+
   /// Atualiza idiomas selecionados
   void updateSelectedLanguages(List<String> languages) {
     selectedLanguages.value = languages;
@@ -1054,7 +1057,7 @@ class ExploreProfilesController extends GetxController {
       selectedLanguages: languages,
     );
   }
-  
+
   /// Atualiza toggle de preferência de idiomas
   void updatePrioritizeLanguages(bool value) {
     prioritizeLanguages.value = value;
@@ -1062,7 +1065,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeLanguages: value,
     );
   }
-  
+
   /// Atualiza educação selecionada
   void updateSelectedEducation(String? education) {
     selectedEducation.value = education;
@@ -1070,7 +1073,7 @@ class ExploreProfilesController extends GetxController {
       selectedEducation: education,
     );
   }
-  
+
   /// Atualiza toggle de preferência de educação
   void updatePrioritizeEducation(bool value) {
     prioritizeEducation.value = value;
@@ -1078,7 +1081,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeEducation: value,
     );
   }
-  
+
   /// Atualiza filhos selecionado
   void updateSelectedChildren(String? children) {
     selectedChildren.value = children;
@@ -1086,7 +1089,7 @@ class ExploreProfilesController extends GetxController {
       selectedChildren: children,
     );
   }
-  
+
   /// Atualiza toggle de preferência de filhos
   void updatePrioritizeChildren(bool value) {
     prioritizeChildren.value = value;
@@ -1094,7 +1097,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeChildren: value,
     );
   }
-  
+
   /// Atualiza beber selecionado
   void updateSelectedDrinking(String? drinking) {
     selectedDrinking.value = drinking;
@@ -1102,7 +1105,7 @@ class ExploreProfilesController extends GetxController {
       selectedDrinking: drinking,
     );
   }
-  
+
   /// Atualiza toggle de preferência de beber
   void updatePrioritizeDrinking(bool value) {
     prioritizeDrinking.value = value;
@@ -1110,7 +1113,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeDrinking: value,
     );
   }
-  
+
   /// Atualiza fumar selecionado
   void updateSelectedSmoking(String? smoking) {
     selectedSmoking.value = smoking;
@@ -1118,7 +1121,7 @@ class ExploreProfilesController extends GetxController {
       selectedSmoking: smoking,
     );
   }
-  
+
   /// Atualiza toggle de preferência de fumar
   void updatePrioritizeSmoking(bool value) {
     prioritizeSmoking.value = value;
@@ -1126,7 +1129,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeSmoking: value,
     );
   }
-  
+
   /// Atualiza certificação espiritual selecionada
   void updateRequiresCertification(bool? certification) {
     requiresCertification.value = certification;
@@ -1134,7 +1137,7 @@ class ExploreProfilesController extends GetxController {
       requiresCertification: certification,
     );
   }
-  
+
   /// Atualiza toggle de preferência de certificação
   void updatePrioritizeCertification(bool value) {
     prioritizeCertification.value = value;
@@ -1142,7 +1145,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeCertification: value,
     );
   }
-  
+
   /// Atualiza movimento Deus é Pai selecionado
   void updateRequiresDeusEPaiMember(bool? member) {
     requiresDeusEPaiMember.value = member;
@@ -1150,7 +1153,7 @@ class ExploreProfilesController extends GetxController {
       requiresDeusEPaiMember: member,
     );
   }
-  
+
   /// Atualiza toggle de preferência de Deus é Pai
   void updatePrioritizeDeusEPaiMember(bool value) {
     prioritizeDeusEPaiMember.value = value;
@@ -1158,7 +1161,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeDeusEPaiMember: value,
     );
   }
-  
+
   /// Atualiza virgindade selecionada
   void updateSelectedVirginity(String? virginity) {
     selectedVirginity.value = virginity;
@@ -1166,7 +1169,7 @@ class ExploreProfilesController extends GetxController {
       selectedVirginity: virginity,
     );
   }
-  
+
   /// Atualiza toggle de preferência de virgindade
   void updatePrioritizeVirginity(bool value) {
     prioritizeVirginity.value = value;
@@ -1174,7 +1177,7 @@ class ExploreProfilesController extends GetxController {
       prioritizeVirginity: value,
     );
   }
-  
+
   /// Atualiza hobbies selecionados
   void updateSelectedHobbies(List<String> hobbies) {
     selectedHobbies.value = hobbies;
@@ -1182,7 +1185,7 @@ class ExploreProfilesController extends GetxController {
       selectedHobbies: hobbies,
     );
   }
-  
+
   /// Atualiza toggle de preferência de hobbies
   void updatePrioritizeHobbies(bool value) {
     prioritizeHobbies.value = value;

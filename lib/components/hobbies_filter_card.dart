@@ -100,7 +100,8 @@ class _HobbiesFilterCardState extends State<HobbiesFilterCard> {
                   label: Text(hobby),
                   selected: isSelected,
                   onSelected: (selected) {
-                    final newHobbies = List<String>.from(widget.selectedHobbies);
+                    final newHobbies =
+                        List<String>.from(widget.selectedHobbies);
                     if (selected) {
                       newHobbies.add(hobby);
                     } else {

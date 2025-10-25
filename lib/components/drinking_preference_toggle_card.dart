@@ -25,12 +25,15 @@ class DrinkingPreferenceToggleCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isEnabled ? Colors.amber.shade50 : Colors.grey.shade100,
+                    color:
+                        isEnabled ? Colors.amber.shade50 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isEnabled ? Icons.check_circle : Icons.local_bar,
-                    color: isEnabled ? Colors.amber.shade700 : Colors.grey.shade400,
+                    color: isEnabled
+                        ? Colors.amber.shade700
+                        : Colors.grey.shade400,
                     size: 24,
                   ),
                 ),
@@ -52,7 +55,9 @@ class DrinkingPreferenceToggleCard extends StatelessWidget {
                         isEnabled ? 'Ativado' : 'Desativado',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isEnabled ? Colors.amber.shade700 : Colors.grey.shade500,
+                          color: isEnabled
+                              ? Colors.amber.shade700
+                              : Colors.grey.shade500,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -82,7 +87,8 @@ class DrinkingPreferenceToggleCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.amber.shade800, size: 20),
+                    Icon(Icons.info_outline,
+                        color: Colors.amber.shade800, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(

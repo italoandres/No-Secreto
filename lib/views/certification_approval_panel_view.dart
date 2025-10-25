@@ -5,7 +5,7 @@ import '../components/certification_request_card.dart';
 import '../components/certification_history_card.dart';
 
 /// Painel administrativo para aprovação de certificações espirituais
-/// 
+///
 /// Esta view permite que administradores:
 /// - Visualizem certificações pendentes em tempo real
 /// - Aprovem ou reprovem certificações
@@ -13,12 +13,13 @@ import '../components/certification_history_card.dart';
 /// - Filtrem certificações por status
 class CertificationApprovalPanelView extends StatefulWidget {
   @override
-  _CertificationApprovalPanelViewState createState() => 
+  _CertificationApprovalPanelViewState createState() =>
       _CertificationApprovalPanelViewState();
 }
 
-class _CertificationApprovalPanelViewState 
-    extends State<CertificationApprovalPanelView> with SingleTickerProviderStateMixin {
+class _CertificationApprovalPanelViewState
+    extends State<CertificationApprovalPanelView>
+    with SingleTickerProviderStateMixin {
   final CertificationApprovalService _service = CertificationApprovalService();
   late TabController _tabController;
   bool _isAdmin = false;
@@ -117,9 +118,9 @@ class _CertificationApprovalPanelViewState
             stream: _service.getPendingCountStream(),
             builder: (context, snapshot) {
               final count = snapshot.data ?? 0;
-              
+
               if (count == 0) return SizedBox.shrink();
-              
+
               return Padding(
                 padding: EdgeInsets.only(right: 16),
                 child: Center(
@@ -249,7 +250,8 @@ class _CertificationApprovalPanelViewState
                 child: CertificationRequestCard(
                   certification: certification,
                   onApprove: () => _handleApproval(certification.id),
-                  onReject: (reason) => _handleRejection(certification.id, reason),
+                  onReject: (reason) =>
+                      _handleRejection(certification.id, reason),
                 ),
               );
             },
@@ -363,18 +365,18 @@ class _CertificationApprovalPanelViewState
       ),
     );
   }
-  
+
   /// Handler para aprovação de certificação
   Future<void> _handleApproval(String certificationId) async {
     try {
       // TODO: Obter email do admin atual
       final adminEmail = 'admin@example.com';
-      
+
       final success = await _service.approveCertification(
         certificationId,
         adminEmail,
       );
-      
+
       if (success) {
         _onCertificationProcessed('aprovada');
       } else {
@@ -394,19 +396,19 @@ class _CertificationApprovalPanelViewState
       );
     }
   }
-  
+
   /// Handler para reprovação de certificação
   Future<void> _handleRejection(String certificationId, String reason) async {
     try {
       // TODO: Obter email do admin atual
       final adminEmail = 'admin@example.com';
-      
+
       final success = await _service.rejectCertification(
         certificationId,
         adminEmail,
         reason,
       );
-      
+
       if (success) {
         _onCertificationProcessed('reprovada');
       } else {

@@ -80,9 +80,9 @@ class CacheEntry<T> {
   }) : lastAccessed = lastAccessed ?? createdAt;
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
-  
+
   Duration get age => DateTime.now().difference(createdAt);
-  
+
   Duration get timeSinceLastAccess => DateTime.now().difference(lastAccessed);
 
   CacheEntry<T> copyWithAccess() {
@@ -100,18 +100,19 @@ class CacheEntry<T> {
 
 /// Gerenciador de cache inteligente com invalidação automática
 class IntelligentCacheManager {
-  static final IntelligentCacheManager _instance = IntelligentCacheManager._internal();
+  static final IntelligentCacheManager _instance =
+      IntelligentCacheManager._internal();
   factory IntelligentCacheManager() => _instance;
   IntelligentCacheManager._internal();
 
   final Map<String, CacheEntry> _memoryCache = {};
   final Map<String, CacheConfig> _cacheConfigs = {};
   final DiagnosticLogger _logger = DiagnosticLogger();
-  
+
   SharedPreferences? _prefs;
   Timer? _cleanupTimer;
   Timer? _persistenceTimer;
-  
+
   static const String _persistentCacheKey = 'intelligent_cache_data';
   static const Duration _cleanupInterval = Duration(minutes: 5);
   static const Duration _persistenceInterval = Duration(minutes: 10);
@@ -123,7 +124,7 @@ class IntelligentCacheManager {
       await _loadPersistentCache();
       _startPeriodicCleanup();
       _startPeriodicPersistence();
-      
+
       _logger.info(
         DiagnosticLogCategory.system,
         'Cache inteligente inicializado',
@@ -133,9 +134,9 @@ class IntelligentCacheManager {
           'persistenceInterval': _persistenceInterval.inMinutes,
         },
       );
-      
-      EnhancedLogger.log('🧠 [INTELLIGENT_CACHE] Cache inicializado com ${_memoryCache.length} entradas');
-      
+
+      EnhancedLogger.log(
+          '🧠 [INTELLIGENT_CACHE] Cache inicializado com ${_memoryCache.length} entradas');
     } catch (e, stackTrace) {
       _logger.error(
         DiagnosticLogCategory.system,
@@ -143,7 +144,7 @@ class IntelligentCacheManager {
         data: {'error': e.toString()},
         stackTrace: stackTrace.toString(),
       );
-      
+
       EnhancedLogger.log('❌ [INTELLIGENT_CACHE] Erro na inicialização: $e');
     }
   }
@@ -151,7 +152,7 @@ class IntelligentCacheManager {
   /// Registra configuração de cache para um tipo específico
   void registerCacheConfig(String type, CacheConfig config) {
     _cacheConfigs[type] = config;
-    
+
     _logger.debug(
       DiagnosticLogCategory.system,
       'Configuração de cache registrada',
@@ -171,27 +172,27 @@ class IntelligentCacheManager {
     Duration? customTtl,
   }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       // Tenta obter do cache primeiro
       final cached = await get<T>(key, cacheType: cacheType);
-      
+
       if (cached.isValid) {
         stopwatch.stop();
-        
+
         _logger.debug(
           DiagnosticLogCategory.performance,
           'Cache hit',
           data: {
             'key': key,
             'cacheType': cacheType,
-            'age': cached.cacheTime != null 
-                ? DateTime.now().difference(cached.cacheTime!).inSeconds 
+            'age': cached.cacheTime != null
+                ? DateTime.now().difference(cached.cacheTime!).inSeconds
                 : 0,
           },
           executionTime: stopwatch.elapsed,
         );
-        
+
         return cached;
       }
 
@@ -203,12 +204,12 @@ class IntelligentCacheManager {
       );
 
       final data = await fetchFunction();
-      
+
       // Armazena no cache
       await set(key, data, cacheType: cacheType, customTtl: customTtl);
-      
+
       stopwatch.stop();
-      
+
       _logger.info(
         DiagnosticLogCategory.performance,
         'Dados buscados e armazenados no cache',
@@ -226,10 +227,9 @@ class IntelligentCacheManager {
         cacheTime: DateTime.now(),
         isExpired: false,
       );
-
     } catch (e, stackTrace) {
       stopwatch.stop();
-      
+
       _logger.error(
         DiagnosticLogCategory.performance,
         'Erro ao buscar dados com cache',
@@ -247,7 +247,8 @@ class IntelligentCacheManager {
   }
 
   /// Obtém dados do cache
-  Future<CacheResult<T>> get<T>(String key, {String cacheType = 'default'}) async {
+  Future<CacheResult<T>> get<T>(String key,
+      {String cacheType = 'default'}) async {
     final fullKey = _buildKey(cacheType, key);
     final entry = _memoryCache[fullKey];
 
@@ -264,7 +265,7 @@ class IntelligentCacheManager {
 
     if (entry.isExpired) {
       _memoryCache.remove(fullKey);
-      
+
       _logger.debug(
         DiagnosticLogCategory.performance,
         'Cache entry expirado removido',
@@ -297,7 +298,7 @@ class IntelligentCacheManager {
     final config = _cacheConfigs[cacheType] ?? CacheConfig.temporaryData;
     final ttl = customTtl ?? config.ttl;
     final fullKey = _buildKey(cacheType, key);
-    
+
     final now = DateTime.now();
     final entry = CacheEntry<T>(
       key: fullKey,
@@ -342,10 +343,10 @@ class IntelligentCacheManager {
   /// Invalida cache por padrão de chave
   Future<void> invalidatePattern(String pattern, {String? cacheType}) async {
     final keysToRemove = <String>[];
-    
+
     for (final key in _memoryCache.keys) {
       if (cacheType != null && !key.startsWith('${cacheType}:')) continue;
-      
+
       final actualKey = key.contains(':') ? key.split(':').last : key;
       if (actualKey.contains(pattern)) {
         keysToRemove.add(key);
@@ -366,7 +367,8 @@ class IntelligentCacheManager {
       },
     );
 
-    EnhancedLogger.log('🧹 [INTELLIGENT_CACHE] ${keysToRemove.length} entradas invalidadas por padrão: $pattern');
+    EnhancedLogger.log(
+        '🧹 [INTELLIGENT_CACHE] ${keysToRemove.length} entradas invalidadas por padrão: $pattern');
   }
 
   /// Invalida todo cache de um tipo
@@ -388,7 +390,8 @@ class IntelligentCacheManager {
       },
     );
 
-    EnhancedLogger.log('🧹 [INTELLIGENT_CACHE] Cache tipo "$cacheType" invalidado (${keysToRemove.length} entradas)');
+    EnhancedLogger.log(
+        '🧹 [INTELLIGENT_CACHE] Cache tipo "$cacheType" invalidado (${keysToRemove.length} entradas)');
   }
 
   /// Limpa todo o cache
@@ -402,21 +405,23 @@ class IntelligentCacheManager {
       data: {'removedEntries': entriesCount},
     );
 
-    EnhancedLogger.log('🧹 [INTELLIGENT_CACHE] Cache limpo ($entriesCount entradas removidas)');
+    EnhancedLogger.log(
+        '🧹 [INTELLIGENT_CACHE] Cache limpo ($entriesCount entradas removidas)');
   }
 
   /// Obtém estatísticas do cache
   Map<String, dynamic> getStatistics() {
     final now = DateTime.now();
     final typeStats = <String, Map<String, dynamic>>{};
-    
+
     int totalSize = 0;
     int expiredCount = 0;
     int totalAccesses = 0;
-    
+
     for (final entry in _memoryCache.values) {
-      final type = entry.key.contains(':') ? entry.key.split(':').first : 'default';
-      
+      final type =
+          entry.key.contains(':') ? entry.key.split(':').first : 'default';
+
       typeStats[type] ??= {
         'count': 0,
         'size': 0,
@@ -424,29 +429,31 @@ class IntelligentCacheManager {
         'accesses': 0,
         'avgAge': 0.0,
       };
-      
+
       typeStats[type]!['count'] = (typeStats[type]!['count'] as int) + 1;
       typeStats[type]!['size'] = (typeStats[type]!['size'] as int) + entry.size;
-      typeStats[type]!['accesses'] = (typeStats[type]!['accesses'] as int) + entry.accessCount;
-      
+      typeStats[type]!['accesses'] =
+          (typeStats[type]!['accesses'] as int) + entry.accessCount;
+
       if (entry.isExpired) {
         expiredCount++;
         typeStats[type]!['expired'] = (typeStats[type]!['expired'] as int) + 1;
       }
-      
+
       totalSize += entry.size;
       totalAccesses += entry.accessCount;
     }
 
     // Calcula idade média por tipo
     for (final type in typeStats.keys) {
-      final entries = _memoryCache.values.where((e) => 
-          e.key.contains(':') ? e.key.split(':').first == type : type == 'default');
-      
+      final entries = _memoryCache.values.where((e) => e.key.contains(':')
+          ? e.key.split(':').first == type
+          : type == 'default');
+
       if (entries.isNotEmpty) {
-        final avgAge = entries
-            .map((e) => e.age.inSeconds)
-            .reduce((a, b) => a + b) / entries.length;
+        final avgAge =
+            entries.map((e) => e.age.inSeconds).reduce((a, b) => a + b) /
+                entries.length;
         typeStats[type]!['avgAge'] = avgAge;
       }
     }
@@ -456,7 +463,8 @@ class IntelligentCacheManager {
       'totalSize': totalSize,
       'expiredEntries': expiredCount,
       'totalAccesses': totalAccesses,
-      'hitRate': totalAccesses > 0 ? (_memoryCache.length / totalAccesses) : 0.0,
+      'hitRate':
+          totalAccesses > 0 ? (_memoryCache.length / totalAccesses) : 0.0,
       'typeStatistics': typeStats,
       'memoryUsage': _estimateMemoryUsage(),
       'lastCleanup': _lastCleanupTime?.toIso8601String(),
@@ -467,7 +475,7 @@ class IntelligentCacheManager {
   /// Força limpeza do cache
   Future<void> forceCleanup() async {
     await _performCleanup();
-    
+
     _logger.info(
       DiagnosticLogCategory.performance,
       'Limpeza forçada do cache executada',
@@ -484,14 +492,14 @@ class IntelligentCacheManager {
   int _estimateSize(dynamic data) {
     try {
       if (data == null) return 0;
-      
+
       if (data is String) return data.length * 2; // UTF-16
       if (data is int) return 8;
       if (data is double) return 8;
       if (data is bool) return 1;
       if (data is List) return data.length * 50; // Estimativa
       if (data is Map) return data.length * 100; // Estimativa
-      
+
       // Para objetos complexos, tenta serializar
       final json = jsonEncode(data);
       return json.length * 2;
@@ -516,7 +524,8 @@ class IntelligentCacheManager {
     if (typeEntries.length <= config.maxSize) return;
 
     // Ordena por LRU (Least Recently Used)
-    typeEntries.sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
+    typeEntries
+        .sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
 
     final toRemove = typeEntries.length - config.maxSize;
     for (int i = 0; i < toRemove; i++) {
@@ -572,7 +581,8 @@ class IntelligentCacheManager {
         },
       );
 
-      EnhancedLogger.log('🧹 [INTELLIGENT_CACHE] Limpeza automática: ${expiredKeys.length} entradas expiradas removidas');
+      EnhancedLogger.log(
+          '🧹 [INTELLIGENT_CACHE] Limpeza automática: ${expiredKeys.length} entradas expiradas removidas');
     }
   }
 
@@ -587,15 +597,16 @@ class IntelligentCacheManager {
   Future<void> _persistCache() async {
     try {
       final importantEntries = _memoryCache.entries
-          .where((entry) => !entry.value.isExpired && entry.value.accessCount > 1)
+          .where(
+              (entry) => !entry.value.isExpired && entry.value.accessCount > 1)
           .take(100) // Limita a 100 entradas mais importantes
           .map((entry) => {
-            'key': entry.key,
-            'data': entry.value.data,
-            'createdAt': entry.value.createdAt.toIso8601String(),
-            'expiresAt': entry.value.expiresAt.toIso8601String(),
-            'accessCount': entry.value.accessCount,
-          })
+                'key': entry.key,
+                'data': entry.value.data,
+                'createdAt': entry.value.createdAt.toIso8601String(),
+                'expiresAt': entry.value.expiresAt.toIso8601String(),
+                'accessCount': entry.value.accessCount,
+              })
           .toList();
 
       if (importantEntries.isNotEmpty) {
@@ -631,7 +642,7 @@ class IntelligentCacheManager {
           final key = entryData['key'] as String;
           final createdAt = DateTime.parse(entryData['createdAt']);
           final expiresAt = DateTime.parse(entryData['expiresAt']);
-          
+
           // Só carrega se ainda não expirou
           if (DateTime.now().isBefore(expiresAt)) {
             final entry = CacheEntry(
@@ -658,7 +669,8 @@ class IntelligentCacheManager {
           data: {'loadedEntries': loadedCount},
         );
 
-        EnhancedLogger.log('💾 [INTELLIGENT_CACHE] $loadedCount entradas carregadas do cache persistido');
+        EnhancedLogger.log(
+            '💾 [INTELLIGENT_CACHE] $loadedCount entradas carregadas do cache persistido');
       }
     } catch (e) {
       _logger.warning(
@@ -674,7 +686,7 @@ class IntelligentCacheManager {
     _cleanupTimer?.cancel();
     _persistenceTimer?.cancel();
     _persistCache();
-    
+
     _logger.info(
       DiagnosticLogCategory.system,
       'Cache inteligente finalizado',

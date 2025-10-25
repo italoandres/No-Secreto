@@ -34,7 +34,9 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
         _isLoading = true;
       });
 
-      final notifications = await InterestNotificationRepository.getReceivedInterestNotifications(currentUser.uid);
+      final notifications =
+          await InterestNotificationRepository.getReceivedInterestNotifications(
+              currentUser.uid);
 
       if (mounted) {
         setState(() {
@@ -95,7 +97,7 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
               ],
             ),
           ),
-          
+
           // Botão de Debug
           Container(
             padding: const EdgeInsets.all(16),
@@ -128,7 +130,7 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
               ],
             ),
           ),
-          
+
           // Lista de notificações
           Expanded(
             child: _buildNotificationsList(),
@@ -140,7 +142,7 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = _filter == value;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -250,7 +252,7 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
   /// Debug das notificações
   Future<void> _debugNotifications() async {
     await DebugReceivedInterests.investigateReceivedInterests();
-    
+
     Get.snackbar(
       'Debug Executado',
       'Veja os logs no console para detalhes',
@@ -262,14 +264,14 @@ class _ReceivedInterestsViewState extends State<ReceivedInterestsView> {
   /// Criar notificação de teste
   Future<void> _createTestNotification() async {
     await DebugReceivedInterests.createTestNotification();
-    
+
     Get.snackbar(
       'Teste Criado',
       'Notificação de teste adicionada. Atualize a lista.',
       backgroundColor: Colors.blue,
       colorText: Colors.white,
     );
-    
+
     // Recarregar lista
     _loadNotifications();
   }

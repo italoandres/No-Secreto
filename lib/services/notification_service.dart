@@ -46,7 +46,7 @@ class NotificationService {
 
       // Salvar no Firestore
       await NotificationRepository.createNotification(notification);
-      
+
       print('Notificação de comentário criada: $notificationId');
     } catch (e) {
       print('Erro ao criar notificação de comentário: $e');
@@ -71,7 +71,8 @@ class NotificationService {
       }
 
       // Gerar ID único para a notificação de menção
-      final notificationId = _generateMentionNotificationId(storyId, mentionedUserId, commentAuthorId);
+      final notificationId = _generateMentionNotificationId(
+          storyId, mentionedUserId, commentAuthorId);
 
       // Truncar o texto do comentário
       final truncatedComment = truncateComment(commentText);
@@ -93,7 +94,7 @@ class NotificationService {
 
       // Salvar no Firestore
       await NotificationRepository.createNotification(notification);
-      
+
       print('Notificação de menção criada: $notificationId');
     } catch (e) {
       print('Erro ao criar notificação de menção: $e');
@@ -119,7 +120,8 @@ class NotificationService {
       }
 
       // Gerar ID único para a notificação de curtida
-      final notificationId = _generateLikeNotificationId(commentId, likerUserId);
+      final notificationId =
+          _generateLikeNotificationId(commentId, likerUserId);
 
       // Truncar o texto do comentário
       final truncatedComment = truncateComment(commentText);
@@ -141,7 +143,7 @@ class NotificationService {
 
       // Salvar no Firestore
       await NotificationRepository.createNotification(notification);
-      
+
       print('Notificação de curtida criada: $notificationId');
     } catch (e) {
       print('Erro ao criar notificação de curtida: $e');
@@ -167,7 +169,8 @@ class NotificationService {
       }
 
       // Gerar ID único para a notificação de resposta
-      final notificationId = _generateReplyNotificationId(parentCommentId, replyAuthorId);
+      final notificationId =
+          _generateReplyNotificationId(parentCommentId, replyAuthorId);
 
       // Truncar o texto da resposta
       final truncatedReply = truncateComment(replyText);
@@ -189,7 +192,7 @@ class NotificationService {
 
       // Salvar no Firestore
       await NotificationRepository.createNotification(notification);
-      
+
       print('Notificação de resposta criada: $notificationId');
     } catch (e) {
       print('Erro ao criar notificação de resposta: $e');
@@ -220,7 +223,7 @@ class NotificationService {
 
     // Extrair menções do texto e criar notificações
     final mentionedUserIds = extractMentionsFromText(commentText);
-    
+
     for (final mentionedUserId in mentionedUserIds) {
       await createMentionNotification(
         storyId: storyId,
@@ -267,7 +270,7 @@ class NotificationService {
     if (comment.length <= maxLength) {
       return comment;
     }
-    
+
     // Truncar e adicionar reticências
     return '${comment.substring(0, maxLength - 3)}...';
   }
@@ -279,19 +282,22 @@ class NotificationService {
   }
 
   // Gerar ID único para notificação de menção
-  static String _generateMentionNotificationId(String storyId, String mentionedUserId, String authorId) {
+  static String _generateMentionNotificationId(
+      String storyId, String mentionedUserId, String authorId) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'mention_${storyId}_${mentionedUserId}_${authorId}_$timestamp';
   }
 
   // Gerar ID único para notificação de curtida
-  static String _generateLikeNotificationId(String commentId, String likerUserId) {
+  static String _generateLikeNotificationId(
+      String commentId, String likerUserId) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'like_${commentId}_${likerUserId}_$timestamp';
   }
 
   // Gerar ID único para notificação de resposta
-  static String _generateReplyNotificationId(String parentCommentId, String replyAuthorId) {
+  static String _generateReplyNotificationId(
+      String parentCommentId, String replyAuthorId) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'reply_${parentCommentId}_${replyAuthorId}_$timestamp';
   }
@@ -300,7 +306,7 @@ class NotificationService {
   static List<String> extractMentionsFromText(String text) {
     final mentionRegex = RegExp(r'@(\w+)');
     final matches = mentionRegex.allMatches(text);
-    
+
     // Extrair usernames mencionados
     final usernames = <String>[];
     for (final match in matches) {
@@ -309,7 +315,7 @@ class NotificationService {
         usernames.add(username);
       }
     }
-    
+
     return usernames;
   }
 
@@ -318,7 +324,7 @@ class NotificationService {
     final mentionRegex = RegExp(r'@(\w+)');
     final matches = mentionRegex.allMatches(text);
     final userIds = <String>[];
-    
+
     for (final match in matches) {
       final username = match.group(1);
       if (username != null) {
@@ -328,7 +334,7 @@ class NotificationService {
         }
       }
     }
-    
+
     return userIds;
   }
 
@@ -340,11 +346,11 @@ class NotificationService {
           .where('username', isEqualTo: username)
           .limit(1)
           .get();
-      
+
       if (query.docs.isNotEmpty) {
         return query.docs.first.id;
       }
-      
+
       return null;
     } catch (e) {
       print('Erro ao buscar usuário por username: $e');
@@ -387,7 +393,8 @@ class NotificationService {
   }
 
   // Marcar notificação como lida e navegar para o conteúdo
-  static Future<void> handleNotificationTap(NotificationModel notification) async {
+  static Future<void> handleNotificationTap(
+      NotificationModel notification) async {
     try {
       // Marcar como lida se não estiver
       if (!notification.isRead) {
@@ -415,15 +422,15 @@ class NotificationService {
     try {
       // Navegar para o viewer de stories com o story específico
       Get.to(() => const EnhancedStoriesViewerView(
-        contexto: 'notification',
-        userSexo: null, // Todos os usuários
-        // TODO: Adicionar parâmetro initialStoryId se disponível
-      ));
-      
+            contexto: 'notification',
+            userSexo: null, // Todos os usuários
+            // TODO: Adicionar parâmetro initialStoryId se disponível
+          ));
+
       print('Navegando para story: $storyId');
     } catch (e) {
       print('Erro ao navegar para story: $e');
-      
+
       // Fallback: mostrar mensagem informativa
       Get.snackbar(
         'Aviso',
@@ -437,11 +444,11 @@ class NotificationService {
   // Verificar se uma notificação é válida
   static bool isValidNotification(NotificationModel notification) {
     return notification.id.isNotEmpty &&
-           notification.userId.isNotEmpty &&
-           notification.type.isNotEmpty &&
-           notification.relatedId.isNotEmpty &&
-           notification.fromUserId.isNotEmpty &&
-           notification.fromUserName.isNotEmpty;
+        notification.userId.isNotEmpty &&
+        notification.type.isNotEmpty &&
+        notification.relatedId.isNotEmpty &&
+        notification.fromUserId.isNotEmpty &&
+        notification.fromUserName.isNotEmpty;
   }
 
   // Contar notificações não lidas para um usuário
@@ -460,12 +467,14 @@ class NotificationService {
   }
 
   // Buscar notificações do usuário para um contexto específico
-  static Stream<List<NotificationModel>> getContextNotifications(String userId, String contexto) {
+  static Stream<List<NotificationModel>> getContextNotifications(
+      String userId, String contexto) {
     return NotificationRepository.getContextNotifications(userId, contexto);
   }
 
   // Marcar todas as notificações de um contexto como lidas
-  static Future<void> markContextNotificationsAsRead(String userId, String contexto) async {
+  static Future<void> markContextNotificationsAsRead(
+      String userId, String contexto) async {
     try {
       await NotificationRepository.markContextAsRead(userId, contexto);
     } catch (e) {
@@ -517,23 +526,26 @@ class NotificationService {
       }
 
       // Verificar se já existe notificação similar recente (últimas 24h)
-      final existingNotifications = await NotificationRepository.getContextNotifications(
-        targetUserId, 
-        'interest_matches'
-      ).first;
-      
-      final recentNotification = existingNotifications.where((n) => 
-        n.fromUserId == interestedUserId && 
-        DateTime.now().difference(n.createdAt).inHours < 24
-      ).isNotEmpty;
-      
+      final existingNotifications =
+          await NotificationRepository.getContextNotifications(
+                  targetUserId, 'interest_matches')
+              .first;
+
+      final recentNotification = existingNotifications
+          .where((n) =>
+              n.fromUserId == interestedUserId &&
+              DateTime.now().difference(n.createdAt).inHours < 24)
+          .isNotEmpty;
+
       if (recentNotification) {
-        print('Notificação de interesse já existe nas últimas 24h - ignorando duplicata');
+        print(
+            'Notificação de interesse já existe nas últimas 24h - ignorando duplicata');
         return;
       }
 
       // Gerar ID único para a notificação de interesse
-      final notificationId = _generateInterestNotificationId(targetUserId, interestedUserId);
+      final notificationId =
+          _generateInterestNotificationId(targetUserId, interestedUserId);
 
       // Criar modelo da notificação
       final notification = NotificationModel(
@@ -542,7 +554,8 @@ class NotificationService {
         type: 'interest_match', // Novo tipo de notificação
         relatedId: interestedUserId, // ID do usuário que demonstrou interesse
         fromUserId: interestedUserId,
-        fromUserName: interestedUserName.isNotEmpty ? interestedUserName : 'Usuário',
+        fromUserName:
+            interestedUserName.isNotEmpty ? interestedUserName : 'Usuário',
         fromUserAvatar: interestedUserAvatar,
         content: 'demonstrou interesse no seu perfil',
         isRead: false,
@@ -552,7 +565,7 @@ class NotificationService {
 
       // Salvar no Firestore com retry
       await _createNotificationWithRetry(notification);
-      
+
       print('Notificação de interesse criada: $notificationId');
     } catch (e) {
       print('Erro ao criar notificação de interesse: $e');
@@ -561,9 +574,11 @@ class NotificationService {
   }
 
   // Criar notificação com retry automático
-  static Future<void> _createNotificationWithRetry(NotificationModel notification, {int maxRetries = 3}) async {
+  static Future<void> _createNotificationWithRetry(
+      NotificationModel notification,
+      {int maxRetries = 3}) async {
     int attempts = 0;
-    
+
     while (attempts < maxRetries) {
       try {
         await NotificationRepository.createNotification(notification);
@@ -571,11 +586,11 @@ class NotificationService {
       } catch (e) {
         attempts++;
         print('Tentativa $attempts de $maxRetries falhou: $e');
-        
+
         if (attempts >= maxRetries) {
           rethrow; // Última tentativa falhou
         }
-        
+
         // Aguardar antes da próxima tentativa
         await Future.delayed(Duration(seconds: attempts * 2));
       }
@@ -593,34 +608,35 @@ class NotificationService {
       // Se não foram fornecidos nome e avatar, buscar do Firestore
       String userName = interestedUserName ?? 'Usuário';
       String userAvatar = interestedUserAvatar ?? '';
-      
+
       if (interestedUserName == null || interestedUserAvatar == null) {
         final userDoc = await FirebaseFirestore.instance
             .collection('usuarios')
             .doc(interestedUserId)
             .get();
-        
+
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
           userName = userData['nome'] ?? userData['displayName'] ?? 'Usuário';
           userAvatar = userData['photoUrl'] ?? userData['avatar'] ?? '';
         }
-        
+
         // Se ainda não encontrou, tentar na coleção de perfis espirituais
         if (userName == 'Usuário') {
           final profileDoc = await FirebaseFirestore.instance
               .collection('spiritual_profiles')
               .doc(interestedUserId)
               .get();
-          
+
           if (profileDoc.exists) {
             final profileData = profileDoc.data() as Map<String, dynamic>;
             userName = profileData['displayName'] ?? 'Usuário';
-            userAvatar = profileData['mainPhotoUrl'] ?? profileData['photoUrl'] ?? '';
+            userAvatar =
+                profileData['mainPhotoUrl'] ?? profileData['photoUrl'] ?? '';
           }
         }
       }
-      
+
       // Criar notificação de interesse com dados completos
       await createInterestNotification(
         interestedUserId: interestedUserId,
@@ -628,8 +644,9 @@ class NotificationService {
         interestedUserAvatar: userAvatar,
         targetUserId: targetUserId,
       );
-      
-      print('Notificação de interesse processada com dados: nome=$userName, avatar=${userAvatar.isNotEmpty ? 'sim' : 'não'}');
+
+      print(
+          'Notificação de interesse processada com dados: nome=$userName, avatar=${userAvatar.isNotEmpty ? 'sim' : 'não'}');
     } catch (e) {
       print('Erro ao processar notificação de interesse: $e');
       // Fallback: criar notificação com dados básicos
@@ -643,7 +660,8 @@ class NotificationService {
   }
 
   // Gerar ID único para notificação de interesse
-  static String _generateInterestNotificationId(String targetUserId, String interestedUserId) {
+  static String _generateInterestNotificationId(
+      String targetUserId, String interestedUserId) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'interest_${targetUserId}_${interestedUserId}_$timestamp';
   }

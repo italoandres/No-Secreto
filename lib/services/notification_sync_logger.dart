@@ -6,22 +6,22 @@ import '../utils/enhanced_logger.dart';
 
 /// Níveis de log específicos para notificações
 enum NotificationLogLevel {
-  debug,    // Informações detalhadas de debug
-  info,     // Informações gerais
-  warning,  // Avisos que precisam atenção
-  error,    // Erros que impedem funcionamento
-  critical  // Erros críticos que quebram o sistema
+  debug, // Informações detalhadas de debug
+  info, // Informações gerais
+  warning, // Avisos que precisam atenção
+  error, // Erros que impedem funcionamento
+  critical // Erros críticos que quebram o sistema
 }
 
 /// Categoria de logs de notificação
 enum NotificationLogCategory {
-  sync,         // Sincronização de dados
-  conflict,     // Resolução de conflitos
-  ui,           // Interface do usuário
-  cache,        // Operações de cache
-  performance,  // Métricas de performance
-  validation,   // Validação de sistema
-  user          // Ações do usuário
+  sync, // Sincronização de dados
+  conflict, // Resolução de conflitos
+  ui, // Interface do usuário
+  cache, // Operações de cache
+  performance, // Métricas de performance
+  validation, // Validação de sistema
+  user // Ações do usuário
 }
 
 /// Entrada de log estruturada
@@ -67,29 +67,31 @@ class NotificationLogEntry {
     buffer.write('[${category.toString().toUpperCase()}] ');
     buffer.write('[$userId] ');
     buffer.write(message);
-    
+
     if (data != null) {
       buffer.write(' | Data: ${jsonEncode(data)}');
     }
-    
+
     if (error != null) {
       buffer.write(' | Error: $error');
     }
-    
+
     return buffer.toString();
   }
 }
 
 /// Logger estruturado para sistema de notificações
 class NotificationSyncLogger {
-  static final NotificationSyncLogger _instance = NotificationSyncLogger._internal();
+  static final NotificationSyncLogger _instance =
+      NotificationSyncLogger._internal();
   factory NotificationSyncLogger() => _instance;
   NotificationSyncLogger._internal();
 
   final List<NotificationLogEntry> _logHistory = [];
   final Map<String, List<NotificationLogEntry>> _userLogs = {};
-  final StreamController<NotificationLogEntry> _logStream = StreamController.broadcast();
-  
+  final StreamController<NotificationLogEntry> _logStream =
+      StreamController.broadcast();
+
   static const int _maxLogHistory = 1000;
   static const int _maxUserLogs = 100;
 
@@ -97,7 +99,8 @@ class NotificationSyncLogger {
   Stream<NotificationLogEntry> get logStream => _logStream.stream;
 
   /// Log de conflito detectado
-  void logConflictDetected(String userId, List<String> sources, {Map<String, dynamic>? data}) {
+  void logConflictDetected(String userId, List<String> sources,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.warning,
       category: NotificationLogCategory.conflict,
@@ -112,7 +115,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de tentativa de resolução
-  void logResolutionAttempt(String userId, String strategy, {Map<String, dynamic>? data}) {
+  void logResolutionAttempt(String userId, String strategy,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.info,
       category: NotificationLogCategory.conflict,
@@ -126,7 +130,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de sucesso na sincronização
-  void logSyncSuccess(String userId, int notificationCount, {Duration? duration}) {
+  void logSyncSuccess(String userId, int notificationCount,
+      {Duration? duration}) {
     _log(
       level: NotificationLogLevel.info,
       category: NotificationLogCategory.sync,
@@ -141,7 +146,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de sincronização forçada
-  void logForceSync(String userId, String reason, {Map<String, dynamic>? data}) {
+  void logForceSync(String userId, String reason,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.info,
       category: NotificationLogCategory.sync,
@@ -156,7 +162,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de operação de cache
-  void logCacheOperation(String userId, String operation, {Map<String, dynamic>? data}) {
+  void logCacheOperation(String userId, String operation,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.debug,
       category: NotificationLogCategory.cache,
@@ -170,7 +177,9 @@ class NotificationSyncLogger {
   }
 
   /// Log de mudança de estado da UI
-  void logUIStateChange(String userId, SyncStatus oldStatus, SyncStatus newStatus, {Map<String, dynamic>? data}) {
+  void logUIStateChange(
+      String userId, SyncStatus oldStatus, SyncStatus newStatus,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.debug,
       category: NotificationLogCategory.ui,
@@ -186,11 +195,12 @@ class NotificationSyncLogger {
   }
 
   /// Log de métricas de performance
-  void logPerformanceMetric(String userId, String operation, Duration duration, {Map<String, dynamic>? data}) {
-    final level = duration.inMilliseconds > 5000 
-        ? NotificationLogLevel.warning 
+  void logPerformanceMetric(String userId, String operation, Duration duration,
+      {Map<String, dynamic>? data}) {
+    final level = duration.inMilliseconds > 5000
+        ? NotificationLogLevel.warning
         : NotificationLogLevel.debug;
-    
+
     _log(
       level: level,
       category: NotificationLogCategory.performance,
@@ -206,12 +216,14 @@ class NotificationSyncLogger {
   }
 
   /// Log de validação de sistema
-  void logValidationResult(String userId, bool isValid, String details, {Map<String, dynamic>? data}) {
+  void logValidationResult(String userId, bool isValid, String details,
+      {Map<String, dynamic>? data}) {
     _log(
       level: isValid ? NotificationLogLevel.info : NotificationLogLevel.warning,
       category: NotificationLogCategory.validation,
       userId: userId,
-      message: 'Validação do sistema: ${isValid ? "PASSOU" : "FALHOU"} - $details',
+      message:
+          'Validação do sistema: ${isValid ? "PASSOU" : "FALHOU"} - $details',
       data: {
         'isValid': isValid,
         'details': details,
@@ -221,7 +233,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de ação do usuário
-  void logUserAction(String userId, String action, {Map<String, dynamic>? data}) {
+  void logUserAction(String userId, String action,
+      {Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.info,
       category: NotificationLogCategory.user,
@@ -236,7 +249,8 @@ class NotificationSyncLogger {
   }
 
   /// Log de erro
-  void logError(String userId, String error, {String? stackTrace, Map<String, dynamic>? data}) {
+  void logError(String userId, String error,
+      {String? stackTrace, Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.error,
       category: NotificationLogCategory.sync,
@@ -249,7 +263,8 @@ class NotificationSyncLogger {
   }
 
   /// Log crítico
-  void logCritical(String userId, String message, {String? error, String? stackTrace, Map<String, dynamic>? data}) {
+  void logCritical(String userId, String message,
+      {String? error, String? stackTrace, Map<String, dynamic>? data}) {
     _log(
       level: NotificationLogLevel.critical,
       category: NotificationLogCategory.sync,
@@ -329,33 +344,36 @@ class NotificationSyncLogger {
   }
 
   /// Obtém logs por usuário
-  List<NotificationLogEntry> getUserLogs(String userId, {NotificationLogLevel? minLevel}) {
+  List<NotificationLogEntry> getUserLogs(String userId,
+      {NotificationLogLevel? minLevel}) {
     final userLogs = _userLogs[userId] ?? [];
-    
+
     if (minLevel == null) return List.from(userLogs);
-    
+
     return userLogs.where((log) => log.level.index >= minLevel.index).toList();
   }
 
   /// Obtém logs por categoria
-  List<NotificationLogEntry> getLogsByCategory(NotificationLogCategory category, {int? limit}) {
+  List<NotificationLogEntry> getLogsByCategory(NotificationLogCategory category,
+      {int? limit}) {
     var logs = _logHistory.where((log) => log.category == category).toList();
-    
+
     if (limit != null && logs.length > limit) {
       logs = logs.sublist(logs.length - limit);
     }
-    
+
     return logs;
   }
 
   /// Obtém logs por nível
-  List<NotificationLogEntry> getLogsByLevel(NotificationLogLevel level, {int? limit}) {
+  List<NotificationLogEntry> getLogsByLevel(NotificationLogLevel level,
+      {int? limit}) {
     var logs = _logHistory.where((log) => log.level == level).toList();
-    
+
     if (limit != null && logs.length > limit) {
       logs = logs.sublist(logs.length - limit);
     }
-    
+
     return logs;
   }
 
@@ -372,21 +390,22 @@ class NotificationSyncLogger {
 
     // Conta por nível
     for (final level in NotificationLogLevel.values) {
-      stats['levelCounts'][level.toString()] = 
+      stats['levelCounts'][level.toString()] =
           _logHistory.where((log) => log.level == level).length;
     }
 
     // Conta por categoria
     for (final category in NotificationLogCategory.values) {
-      stats['categoryCounts'][category.toString()] = 
+      stats['categoryCounts'][category.toString()] =
           _logHistory.where((log) => log.category == category).length;
     }
 
     // Erros recentes (última hora)
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
     stats['recentErrors'] = _logHistory
-        .where((log) => log.level == NotificationLogLevel.error && 
-                       log.timestamp.isAfter(oneHourAgo))
+        .where((log) =>
+            log.level == NotificationLogLevel.error &&
+            log.timestamp.isAfter(oneHourAgo))
         .length;
 
     // Críticos totais
@@ -400,40 +419,41 @@ class NotificationSyncLogger {
   /// Exporta logs em JSON
   String exportLogsAsJson({String? userId, int? limit}) {
     List<NotificationLogEntry> logsToExport;
-    
+
     if (userId != null) {
       logsToExport = getUserLogs(userId);
     } else {
       logsToExport = List.from(_logHistory);
     }
-    
+
     if (limit != null && logsToExport.length > limit) {
       logsToExport = logsToExport.sublist(logsToExport.length - limit);
     }
-    
+
     final jsonData = {
       'exportedAt': DateTime.now().toIso8601String(),
       'userId': userId,
       'totalLogs': logsToExport.length,
       'logs': logsToExport.map((log) => log.toJson()).toList(),
     };
-    
+
     return jsonEncode(jsonData);
   }
 
   /// Limpa logs antigos
   void cleanupOldLogs({Duration? olderThan}) {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(days: 7));
-    
+    final cutoff =
+        DateTime.now().subtract(olderThan ?? const Duration(days: 7));
+
     _logHistory.removeWhere((log) => log.timestamp.isBefore(cutoff));
-    
+
     for (final userId in _userLogs.keys.toList()) {
       _userLogs[userId]!.removeWhere((log) => log.timestamp.isBefore(cutoff));
       if (_userLogs[userId]!.isEmpty) {
         _userLogs.remove(userId);
       }
     }
-    
+
     EnhancedLogger.log('🧹 [LOGGER] Logs antigos limpos. Cutoff: $cutoff');
   }
 
@@ -441,7 +461,7 @@ class NotificationSyncLogger {
   void clearUserLogs(String userId) {
     _userLogs.remove(userId);
     _logHistory.removeWhere((log) => log.userId == userId);
-    
+
     EnhancedLogger.log('🧹 [LOGGER] Logs do usuário $userId limpos');
   }
 
@@ -449,7 +469,7 @@ class NotificationSyncLogger {
   void clearAllLogs() {
     _logHistory.clear();
     _userLogs.clear();
-    
+
     EnhancedLogger.log('🧹 [LOGGER] Todos os logs limpos');
   }
 
@@ -458,7 +478,7 @@ class NotificationSyncLogger {
     _logStream.close();
     _logHistory.clear();
     _userLogs.clear();
-    
+
     EnhancedLogger.log('🧹 [LOGGER] Logger disposed');
   }
 }

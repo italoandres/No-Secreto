@@ -46,7 +46,8 @@ class InterestCard extends StatelessWidget {
               children: [
                 // Foto
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                   child: CachedNetworkImage(
                     imageUrl: profile.photoUrl ?? '',
                     height: 200,
@@ -60,18 +61,20 @@ class InterestCard extends StatelessWidget {
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[300],
-                      child: const Icon(Icons.person, size: 60, color: Colors.grey),
+                      child: const Icon(Icons.person,
+                          size: 60, color: Colors.grey),
                     ),
                   ),
                 ),
-                
+
                 // Badge de certificação
                 if (profile.hasCertification)
                   Positioned(
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
@@ -102,7 +105,7 @@ class InterestCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                
+
                 // Gradiente inferior
                 Positioned(
                   bottom: 0,
@@ -122,7 +125,7 @@ class InterestCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 // Nome e idade
                 Positioned(
                   bottom: 12,
@@ -154,7 +157,7 @@ class InterestCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Informações e ações
           Padding(
             padding: const EdgeInsets.all(16),
@@ -188,14 +191,14 @@ class InterestCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Match Score
                 MatchScoreBadge(score: profile.score),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Tempo do interesse
                 Row(
                   children: [
@@ -210,9 +213,9 @@ class InterestCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Botões de ação
                 Row(
                   children: [
@@ -224,7 +227,8 @@ class InterestCard extends StatelessWidget {
                         label: const Text('Recusar'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.grey[700],
-                          side: BorderSide(color: Colors.grey[300]!, width: 1.5),
+                          side:
+                              BorderSide(color: Colors.grey[300]!, width: 1.5),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -232,9 +236,9 @@ class InterestCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(width: 12),
-                    
+
                     // Botão Aceitar
                     Expanded(
                       flex: 2,

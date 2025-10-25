@@ -30,10 +30,10 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
   final DiagnosticLogger _logger = DiagnosticLogger();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<DiagnosticLogEntry> _logs = [];
   StreamSubscription<DiagnosticLogEntry>? _logSubscription;
-  
+
   DiagnosticLogLevel? _selectedLevel;
   DiagnosticLogCategory? _selectedCategory;
   String _searchText = '';
@@ -46,9 +46,9 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
     super.initState();
     _selectedLevel = widget.level;
     _selectedCategory = widget.category;
-    
+
     _loadLogs();
-    
+
     if (widget.showRealTime) {
       _setupRealTimeUpdates();
     }
@@ -70,7 +70,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
       searchText: _searchText.isNotEmpty ? _searchText : null,
       limit: widget.maxLogs,
     );
-    
+
     setState(() {
       _logs = _logger.getLogs(filter);
     });
@@ -85,17 +85,17 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
         categories: _selectedCategory != null ? [_selectedCategory!] : null,
         searchText: _searchText.isNotEmpty ? _searchText : null,
       );
-      
+
       if (filter.matches(newLog)) {
         setState(() {
           _logs.insert(0, newLog);
-          
+
           // Remove logs antigos se exceder o limite
           if (_logs.length > widget.maxLogs) {
             _logs.removeRange(widget.maxLogs, _logs.length);
           }
         });
-        
+
         // Auto-scroll para o topo se habilitado
         if (_autoScroll && _scrollController.hasClients) {
           _scrollController.animateTo(
@@ -163,12 +163,12 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
       categories: _selectedCategory != null ? [_selectedCategory!] : null,
       searchText: _searchText.isNotEmpty ? _searchText : null,
     );
-    
+
     final exportData = _logger.exportLogsAsJson(filter);
-    
+
     // Copia para clipboard
     Clipboard.setData(ClipboardData(text: exportData));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Logs exportados para clipboard'),
@@ -241,7 +241,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
               onChanged: _onSearchChanged,
             ),
             SizedBox(height: 16),
-            
+
             // Filtros
             Row(
               children: [
@@ -258,8 +258,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                         value: null,
                         child: Text('Todos os níveis'),
                       ),
-                      ...DiagnosticLogLevel.values.map((level) =>
-                        DropdownMenuItem<DiagnosticLogLevel?>(
+                      ...DiagnosticLogLevel.values.map(
+                        (level) => DropdownMenuItem<DiagnosticLogLevel?>(
                           value: level,
                           child: Row(
                             children: [
@@ -275,7 +275,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                   ),
                 ),
                 SizedBox(width: 16),
-                
+
                 // Filtro de categoria
                 Expanded(
                   child: DropdownButtonFormField<DiagnosticLogCategory?>(
@@ -289,8 +289,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                         value: null,
                         child: Text('Todas as categorias'),
                       ),
-                      ...DiagnosticLogCategory.values.map((category) =>
-                        DropdownMenuItem<DiagnosticLogCategory?>(
+                      ...DiagnosticLogCategory.values.map(
+                        (category) => DropdownMenuItem<DiagnosticLogCategory?>(
                           value: category,
                           child: Row(
                             children: [
@@ -323,7 +323,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Spacer(),
-          
+
           // Auto-scroll toggle
           Row(
             children: [
@@ -339,7 +339,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
             ],
           ),
           SizedBox(width: 16),
-          
+
           // Botões de ação
           IconButton(
             icon: Icon(Icons.refresh),
@@ -390,7 +390,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
 
   Widget _buildLogItem(DiagnosticLogEntry log) {
     final levelColor = _getLevelColor(log.level);
-    
+
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: InkWell(
@@ -428,7 +428,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                         if (log.userId != null) ...[
                           SizedBox(width: 8),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.blue[100],
                               borderRadius: BorderRadius.circular(8),
@@ -445,7 +446,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                         if (log.executionTime != null) ...[
                           SizedBox(width: 8),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.green[100],
                               borderRadius: BorderRadius.circular(8),
@@ -493,7 +495,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
 
   Widget _buildLogDetails() {
     final log = _selectedLog!;
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -518,7 +520,7 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
             ],
           ),
           SizedBox(height: 16),
-          
+
           // Card principal com detalhes
           Card(
             child: Padding(
@@ -558,16 +560,18 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                     ],
                   ),
                   SizedBox(height: 16),
-                  
+
                   // Informações básicas
                   _buildDetailRow('ID', log.id),
                   _buildDetailRow('Timestamp', _formatTimestamp(log.timestamp)),
-                  if (log.userId != null) _buildDetailRow('User ID', log.userId!),
-                  if (log.executionTime != null) 
-                    _buildDetailRow('Tempo de Execução', '${log.executionTime!.inMilliseconds}ms'),
-                  
+                  if (log.userId != null)
+                    _buildDetailRow('User ID', log.userId!),
+                  if (log.executionTime != null)
+                    _buildDetailRow('Tempo de Execução',
+                        '${log.executionTime!.inMilliseconds}ms'),
+
                   SizedBox(height: 16),
-                  
+
                   // Mensagem
                   Text(
                     'Mensagem',
@@ -586,13 +590,14 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
-                  
+
                   // Dados adicionais
                   if (log.data.isNotEmpty) ...[
                     SizedBox(height: 16),
                     Text(
                       'Dados Adicionais',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Container(
@@ -611,13 +616,14 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                       ),
                     ),
                   ],
-                  
+
                   // Stack trace
                   if (log.stackTrace != null) ...[
                     SizedBox(height: 16),
                     Text(
                       'Stack Trace',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Container(
@@ -640,9 +646,9 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
               ),
             ),
           ),
-          
+
           SizedBox(height: 16),
-          
+
           // Botões de ação
           Row(
             children: [
@@ -663,7 +669,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     final logJson = log.toJson();
-                    Clipboard.setData(ClipboardData(text: _formatJson(logJson)));
+                    Clipboard.setData(
+                        ClipboardData(text: _formatJson(logJson)));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Log completo copiado')),
                     );
@@ -702,8 +709,8 @@ class _DiagnosticLogViewerState extends State<DiagnosticLogViewer> {
 
   String _formatTimestamp(DateTime timestamp) {
     return '${timestamp.day.toString().padLeft(2, '0')}/${timestamp.month.toString().padLeft(2, '0')} '
-           '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:'
-           '${timestamp.second.toString().padLeft(2, '0')}';
+        '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:'
+        '${timestamp.second.toString().padLeft(2, '0')}';
   }
 
   String _formatJson(Map<String, dynamic> data) {

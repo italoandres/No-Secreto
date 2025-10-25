@@ -3,7 +3,7 @@ import '../utils/certification_badge_helper.dart';
 import '../components/spiritual_certification_badge.dart';
 
 /// Exemplos práticos de integração do badge de certificação
-/// 
+///
 /// Este arquivo contém exemplos de como integrar o badge de certificação
 /// em diferentes telas e contextos do aplicativo.
 
@@ -48,10 +48,11 @@ class ProfileViewWithBadge extends StatelessWidget {
                   // Foto do perfil
                   const CircleAvatar(
                     radius: 60,
-                    backgroundImage: NetworkImage('https://example.com/photo.jpg'),
+                    backgroundImage:
+                        NetworkImage('https://example.com/photo.jpg'),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Nome do usuário
                   const Text(
                     'João Silva',
@@ -61,7 +62,7 @@ class ProfileViewWithBadge extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // ✅ BADGE DE CERTIFICAÇÃO - PERFIL PRÓPRIO
                   CertificationBadgeHelper.buildOwnProfileBadge(
                     context: context,
@@ -69,9 +70,9 @@ class ProfileViewWithBadge extends StatelessWidget {
                     size: 80,
                     showLabel: true,
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Outras informações do perfil...
                   const Text(
                     'Buscando relacionamento sério baseado em valores cristãos.',
@@ -84,9 +85,9 @@ class ProfileViewWithBadge extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Outras seções do perfil...
             _buildProfileSection('Informações Básicas', [
               _buildInfoRow('Idade', '28 anos'),
@@ -218,7 +219,7 @@ class OtherProfileViewWithBadge extends StatelessWidget {
                     backgroundImage: NetworkImage(userPhotoUrl),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Nome do usuário
                   Text(
                     userName,
@@ -228,7 +229,7 @@ class OtherProfileViewWithBadge extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // ✅ BADGE DE CERTIFICAÇÃO - OUTRO PERFIL
                   // Só aparece se o usuário for certificado
                   CertificationBadgeHelper.buildOtherProfileBadge(
@@ -236,9 +237,9 @@ class OtherProfileViewWithBadge extends StatelessWidget {
                     size: 70,
                     showLabel: true,
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Botões de ação
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -319,7 +320,7 @@ class VitrineProfileCard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Informações do usuário
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -346,7 +347,7 @@ class VitrineProfileCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // Idade e localização
                     Text(
                       '$age anos • $location',
@@ -356,7 +357,7 @@ class VitrineProfileCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     // Botões de ação
                     Row(
                       children: [
@@ -387,7 +388,7 @@ class VitrineProfileCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // ✅ BADGE POSICIONADO - VITRINE
           CertificationBadgeHelper.buildVitrineCardBadge(
             userId: userId,
@@ -580,11 +581,13 @@ class ChatViewWithBadge extends StatelessWidget {
                 // Mensagens do chat...
                 _buildMessage('Olá! Como você está?', true),
                 _buildMessage('Oi! Estou bem, obrigada! E você?', false),
-                _buildMessage('Também estou bem! Vi que você é certificada espiritualmente, que legal!', true),
+                _buildMessage(
+                    'Também estou bem! Vi que você é certificada espiritualmente, que legal!',
+                    true),
               ],
             ),
           ),
-          
+
           // Campo de entrada de mensagem
           Container(
             padding: const EdgeInsets.all(16),

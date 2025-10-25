@@ -36,7 +36,8 @@ class SmokingFilterCard extends StatelessWidget {
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.smoking_rooms, color: Colors.red.shade600, size: 24),
+                  child: Icon(Icons.smoking_rooms,
+                      color: Colors.red.shade600, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -54,7 +55,8 @@ class SmokingFilterCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'A pessoa fuma?',
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        style: TextStyle(
+                            fontSize: 13, color: Colors.grey.shade600),
                       ),
                     ],
                   ),
@@ -72,7 +74,8 @@ class SmokingFilterCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.smoking_rooms, color: Colors.red.shade700, size: 20),
+                  Icon(Icons.smoking_rooms,
+                      color: Colors.red.shade700, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -101,8 +104,9 @@ class SmokingFilterCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: _smokingOptions.map((option) {
-                final isSelected = selectedSmoking == option || 
-                    (selectedSmoking == null && option == 'Não tenho preferência');
+                final isSelected = selectedSmoking == option ||
+                    (selectedSmoking == null &&
+                        option == 'Não tenho preferência');
                 return FilterChip(
                   label: Text(
                     option,
@@ -114,13 +118,15 @@ class SmokingFilterCard extends StatelessWidget {
                   ),
                   selected: isSelected,
                   onSelected: (_) {
-                    onSmokingChanged(option == 'Não tenho preferência' ? null : option);
+                    onSmokingChanged(
+                        option == 'Não tenho preferência' ? null : option);
                   },
                   backgroundColor: Colors.grey.shade100,
                   selectedColor: Colors.red.shade600,
                   checkmarkColor: Colors.white,
                   side: BorderSide(
-                    color: isSelected ? Colors.red.shade600 : Colors.grey.shade300,
+                    color:
+                        isSelected ? Colors.red.shade600 : Colors.grey.shade300,
                   ),
                 );
               }).toList(),

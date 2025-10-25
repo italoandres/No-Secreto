@@ -43,14 +43,16 @@ class ProfileCardComponent extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
                       child: _buildProfileImage(),
                     ),
                   ),
-                  
+
                   // Badge de verificação
                   if (profile.isProfileComplete == true)
                     Positioned(
@@ -82,7 +84,8 @@ class ProfileCardComponent extends StatelessWidget {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.amber[600],
                           borderRadius: BorderRadius.circular(8),
@@ -128,7 +131,8 @@ class ProfileCardComponent extends StatelessWidget {
                         ),
                         if (profile.age != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
@@ -144,7 +148,7 @@ class ProfileCardComponent extends StatelessWidget {
                           ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 4),
 
                     // Localização
@@ -246,7 +250,7 @@ class ProfileCardComponent extends StatelessWidget {
         errorWidget: (context, url, error) => _buildFallbackImage(),
       );
     }
-    
+
     return _buildFallbackImage();
   }
 
@@ -285,6 +289,4 @@ class ProfileCardComponent extends StatelessWidget {
     }
     return '';
   }
-
-
 }

@@ -9,13 +9,12 @@ class GuaranteedInterestNotificationComponent extends StatefulWidget {
   const GuaranteedInterestNotificationComponent({super.key});
 
   @override
-  State<GuaranteedInterestNotificationComponent> createState() => 
+  State<GuaranteedInterestNotificationComponent> createState() =>
       _GuaranteedInterestNotificationComponentState();
 }
 
-class _GuaranteedInterestNotificationComponentState 
+class _GuaranteedInterestNotificationComponentState
     extends State<GuaranteedInterestNotificationComponent> {
-  
   int _unreadCount = 0;
   bool _isLoading = true;
 
@@ -46,12 +45,12 @@ class _GuaranteedInterestNotificationComponentState
             .where('type', isEqualTo: 'interest_match')
             .where('isRead', isEqualTo: false)
             .get();
-        
+
         setState(() {
           _unreadCount = query.docs.length;
           _isLoading = false;
         });
-        
+
         print('✅ Notificações carregadas: $_unreadCount');
         return;
       } catch (e) {
@@ -64,18 +63,17 @@ class _GuaranteedInterestNotificationComponentState
             .collection('notifications')
             .where('userId', isEqualTo: currentUser.uid)
             .get();
-        
+
         final unreadInterestNotifications = allQuery.docs.where((doc) {
           final data = doc.data();
-          return data['type'] == 'interest_match' && 
-                 data['isRead'] == false;
+          return data['type'] == 'interest_match' && data['isRead'] == false;
         }).length;
-        
+
         setState(() {
           _unreadCount = unreadInterestNotifications;
           _isLoading = false;
         });
-        
+
         print('✅ Notificações carregadas (fallback): $_unreadCount');
         return;
       } catch (e) {
@@ -87,7 +85,6 @@ class _GuaranteedInterestNotificationComponentState
         _unreadCount = 2; // Mostrar 2 como padrão se houver erro
         _isLoading = false;
       });
-      
     } catch (e) {
       print('Erro geral ao carregar notificações: $e');
       setState(() {
@@ -111,7 +108,7 @@ class _GuaranteedInterestNotificationComponentState
   Widget build(BuildContext context) {
     // Sempre mostrar o componente, mesmo se estiver carregando
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 16),
       child: ElevatedButton(
@@ -145,7 +142,7 @@ class _GuaranteedInterestNotificationComponentState
                 size: 24,
               ),
             ),
-            
+
             // Badge sempre visível se houver notificações
             if (_unreadCount > 0)
               Positioned(
@@ -176,7 +173,7 @@ class _GuaranteedInterestNotificationComponentState
                   ),
                 ),
               ),
-            
+
             // Indicador de carregamento
             if (_isLoading)
               Positioned(
@@ -205,7 +202,7 @@ class AlwaysVisibleInterestNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 16),
       child: ElevatedButton(
@@ -235,7 +232,7 @@ class AlwaysVisibleInterestNotificationComponent extends StatelessWidget {
                 size: 24,
               ),
             ),
-            
+
             // Badge sempre visível
             Positioned(
               right: 6,

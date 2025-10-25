@@ -57,8 +57,8 @@ class VirginityFilterCard extends StatelessWidget {
               children: [
                 ChoiceChip(
                   label: const Text('Não tenho preferência'),
-                  selected: selectedVirginity == null || 
-                           selectedVirginity == 'Não tenho preferência',
+                  selected: selectedVirginity == null ||
+                      selectedVirginity == 'Não tenho preferência',
                   onSelected: (selected) {
                     if (selected) onVirginityChanged(null);
                   },

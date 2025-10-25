@@ -14,10 +14,12 @@ class RobustInterestNotification extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RobustInterestNotificationState createState() => _RobustInterestNotificationState();
+  _RobustInterestNotificationState createState() =>
+      _RobustInterestNotificationState();
 }
 
-class _RobustInterestNotificationState extends State<RobustInterestNotification> {
+class _RobustInterestNotificationState
+    extends State<RobustInterestNotification> {
   bool _isProcessing = false;
   String? _currentStatus;
 
@@ -35,19 +37,21 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
     });
 
     try {
-      final notificationId = widget.notificationData['id'] ?? 
-                           widget.notificationData['notificationId'];
-      
+      final notificationId = widget.notificationData['id'] ??
+          widget.notificationData['notificationId'];
+
       if (notificationId == null) {
         _showError('ID da notificação não encontrado');
         return;
       }
 
-      print('📝 Processando resposta: $action para notificação: $notificationId');
+      print(
+          '📝 Processando resposta: $action para notificação: $notificationId');
 
       // Verificar se já foi respondida
-      final alreadyResponded = await RobustNotificationHandler
-          .isNotificationAlreadyResponded(notificationId);
+      final alreadyResponded =
+          await RobustNotificationHandler.isNotificationAlreadyResponded(
+              notificationId);
 
       if (alreadyResponded && _currentStatus != 'pending') {
         print('ℹ️ Notificação já foi respondida, tratando graciosamente');
@@ -56,7 +60,8 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
       }
 
       // Processar resposta
-      await RobustNotificationHandler.respondToNotification(notificationId, action);
+      await RobustNotificationHandler.respondToNotification(
+          notificationId, action);
 
       // Atualizar estado local
       setState(() {
@@ -74,10 +79,9 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
       if (widget.onNotificationUpdated != null) {
         widget.onNotificationUpdated!();
       }
-
     } catch (e) {
       print('❌ Erro ao processar resposta: $e');
-      
+
       // Não mostrar erro se for duplicata
       if (e.toString().contains('já foi respondida')) {
         _showInfo('Esta notificação já foi processada');
@@ -129,7 +133,8 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
   @override
   Widget build(BuildContext context) {
     final fromUserName = widget.notificationData['fromUserName'] ?? 'Usuário';
-    final message = widget.notificationData['message'] ?? 'Tem interesse em você';
+    final message =
+        widget.notificationData['message'] ?? 'Tem interesse em você';
     final fromUserId = widget.notificationData['fromUserId'];
 
     return Card(
@@ -146,8 +151,11 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
                 CircleAvatar(
                   backgroundColor: Colors.blue,
                   child: Text(
-                    fromUserName.isNotEmpty ? fromUserName[0].toUpperCase() : 'U',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    fromUserName.isNotEmpty
+                        ? fromUserName[0].toUpperCase()
+                        : 'U',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
                 SizedBox(width: 12),
@@ -177,7 +185,9 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _currentStatus == 'accepted' ? Colors.green : Colors.grey,
+                      color: _currentStatus == 'accepted'
+                          ? Colors.green
+                          : Colors.grey,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -200,7 +210,9 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : () => _handleResponse('rejected'),
+                      onPressed: _isProcessing
+                          ? null
+                          : () => _handleResponse('rejected'),
                       icon: _isProcessing
                           ? SizedBox(
                               width: 16,
@@ -218,7 +230,9 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : () => _handleResponse('accepted'),
+                      onPressed: _isProcessing
+                          ? null
+                          : () => _handleResponse('accepted'),
                       icon: _isProcessing
                           ? SizedBox(
                               width: 16,
@@ -250,11 +264,13 @@ class _RobustInterestNotificationState extends State<RobustInterestNotification>
               // Status final
               Center(
                 child: Text(
-                  _currentStatus == 'accepted' 
-                      ? '💕 Interesse aceito!' 
+                  _currentStatus == 'accepted'
+                      ? '💕 Interesse aceito!'
                       : '❌ Interesse rejeitado',
                   style: TextStyle(
-                    color: _currentStatus == 'accepted' ? Colors.green : Colors.grey,
+                    color: _currentStatus == 'accepted'
+                        ? Colors.green
+                        : Colors.grey,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -292,10 +308,12 @@ class RobustInterestNotificationsList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RobustInterestNotificationsListState createState() => _RobustInterestNotificationsListState();
+  _RobustInterestNotificationsListState createState() =>
+      _RobustInterestNotificationsListState();
 }
 
-class _RobustInterestNotificationsListState extends State<RobustInterestNotificationsList> {
+class _RobustInterestNotificationsListState
+    extends State<RobustInterestNotificationsList> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(

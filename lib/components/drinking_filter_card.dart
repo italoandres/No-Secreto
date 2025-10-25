@@ -36,7 +36,8 @@ class DrinkingFilterCard extends StatelessWidget {
                     color: Colors.amber.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.local_bar, color: Colors.amber.shade700, size: 24),
+                  child: Icon(Icons.local_bar,
+                      color: Colors.amber.shade700, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -54,7 +55,8 @@ class DrinkingFilterCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'A pessoa consome bebidas alcoólicas?',
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        style: TextStyle(
+                            fontSize: 13, color: Colors.grey.shade600),
                       ),
                     ],
                   ),
@@ -101,8 +103,9 @@ class DrinkingFilterCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: _drinkingOptions.map((option) {
-                final isSelected = selectedDrinking == option || 
-                    (selectedDrinking == null && option == 'Não tenho preferência');
+                final isSelected = selectedDrinking == option ||
+                    (selectedDrinking == null &&
+                        option == 'Não tenho preferência');
                 return FilterChip(
                   label: Text(
                     option,
@@ -114,13 +117,16 @@ class DrinkingFilterCard extends StatelessWidget {
                   ),
                   selected: isSelected,
                   onSelected: (_) {
-                    onDrinkingChanged(option == 'Não tenho preferência' ? null : option);
+                    onDrinkingChanged(
+                        option == 'Não tenho preferência' ? null : option);
                   },
                   backgroundColor: Colors.grey.shade100,
                   selectedColor: Colors.amber.shade700,
                   checkmarkColor: Colors.white,
                   side: BorderSide(
-                    color: isSelected ? Colors.amber.shade700 : Colors.grey.shade300,
+                    color: isSelected
+                        ? Colors.amber.shade700
+                        : Colors.grey.shade300,
                   ),
                 );
               }).toList(),

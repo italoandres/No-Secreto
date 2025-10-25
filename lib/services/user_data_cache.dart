@@ -9,7 +9,7 @@ class UserDataCache {
   final DateTime cachedAt;
   final bool isValid;
   final Map<String, dynamic> fullData;
-  
+
   UserDataCache({
     required this.userId,
     required this.name,
@@ -19,9 +19,10 @@ class UserDataCache {
     required this.isValid,
     required this.fullData,
   });
-  
+
   /// Cria instância a partir de dados do Firebase
-  factory UserDataCache.fromFirestore(String userId, Map<String, dynamic> data) {
+  factory UserDataCache.fromFirestore(
+      String userId, Map<String, dynamic> data) {
     return UserDataCache(
       userId: userId,
       name: data['nome'] as String? ?? data['name'] as String? ?? 'Usuário',
@@ -32,7 +33,7 @@ class UserDataCache {
       fullData: Map<String, dynamic>.from(data),
     );
   }
-  
+
   /// Verifica se o cache ainda é válido (5 minutos)
   bool get isCacheValid {
     final now = DateTime.now();
@@ -44,14 +45,14 @@ class UserDataCache {
 /// Sistema de cache para dados de usuário
 class UserDataCacheSystem {
   static final Map<String, UserDataCache> _cache = {};
-  
+
   /// Duração do cache em minutos
   static const int CACHE_DURATION_MINUTES = 5;
-  
+
   /// Busca dados do usuário com cache
   static Future<UserDataCache?> getUserData(String userId) async {
     print('📦 [CACHE] Buscando dados para userId: $userId');
-    
+
     // Verificar cache primeiro
     if (_cache.containsKey(userId)) {
       final cached = _cache[userId]!;
@@ -63,7 +64,7 @@ class UserDataCacheSystem {
         _cache.remove(userId);
       }
     }
-    
+
     // Buscar no Firebase
     try {
       print('📦 [CACHE] Buscando no Firebase...');
@@ -71,13 +72,13 @@ class UserDataCacheSystem {
           .collection('users')
           .doc(userId)
           .get();
-      
+
       if (userDoc.exists) {
         final userData = UserDataCache.fromFirestore(userId, userDoc.data()!);
-        
+
         // Salvar no cache
         _cache[userId] = userData;
-        
+
         print('📦 [CACHE] Dados salvos no cache: ${userData.name}');
         return userData;
       } else {
@@ -89,23 +90,23 @@ class UserDataCacheSystem {
       return null;
     }
   }
-  
+
   /// Busca apenas o nome do usuário
   static Future<String> getUserName(String userId) async {
     final userData = await getUserData(userId);
     return userData?.name ?? 'Usuário não encontrado';
   }
-  
+
   /// Pré-carrega dados de múltiplos usuários
   static Future<void> preloadUsers(List<String> userIds) async {
     print('📦 [CACHE] Pré-carregando ${userIds.length} usuários...');
-    
+
     final futures = userIds.map((userId) => getUserData(userId));
     await Future.wait(futures);
-    
+
     print('📦 [CACHE] Pré-carregamento concluído');
   }
-  
+
   /// Invalida cache de um usuário específico
   static void invalidateUser(String userId) {
     if (_cache.containsKey(userId)) {
@@ -113,40 +114,40 @@ class UserDataCacheSystem {
       print('📦 [CACHE] Cache invalidado para userId: $userId');
     }
   }
-  
+
   /// Limpa todo o cache
   static void clearCache() {
     final count = _cache.length;
     _cache.clear();
     print('📦 [CACHE] Cache limpo ($count entradas removidas)');
   }
-  
+
   /// Limpa cache expirado
   static void cleanExpiredCache() {
     final now = DateTime.now();
     final toRemove = <String>[];
-    
+
     _cache.forEach((userId, userData) {
       if (!userData.isCacheValid) {
         toRemove.add(userId);
       }
     });
-    
+
     for (final userId in toRemove) {
       _cache.remove(userId);
     }
-    
+
     if (toRemove.isNotEmpty) {
       print('📦 [CACHE] Cache expirado limpo (${toRemove.length} entradas)');
     }
   }
-  
+
   /// Retorna estatísticas do cache
   static Map<String, dynamic> getCacheStats() {
     final now = DateTime.now();
     int validEntries = 0;
     int expiredEntries = 0;
-    
+
     _cache.forEach((userId, userData) {
       if (userData.isCacheValid) {
         validEntries++;
@@ -154,7 +155,7 @@ class UserDataCacheSystem {
         expiredEntries++;
       }
     });
-    
+
     return {
       'totalEntries': _cache.length,
       'validEntries': validEntries,
@@ -162,23 +163,23 @@ class UserDataCacheSystem {
       'cacheHitRate': validEntries / (_cache.length > 0 ? _cache.length : 1),
     };
   }
-  
+
   /// Força atualização de um usuário
   static Future<UserDataCache?> forceRefreshUser(String userId) async {
     print('📦 [CACHE] Forçando atualização para userId: $userId');
-    
+
     // Remover do cache
     _cache.remove(userId);
-    
+
     // Buscar novamente
     return await getUserData(userId);
   }
-  
+
   /// Verifica se um usuário está no cache
   static bool isUserCached(String userId) {
     return _cache.containsKey(userId) && _cache[userId]!.isCacheValid;
   }
-  
+
   /// Retorna todos os usuários em cache
   static List<UserDataCache> getAllCachedUsers() {
     return _cache.values.where((user) => user.isCacheValid).toList();

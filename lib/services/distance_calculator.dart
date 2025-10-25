@@ -33,9 +33,7 @@ class DistanceCalculator {
 
     // Fórmula de Haversine
     final a = math.pow(math.sin(dLat / 2), 2) +
-        math.cos(lat1Rad) *
-            math.cos(lat2Rad) *
-            math.pow(math.sin(dLon / 2), 2);
+        math.cos(lat1Rad) * math.cos(lat2Rad) * math.pow(math.sin(dLon / 2), 2);
 
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 

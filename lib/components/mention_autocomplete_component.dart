@@ -58,7 +58,8 @@ class MentionAutocompleteComponent extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.alternate_email, color: Color(0xFF39b9ff), size: 16),
+                    const Icon(Icons.alternate_email,
+                        color: Color(0xFF39b9ff), size: 16),
                     const SizedBox(width: 6),
                     Text(
                       'Mencionar usuário',
@@ -71,7 +72,8 @@ class MentionAutocompleteComponent extends StatelessWidget {
                     const Spacer(),
                     GestureDetector(
                       onTap: onDismiss,
-                      child: const Icon(Icons.close, color: Color(0xFF39b9ff), size: 16),
+                      child: const Icon(Icons.close,
+                          color: Color(0xFF39b9ff), size: 16),
                     ),
                   ],
                 ),

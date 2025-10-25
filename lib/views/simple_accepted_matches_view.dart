@@ -13,23 +13,24 @@ class SimpleAcceptedMatchesView extends StatefulWidget {
   const SimpleAcceptedMatchesView({super.key});
 
   @override
-  State<SimpleAcceptedMatchesView> createState() => _SimpleAcceptedMatchesViewState();
+  State<SimpleAcceptedMatchesView> createState() =>
+      _SimpleAcceptedMatchesViewState();
 }
 
 class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   final _repository = SimpleAcceptedMatchesRepository();
-  
+
   // ✨ NOVO: Mapa para armazenar status online de cada usuário
   final Map<String, bool> _userOnlineStatus = {};
   final Map<String, Timestamp?> _userLastSeen = {};
   final Map<String, StreamSubscription> _statusSubscriptions = {};
-  
+
   @override
   void initState() {
     super.initState();
     debugPrint('🔍 [MATCHES_VIEW] Iniciando stream de matches aceitos');
   }
-  
+
   @override
   void dispose() {
     // ✨ NOVO: Cancelar todas as subscriptions de status
@@ -38,13 +39,13 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
     }
     super.dispose();
   }
-  
+
   // ✨ NOVO: Iniciar listener do status de um usuário
   void _startListeningToUserStatus(String userId) {
     if (_statusSubscriptions.containsKey(userId)) {
       return; // Já está ouvindo
     }
-    
+
     final subscription = FirebaseFirestore.instance
         .collection('usuarios')
         .doc(userId)
@@ -58,7 +59,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
         });
       }
     });
-    
+
     _statusSubscriptions[userId] = subscription;
   }
 
@@ -90,7 +91,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
 
   Widget _buildBody() {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return Center(
         child: Column(
@@ -150,7 +151,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
         }
 
         final matches = snapshot.data ?? [];
-        
+
         debugPrint('📊 [MATCHES_VIEW] Matches recebidos: ${matches.length}');
 
         // Empty
@@ -188,11 +189,11 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
           itemCount: matches.length,
           itemBuilder: (context, index) {
             final match = matches[index];
-            
+
             debugPrint('🎨 [UI] Exibindo match: ${match.otherUserName}');
             debugPrint('   nameWithAge: ${match.nameWithAge}');
             debugPrint('   formattedLocation: ${match.formattedLocation}');
-            
+
             return _buildMatchCard(match);
           },
         );
@@ -203,7 +204,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   Widget _buildMatchCard(AcceptedMatchModel match) {
     // ✨ NOVO: Iniciar listener do status deste usuário
     _startListeningToUserStatus(match.otherUserId);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -248,7 +249,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                   ],
                 ),
                 const SizedBox(width: 16),
-                
+
                 // Informações principais
                 Expanded(
                   child: Column(
@@ -264,7 +265,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      
+
                       // Cidade (sempre mostrar, mesmo que vazia)
                       Row(
                         children: [
@@ -275,24 +276,24 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            match.formattedLocation.isNotEmpty 
-                                ? match.formattedLocation 
+                            match.formattedLocation.isNotEmpty
+                                ? match.formattedLocation
                                 : 'Localização não informada',
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: match.formattedLocation.isNotEmpty 
-                                  ? Colors.grey[600] 
+                              color: match.formattedLocation.isNotEmpty
+                                  ? Colors.grey[600]
                                   : Colors.grey[400],
-                              fontStyle: match.formattedLocation.isEmpty 
-                                  ? FontStyle.italic 
+                              fontStyle: match.formattedLocation.isEmpty
+                                  ? FontStyle.italic
                                   : FontStyle.normal,
                             ),
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Data do match + Dias restantes (discreto)
                       Row(
                         children: [
@@ -330,7 +331,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                     ],
                   ),
                 ),
-                
+
                 // Badge de mensagens não lidas
                 if (match.hasUnreadMessages)
                   Container(
@@ -373,9 +374,9 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [
@@ -406,13 +407,14 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Botão Conversar
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: match.chatExpired ? null : () => _openChat(match),
+                    onPressed:
+                        match.chatExpired ? null : () => _openChat(match),
                     icon: const Icon(Icons.chat_bubble_rounded, size: 18),
                     label: Text(
                       'Conversar',
@@ -422,8 +424,8 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: match.chatExpired 
-                          ? Colors.grey[300] 
+                      backgroundColor: match.chatExpired
+                          ? Colors.grey[300]
                           : const Color(0xFFFF6B9D),
                       foregroundColor: Colors.white,
                       elevation: match.chatExpired ? 0 : 4,
@@ -431,8 +433,8 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      shadowColor: match.chatExpired 
-                          ? Colors.transparent 
+                      shadowColor: match.chatExpired
+                          ? Colors.transparent
                           : const Color(0xFFFF6B9D).withValues(alpha: 0.4),
                     ),
                   ),
@@ -446,7 +448,8 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   }
 
   Widget _buildModernAvatar(AcceptedMatchModel match) {
-    final hasPhoto = match.otherUserPhoto != null && match.otherUserPhoto!.isNotEmpty;
+    final hasPhoto =
+        match.otherUserPhoto != null && match.otherUserPhoto!.isNotEmpty;
 
     return Container(
       width: 64,
@@ -471,7 +474,8 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
         child: CircleAvatar(
           radius: 30,
           backgroundColor: Colors.white,
-          backgroundImage: hasPhoto ? NetworkImage(match.otherUserPhoto!) : null,
+          backgroundImage:
+              hasPhoto ? NetworkImage(match.otherUserPhoto!) : null,
           onBackgroundImageError: hasPhoto
               ? (exception, stackTrace) {
                   debugPrint('Erro ao carregar foto: $exception');
@@ -497,20 +501,20 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   // ✨ NOVO: Calcular cor do status online (copiado do ChatView)
   Color _getOnlineStatusColor(String userId) {
     final lastSeen = _userLastSeen[userId];
-    
+
     if (lastSeen == null) return Colors.grey; // Sem dados = offline
-    
+
     final now = DateTime.now();
     final lastSeenDate = lastSeen.toDate();
     final difference = now.difference(lastSeenDate);
-    
+
     final isOnline = _userOnlineStatus[userId] ?? false;
-    
+
     // Online: verde (se isOnline = true E lastSeen < 5 minutos)
     if (isOnline && difference.inMinutes < 5) {
       return Colors.green;
     }
-    
+
     // Offline: cinza
     return Colors.grey;
   }

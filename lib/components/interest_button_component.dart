@@ -22,7 +22,8 @@ class InterestButtonComponent extends StatefulWidget {
   });
 
   @override
-  State<InterestButtonComponent> createState() => _InterestButtonComponentState();
+  State<InterestButtonComponent> createState() =>
+      _InterestButtonComponentState();
 }
 
 class _InterestButtonComponentState extends State<InterestButtonComponent> {
@@ -40,7 +41,8 @@ class _InterestButtonComponentState extends State<InterestButtonComponent> {
       final currentUserId = FirebaseAuth.instance.currentUser?.uid;
       if (currentUserId == null) return;
 
-      final hasInterest = await InterestNotificationRepository.hasUserShownInterest(
+      final hasInterest =
+          await InterestNotificationRepository.hasUserShownInterest(
         currentUserId,
         widget.targetUserId,
       );
@@ -66,10 +68,11 @@ class _InterestButtonComponentState extends State<InterestButtonComponent> {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ElevatedButton(
-        onPressed: _hasShownInterest ? null : (_isLoading ? null : _showInterest),
+        onPressed:
+            _hasShownInterest ? null : (_isLoading ? null : _showInterest),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _hasShownInterest 
-              ? Colors.grey.shade400 
+          backgroundColor: _hasShownInterest
+              ? Colors.grey.shade400
               : const Color(0xFFfc6aeb),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -124,37 +127,40 @@ class _InterestButtonComponentState extends State<InterestButtonComponent> {
       // Buscar dados do usuário do Firestore se não foram passados
       String fromUserName;
       String fromUserEmail;
-      
+
       if (widget.currentUser != null) {
         // Usar dados passados como parâmetro
         fromUserName = widget.currentUser!.nome ?? 'Usuário';
         fromUserEmail = widget.currentUser!.email ?? currentUser.email ?? '';
       } else {
         // Buscar do Firestore
-        print('🔍 [INTEREST_BUTTON] Buscando dados do usuário do Firestore: ${currentUser.uid}');
-        
+        print(
+            '🔍 [INTEREST_BUTTON] Buscando dados do usuário do Firestore: ${currentUser.uid}');
+
         final userDoc = await FirebaseFirestore.instance
             .collection('usuarios')
             .doc(currentUser.uid)
             .get();
-        
+
         if (!userDoc.exists) {
           throw Exception('Dados do usuário não encontrados');
         }
-        
+
         final userData = userDoc.data()!;
         fromUserName = userData['nome'] ?? userData['username'] ?? 'Usuário';
         fromUserEmail = userData['email'] ?? currentUser.email ?? '';
-        
-        print('✅ [INTEREST_BUTTON] Dados obtidos: nome=$fromUserName, email=$fromUserEmail');
+
+        print(
+            '✅ [INTEREST_BUTTON] Dados obtidos: nome=$fromUserName, email=$fromUserEmail');
       }
 
       if (fromUserEmail.isEmpty) {
         throw Exception('Email do usuário não encontrado');
       }
-      
+
       if (fromUserName.isEmpty || fromUserName == 'Usuário') {
-        print('⚠️ [INTEREST_BUTTON] Nome do usuário está vazio ou genérico: "$fromUserName"');
+        print(
+            '⚠️ [INTEREST_BUTTON] Nome do usuário está vazio ou genérico: "$fromUserName"');
       }
 
       print('💕 [INTEREST_BUTTON] Criando notificação de interesse:');
@@ -188,7 +194,6 @@ class _InterestButtonComponentState extends State<InterestButtonComponent> {
         duration: const Duration(seconds: 3),
         snackPosition: SnackPosition.BOTTOM,
       );
-
     } catch (e) {
       Get.snackbar(
         'Erro',
@@ -283,25 +288,29 @@ class CompactInterestButton extends StatelessWidget {
       }
 
       // Buscar dados do usuário do Firestore
-      print('🔍 [INTEREST_BUTTON_COMPACT] Buscando dados do usuário do Firestore: ${currentUser.uid}');
-      
+      print(
+          '🔍 [INTEREST_BUTTON_COMPACT] Buscando dados do usuário do Firestore: ${currentUser.uid}');
+
       final userDoc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(currentUser.uid)
           .get();
-      
+
       if (!userDoc.exists) {
         throw Exception('Dados do usuário não encontrados');
       }
-      
+
       final userData = userDoc.data()!;
-      final fromUserName = userData['nome'] ?? userData['username'] ?? 'Usuário';
+      final fromUserName =
+          userData['nome'] ?? userData['username'] ?? 'Usuário';
       final fromUserEmail = userData['email'] ?? currentUser.email ?? '';
-      
-      print('✅ [INTEREST_BUTTON_COMPACT] Dados obtidos: nome=$fromUserName, email=$fromUserEmail');
-      
+
+      print(
+          '✅ [INTEREST_BUTTON_COMPACT] Dados obtidos: nome=$fromUserName, email=$fromUserEmail');
+
       if (fromUserName.isEmpty || fromUserName == 'Usuário') {
-        print('⚠️ [INTEREST_BUTTON_COMPACT] Nome do usuário está vazio ou genérico: "$fromUserName"');
+        print(
+            '⚠️ [INTEREST_BUTTON_COMPACT] Nome do usuário está vazio ou genérico: "$fromUserName"');
       }
 
       print('💕 [INTEREST_BUTTON_COMPACT] Criando notificação de interesse:');
@@ -325,7 +334,6 @@ class CompactInterestButton extends StatelessWidget {
         duration: const Duration(seconds: 2),
         snackPosition: SnackPosition.BOTTOM,
       );
-
     } catch (e) {
       Get.snackbar(
         'Erro',

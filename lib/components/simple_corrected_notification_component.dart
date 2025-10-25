@@ -8,7 +8,7 @@ class SimpleCorrectedNotificationComponent extends StatefulWidget {
   final String userId;
   final Function(String)? onProfileView;
   final Function(String)? onInterestResponse;
-  
+
   const SimpleCorrectedNotificationComponent({
     Key? key,
     required this.userId,
@@ -17,23 +17,22 @@ class SimpleCorrectedNotificationComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SimpleCorrectedNotificationComponent> createState() => 
+  State<SimpleCorrectedNotificationComponent> createState() =>
       _SimpleCorrectedNotificationComponentState();
 }
 
-class _SimpleCorrectedNotificationComponentState 
+class _SimpleCorrectedNotificationComponentState
     extends State<SimpleCorrectedNotificationComponent> {
-  
   List<Map<String, dynamic>> notifications = [];
   bool isLoading = true;
   String? error;
-  
+
   @override
   void initState() {
     super.initState();
     _loadNotifications();
   }
-  
+
   /// Carrega notificações SEM ÍNDICES COMPLEXOS
   Future<void> _loadNotifications() async {
     try {
@@ -41,39 +40,42 @@ class _SimpleCorrectedNotificationComponentState
         isLoading = true;
         error = null;
       });
-      
+
       print('🔄 [SIMPLE_CORRECTED] Carregando notificações SEM ÍNDICES...');
-      
+
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         throw Exception('Usuário não logado');
       }
-      
+
       // Buscar TODAS as notificações (sem filtros complexos)
       final querySnapshot = await FirebaseFirestore.instance
           .collection('notifications')
           .limit(100)
           .get();
-      
-      print('🔄 [SIMPLE_CORRECTED] ${querySnapshot.docs.length} notificações encontradas');
-      
+
+      print(
+          '🔄 [SIMPLE_CORRECTED] ${querySnapshot.docs.length} notificações encontradas');
+
       final List<Map<String, dynamic>> loadedNotifications = [];
-      
+
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
-        
+
         // Filtrar manualmente (sem índices)
         if (_shouldIncludeNotification(data, currentUser.uid, doc.id)) {
           // Aplicar correções
-          final correctedData = _correctNotificationData(data, doc.id, currentUser.uid);
+          final correctedData =
+              _correctNotificationData(data, doc.id, currentUser.uid);
           correctedData['id'] = doc.id;
-          
+
           loadedNotifications.add(correctedData);
-          
-          print('✅ [SIMPLE_CORRECTED] Notificação incluída: ${correctedData['fromUserName']}');
+
+          print(
+              '✅ [SIMPLE_CORRECTED] Notificação incluída: ${correctedData['fromUserName']}');
         }
       }
-      
+
       // Ordenar por data (manualmente)
       loadedNotifications.sort((a, b) {
         final aTime = a['createdAt'] as Timestamp?;
@@ -81,14 +83,14 @@ class _SimpleCorrectedNotificationComponentState
         if (aTime == null || bTime == null) return 0;
         return bTime.compareTo(aTime);
       });
-      
+
       setState(() {
         notifications = loadedNotifications;
         isLoading = false;
       });
-      
-      print('🎉 [SIMPLE_CORRECTED] ${notifications.length} notificações carregadas com sucesso');
-      
+
+      print(
+          '🎉 [SIMPLE_CORRECTED] ${notifications.length} notificações carregadas com sucesso');
     } catch (e) {
       print('❌ [SIMPLE_CORRECTED] Erro ao carregar notificações: $e');
       setState(() {
@@ -97,7 +99,7 @@ class _SimpleCorrectedNotificationComponentState
       });
     }
   }
-  
+
   /// Verifica se a notificação deve ser incluída (SEM ÍNDICES)
   bool _shouldIncludeNotification(
     Map<String, dynamic> data,
@@ -106,29 +108,31 @@ class _SimpleCorrectedNotificationComponentState
   ) {
     // Verificar tipo
     if (data['type'] != 'interest_match') return false;
-    
+
     // Verificar se não foi lida
     if (data['isRead'] == true) return false;
-    
+
     // Verificar se é para o usuário atual
     final targetUserId = data['userId'] as String?;
     final isForCurrentUser = targetUserId == currentUserId;
-    
+
     // Verificar se é uma notificação conhecida que deve ser corrigida
     final isKnownNotification = notificationId == 'Iu4C9VdYrT0AaAinZEit';
-    
+
     // Verificar se menciona o usuário atual
     final dataString = data.toString().toLowerCase();
-    final mentionsUser = dataString.contains(currentUserId) || 
-                        dataString.contains('itala');
-    
-    final shouldInclude = isForCurrentUser || isKnownNotification || mentionsUser;
-    
-    print('🔍 [SIMPLE_CORRECTED] Notificação $notificationId: incluir=$shouldInclude');
-    
+    final mentionsUser =
+        dataString.contains(currentUserId) || dataString.contains('itala');
+
+    final shouldInclude =
+        isForCurrentUser || isKnownNotification || mentionsUser;
+
+    print(
+        '🔍 [SIMPLE_CORRECTED] Notificação $notificationId: incluir=$shouldInclude');
+
     return shouldInclude;
   }
-  
+
   /// Corrige dados da notificação
   Map<String, dynamic> _correctNotificationData(
     Map<String, dynamic> data,
@@ -136,7 +140,7 @@ class _SimpleCorrectedNotificationComponentState
     String currentUserId,
   ) {
     final corrected = Map<String, dynamic>.from(data);
-    
+
     // Correções específicas conhecidas
     if (notificationId == 'Iu4C9VdYrT0AaAinZEit') {
       corrected['fromUserId'] = '6Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
@@ -144,23 +148,23 @@ class _SimpleCorrectedNotificationComponentState
       corrected['userId'] = currentUserId; // Corrigir destinatário
       print('🔧 [SIMPLE_CORRECTED] Aplicando correções para ITALO2');
     }
-    
+
     // Garantir campos obrigatórios
     corrected['fromUserName'] = corrected['fromUserName'] ?? 'Usuário';
-    corrected['message'] = corrected['content'] ?? 
-                          corrected['message'] ?? 
-                          'Tem interesse em conhecer seu perfil melhor';
-    
+    corrected['message'] = corrected['content'] ??
+        corrected['message'] ??
+        'Tem interesse em conhecer seu perfil melhor';
+
     return corrected;
   }
-  
+
   /// Navega para o perfil do usuário
   Future<void> _viewProfile(Map<String, dynamic> notification) async {
     final userName = notification['fromUserName'] as String;
     final userId = notification['fromUserId'] as String;
-    
+
     print('👤 [SIMPLE_CORRECTED] Visualizando perfil: $userName ($userId)');
-    
+
     Get.snackbar(
       '👤 Abrindo Perfil',
       'Carregando perfil de $userName...',
@@ -168,39 +172,40 @@ class _SimpleCorrectedNotificationComponentState
       colorText: Colors.white,
       duration: const Duration(seconds: 2),
     );
-    
+
     widget.onProfileView?.call(userId);
   }
-  
+
   /// Responde ao interesse
-  Future<void> _respondToInterest(Map<String, dynamic> notification, bool interested) async {
+  Future<void> _respondToInterest(
+      Map<String, dynamic> notification, bool interested) async {
     final userName = notification['fromUserName'] as String;
     final userId = notification['fromUserId'] as String;
     final response = interested ? 'Também Tenho' : 'Não Tenho';
-    
+
     print('💕 [SIMPLE_CORRECTED] Resposta: $response para $userName');
-    
+
     Get.snackbar(
       interested ? '💕 Interesse Mútuo!' : '👋 Resposta Enviada',
-      interested 
+      interested
           ? 'Você também tem interesse em $userName!'
           : 'Resposta enviada para $userName',
       backgroundColor: interested ? Colors.pink : Colors.blue,
       colorText: Colors.white,
       duration: const Duration(seconds: 3),
     );
-    
+
     widget.onInterestResponse?.call(userId);
   }
-  
+
   /// Retorna tempo relativo
   String _getTimeAgo(dynamic timestamp) {
     if (timestamp is! Timestamp) return 'agora';
-    
+
     final now = DateTime.now();
     final time = timestamp.toDate();
     final difference = now.difference(time);
-    
+
     if (difference.inDays > 0) {
       return 'há ${difference.inDays} dia${difference.inDays > 1 ? 's' : ''}';
     } else if (difference.inHours > 0) {
@@ -211,7 +216,7 @@ class _SimpleCorrectedNotificationComponentState
       return 'agora';
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -226,7 +231,7 @@ class _SimpleCorrectedNotificationComponentState
         ),
       );
     }
-    
+
     if (error != null) {
       return Center(
         child: Column(
@@ -244,7 +249,7 @@ class _SimpleCorrectedNotificationComponentState
         ),
       );
     }
-    
+
     if (notifications.isEmpty) {
       return const Center(
         child: Column(
@@ -260,7 +265,7 @@ class _SimpleCorrectedNotificationComponentState
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -290,7 +295,7 @@ class _SimpleCorrectedNotificationComponentState
             ],
           ),
         ),
-        
+
         // Lista de notificações
         Expanded(
           child: ListView.builder(
@@ -304,13 +309,14 @@ class _SimpleCorrectedNotificationComponentState
       ],
     );
   }
-  
+
   /// Constrói card de notificação
   Widget _buildNotificationCard(Map<String, dynamic> notification) {
     final userName = notification['fromUserName'] as String? ?? 'Usuário';
-    final message = notification['message'] as String? ?? 'Tem interesse em você';
+    final message =
+        notification['message'] as String? ?? 'Tem interesse em você';
     final timeAgo = _getTimeAgo(notification['createdAt']);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -355,7 +361,8 @@ class _SimpleCorrectedNotificationComponentState
                 ),
                 // Indicador de correção
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.circular(8),
@@ -371,17 +378,17 @@ class _SimpleCorrectedNotificationComponentState
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Mensagem
             Text(
               message,
               style: const TextStyle(fontSize: 14),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [

@@ -3,7 +3,7 @@ import '../models/accepted_match_model.dart';
 import 'unread_messages_counter.dart';
 
 /// Card que representa um match aceito na lista de chats
-/// 
+///
 /// Funcionalidades:
 /// - Exibe foto, nome e data do match
 /// - Mostra indicador de mensagens não lidas
@@ -71,19 +71,20 @@ class _MatchChatCardState extends State<MatchChatCard>
     final theme = Theme.of(context);
     final isExpired = widget.match.chatExpired;
     final hasUnreadMessages = widget.match.unreadMessages > 0;
-    
+
     // Debug: Verificar dados do match
     debugPrint('🎨 [MATCH_CARD] Exibindo: ${widget.match.otherUserName}');
     debugPrint('   nameWithAge: ${widget.match.nameWithAge}');
     debugPrint('   formattedLocation: ${widget.match.formattedLocation}');
     debugPrint('   otherUserAge: ${widget.match.otherUserAge}');
     debugPrint('   otherUserCity: ${widget.match.otherUserCity}');
-    
+
     return Container(
-      margin: widget.margin ?? const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      margin: widget.margin ??
+          const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 4,
+          ),
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
@@ -119,7 +120,7 @@ class _MatchChatCardState extends State<MatchChatCard>
                       // Foto do usuário com indicador online
                       _buildUserAvatar(),
                       const SizedBox(width: 16),
-                      
+
                       // Informações do match
                       Expanded(
                         child: Column(
@@ -139,7 +140,7 @@ class _MatchChatCardState extends State<MatchChatCard>
                           ],
                         ),
                       ),
-                      
+
                       // Indicadores laterais
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -147,8 +148,7 @@ class _MatchChatCardState extends State<MatchChatCard>
                           _buildTimeIndicator(),
                           const SizedBox(height: 8),
                           _buildUnreadBadge(),
-                          if (!isExpired)
-                            _buildChatIcon(),
+                          if (!isExpired) _buildChatIcon(),
                         ],
                       ),
                     ],
@@ -164,11 +164,12 @@ class _MatchChatCardState extends State<MatchChatCard>
 
   Widget _buildUserAvatar() {
     final hasPhoto = widget.match.otherUserPhoto != null;
-    
+
     return Stack(
       children: [
         Hero(
-          tag: 'chat_profile_${widget.match.chatId}_${widget.match.otherUserId}',
+          tag:
+              'chat_profile_${widget.match.chatId}_${widget.match.otherUserId}',
           child: Container(
             width: 60,
             height: 60,
@@ -202,7 +203,7 @@ class _MatchChatCardState extends State<MatchChatCard>
                 : _buildDefaultAvatar(),
           ),
         ),
-        
+
         // Indicador online (se habilitado)
         if (widget.showOnlineStatus)
           Positioned(
@@ -246,9 +247,9 @@ class _MatchChatCardState extends State<MatchChatCard>
   Widget _buildUserName() {
     final theme = Theme.of(context);
     final isExpired = widget.match.chatExpired;
-    
+
     return Text(
-      widget.match.nameWithAge,  // MUDADO: Agora exibe nome com idade
+      widget.match.nameWithAge, // MUDADO: Agora exibe nome com idade
       style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.bold,
         color: isExpired
@@ -263,7 +264,7 @@ class _MatchChatCardState extends State<MatchChatCard>
   Widget _buildLocation() {
     final theme = Theme.of(context);
     final isExpired = widget.match.chatExpired;
-    
+
     return Row(
       children: [
         Icon(
@@ -292,7 +293,7 @@ class _MatchChatCardState extends State<MatchChatCard>
   Widget _buildMatchInfo() {
     final theme = Theme.of(context);
     final isExpired = widget.match.chatExpired;
-    
+
     return Text(
       'Match ${widget.match.formattedMatchDate}',
       style: theme.textTheme.bodySmall?.copyWith(
@@ -340,7 +341,7 @@ class _MatchChatCardState extends State<MatchChatCard>
     final theme = Theme.of(context);
     final daysRemaining = widget.match.daysRemaining;
     final isExpired = widget.match.chatExpired;
-    
+
     if (isExpired) {
       return Icon(
         Icons.block,
@@ -348,7 +349,7 @@ class _MatchChatCardState extends State<MatchChatCard>
         color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
       );
     }
-    
+
     Color timeColor;
     if (daysRemaining <= 1) {
       timeColor = Colors.red;
@@ -357,7 +358,7 @@ class _MatchChatCardState extends State<MatchChatCard>
     } else {
       timeColor = Colors.green;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -414,12 +415,13 @@ class MatchChatCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
-      margin: margin ?? const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      margin: margin ??
+          const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 4,
+          ),
       child: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
@@ -446,7 +448,7 @@ class MatchChatCardSkeleton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               // Content skeleton
               Expanded(
                 child: Column(
@@ -472,7 +474,7 @@ class MatchChatCardSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Right side skeleton
               Column(
                 children: [

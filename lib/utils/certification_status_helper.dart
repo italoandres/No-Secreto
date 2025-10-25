@@ -9,15 +9,16 @@ class CertificationStatusHelper {
   static Future<bool> hasApprovedCertification(String userId) async {
     try {
       print('🔍 Verificando certificação para userId: $userId');
-      
+
       // PRIMEIRO: Verificar TODAS as certificações aprovadas
       final allApproved = await _firestore
           .collection('spiritual_certifications')
           .where('status', isEqualTo: 'approved')
           .get();
-      
-      print('📊 Total de certificações aprovadas no sistema: ${allApproved.docs.length}');
-      
+
+      print(
+          '📊 Total de certificações aprovadas no sistema: ${allApproved.docs.length}');
+
       if (allApproved.docs.isNotEmpty) {
         print('📋 Listando todas as certificações aprovadas:');
         for (var doc in allApproved.docs) {
@@ -28,7 +29,7 @@ class CertificationStatusHelper {
           print('     Status: ${data['status']}');
         }
       }
-      
+
       // SEGUNDO: Buscar específica do usuário
       final snapshot = await _firestore
           .collection('spiritual_certifications')
@@ -36,9 +37,10 @@ class CertificationStatusHelper {
           .where('status', isEqualTo: 'approved')
           .limit(1)
           .get();
-      
-      print('📊 Documentos encontrados para userId $userId: ${snapshot.docs.length}');
-      
+
+      print(
+          '📊 Documentos encontrados para userId $userId: ${snapshot.docs.length}');
+
       if (snapshot.docs.isNotEmpty) {
         final doc = snapshot.docs.first;
         print('✅ Certificação aprovada encontrada:');
@@ -49,7 +51,7 @@ class CertificationStatusHelper {
         print('⚠️ Nenhuma certificação aprovada encontrada para este userId');
         print('💡 Dica: Verifique se o userId no Firestore está correto');
       }
-      
+
       return snapshot.docs.isNotEmpty;
     } catch (e) {
       print('❌ Erro ao verificar certificação: $e');
@@ -79,7 +81,7 @@ class CertificationStatusHelper {
           .where('status', isEqualTo: 'pending')
           .limit(1)
           .get();
-      
+
       return snapshot.docs.isNotEmpty;
     } catch (e) {
       print('❌ Erro ao verificar certificação pendente: $e');

@@ -18,13 +18,13 @@ class RealInterestNotificationsComponent extends StatelessWidget {
       children: [
         // Header com título e botões de debug
         _buildHeader(context),
-        
+
         // Aviso sobre índice Firebase se necessário
         _buildFirebaseIndexWarning(context),
-        
+
         // Lista de notificações reais
         Obx(() => _buildNotificationsList(context)),
-        
+
         // Widget de teste (apenas em debug)
         if (kDebugMode) _buildTestWidget(context),
       ],
@@ -47,9 +47,10 @@ class RealInterestNotificationsComponent extends StatelessWidget {
           ),
           Spacer(),
           Obx(() => Badge(
-            label: Text('${controller.realInterestNotificationsCount.value}'),
-            child: Icon(Icons.notifications),
-          )),
+                label:
+                    Text('${controller.realInterestNotificationsCount.value}'),
+                child: Icon(Icons.notifications),
+              )),
           SizedBox(width: 8),
           IconButton(
             icon: Icon(Icons.refresh),
@@ -126,7 +127,8 @@ class RealInterestNotificationsComponent extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationCard(BuildContext context, RealNotification notification) {
+  Widget _buildNotificationCard(
+      BuildContext context, RealNotification notification) {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
@@ -134,9 +136,7 @@ class RealInterestNotificationsComponent extends StatelessWidget {
           backgroundImage: notification.fromUserPhoto != null
               ? NetworkImage(notification.fromUserPhoto!)
               : null,
-          child: notification.fromUserPhoto == null
-              ? Icon(Icons.person)
-              : null,
+          child: notification.fromUserPhoto == null ? Icon(Icons.person) : null,
         ),
         title: Text(
           notification.fromUserName,
@@ -186,7 +186,8 @@ class RealInterestNotificationsComponent extends StatelessWidget {
                   child: Text('Rejeitar'),
                 ),
               ],
-              onSelected: (value) => _handleNotificationAction(context, notification, value),
+              onSelected: (value) =>
+                  _handleNotificationAction(context, notification, value),
             ),
           ],
         ),
@@ -197,8 +198,8 @@ class RealInterestNotificationsComponent extends StatelessWidget {
 
   Widget _buildTestWidget(BuildContext context) {
     return TestRealNotifications.buildTestWidget(
-      context, 
-      Get.find<MatchesController>().matches.isNotEmpty 
+      context,
+      Get.find<MatchesController>().matches.isNotEmpty
           ? 'current_user_id' // Substitua pelo ID real do usuário atual
           : 'St2kw3cgX2MMPxlLRmBDjYm2nO22', // ID de teste
     );
@@ -221,12 +222,14 @@ class RealInterestNotificationsComponent extends StatelessWidget {
     }
   }
 
-  void _handleNotificationTap(BuildContext context, RealNotification notification) {
+  void _handleNotificationTap(
+      BuildContext context, RealNotification notification) {
     // Implementar navegação para perfil ou chat
     print('Tapped notification: ${notification.id}');
   }
 
-  void _handleNotificationAction(BuildContext context, RealNotification notification, String action) {
+  void _handleNotificationAction(
+      BuildContext context, RealNotification notification, String action) {
     switch (action) {
       case 'view_profile':
         // Implementar navegação para perfil

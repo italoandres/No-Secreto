@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Seção que exibe galeria de fotos do perfil
-/// 
+///
 /// Exibe foto principal e fotos secundárias em um grid
 /// Permite clicar para ver em tela cheia
 class PhotoGallerySection extends StatelessWidget {
@@ -21,7 +21,7 @@ class PhotoGallerySection extends StatelessWidget {
   Widget build(BuildContext context) {
     // Coletar apenas fotos secundárias (não incluir a principal)
     final secondaryPhotos = _getSecondaryPhotos();
-    
+
     // Se não houver fotos secundárias, não renderizar galeria
     if (secondaryPhotos.isEmpty) {
       return const SizedBox.shrink();
@@ -30,28 +30,28 @@ class PhotoGallerySection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
-            children: [
-              if (secondaryPhoto1Url?.isNotEmpty == true)
-                Expanded(
-                  child: _buildSecondaryPhotoItem(
-                    secondaryPhoto1Url!,
-                    0,
-                    secondaryPhotos,
-                  ),
-                ),
-              if (secondaryPhoto1Url?.isNotEmpty == true &&
-                  secondaryPhoto2Url?.isNotEmpty == true)
-                const SizedBox(width: 12),
-              if (secondaryPhoto2Url?.isNotEmpty == true)
-                Expanded(
-                  child: _buildSecondaryPhotoItem(
-                    secondaryPhoto2Url!,
-                    secondaryPhoto1Url?.isNotEmpty == true ? 1 : 0,
-                    secondaryPhotos,
-                  ),
-                ),
-            ],
-          ),
+        children: [
+          if (secondaryPhoto1Url?.isNotEmpty == true)
+            Expanded(
+              child: _buildSecondaryPhotoItem(
+                secondaryPhoto1Url!,
+                0,
+                secondaryPhotos,
+              ),
+            ),
+          if (secondaryPhoto1Url?.isNotEmpty == true &&
+              secondaryPhoto2Url?.isNotEmpty == true)
+            const SizedBox(width: 12),
+          if (secondaryPhoto2Url?.isNotEmpty == true)
+            Expanded(
+              child: _buildSecondaryPhotoItem(
+                secondaryPhoto2Url!,
+                secondaryPhoto1Url?.isNotEmpty == true ? 1 : 0,
+                secondaryPhotos,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -141,12 +141,12 @@ class PhotoGallerySection extends StatelessWidget {
     print('📸 Initial index: $initialIndex');
     print('📸 Photos: $photos');
     print('📸 Photos length: ${photos.length}');
-    
+
     if (photos.isEmpty) {
       print('❌ No photos to display');
       return;
     }
-    
+
     try {
       Get.to(
         () => PhotoViewerScreen(
@@ -163,15 +163,15 @@ class PhotoGallerySection extends StatelessWidget {
   /// Retorna lista apenas de fotos secundárias
   List<String> _getSecondaryPhotos() {
     final photos = <String>[];
-    
+
     if (secondaryPhoto1Url?.isNotEmpty == true) {
       photos.add(secondaryPhoto1Url!);
     }
-    
+
     if (secondaryPhoto2Url?.isNotEmpty == true) {
       photos.add(secondaryPhoto2Url!);
     }
-    
+
     return photos;
   }
 }
@@ -200,7 +200,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
-    
+
     // Debug
     print('📸 PhotoViewerScreen initState');
     print('📸 Photos: ${widget.photos}');
@@ -217,7 +217,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   Widget build(BuildContext context) {
     print('📸 PhotoViewerScreen build');
     print('📸 Photos count: ${widget.photos.length}');
-    
+
     if (widget.photos.isEmpty) {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -241,7 +241,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
         ),
       );
     }
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -259,7 +259,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               itemBuilder: (context, index) {
                 final photoUrl = widget.photos[index];
                 print('📸 Building photo at index $index: $photoUrl');
-                
+
                 return Container(
                   width: double.infinity,
                   height: double.infinity,
@@ -312,7 +312,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 );
               },
             ),
-            
+
             // Botão de fechar
             Positioned(
               top: 16,
@@ -332,7 +332,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 ),
               ),
             ),
-            
+
             // Indicador de posição
             if (widget.photos.length > 1)
               Positioned(
@@ -341,7 +341,8 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 right: 0,
                 child: Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(20),

@@ -2,18 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Serviço para enviar emails de confirmação para administradores
-/// 
+///
 /// Este serviço envia emails aos administradores após:
 /// - Aprovação de certificação
 /// - Reprovação de certificação
-/// 
+///
 /// Os emails incluem:
 /// - Resumo da ação tomada
 /// - Informações do usuário afetado
 /// - Link para o painel administrativo
 /// - Timestamp da ação
 class AdminConfirmationEmailService {
-  static final AdminConfirmationEmailService _instance = 
+  static final AdminConfirmationEmailService _instance =
       AdminConfirmationEmailService._internal();
   factory AdminConfirmationEmailService() => _instance;
   AdminConfirmationEmailService._internal();
@@ -25,7 +25,7 @@ class AdminConfirmationEmailService {
   CollectionReference get _emailsRef => _firestore.collection('mail');
 
   /// Envia email de confirmação de aprovação para o admin
-  /// 
+  ///
   /// [certificationId] - ID da certificação aprovada
   /// [userId] - ID do usuário que teve a certificação aprovada
   /// [userEmail] - Email do usuário
@@ -44,11 +44,13 @@ class AdminConfirmationEmailService {
   }) async {
     try {
       final currentUser = _auth.currentUser;
-      final finalAdminEmail = adminEmail ?? currentUser?.email ?? 'admin@app.com';
-      final finalAdminName = adminName ?? currentUser?.displayName ?? 'Administrador';
-      
+      final finalAdminEmail =
+          adminEmail ?? currentUser?.email ?? 'admin@app.com';
+      final finalAdminName =
+          adminName ?? currentUser?.displayName ?? 'Administrador';
+
       final timestamp = DateTime.now();
-      
+
       // Criar documento de email na coleção 'mail'
       await _emailsRef.add({
         'to': [finalAdminEmail],
@@ -69,9 +71,9 @@ class AdminConfirmationEmailService {
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
-      print('📧 Email de confirmação de aprovação enviado para $finalAdminEmail');
-      
+
+      print(
+          '📧 Email de confirmação de aprovação enviado para $finalAdminEmail');
     } catch (e) {
       print('❌ Erro ao enviar email de confirmação de aprovação: $e');
       // Não falhar a operação principal por causa do email
@@ -79,7 +81,7 @@ class AdminConfirmationEmailService {
   }
 
   /// Envia email de confirmação de reprovação para o admin
-  /// 
+  ///
   /// [certificationId] - ID da certificação reprovada
   /// [userId] - ID do usuário que teve a certificação reprovada
   /// [userEmail] - Email do usuário
@@ -100,11 +102,13 @@ class AdminConfirmationEmailService {
   }) async {
     try {
       final currentUser = _auth.currentUser;
-      final finalAdminEmail = adminEmail ?? currentUser?.email ?? 'admin@app.com';
-      final finalAdminName = adminName ?? currentUser?.displayName ?? 'Administrador';
-      
+      final finalAdminEmail =
+          adminEmail ?? currentUser?.email ?? 'admin@app.com';
+      final finalAdminName =
+          adminName ?? currentUser?.displayName ?? 'Administrador';
+
       final timestamp = DateTime.now();
-      
+
       // Criar documento de email na coleção 'mail'
       await _emailsRef.add({
         'to': [finalAdminEmail],
@@ -126,9 +130,9 @@ class AdminConfirmationEmailService {
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
-      print('📧 Email de confirmação de reprovação enviado para $finalAdminEmail');
-      
+
+      print(
+          '📧 Email de confirmação de reprovação enviado para $finalAdminEmail');
     } catch (e) {
       print('❌ Erro ao enviar email de confirmação de reprovação: $e');
       // Não falhar a operação principal por causa do email
@@ -136,7 +140,7 @@ class AdminConfirmationEmailService {
   }
 
   /// Envia email de resumo diário para administradores
-  /// 
+  ///
   /// [adminEmail] - Email do administrador
   /// [adminName] - Nome do administrador
   /// [approvedCount] - Número de certificações aprovadas no dia
@@ -151,7 +155,7 @@ class AdminConfirmationEmailService {
   }) async {
     try {
       final timestamp = DateTime.now();
-      
+
       await _emailsRef.add({
         'to': [adminEmail],
         'template': {
@@ -164,21 +168,21 @@ class AdminConfirmationEmailService {
             'pendingCount': pendingCount,
             'totalProcessed': approvedCount + rejectedCount,
             'panelLink': _getPanelLink(),
-            'subject': '📊 Resumo Diário de Certificações - ${_formatDate(timestamp)}',
+            'subject':
+                '📊 Resumo Diário de Certificações - ${_formatDate(timestamp)}',
           },
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       print('📧 Email de resumo diário enviado para $adminEmail');
-      
     } catch (e) {
       print('❌ Erro ao enviar email de resumo diário: $e');
     }
   }
 
   /// Envia email de alerta para administradores
-  /// 
+  ///
   /// [adminEmail] - Email do administrador
   /// [adminName] - Nome do administrador
   /// [alertType] - Tipo de alerta (ex: 'pending_overflow', 'suspicious_activity')
@@ -193,7 +197,7 @@ class AdminConfirmationEmailService {
   }) async {
     try {
       final timestamp = DateTime.now();
-      
+
       await _emailsRef.add({
         'to': [adminEmail],
         'template': {
@@ -210,16 +214,15 @@ class AdminConfirmationEmailService {
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       print('📧 Email de alerta enviado para $adminEmail');
-      
     } catch (e) {
       print('❌ Erro ao enviar email de alerta: $e');
     }
   }
 
   /// Envia email para múltiplos administradores
-  /// 
+  ///
   /// [adminEmails] - Lista de emails dos administradores
   /// [subject] - Assunto do email
   /// [templateName] - Nome do template a ser usado
@@ -243,9 +246,8 @@ class AdminConfirmationEmailService {
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       print('📧 Email enviado para ${adminEmails.length} administradores');
-      
     } catch (e) {
       print('❌ Erro ao enviar email para múltiplos admins: $e');
     }
@@ -259,15 +261,14 @@ class AdminConfirmationEmailService {
           .collection('usuarios')
           .where('role', isEqualTo: 'admin')
           .get();
-      
+
       final adminEmails = adminsSnapshot.docs
           .map((doc) => doc.data()['email'] as String?)
           .where((email) => email != null && email.isNotEmpty)
           .cast<String>()
           .toList();
-      
+
       return adminEmails;
-      
     } catch (e) {
       print('❌ Erro ao buscar emails de administradores: $e');
       return [];
@@ -275,7 +276,7 @@ class AdminConfirmationEmailService {
   }
 
   /// Envia notificação para todos os administradores
-  /// 
+  ///
   /// [subject] - Assunto do email
   /// [templateName] - Nome do template
   /// [templateData] - Dados para o template
@@ -286,19 +287,18 @@ class AdminConfirmationEmailService {
   }) async {
     try {
       final adminEmails = await getAdminEmails();
-      
+
       if (adminEmails.isEmpty) {
         print('⚠️ Nenhum administrador encontrado para notificar');
         return;
       }
-      
+
       await sendToMultipleAdmins(
         adminEmails: adminEmails,
         subject: subject,
         templateName: templateName,
         templateData: templateData,
       );
-      
     } catch (e) {
       print('❌ Erro ao notificar todos os administradores: $e');
     }
@@ -311,7 +311,7 @@ class AdminConfirmationEmailService {
     final year = date.year;
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
-    
+
     return '$day/$month/$year às $hour:$minute';
   }
 
@@ -337,9 +337,8 @@ class AdminConfirmationEmailService {
         },
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       print('📧 Email de teste enviado para $adminEmail');
-      
     } catch (e) {
       print('❌ Erro ao enviar email de teste: $e');
       rethrow;

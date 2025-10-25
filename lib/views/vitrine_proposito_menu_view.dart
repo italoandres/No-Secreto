@@ -62,7 +62,6 @@ class VitrinePropositoMenuView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +137,8 @@ class VitrinePropositoMenuView extends StatelessWidget {
                     final validDocs = snapshot.docs.where((doc) {
                       final data = doc.data() as Map<String, dynamic>;
                       final type = data['type'] ?? 'interest';
-                      return ['interest', 'acceptance', 'mutual_match'].contains(type);
+                      return ['interest', 'acceptance', 'mutual_match']
+                          .contains(type);
                     }).toList();
                     return validDocs.length;
                   }),
@@ -228,7 +228,7 @@ class VitrinePropositoMenuView extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     if (count == 0) return const SizedBox.shrink();
-                    
+
                     return Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,

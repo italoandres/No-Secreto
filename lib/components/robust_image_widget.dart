@@ -19,7 +19,7 @@ class RobustImageWidget extends StatefulWidget {
   final Duration retryDelay;
   final Widget? loadingWidget;
   final Widget? errorWidget;
-  
+
   const RobustImageWidget({
     super.key,
     this.imageUrl,
@@ -66,7 +66,7 @@ class _RobustImageWidgetState extends State<RobustImageWidget> {
   @override
   Widget build(BuildContext context) {
     Widget imageWidget;
-    
+
     if (_currentImageUrl?.isNotEmpty == true) {
       imageWidget = CachedNetworkImage(
         imageUrl: _currentImageUrl!,
@@ -82,14 +82,14 @@ class _RobustImageWidgetState extends State<RobustImageWidget> {
     } else {
       imageWidget = _buildFallbackWidget();
     }
-    
+
     if (widget.borderRadius != null) {
       imageWidget = ClipRRect(
         borderRadius: widget.borderRadius!,
         child: imageWidget,
       );
     }
-    
+
     return imageWidget;
   }
 
@@ -97,7 +97,7 @@ class _RobustImageWidgetState extends State<RobustImageWidget> {
     if (widget.loadingWidget != null) {
       return widget.loadingWidget!;
     }
-    
+
     return Container(
       width: widget.width,
       height: widget.height,
@@ -119,32 +119,29 @@ class _RobustImageWidgetState extends State<RobustImageWidget> {
   }
 
   Widget _buildErrorWidget(dynamic error) {
-    EnhancedLogger.warning('Image load failed', 
-      tag: 'ROBUST_IMAGE',
-      data: {
-        'url': _currentImageUrl,
-        'error': error.toString(),
-        'retryCount': _retryCount,
-      }
-    );
-    
+    EnhancedLogger.warning('Image load failed', tag: 'ROBUST_IMAGE', data: {
+      'url': _currentImageUrl,
+      'error': error.toString(),
+      'retryCount': _retryCount,
+    });
+
     // Se retry está habilitado e ainda temos tentativas
     if (widget.enableRetry && _retryCount < widget.maxRetries && !_isRetrying) {
       _scheduleRetry();
     }
-    
+
     if (widget.errorWidget != null) {
       return widget.errorWidget!;
     }
-    
+
     if (_isRetrying) {
       return _buildRetryingWidget();
     }
-    
+
     if (widget.showInitialsOnError) {
       return _buildFallbackWidget();
     }
-    
+
     return _buildDefaultErrorWidget();
   }
 
@@ -230,16 +227,13 @@ class _RobustImageWidgetState extends State<RobustImageWidget> {
   void _scheduleRetry() {
     _isRetrying = true;
     _retryCount++;
-    
-    EnhancedLogger.info('Scheduling image retry', 
-      tag: 'ROBUST_IMAGE',
-      data: {
-        'url': _currentImageUrl,
-        'retryCount': _retryCount,
-        'maxRetries': widget.maxRetries,
-      }
-    );
-    
+
+    EnhancedLogger.info('Scheduling image retry', tag: 'ROBUST_IMAGE', data: {
+      'url': _currentImageUrl,
+      'retryCount': _retryCount,
+      'maxRetries': widget.maxRetries,
+    });
+
     Future.delayed(widget.retryDelay, () {
       if (mounted) {
         setState(() {
@@ -264,7 +258,7 @@ class ProfileImageWidget extends StatelessWidget {
   final bool showBorder;
   final Color? borderColor;
   final bool enableRetry;
-  
+
   const ProfileImageWidget({
     super.key,
     this.imageUrl,
@@ -286,7 +280,7 @@ class ProfileImageWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(size / 2),
       enableRetry: enableRetry,
     );
-    
+
     if (showBorder) {
       imageWidget = Container(
         width: size + 4,
@@ -301,7 +295,7 @@ class ProfileImageWidget extends StatelessWidget {
         child: imageWidget,
       );
     }
-    
+
     return imageWidget;
   }
 }
@@ -315,7 +309,7 @@ class ImageGalleryWidget extends StatelessWidget {
   final double crossAxisSpacing;
   final double mainAxisSpacing;
   final Function(String imageUrl, int index)? onImageTap;
-  
+
   const ImageGalleryWidget({
     super.key,
     required this.imageUrls,
@@ -358,7 +352,7 @@ class ImageGalleryWidget extends StatelessWidget {
         ),
       );
     }
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -371,7 +365,7 @@ class ImageGalleryWidget extends StatelessWidget {
       itemCount: imageUrls.length,
       itemBuilder: (context, index) {
         final imageUrl = imageUrls[index];
-        
+
         return GestureDetector(
           onTap: onImageTap != null ? () => onImageTap!(imageUrl, index) : null,
           child: RobustImageWidget(
@@ -392,7 +386,7 @@ class ImagePreviewWidget extends StatelessWidget {
   final String fallbackText;
   final bool showCloseButton;
   final VoidCallback? onClose;
-  
+
   const ImagePreviewWidget({
     super.key,
     required this.imageUrl,
@@ -419,7 +413,6 @@ class ImagePreviewWidget extends StatelessWidget {
               ),
             ),
           ),
-          
           if (showCloseButton)
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,

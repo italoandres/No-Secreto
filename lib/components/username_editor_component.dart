@@ -11,7 +11,7 @@ class UsernameEditorComponent extends StatefulWidget {
   final String? currentUsername;
   final Function(String newUsername)? onUsernameChanged;
   final bool showSuggestions;
-  
+
   const UsernameEditorComponent({
     super.key,
     required this.userId,
@@ -21,13 +21,14 @@ class UsernameEditorComponent extends StatefulWidget {
   });
 
   @override
-  State<UsernameEditorComponent> createState() => _UsernameEditorComponentState();
+  State<UsernameEditorComponent> createState() =>
+      _UsernameEditorComponentState();
 }
 
 class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  
+
   bool _isEditing = false;
   bool _isLoading = false;
   bool _isValidating = false;
@@ -41,7 +42,7 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
     super.initState();
     _controller.text = widget.currentUsername ?? '';
     _loadChangeInfo();
-    
+
     // Debounce para validação
     _controller.addListener(_onUsernameChanged);
   }
@@ -62,20 +63,17 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
         });
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to load username change info', 
-        tag: 'USERNAME_EDITOR', 
-        error: e,
-        data: {'userId': widget.userId}
-      );
+      EnhancedLogger.error('Failed to load username change info',
+          tag: 'USERNAME_EDITOR', error: e, data: {'userId': widget.userId});
     }
   }
 
   void _onUsernameChanged() {
     final username = _controller.text.trim();
-    
+
     // Cancelar validação anterior
     if (_isValidating) return;
-    
+
     // Validar após 500ms de inatividade
     Future.delayed(const Duration(milliseconds: 500), () {
       if (_controller.text.trim() == username && mounted) {
@@ -102,7 +100,8 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
       // Validar formato
       if (!DataValidator.isValidUsernameFormat(username)) {
         setState(() {
-          _validationMessage = 'Username deve ter 3-30 caracteres, começar com letra/número';
+          _validationMessage =
+              'Username deve ter 3-30 caracteres, começar com letra/número';
           _isAvailable = false;
           _isValidating = false;
         });
@@ -110,12 +109,14 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
       }
 
       // Verificar disponibilidade
-      final isAvailable = await UsernameManagementService.isUsernameAvailable(username);
-      
+      final isAvailable =
+          await UsernameManagementService.isUsernameAvailable(username);
+
       if (mounted) {
         setState(() {
           _isAvailable = isAvailable;
-          _validationMessage = isAvailable ? null : 'Este username já está em uso';
+          _validationMessage =
+              isAvailable ? null : 'Este username já está em uso';
           _isValidating = false;
         });
       }
@@ -132,7 +133,7 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
 
   Future<void> _generateSuggestions() async {
     if (!widget.showSuggestions) return;
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -140,8 +141,9 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
     try {
       // Usar nome do usuário ou username atual como base
       final baseName = widget.currentUsername ?? 'user';
-      final suggestions = await UsernameManagementService.generateSuggestions(baseName);
-      
+      final suggestions =
+          await UsernameManagementService.generateSuggestions(baseName);
+
       if (mounted) {
         setState(() {
           _suggestions = suggestions;
@@ -154,16 +156,14 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
           _isLoading = false;
         });
       }
-      EnhancedLogger.error('Failed to generate username suggestions', 
-        tag: 'USERNAME_EDITOR', 
-        error: e
-      );
+      EnhancedLogger.error('Failed to generate username suggestions',
+          tag: 'USERNAME_EDITOR', error: e);
     }
   }
 
   Future<void> _saveUsername() async {
     final newUsername = _controller.text.trim();
-    
+
     if (newUsername == widget.currentUsername) {
       _cancelEditing();
       return;
@@ -180,20 +180,18 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
 
     try {
       final success = await UsernameManagementService.updateUsername(
-        widget.userId, 
-        newUsername
-      );
+          widget.userId, newUsername);
 
       if (success && mounted) {
         setState(() {
           _isEditing = false;
           _isLoading = false;
         });
-        
+
         if (widget.onUsernameChanged != null) {
           widget.onUsernameChanged!(newUsername);
         }
-        
+
         // Recarregar informações de alteração
         await _loadChangeInfo();
       } else {
@@ -205,11 +203,10 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
       setState(() {
         _isLoading = false;
       });
-      EnhancedLogger.error('Failed to save username', 
-        tag: 'USERNAME_EDITOR', 
-        error: e,
-        data: {'userId': widget.userId, 'newUsername': newUsername}
-      );
+      EnhancedLogger.error('Failed to save username',
+          tag: 'USERNAME_EDITOR',
+          error: e,
+          data: {'userId': widget.userId, 'newUsername': newUsername});
     }
   }
 
@@ -223,9 +220,9 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
       _isEditing = true;
       _suggestions.clear();
     });
-    
+
     _focusNode.requestFocus();
-    
+
     if (widget.showSuggestions) {
       _generateSuggestions();
     }
@@ -303,7 +300,7 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _isEditing 
+          color: _isEditing
               ? (_isAvailable ? Colors.blue[300]! : Colors.red[300]!)
               : Colors.grey[300]!,
         ),
@@ -358,13 +355,13 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
         ),
         const SizedBox(height: 2),
         Text(
-          widget.currentUsername?.isNotEmpty == true 
+          widget.currentUsername?.isNotEmpty == true
               ? '@${widget.currentUsername}'
               : 'Definir username',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: widget.currentUsername?.isNotEmpty == true 
+            color: widget.currentUsername?.isNotEmpty == true
                 ? Colors.black87
                 : Colors.grey[500],
           ),
@@ -413,8 +410,8 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
             child: Icon(
               Icons.check,
               size: 18,
-              color: _isAvailable && !_isValidating 
-                  ? Colors.green[600] 
+              color: _isAvailable && !_isValidating
+                  ? Colors.green[600]
                   : Colors.grey[400],
             ),
           ),
@@ -449,23 +446,23 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
     return Row(
       children: [
         Icon(
-          _isValidating 
+          _isValidating
               ? Icons.hourglass_empty
               : (_isAvailable ? Icons.check_circle : Icons.error),
           size: 16,
-          color: _isValidating 
+          color: _isValidating
               ? Colors.orange[600]
               : (_isAvailable ? Colors.green[600] : Colors.red[600]),
         ),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            _isValidating 
+            _isValidating
                 ? 'Verificando disponibilidade...'
                 : (_validationMessage ?? 'Username disponível'),
             style: TextStyle(
               fontSize: 12,
-              color: _isValidating 
+              color: _isValidating
                   ? Colors.orange[600]
                   : (_isAvailable ? Colors.green[600] : Colors.red[600]),
             ),
@@ -491,30 +488,33 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
         Wrap(
           spacing: 8,
           runSpacing: 6,
-          children: _suggestions.map((suggestion) => 
-            GestureDetector(
-              onTap: () {
-                _controller.text = suggestion;
-                _validateUsername(suggestion);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.blue[200]!),
-                ),
-                child: Text(
-                  '@$suggestion',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue[700],
-                    fontWeight: FontWeight.w500,
+          children: _suggestions
+              .map(
+                (suggestion) => GestureDetector(
+                  onTap: () {
+                    _controller.text = suggestion;
+                    _validateUsername(suggestion);
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Text(
+                      '@$suggestion',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ).toList(),
+              )
+              .toList(),
         ),
       ],
     );
@@ -522,7 +522,7 @@ class _UsernameEditorComponentState extends State<UsernameEditorComponent> {
 
   Widget _buildChangeRestriction() {
     final info = _changeInfo!;
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

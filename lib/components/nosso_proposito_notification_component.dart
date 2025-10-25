@@ -10,18 +10,19 @@ class NossoPropositoNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
 
     return StreamBuilder<int>(
-      stream: NotificationService.getContextUnreadCount(currentUser.uid, 'nosso_proposito'),
+      stream: NotificationService.getContextUnreadCount(
+          currentUser.uid, 'nosso_proposito'),
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;
-        
+
         return Container(
-          width: 50, 
+          width: 50,
           height: 50,
           margin: const EdgeInsets.only(left: 16),
           child: ElevatedButton(
@@ -45,7 +46,7 @@ class NossoPropositoNotificationComponent extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                
+
                 // Badge com contador (só aparece se houver notificações)
                 if (unreadCount > 0)
                   Positioned(
@@ -87,17 +88,17 @@ class NossoPropositoNotificationComponent extends StatelessWidget {
 
 // Versão com animação para quando há notificações
 class AnimatedNossoPropositoNotificationComponent extends StatefulWidget {
-  const AnimatedNossoPropositoNotificationComponent({Key? key}) : super(key: key);
+  const AnimatedNossoPropositoNotificationComponent({Key? key})
+      : super(key: key);
 
   @override
-  State<AnimatedNossoPropositoNotificationComponent> createState() => 
+  State<AnimatedNossoPropositoNotificationComponent> createState() =>
       _AnimatedNossoPropositoNotificationComponentState();
 }
 
-class _AnimatedNossoPropositoNotificationComponentState 
+class _AnimatedNossoPropositoNotificationComponentState
     extends State<AnimatedNossoPropositoNotificationComponent>
     with SingleTickerProviderStateMixin {
-  
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -108,7 +109,7 @@ class _AnimatedNossoPropositoNotificationComponentState
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.1,
@@ -136,16 +137,17 @@ class _AnimatedNossoPropositoNotificationComponentState
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
 
     return StreamBuilder<int>(
-      stream: NotificationService.getContextUnreadCount(currentUser.uid, 'nosso_proposito'),
+      stream: NotificationService.getContextUnreadCount(
+          currentUser.uid, 'nosso_proposito'),
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;
-        
+
         // Controlar animação baseado nas notificações
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (unreadCount > 0) {
@@ -154,14 +156,14 @@ class _AnimatedNossoPropositoNotificationComponentState
             _stopPulseAnimation();
           }
         });
-        
+
         return AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, child) {
             return Transform.scale(
               scale: unreadCount > 0 ? _scaleAnimation.value : 1.0,
               child: Container(
-                width: 50, 
+                width: 50,
                 height: 50,
                 margin: const EdgeInsets.only(left: 16),
                 child: ElevatedButton(
@@ -186,7 +188,7 @@ class _AnimatedNossoPropositoNotificationComponentState
                           size: 24,
                         ),
                       ),
-                      
+
                       // Badge com contador
                       if (unreadCount > 0)
                         Positioned(

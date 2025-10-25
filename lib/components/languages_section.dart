@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Seção que exibe idiomas falados pelo usuário
-/// 
+///
 /// Exibe lista de idiomas em formato de lista com ícones
 class LanguagesSection extends StatelessWidget {
   final List<String>? languages;
@@ -122,14 +122,14 @@ class LanguagesSection extends StatelessWidget {
   /// Extrai o nível do idioma
   String _getLevel(String language) {
     if (!_hasLevel(language)) return '';
-    
+
     final start = language.indexOf('(');
     final end = language.indexOf(')');
-    
+
     if (start != -1 && end != -1 && end > start) {
       return language.substring(start + 1, end);
     }
-    
+
     return '';
   }
 }

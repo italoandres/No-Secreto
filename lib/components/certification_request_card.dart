@@ -3,7 +3,7 @@ import '../models/certification_request_model.dart';
 import 'certification_proof_viewer.dart';
 
 /// Card para exibir solicitação de certificação pendente
-/// 
+///
 /// Exibe:
 /// - Informações do usuário (nome, email, email de compra)
 /// - Data da solicitação
@@ -13,14 +13,14 @@ class CertificationRequestCard extends StatelessWidget {
   final CertificationRequestModel certification;
   final VoidCallback onApprove;
   final Function(String reason) onReject;
-  
+
   const CertificationRequestCard({
     Key? key,
     required this.certification,
     required this.onApprove,
     required this.onReject,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -84,9 +84,9 @@ class CertificationRequestCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             Divider(height: 24),
-            
+
             // Informações da solicitação
             _buildInfoRow(
               Icons.email,
@@ -99,9 +99,9 @@ class CertificationRequestCard extends StatelessWidget {
               'Data da Solicitação',
               _formatDate(certification.createdAt),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Preview do comprovante
             Text(
               'Comprovante',
@@ -112,7 +112,7 @@ class CertificationRequestCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            
+
             GestureDetector(
               onTap: () => _showFullScreenProof(context),
               child: Container(
@@ -200,9 +200,9 @@ class CertificationRequestCard extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [
@@ -244,7 +244,7 @@ class CertificationRequestCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -269,7 +269,7 @@ class CertificationRequestCard extends StatelessWidget {
       ],
     );
   }
-  
+
   void _showFullScreenProof(BuildContext context) {
     Navigator.push(
       context,
@@ -281,7 +281,7 @@ class CertificationRequestCard extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showApprovalDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -349,10 +349,10 @@ class CertificationRequestCard extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showRejectionDialog(BuildContext context) {
     final TextEditingController reasonController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -448,7 +448,7 @@ class CertificationRequestCard extends StatelessWidget {
       ),
     );
   }
-  
+
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} às ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }

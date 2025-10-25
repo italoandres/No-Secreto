@@ -9,7 +9,8 @@ class MatchesButtonWithCounter extends StatefulWidget {
   const MatchesButtonWithCounter({super.key});
 
   @override
-  State<MatchesButtonWithCounter> createState() => _MatchesButtonWithCounterState();
+  State<MatchesButtonWithCounter> createState() =>
+      _MatchesButtonWithCounterState();
 }
 
 class _MatchesButtonWithCounterState extends State<MatchesButtonWithCounter> {
@@ -37,7 +38,7 @@ class _MatchesButtonWithCounterState extends State<MatchesButtonWithCounter> {
       final repository = SimpleAcceptedMatchesRepository();
       final matches = await repository.getAcceptedMatches(currentUser.uid);
       int totalUnread = 0;
-      
+
       for (final match in matches) {
         totalUnread += match.unreadMessages;
       }
@@ -62,7 +63,7 @@ class _MatchesButtonWithCounterState extends State<MatchesButtonWithCounter> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 8),
       child: Stack(
@@ -88,7 +89,7 @@ class _MatchesButtonWithCounterState extends State<MatchesButtonWithCounter> {
               size: 24,
             ),
           ),
-          
+
           // Badge de contador (apenas se houver mensagens não lidas)
           if (!_isLoading && _unreadCount > 0)
             Positioned(
@@ -116,7 +117,7 @@ class _MatchesButtonWithCounterState extends State<MatchesButtonWithCounter> {
                 ),
               ),
             ),
-          
+
           // Indicador de carregamento
           if (_isLoading)
             Positioned(

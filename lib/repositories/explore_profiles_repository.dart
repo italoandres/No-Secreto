@@ -18,10 +18,10 @@ class ExploreProfilesRepository {
     int limit = 20,
   }) async {
     try {
-      EnhancedLogger.info('Fetching verified profiles with robust search system', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'searchQuery': searchQuery, 'limit': limit}
-      );
+      EnhancedLogger.info(
+          'Fetching verified profiles with robust search system',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {'searchQuery': searchQuery, 'limit': limit});
 
       // Usar o novo sistema de busca robusto para perfis verificados
       final filters = SearchFilters(
@@ -37,23 +37,19 @@ class ExploreProfilesRepository {
         useCache: true,
       );
 
-      EnhancedLogger.success('Verified profiles fetched successfully', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'count': result.profiles.length,
-          'strategy': result.strategy,
-          'fromCache': result.fromCache,
-          'executionTime': result.executionTime,
-        }
-      );
+      EnhancedLogger.success('Verified profiles fetched successfully',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'count': result.profiles.length,
+            'strategy': result.strategy,
+            'fromCache': result.fromCache,
+            'executionTime': result.executionTime,
+          });
 
       return result.profiles;
-
     } catch (e) {
-      EnhancedLogger.error('Failed to fetch verified profiles', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'error': e.toString()}
-      );
+      EnhancedLogger.error('Failed to fetch verified profiles',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
 
       // Fallback para método legado
       return await _legacyGetVerifiedProfiles(searchQuery, limit);
@@ -66,10 +62,9 @@ class ExploreProfilesRepository {
     int limit,
   ) async {
     try {
-      EnhancedLogger.warning('Using legacy fallback for verified profiles', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'searchQuery': searchQuery, 'limit': limit}
-      );
+      EnhancedLogger.warning('Using legacy fallback for verified profiles',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {'searchQuery': searchQuery, 'limit': limit});
 
       // Query mais básica possível para evitar problemas de índices
       Query query = _firestore
@@ -78,7 +73,7 @@ class ExploreProfilesRepository {
           .limit(limit * 3); // Buscar mais para compensar filtros
 
       final snapshot = await query.get();
-      
+
       List<SpiritualProfileModel> profiles = snapshot.docs
           .map((doc) {
             try {
@@ -87,10 +82,9 @@ class ExploreProfilesRepository {
                 ...doc.data() as Map<String, dynamic>,
               });
             } catch (e) {
-              EnhancedLogger.warning('Failed to parse profile document', 
-                tag: 'EXPLORE_PROFILES_REPOSITORY',
-                data: {'docId': doc.id, 'error': e.toString()}
-              );
+              EnhancedLogger.warning('Failed to parse profile document',
+                  tag: 'EXPLORE_PROFILES_REPOSITORY',
+                  data: {'docId': doc.id, 'error': e.toString()});
               return null;
             }
           })
@@ -103,7 +97,7 @@ class ExploreProfilesRepository {
         // Filtros obrigatórios
         if (profile.isVerified != true) return false;
         if (profile.hasCompletedCourse != true) return false;
-        
+
         // Filtro de busca textual
         if (searchQuery != null && searchQuery.isNotEmpty) {
           final searchableText = [
@@ -113,35 +107,31 @@ class ExploreProfilesRepository {
             profile.state ?? '',
             ...(profile.interests ?? []),
           ].join(' ').toLowerCase();
-          
+
           final queryWords = searchQuery.toLowerCase().split(' ');
-          final hasMatch = queryWords.any((word) => 
-            word.isNotEmpty && searchableText.contains(word)
-          );
-          
+          final hasMatch = queryWords
+              .any((word) => word.isNotEmpty && searchableText.contains(word));
+
           if (!hasMatch) return false;
         }
-        
+
         return true;
       }).toList();
 
       final result = profiles.take(limit).toList();
 
-      EnhancedLogger.info('Legacy verified profiles fetch completed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'totalFetched': profiles.length,
-          'afterFilters': result.length,
-          'searchQuery': searchQuery,
-        }
-      );
+      EnhancedLogger.info('Legacy verified profiles fetch completed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'totalFetched': profiles.length,
+            'afterFilters': result.length,
+            'searchQuery': searchQuery,
+          });
 
       return result;
     } catch (e) {
-      EnhancedLogger.error('Legacy verified profiles fetch failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'error': e.toString()}
-      );
+      EnhancedLogger.error('Legacy verified profiles fetch failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return [];
     }
   }
@@ -152,10 +142,9 @@ class ExploreProfilesRepository {
     int limit = 20,
   }) async {
     try {
-      EnhancedLogger.info('Fetching profiles by engagement', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'searchQuery': searchQuery, 'limit': limit}
-      );
+      EnhancedLogger.info('Fetching profiles by engagement',
+          tag: 'EXPLORE_PROFILES',
+          data: {'searchQuery': searchQuery, 'limit': limit});
 
       // Primeiro buscar métricas de engajamento
       final engagementQuery = await _firestore
@@ -176,16 +165,19 @@ class ExploreProfilesRepository {
       // Buscar perfis espirituais correspondentes
       Query profilesQuery = _firestore
           .collection('spiritual_profiles')
-          .where('userId', whereIn: userIds.take(10).toList()) // Firestore limit
-          .where('isActive', isEqualTo: true); // 🔧 CORREÇÃO FINAL - apenas perfis ativos
+          .where('userId',
+              whereIn: userIds.take(10).toList()) // Firestore limit
+          .where('isActive',
+              isEqualTo: true); // 🔧 CORREÇÃO FINAL - apenas perfis ativos
 
       // Adicionar filtro de busca se fornecido
       if (searchQuery != null && searchQuery.isNotEmpty) {
-        profilesQuery = profilesQuery.where('searchKeywords', arrayContains: searchQuery.toLowerCase());
+        profilesQuery = profilesQuery.where('searchKeywords',
+            arrayContains: searchQuery.toLowerCase());
       }
 
       final profilesSnapshot = await profilesQuery.get();
-      
+
       final profiles = profilesSnapshot.docs
           .map((doc) => SpiritualProfileModel.fromJson({
                 'id': doc.id,
@@ -200,44 +192,44 @@ class ExploreProfilesRepository {
         return aIndex.compareTo(bIndex);
       });
 
-      EnhancedLogger.success('Profiles by engagement fetched', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'count': profiles.length}
-      );
+      EnhancedLogger.success('Profiles by engagement fetched',
+          tag: 'EXPLORE_PROFILES', data: {'count': profiles.length});
 
       return profiles.take(limit).toList();
     } catch (e) {
-      EnhancedLogger.error('Failed to fetch profiles by engagement', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'error': e.toString()}
-      );
+      EnhancedLogger.error('Failed to fetch profiles by engagement',
+          tag: 'EXPLORE_PROFILES', data: {'error': e.toString()});
       return [];
     }
   }
 
   /// Atualiza métricas de engajamento de um perfil
-  static Future<void> updateEngagementMetrics(String userId, {
+  static Future<void> updateEngagementMetrics(
+    String userId, {
     int? storyCommentsIncrement,
     int? storyLikesIncrement,
     int? screenTimeIncrement,
   }) async {
     try {
       final docRef = _firestore.collection('profile_engagement').doc(userId);
-      
+
       final updateData = <String, dynamic>{
         'lastActivity': Timestamp.now(),
       };
 
       if (storyCommentsIncrement != null) {
-        updateData['storyCommentsCount'] = FieldValue.increment(storyCommentsIncrement);
+        updateData['storyCommentsCount'] =
+            FieldValue.increment(storyCommentsIncrement);
       }
-      
+
       if (storyLikesIncrement != null) {
-        updateData['storyLikesCount'] = FieldValue.increment(storyLikesIncrement);
+        updateData['storyLikesCount'] =
+            FieldValue.increment(storyLikesIncrement);
       }
-      
+
       if (screenTimeIncrement != null) {
-        updateData['totalScreenTime'] = FieldValue.increment(screenTimeIncrement);
+        updateData['totalScreenTime'] =
+            FieldValue.increment(screenTimeIncrement);
       }
 
       await docRef.set(updateData, SetOptions(merge: true));
@@ -245,27 +237,25 @@ class ExploreProfilesRepository {
       // Recalcular score de engajamento
       await _recalculateEngagementScore(userId);
 
-      EnhancedLogger.info('Engagement metrics updated', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('Engagement metrics updated',
+          tag: 'EXPLORE_PROFILES', data: {'userId': userId});
     } catch (e) {
-      EnhancedLogger.error('Failed to update engagement metrics', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'userId': userId, 'error': e.toString()}
-      );
+      EnhancedLogger.error('Failed to update engagement metrics',
+          tag: 'EXPLORE_PROFILES',
+          data: {'userId': userId, 'error': e.toString()});
     }
   }
 
   /// Recalcula score de engajamento
   static Future<void> _recalculateEngagementScore(String userId) async {
     try {
-      final doc = await _firestore.collection('profile_engagement').doc(userId).get();
-      
+      final doc =
+          await _firestore.collection('profile_engagement').doc(userId).get();
+
       if (doc.exists) {
         final engagement = ProfileEngagementModel.fromJson(doc.data()!);
         final newScore = engagement.calculateEngagementScore();
-        
+
         await doc.reference.update({
           'engagementScore': newScore,
           'isEligibleForExploration': engagement.isEligibleForExploration,
@@ -273,10 +263,9 @@ class ExploreProfilesRepository {
         });
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to recalculate engagement score', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'userId': userId, 'error': e.toString()}
-      );
+      EnhancedLogger.error('Failed to recalculate engagement score',
+          tag: 'EXPLORE_PROFILES',
+          data: {'userId': userId, 'error': e.toString()});
     }
   }
 
@@ -293,22 +282,21 @@ class ExploreProfilesRepository {
     bool requireCompletedCourse = false, // 🔧 CORREÇÃO FINAL - padrão alterado
   }) async {
     final startTime = DateTime.now();
-    
+
     try {
-      EnhancedLogger.info('Searching profiles with layered strategy system', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'query': query,
-          'minAge': minAge,
-          'maxAge': maxAge,
-          'city': city,
-          'state': state,
-          'interests': interests,
-          'limit': limit,
-          'requireVerified': requireVerified,
-          'requireCompletedCourse': requireCompletedCourse,
-        }
-      );
+      EnhancedLogger.info('Searching profiles with layered strategy system',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'query': query,
+            'minAge': minAge,
+            'maxAge': maxAge,
+            'city': city,
+            'state': state,
+            'interests': interests,
+            'limit': limit,
+            'requireVerified': requireVerified,
+            'requireCompletedCourse': requireCompletedCourse,
+          });
 
       // Criar filtros de busca
       final filters = SearchFilters(
@@ -323,38 +311,39 @@ class ExploreProfilesRepository {
 
       // ESTRATÉGIA EM CAMADAS - Tentar do mais específico para o mais geral
       List<SpiritualProfileModel> result = [];
-      
+
       // Camada 0: Busca APENAS perfis de vitrine completos (NOVA CORREÇÃO)
       try {
         result = await VitrineProfileFilter.searchCompleteVitrineProfiles(
           query: query,
           limit: limit,
         );
-        
+
         if (result.isNotEmpty) {
-          final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-          
-          EnhancedLogger.success('Layer 0 search successful (Complete Vitrine Only)', 
-            tag: 'EXPLORE_PROFILES_REPOSITORY',
-            data: {
-              'results': result.length,
-              'strategy': 'completeVitrineOnly',
-              'executionTime': executionTime,
-              'onlyCompleteVitrineProfiles': true,
-              'requiresUsername': true,
-              'requiresCompleteData': true,
-            }
-          );
-          
+          final executionTime =
+              DateTime.now().difference(startTime).inMilliseconds;
+
+          EnhancedLogger.success(
+              'Layer 0 search successful (Complete Vitrine Only)',
+              tag: 'EXPLORE_PROFILES_REPOSITORY',
+              data: {
+                'results': result.length,
+                'strategy': 'completeVitrineOnly',
+                'executionTime': executionTime,
+                'onlyCompleteVitrineProfiles': true,
+                'requiresUsername': true,
+                'requiresCompleteData': true,
+              });
+
           return result.take(limit).toList();
         }
       } catch (e) {
-        EnhancedLogger.warning('Layer 0 complete vitrine search failed, trying Layer 1', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'error': e.toString()}
-        );
+        EnhancedLogger.warning(
+            'Layer 0 complete vitrine search failed, trying Layer 1',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'error': e.toString()});
       }
-      
+
       // Camada 1: Usar o serviço de busca robusto (mais eficiente)
       try {
         final searchService = SearchProfilesService.instance;
@@ -364,92 +353,87 @@ class ExploreProfilesRepository {
           limit: limit,
           useCache: true,
         );
-        
+
         result = searchResult.profiles;
-        
+
         if (result.isNotEmpty) {
-          final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-          
-          EnhancedLogger.success('Layer 1 search successful (SearchService)', 
-            tag: 'EXPLORE_PROFILES_REPOSITORY',
-            data: {
-              'results': result.length,
-              'strategy': searchResult.strategy,
-              'fromCache': searchResult.fromCache,
-              'executionTime': executionTime,
-            }
-          );
-          
+          final executionTime =
+              DateTime.now().difference(startTime).inMilliseconds;
+
+          EnhancedLogger.success('Layer 1 search successful (SearchService)',
+              tag: 'EXPLORE_PROFILES_REPOSITORY',
+              data: {
+                'results': result.length,
+                'strategy': searchResult.strategy,
+                'fromCache': searchResult.fromCache,
+                'executionTime': executionTime,
+              });
+
           return result;
         }
       } catch (e) {
-        EnhancedLogger.warning('Layer 1 search failed, trying Layer 2', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'error': e.toString()}
-        );
+        EnhancedLogger.warning('Layer 1 search failed, trying Layer 2',
+            tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       }
 
       // Camada 2: Busca Firebase simplificada com filtros básicos
       try {
         result = await _layeredFirebaseSearch(query, filters, limit);
-        
+
         if (result.isNotEmpty) {
-          final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-          
-          EnhancedLogger.success('Layer 2 search successful (Simplified Firebase)', 
-            tag: 'EXPLORE_PROFILES_REPOSITORY',
-            data: {
-              'results': result.length,
-              'executionTime': executionTime,
-            }
-          );
-          
+          final executionTime =
+              DateTime.now().difference(startTime).inMilliseconds;
+
+          EnhancedLogger.success(
+              'Layer 2 search successful (Simplified Firebase)',
+              tag: 'EXPLORE_PROFILES_REPOSITORY',
+              data: {
+                'results': result.length,
+                'executionTime': executionTime,
+              });
+
           return result;
         }
       } catch (e) {
-        EnhancedLogger.warning('Layer 2 search failed, trying Layer 3', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'error': e.toString()}
-        );
+        EnhancedLogger.warning('Layer 2 search failed, trying Layer 3',
+            tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       }
 
       // Camada 3: Busca básica com filtros aplicados no código Dart
       try {
         result = await _basicSearchWithDartFilters(query, filters, limit);
-        
-        final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-        
-        EnhancedLogger.success('Layer 3 search completed (Basic + Dart filters)', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {
-            'results': result.length,
-            'executionTime': executionTime,
-          }
-        );
-        
+
+        final executionTime =
+            DateTime.now().difference(startTime).inMilliseconds;
+
+        EnhancedLogger.success(
+            'Layer 3 search completed (Basic + Dart filters)',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {
+              'results': result.length,
+              'executionTime': executionTime,
+            });
+
         return result;
-        
       } catch (e) {
-        final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-        
-        EnhancedLogger.error('All search layers failed', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          error: e,
-          data: {'executionTime': executionTime}
-        );
-        
+        final executionTime =
+            DateTime.now().difference(startTime).inMilliseconds;
+
+        EnhancedLogger.error('All search layers failed',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            error: e,
+            data: {'executionTime': executionTime});
+
         return [];
       }
-
     } catch (e) {
       final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-      
-      EnhancedLogger.error('Critical error in layered search', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e,
-        data: {'executionTime': executionTime}
-      );
-      
+
+      EnhancedLogger.error('Critical error in layered search',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          error: e,
+          data: {'executionTime': executionTime});
+
       return [];
     }
   }
@@ -460,10 +444,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.info('Executing Layer 2: Simplified Firebase search', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.info('Executing Layer 2: Simplified Firebase search',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     // Construir query Firebase com apenas filtros essenciais e seguros
     Query profilesQuery = _firestore
@@ -477,7 +460,8 @@ class ExploreProfilesRepository {
     // }
 
     if (filters.hasCompletedCourse == true) {
-      profilesQuery = profilesQuery.where('hasCompletedCourse', isEqualTo: true);
+      profilesQuery =
+          profilesQuery.where('hasCompletedCourse', isEqualTo: true);
     }
 
     // Limitar resultados para buscar mais e filtrar depois
@@ -498,10 +482,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.info('Executing Layer 3: Basic search with Dart filters', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.info('Executing Layer 3: Basic search with Dart filters',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     // Query mais básica possível - apenas isActive
     final snapshot = await _firestore
@@ -524,14 +507,13 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.warning('Executing manual fallback search (last resort)', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {
-        'query': query,
-        'hasFilters': filters != null,
-        'limit': limit,
-      }
-    );
+    EnhancedLogger.warning('Executing manual fallback search (last resort)',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {
+          'query': query,
+          'hasFilters': filters != null,
+          'limit': limit,
+        });
 
     try {
       // Query mais básica possível - apenas isActive
@@ -547,25 +529,22 @@ class ExploreProfilesRepository {
         //   profilesQuery = profilesQuery.where('isVerified', isEqualTo: true);
         // }
       } catch (e) {
-        EnhancedLogger.warning('Could not add isVerified filter', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'error': e.toString()}
-        );
+        EnhancedLogger.warning('Could not add isVerified filter',
+            tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       }
 
       try {
         if (filters.hasCompletedCourse == true) {
-          profilesQuery = profilesQuery.where('hasCompletedCourse', isEqualTo: true);
+          profilesQuery =
+              profilesQuery.where('hasCompletedCourse', isEqualTo: true);
         }
       } catch (e) {
-        EnhancedLogger.warning('Could not add hasCompletedCourse filter', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'error': e.toString()}
-        );
+        EnhancedLogger.warning('Could not add hasCompletedCourse filter',
+            tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       }
 
       final snapshot = await profilesQuery.get();
-      
+
       List<SpiritualProfileModel> profiles = snapshot.docs
           .map((doc) {
             try {
@@ -574,10 +553,9 @@ class ExploreProfilesRepository {
                 ...doc.data() as Map<String, dynamic>,
               });
             } catch (e) {
-              EnhancedLogger.warning('Failed to parse profile in fallback', 
-                tag: 'EXPLORE_PROFILES_REPOSITORY',
-                data: {'docId': doc.id, 'error': e.toString()}
-              );
+              EnhancedLogger.warning('Failed to parse profile in fallback',
+                  tag: 'EXPLORE_PROFILES_REPOSITORY',
+                  data: {'docId': doc.id, 'error': e.toString()});
               return null;
             }
           })
@@ -587,25 +565,21 @@ class ExploreProfilesRepository {
 
       // Aplicar filtros no código Dart
       profiles = _applyOptimizedFilters(profiles, query, filters);
-      
+
       final result = profiles.take(limit).toList();
 
-      EnhancedLogger.info('Manual fallback search completed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'totalFetched': snapshot.docs.length,
-          'afterParsing': profiles.length,
-          'finalResults': result.length,
-        }
-      );
-      
-      return result;
+      EnhancedLogger.info('Manual fallback search completed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'totalFetched': snapshot.docs.length,
+            'afterParsing': profiles.length,
+            'finalResults': result.length,
+          });
 
+      return result;
     } catch (e) {
-      EnhancedLogger.error('Manual fallback search failed completely', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e
-      );
+      EnhancedLogger.error('Manual fallback search failed completely',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', error: e);
 
       // Último recurso - tentar busca sem filtros
       try {
@@ -629,17 +603,14 @@ class ExploreProfilesRepository {
             .cast<SpiritualProfileModel>()
             .toList();
 
-        EnhancedLogger.warning('Using emergency fallback with no filters', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'results': profiles.length}
-        );
+        EnhancedLogger.warning('Using emergency fallback with no filters',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'results': profiles.length});
 
         return profiles;
       } catch (emergencyError) {
-        EnhancedLogger.error('Emergency fallback also failed', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          error: emergencyError
-        );
+        EnhancedLogger.error('Emergency fallback also failed',
+            tag: 'EXPLORE_PROFILES_REPOSITORY', error: emergencyError);
         return [];
       }
     }
@@ -662,16 +633,17 @@ class ExploreProfilesRepository {
             profile.state ?? '',
             ...(profile.interests ?? []),
           ].join(' ').toLowerCase();
-          
+
           // Busca por palavras individuais
-          final queryWords = query.toLowerCase().split(' ')
+          final queryWords = query
+              .toLowerCase()
+              .split(' ')
               .where((word) => word.isNotEmpty)
               .toList();
-          
+
           if (queryWords.isNotEmpty) {
-            final hasMatch = queryWords.any((word) => 
-              searchableText.contains(word)
-            );
+            final hasMatch =
+                queryWords.any((word) => searchableText.contains(word));
             if (!hasMatch) return false;
           }
         }
@@ -707,24 +679,20 @@ class ExploreProfilesRepository {
 
         // Filtros de interesses com busca flexível
         if (filters.interests != null && filters.interests!.isNotEmpty) {
-          final profileInterests = (profile.interests ?? [])
-              .map((i) => i.toLowerCase())
-              .toList();
-          
+          final profileInterests =
+              (profile.interests ?? []).map((i) => i.toLowerCase()).toList();
+
           if (profileInterests.isEmpty) return false;
-          
-          final filterInterests = filters.interests!
-              .map((i) => i.toLowerCase())
-              .toList();
-          
+
+          final filterInterests =
+              filters.interests!.map((i) => i.toLowerCase()).toList();
+
           // Deve ter pelo menos um interesse relacionado
           final hasCommonInterest = filterInterests.any((filterInterest) =>
-            profileInterests.any((profileInterest) =>
-              profileInterest.contains(filterInterest) ||
-              filterInterest.contains(profileInterest)
-            )
-          );
-          
+              profileInterests.any((profileInterest) =>
+                  profileInterest.contains(filterInterest) ||
+                  filterInterest.contains(profileInterest)));
+
           if (!hasCommonInterest) return false;
         }
 
@@ -732,24 +700,25 @@ class ExploreProfilesRepository {
         if (filters.isVerified == true && profile.isVerified != true) {
           return false;
         }
-        if (filters.hasCompletedCourse == true && profile.hasCompletedCourse != true) {
+        if (filters.hasCompletedCourse == true &&
+            profile.hasCompletedCourse != true) {
           return false;
         }
 
         return true;
       } catch (e) {
         // Se houver erro ao processar um perfil, excluí-lo dos resultados
-        EnhancedLogger.warning('Error applying manual filters to profile', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'profileId': profile.id, 'error': e.toString()}
-        );
+        EnhancedLogger.warning('Error applying manual filters to profile',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'profileId': profile.id, 'error': e.toString()});
         return false;
       }
     }).toList();
   }
 
   /// Registra visualização de perfil
-  static Future<void> recordProfileView(String viewerId, String profileId) async {
+  static Future<void> recordProfileView(
+      String viewerId, String profileId) async {
     try {
       await _firestore.collection('profile_views').add({
         'viewerId': viewerId,
@@ -762,25 +731,24 @@ class ExploreProfilesRepository {
       //   'viewsCount': FieldValue.increment(1),
       // });
 
-      EnhancedLogger.info('Profile view recorded', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'viewerId': viewerId, 'profileId': profileId}
-      );
+      EnhancedLogger.info('Profile view recorded',
+          tag: 'EXPLORE_PROFILES',
+          data: {'viewerId': viewerId, 'profileId': profileId});
     } catch (e) {
-      EnhancedLogger.error('Failed to record profile view', 
-        tag: 'EXPLORE_PROFILES',
-        error: e
-      );
+      EnhancedLogger.error('Failed to record profile view',
+          tag: 'EXPLORE_PROFILES', error: e);
     }
   }
 
   /// Obtém perfis populares (mais visualizados) - VERSÃO CORRIGIDA
-  static Future<List<SpiritualProfileModel>> getPopularProfiles({int limit = 10}) async {
+  static Future<List<SpiritualProfileModel>> getPopularProfiles(
+      {int limit = 10}) async {
     try {
       // Buscar sem orderBy para evitar índice composto
       final snapshot = await _firestore
           .collection('spiritual_profiles')
-          .where('isActive', isEqualTo: true) // 🔧 CORREÇÃO FINAL - apenas perfis ativos
+          .where('isActive',
+              isEqualTo: true) // 🔧 CORREÇÃO FINAL - apenas perfis ativos
           .limit(limit * 2)
           .get();
 
@@ -792,20 +760,17 @@ class ExploreProfilesRepository {
           .toList();
 
       // Ordenar no código Dart - usando createdAt como alternativa
-      profiles.sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
+      profiles.sort((a, b) => (b.createdAt ?? DateTime.now())
+          .compareTo(a.createdAt ?? DateTime.now()));
       profiles = profiles.take(limit).toList();
 
-      EnhancedLogger.success('Popular profiles fetched', 
-        tag: 'EXPLORE_PROFILES',
-        data: {'count': profiles.length}
-      );
+      EnhancedLogger.success('Popular profiles fetched',
+          tag: 'EXPLORE_PROFILES', data: {'count': profiles.length});
 
       return profiles;
     } catch (e) {
-      EnhancedLogger.error('Failed to fetch popular profiles', 
-        tag: 'EXPLORE_PROFILES',
-        error: e
-      );
+      EnhancedLogger.error('Failed to fetch popular profiles',
+          tag: 'EXPLORE_PROFILES', error: e);
       return [];
     }
   }
@@ -815,7 +780,7 @@ class ExploreProfilesRepository {
     try {
       final searchService = SearchProfilesService.instance;
       final stats = searchService.getStats();
-      
+
       return {
         'searchService': stats,
         'timestamp': DateTime.now().toIso8601String(),
@@ -829,10 +794,8 @@ class ExploreProfilesRepository {
         ],
       };
     } catch (e) {
-      EnhancedLogger.error('Failed to get search stats', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e
-      );
+      EnhancedLogger.error('Failed to get search stats',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', error: e);
       return {
         'error': e.toString(),
         'timestamp': DateTime.now().toIso8601String(),
@@ -847,15 +810,12 @@ class ExploreProfilesRepository {
     try {
       final searchService = SearchProfilesService.instance;
       await searchService.clearCache();
-      
-      EnhancedLogger.info('Search cache cleared successfully', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY'
-      );
+
+      EnhancedLogger.info('Search cache cleared successfully',
+          tag: 'EXPLORE_PROFILES_REPOSITORY');
     } catch (e) {
-      EnhancedLogger.error('Failed to clear search cache', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e
-      );
+      EnhancedLogger.error('Failed to clear search cache',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', error: e);
     }
   }
 
@@ -867,20 +827,19 @@ class ExploreProfilesRepository {
     String? strategyName,
   }) async {
     try {
-      EnhancedLogger.info('Testing search with specific strategy', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'query': query,
-          'strategyName': strategyName,
-          'hasFilters': filters != null,
-          'limit': limit,
-        }
-      );
+      EnhancedLogger.info('Testing search with specific strategy',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'query': query,
+            'strategyName': strategyName,
+            'hasFilters': filters != null,
+            'limit': limit,
+          });
 
       final searchService = SearchProfilesService.instance;
-      
+
       List<SpiritualProfileModel> result;
-      
+
       if (strategyName != null) {
         // Forçar estratégia específica
         result = await searchService.searchWithStrategy(
@@ -900,25 +859,23 @@ class ExploreProfilesRepository {
         result = searchResult.profiles;
       }
 
-      EnhancedLogger.success('Test search completed successfully', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'query': query,
-          'results': result.length,
-          'strategyName': strategyName,
-        }
-      );
+      EnhancedLogger.success('Test search completed successfully',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'query': query,
+            'results': result.length,
+            'strategyName': strategyName,
+          });
 
       return result;
     } catch (e) {
-      EnhancedLogger.error('Test search failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e,
-        data: {
-          'query': query,
-          'strategyName': strategyName,
-        }
-      );
+      EnhancedLogger.error('Test search failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          error: e,
+          data: {
+            'query': query,
+            'strategyName': strategyName,
+          });
       return [];
     }
   }
@@ -930,14 +887,13 @@ class ExploreProfilesRepository {
     int limit = 10,
   }) async {
     try {
-      EnhancedLogger.info('Testing all search strategies', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'query': query,
-          'hasFilters': filters != null,
-          'limit': limit,
-        }
-      );
+      EnhancedLogger.info('Testing all search strategies',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'query': query,
+            'hasFilters': filters != null,
+            'limit': limit,
+          });
 
       final searchService = SearchProfilesService.instance;
       final results = await searchService.testAllStrategies(
@@ -952,22 +908,19 @@ class ExploreProfilesRepository {
         convertedResults[entry.key] = entry.value.profiles;
       }
 
-      EnhancedLogger.success('All strategies tested successfully', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {
-          'query': query,
-          'strategiesTested': convertedResults.keys.length,
-          'totalResults': convertedResults.values
-              .fold(0, (sum, profiles) => sum + profiles.length),
-        }
-      );
+      EnhancedLogger.success('All strategies tested successfully',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {
+            'query': query,
+            'strategiesTested': convertedResults.keys.length,
+            'totalResults': convertedResults.values
+                .fold(0, (sum, profiles) => sum + profiles.length),
+          });
 
       return convertedResults;
     } catch (e) {
-      EnhancedLogger.error('Failed to test all strategies', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        error: e
-      );
+      EnhancedLogger.error('Failed to test all strategies',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', error: e);
       return {};
     }
   }
@@ -977,41 +930,41 @@ class ExploreProfilesRepository {
   /// Classifica o tipo de erro do Firebase para escolher melhor estratégia de fallback
   static FirebaseErrorType _classifyFirebaseError(dynamic error) {
     final errorString = error.toString().toLowerCase();
-    
+
     // Erros de índice faltando
-    if (errorString.contains('index') || 
+    if (errorString.contains('index') ||
         errorString.contains('composite') ||
         errorString.contains('requires an index') ||
         errorString.contains('inequality filter') ||
         errorString.contains('order by')) {
       return FirebaseErrorType.indexMissing;
     }
-    
+
     // Erros de permissão
-    if (errorString.contains('permission') || 
+    if (errorString.contains('permission') ||
         errorString.contains('denied') ||
         errorString.contains('unauthorized') ||
         errorString.contains('insufficient permissions')) {
       return FirebaseErrorType.permissionDenied;
     }
-    
+
     // Erros de rede
-    if (errorString.contains('network') || 
+    if (errorString.contains('network') ||
         errorString.contains('connection') ||
         errorString.contains('timeout') ||
         errorString.contains('unavailable') ||
         errorString.contains('deadline exceeded')) {
       return FirebaseErrorType.networkError;
     }
-    
+
     // Erros de quota
-    if (errorString.contains('quota') || 
+    if (errorString.contains('quota') ||
         errorString.contains('limit') ||
         errorString.contains('exceeded') ||
         errorString.contains('resource exhausted')) {
       return FirebaseErrorType.quotaExceeded;
     }
-    
+
     return FirebaseErrorType.unknown;
   }
 
@@ -1023,16 +976,15 @@ class ExploreProfilesRepository {
     int limit,
   ) async {
     final errorType = _classifyFirebaseError(error);
-    
-    EnhancedLogger.warning('Handling Firebase error with specific strategy', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {
-        'errorType': errorType.toString(),
-        'query': query,
-        'limit': limit,
-      }
-    );
-    
+
+    EnhancedLogger.warning('Handling Firebase error with specific strategy',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {
+          'errorType': errorType.toString(),
+          'query': query,
+          'limit': limit,
+        });
+
     switch (errorType) {
       case FirebaseErrorType.indexMissing:
         return await _indexMissingFallback(query, filters, limit);
@@ -1053,10 +1005,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.warning('Using index missing fallback', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.warning('Using index missing fallback',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     try {
       // Query mais simples possível - apenas campos indexados básicos
@@ -1071,21 +1022,21 @@ class ExploreProfilesRepository {
       //   try {
       //     profilesQuery = profilesQuery.where('isVerified', isEqualTo: true);
       //   } catch (e) {
-      //     EnhancedLogger.warning('Could not add isVerified filter in index fallback', 
+      //     EnhancedLogger.warning('Could not add isVerified filter in index fallback',
       //       tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       //   }
       // }
 
       final snapshot = await profilesQuery.get();
       final profiles = _parseProfileDocuments(snapshot.docs);
-      
+
       // Aplicar todos os outros filtros no código
       final filteredProfiles = _applyOptimizedFilters(profiles, query, filters);
-      
+
       return filteredProfiles.take(limit).toList();
     } catch (e) {
-      EnhancedLogger.error('Index missing fallback failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.error('Index missing fallback failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return await _emergencyFallback(limit);
     }
   }
@@ -1096,10 +1047,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.warning('Using permission denied fallback', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.warning('Using permission denied fallback',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     try {
       // Tentar query mais básica sem filtros sensíveis
@@ -1110,11 +1060,11 @@ class ExploreProfilesRepository {
 
       final profiles = _parseProfileDocuments(snapshot.docs);
       final filteredProfiles = _applyOptimizedFilters(profiles, query, filters);
-      
+
       return filteredProfiles.take(limit).toList();
     } catch (e) {
-      EnhancedLogger.error('Permission denied fallback failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.error('Permission denied fallback failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return [];
     }
   }
@@ -1125,10 +1075,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.warning('Using network error fallback', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.warning('Using network error fallback',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     // Para erros de rede, tentar cache local primeiro
     try {
@@ -1141,15 +1090,14 @@ class ExploreProfilesRepository {
       );
 
       if (cachedResult.profiles.isNotEmpty) {
-        EnhancedLogger.info('Using cached results for network error', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'cachedResults': cachedResult.profiles.length}
-        );
+        EnhancedLogger.info('Using cached results for network error',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'cachedResults': cachedResult.profiles.length});
         return cachedResult.profiles;
       }
     } catch (e) {
-      EnhancedLogger.warning('Cache fallback failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.warning('Cache fallback failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
     }
 
     // Se não há cache, tentar query simples com timeout menor
@@ -1162,10 +1110,12 @@ class ExploreProfilesRepository {
           .timeout(Duration(seconds: 5));
 
       final profiles = _parseProfileDocuments(snapshot.docs);
-      return _applyOptimizedFilters(profiles, query, filters).take(limit).toList();
+      return _applyOptimizedFilters(profiles, query, filters)
+          .take(limit)
+          .toList();
     } catch (e) {
-      EnhancedLogger.error('Network error fallback failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.error('Network error fallback failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return [];
     }
   }
@@ -1176,10 +1126,9 @@ class ExploreProfilesRepository {
     SearchFilters filters,
     int limit,
   ) async {
-    EnhancedLogger.warning('Using quota exceeded fallback', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'query': query, 'limit': limit}
-    );
+    EnhancedLogger.warning('Using quota exceeded fallback',
+        tag: 'EXPLORE_PROFILES_REPOSITORY',
+        data: {'query': query, 'limit': limit});
 
     // Para quota excedida, usar apenas cache
     try {
@@ -1191,25 +1140,23 @@ class ExploreProfilesRepository {
         useCache: true,
       );
 
-      EnhancedLogger.info('Using cached results for quota exceeded', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'cachedResults': cachedResult.profiles.length}
-      );
+      EnhancedLogger.info('Using cached results for quota exceeded',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {'cachedResults': cachedResult.profiles.length});
 
       return cachedResult.profiles;
     } catch (e) {
-      EnhancedLogger.error('Quota exceeded fallback failed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.error('Quota exceeded fallback failed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return [];
     }
   }
 
   /// Fallback de emergência - última tentativa
-  static Future<List<SpiritualProfileModel>> _emergencyFallback(int limit) async {
-    EnhancedLogger.warning('Using emergency fallback (last resort)', 
-      tag: 'EXPLORE_PROFILES_REPOSITORY',
-      data: {'limit': limit}
-    );
+  static Future<List<SpiritualProfileModel>> _emergencyFallback(
+      int limit) async {
+    EnhancedLogger.warning('Using emergency fallback (last resort)',
+        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'limit': limit});
 
     try {
       // Query mais básica possível
@@ -1220,24 +1167,24 @@ class ExploreProfilesRepository {
           .timeout(Duration(seconds: 3));
 
       final profiles = _parseProfileDocuments(snapshot.docs);
-      
-      EnhancedLogger.info('Emergency fallback completed', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY',
-        data: {'results': profiles.length}
-      );
+
+      EnhancedLogger.info('Emergency fallback completed',
+          tag: 'EXPLORE_PROFILES_REPOSITORY',
+          data: {'results': profiles.length});
 
       return profiles;
     } catch (e) {
-      EnhancedLogger.error('Emergency fallback failed completely', 
-        tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
+      EnhancedLogger.error('Emergency fallback failed completely',
+          tag: 'EXPLORE_PROFILES_REPOSITORY', data: {'error': e.toString()});
       return [];
     }
   }
 
   /// Método auxiliar para parsing seguro de documentos
-  static List<SpiritualProfileModel> _parseProfileDocuments(List<QueryDocumentSnapshot> docs) {
+  static List<SpiritualProfileModel> _parseProfileDocuments(
+      List<QueryDocumentSnapshot> docs) {
     final profiles = <SpiritualProfileModel>[];
-    
+
     for (final doc in docs) {
       try {
         final profile = SpiritualProfileModel.fromMap({
@@ -1246,18 +1193,15 @@ class ExploreProfilesRepository {
         });
         profiles.add(profile);
       } catch (e) {
-        EnhancedLogger.warning('Failed to parse profile document', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'docId': doc.id, 'error': e.toString()}
-        );
+        EnhancedLogger.warning('Failed to parse profile document',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'docId': doc.id, 'error': e.toString()});
         // Continuar com outros documentos
       }
     }
-    
+
     return profiles;
   }
-
-
 
   /// Método otimizado para aplicação de filtros manuais
   static List<SpiritualProfileModel> _applyOptimizedFilters(
@@ -1273,15 +1217,18 @@ class ExploreProfilesRepository {
         if (filters.isVerified == true && profile.isVerified != true) {
           return false;
         }
-        if (filters.hasCompletedCourse == true && profile.hasCompletedCourse != true) {
+        if (filters.hasCompletedCourse == true &&
+            profile.hasCompletedCourse != true) {
           return false;
         }
 
         // Filtros de idade (numéricos)
-        if (filters.minAge != null && (profile.age == null || profile.age! < filters.minAge!)) {
+        if (filters.minAge != null &&
+            (profile.age == null || profile.age! < filters.minAge!)) {
           return false;
         }
-        if (filters.maxAge != null && (profile.age == null || profile.age! > filters.maxAge!)) {
+        if (filters.maxAge != null &&
+            (profile.age == null || profile.age! > filters.maxAge!)) {
           return false;
         }
 
@@ -1304,10 +1251,9 @@ class ExploreProfilesRepository {
 
         return true;
       } catch (e) {
-        EnhancedLogger.warning('Error applying optimized filters to profile', 
-          tag: 'EXPLORE_PROFILES_REPOSITORY',
-          data: {'profileId': profile.id, 'error': e.toString()}
-        );
+        EnhancedLogger.warning('Error applying optimized filters to profile',
+            tag: 'EXPLORE_PROFILES_REPOSITORY',
+            data: {'profileId': profile.id, 'error': e.toString()});
         return false;
       }
     }).toList();
@@ -1322,18 +1268,19 @@ class ExploreProfilesRepository {
       profile.state ?? '',
       ...(profile.interests ?? []),
     ].join(' ').toLowerCase();
-    
-    final queryWords = query.toLowerCase().split(' ')
+
+    final queryWords = query
+        .toLowerCase()
+        .split(' ')
         .where((word) => word.isNotEmpty)
         .toList();
-    
+
     if (queryWords.isEmpty) return true;
-    
+
     // Usar TextMatcher para busca mais inteligente
     try {
-      return queryWords.any((word) => 
-        TextMatcher.matches(searchableText, word, threshold: 0.6)
-      );
+      return queryWords.any(
+          (word) => TextMatcher.matches(searchableText, word, threshold: 0.6));
     } catch (e) {
       // Fallback para busca simples
       return queryWords.any((word) => searchableText.contains(word));
@@ -1341,7 +1288,8 @@ class ExploreProfilesRepository {
   }
 
   /// Verifica se o perfil corresponde aos filtros de localização
-  static bool _matchesLocationFilters(SpiritualProfileModel profile, SearchFilters filters) {
+  static bool _matchesLocationFilters(
+      SpiritualProfileModel profile, SearchFilters filters) {
     if (filters.city != null && filters.city!.isNotEmpty) {
       final profileCity = profile.city?.toLowerCase() ?? '';
       final filterCity = filters.city!.toLowerCase();
@@ -1362,28 +1310,25 @@ class ExploreProfilesRepository {
   }
 
   /// Verifica se o perfil corresponde aos filtros de interesses
-  static bool _matchesInterestFilters(SpiritualProfileModel profile, SearchFilters filters) {
+  static bool _matchesInterestFilters(
+      SpiritualProfileModel profile, SearchFilters filters) {
     if (filters.interests == null || filters.interests!.isEmpty) {
       return true;
     }
 
-    final profileInterests = (profile.interests ?? [])
-        .map((i) => i.toLowerCase())
-        .toList();
-    
+    final profileInterests =
+        (profile.interests ?? []).map((i) => i.toLowerCase()).toList();
+
     if (profileInterests.isEmpty) return false;
-    
-    final filterInterests = filters.interests!
-        .map((i) => i.toLowerCase())
-        .toList();
-    
+
+    final filterInterests =
+        filters.interests!.map((i) => i.toLowerCase()).toList();
+
     // Deve ter pelo menos um interesse relacionado
-    return filterInterests.any((filterInterest) =>
-      profileInterests.any((profileInterest) =>
-        profileInterest.contains(filterInterest) ||
-        filterInterest.contains(profileInterest)
-      )
-    );
+    return filterInterests.any((filterInterest) => profileInterests.any(
+        (profileInterest) =>
+            profileInterest.contains(filterInterest) ||
+            filterInterest.contains(profileInterest)));
   }
 }
 

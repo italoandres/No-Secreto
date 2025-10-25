@@ -89,7 +89,7 @@ class MessageData {
   String get timeAgo {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora mesmo';
     } else if (difference.inHours < 1) {
@@ -122,16 +122,16 @@ class MessageData {
   bool get isToday {
     final now = DateTime.now();
     return timestamp.year == now.year &&
-           timestamp.month == now.month &&
-           timestamp.day == now.day;
+        timestamp.month == now.month &&
+        timestamp.day == now.day;
   }
 
   /// Verifica se a mensagem é de ontem
   bool get isYesterday {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     return timestamp.year == yesterday.year &&
-           timestamp.month == yesterday.month &&
-           timestamp.day == yesterday.day;
+        timestamp.month == yesterday.month &&
+        timestamp.day == yesterday.day;
   }
 
   /// Obtém preview da mensagem (limitado a 50 caracteres)
@@ -145,7 +145,8 @@ class MessageData {
     if (timestamp == null) return DateTime.now();
     if (timestamp is Timestamp) return timestamp.toDate();
     if (timestamp is DateTime) return timestamp;
-    if (timestamp is String) return DateTime.tryParse(timestamp) ?? DateTime.now();
+    if (timestamp is String)
+      return DateTime.tryParse(timestamp) ?? DateTime.now();
     return DateTime.now();
   }
 

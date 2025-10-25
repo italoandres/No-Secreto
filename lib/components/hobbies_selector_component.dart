@@ -43,14 +43,15 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
         _selectedHobbies.remove(hobbyName);
       } else {
         // Verificar limite máximo
-        if (widget.maxSelection == null || 
+        if (widget.maxSelection == null ||
             _selectedHobbies.length < widget.maxSelection!) {
           _selectedHobbies.add(hobbyName);
         } else {
           // Mostrar mensagem de limite
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Máximo de ${widget.maxSelection} hobbies permitidos'),
+              content:
+                  Text('Máximo de ${widget.maxSelection} hobbies permitidos'),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 2),
             ),
@@ -65,9 +66,10 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
   void _onSearchChanged(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredHobbies = _selectedCategory == 'Todos' 
+        _filteredHobbies = _selectedCategory == 'Todos'
             ? HobbiesInterestsData.getAllHobbies()
-            : HobbiesInterestsData.getHobbiesByCategory()[_selectedCategory] ?? [];
+            : HobbiesInterestsData.getHobbiesByCategory()[_selectedCategory] ??
+                [];
       } else {
         _filteredHobbies = HobbiesInterestsData.searchHobbies(query);
       }
@@ -81,7 +83,8 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
       if (category == 'Todos') {
         _filteredHobbies = HobbiesInterestsData.getAllHobbies();
       } else {
-        _filteredHobbies = HobbiesInterestsData.getHobbiesByCategory()[category] ?? [];
+        _filteredHobbies =
+            HobbiesInterestsData.getHobbiesByCategory()[category] ?? [];
       }
     });
   }
@@ -95,23 +98,21 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
         margin: const EdgeInsets.only(right: 8, bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? widget.primaryColor 
-              : Colors.grey[100],
+          color: isSelected ? widget.primaryColor : Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected 
-                ? widget.primaryColor 
-                : Colors.grey[300]!,
+            color: isSelected ? widget.primaryColor : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: widget.primaryColor.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: widget.primaryColor.withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -144,7 +145,10 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
   }
 
   Widget _buildCategoryFilter() {
-    final categories = ['Todos', ...HobbiesInterestsData.getHobbiesByCategory().keys];
+    final categories = [
+      'Todos',
+      ...HobbiesInterestsData.getHobbiesByCategory().keys
+    ];
     return Container(
       height: 40,
       margin: const EdgeInsets.only(bottom: 16),
@@ -160,22 +164,18 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? widget.primaryColor.withOpacity(0.1)
                     : Colors.grey[50],
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected 
-                      ? widget.primaryColor 
-                      : Colors.grey[300]!,
+                  color: isSelected ? widget.primaryColor : Colors.grey[300]!,
                 ),
               ),
               child: Text(
                 category,
                 style: TextStyle(
-                  color: isSelected 
-                      ? widget.primaryColor 
-                      : Colors.grey[700],
+                  color: isSelected ? widget.primaryColor : Colors.grey[700],
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   fontSize: 13,
                 ),
@@ -189,30 +189,32 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
 
   Widget _buildSelectedCounter() {
     final count = _selectedHobbies.length;
-    final minText = widget.minSelection > 0 ? ' (mín. ${widget.minSelection})' : '';
-    final maxText = widget.maxSelection != null ? ' (máx. ${widget.maxSelection})' : '';
+    final minText =
+        widget.minSelection > 0 ? ' (mín. ${widget.minSelection})' : '';
+    final maxText =
+        widget.maxSelection != null ? ' (máx. ${widget.maxSelection})' : '';
     return Container(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: count >= widget.minSelection 
-            ? Colors.green.shade50 
+        color: count >= widget.minSelection
+            ? Colors.green.shade50
             : Colors.orange.shade50,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: count >= widget.minSelection 
-              ? Colors.green.shade200 
+          color: count >= widget.minSelection
+              ? Colors.green.shade200
               : Colors.orange.shade200,
         ),
       ),
       child: Row(
         children: [
           Icon(
-            count >= widget.minSelection 
-                ? Icons.check_circle 
+            count >= widget.minSelection
+                ? Icons.check_circle
                 : Icons.info_outline,
-            color: count >= widget.minSelection 
-                ? Colors.green.shade700 
+            color: count >= widget.minSelection
+                ? Colors.green.shade700
                 : Colors.orange.shade700,
             size: 20,
           ),
@@ -223,8 +225,8 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
                   ? '$count hobbies selecionados$maxText'
                   : 'Selecione pelo menos ${widget.minSelection} hobby$minText$maxText',
               style: TextStyle(
-                color: count >= widget.minSelection 
-                    ? Colors.green.shade700 
+                color: count >= widget.minSelection
+                    ? Colors.green.shade700
                     : Colors.orange.shade700,
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
@@ -301,7 +303,9 @@ class _HobbiesSelectorComponentState extends State<HobbiesSelectorComponent> {
           constraints: const BoxConstraints(maxHeight: 300),
           child: SingleChildScrollView(
             child: Wrap(
-              children: _filteredHobbies.map((hobby) => _buildHobbyChip(hobby)).toList(),
+              children: _filteredHobbies
+                  .map((hobby) => _buildHobbyChip(hobby))
+                  .toList(),
             ),
           ),
         ),

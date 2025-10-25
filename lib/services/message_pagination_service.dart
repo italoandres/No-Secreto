@@ -64,7 +64,8 @@ class MessagePaginationService {
     PaginationConfig config = PaginationConfig.defaultConfig,
   }) async {
     try {
-      EnhancedLogger.info('Loading first page for chat $chatId', tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info('Loading first page for chat $chatId',
+          tag: 'MESSAGE_PAGINATION');
 
       final query = _firestore
           .collection('chat_messages')
@@ -74,7 +75,8 @@ class MessagePaginationService {
 
       final snapshot = await query.get();
       final messages = snapshot.docs
-          .map((doc) => ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
       final page = MessagePage(
@@ -88,12 +90,12 @@ class MessagePaginationService {
       _pageCache[chatId] = [page];
       _cacheTimestamps[chatId] = DateTime.now();
 
-      EnhancedLogger.info('Loaded ${messages.length} messages in first page', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info('Loaded ${messages.length} messages in first page',
+          tag: 'MESSAGE_PAGINATION');
       return page;
     } catch (e) {
-      EnhancedLogger.error('Error loading first page for chat $chatId: $e', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error loading first page for chat $chatId: $e',
+          tag: 'MESSAGE_PAGINATION');
       rethrow;
     }
   }
@@ -106,33 +108,35 @@ class MessagePaginationService {
     try {
       final cachedPages = _pageCache[chatId];
       if (cachedPages == null || cachedPages.isEmpty) {
-        EnhancedLogger.warning('No cached pages found, loading first page', 
-          tag: 'MESSAGE_PAGINATION');
+        EnhancedLogger.warning('No cached pages found, loading first page',
+            tag: 'MESSAGE_PAGINATION');
         return await loadFirstPage(chatId, config: config);
       }
 
       final lastPage = cachedPages.last;
       if (!lastPage.hasMore) {
-        EnhancedLogger.debug('No more pages available for chat $chatId', 
-          tag: 'MESSAGE_PAGINATION');
+        EnhancedLogger.debug('No more pages available for chat $chatId',
+            tag: 'MESSAGE_PAGINATION');
         return null;
       }
 
       if (lastPage.lastDocument == null) {
-        EnhancedLogger.warning('Last document is null, cannot load next page', 
-          tag: 'MESSAGE_PAGINATION');
+        EnhancedLogger.warning('Last document is null, cannot load next page',
+            tag: 'MESSAGE_PAGINATION');
         return null;
       }
 
       // Verificar limite de páginas
       if (cachedPages.length >= config.maxPages) {
-        EnhancedLogger.info('Maximum pages reached (${config.maxPages}), removing oldest', 
-          tag: 'MESSAGE_PAGINATION');
+        EnhancedLogger.info(
+            'Maximum pages reached (${config.maxPages}), removing oldest',
+            tag: 'MESSAGE_PAGINATION');
         cachedPages.removeAt(0); // Remove página mais antiga
       }
 
-      EnhancedLogger.info('Loading page ${lastPage.pageNumber + 1} for chat $chatId', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info(
+          'Loading page ${lastPage.pageNumber + 1} for chat $chatId',
+          tag: 'MESSAGE_PAGINATION');
 
       final query = _firestore
           .collection('chat_messages')
@@ -143,7 +147,8 @@ class MessagePaginationService {
 
       final snapshot = await query.get();
       final messages = snapshot.docs
-          .map((doc) => ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
       final nextPage = MessagePage(
@@ -157,12 +162,13 @@ class MessagePaginationService {
       cachedPages.add(nextPage);
       _cacheTimestamps[chatId] = DateTime.now();
 
-      EnhancedLogger.info('Loaded ${messages.length} messages in page ${nextPage.pageNumber}', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info(
+          'Loaded ${messages.length} messages in page ${nextPage.pageNumber}',
+          tag: 'MESSAGE_PAGINATION');
       return nextPage;
     } catch (e) {
-      EnhancedLogger.error('Error loading next page for chat $chatId: $e', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error loading next page for chat $chatId: $e',
+          tag: 'MESSAGE_PAGINATION');
       rethrow;
     }
   }
@@ -216,8 +222,9 @@ class MessagePaginationService {
   static void invalidateCache(String chatId) {
     _pageCache.remove(chatId);
     _cacheTimestamps.remove(chatId);
-    
-    EnhancedLogger.info('Cache invalidated for chat $chatId', tag: 'MESSAGE_PAGINATION');
+
+    EnhancedLogger.info('Cache invalidated for chat $chatId',
+        tag: 'MESSAGE_PAGINATION');
   }
 
   /// Limpar todo o cache
@@ -225,9 +232,9 @@ class MessagePaginationService {
     final chatCount = _pageCache.length;
     _pageCache.clear();
     _cacheTimestamps.clear();
-    
-    EnhancedLogger.info('All pagination cache cleared ($chatCount chats)', 
-      tag: 'MESSAGE_PAGINATION');
+
+    EnhancedLogger.info('All pagination cache cleared ($chatCount chats)',
+        tag: 'MESSAGE_PAGINATION');
   }
 
   /// Pré-carregar mensagens para um chat
@@ -237,8 +244,8 @@ class MessagePaginationService {
     PaginationConfig config = PaginationConfig.defaultConfig,
   }) async {
     try {
-      EnhancedLogger.info('Preloading $pagesToPreload pages for chat $chatId', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info('Preloading $pagesToPreload pages for chat $chatId',
+          tag: 'MESSAGE_PAGINATION');
 
       // Carregar primeira página se não estiver carregada
       if (!_pageCache.containsKey(chatId)) {
@@ -251,11 +258,11 @@ class MessagePaginationService {
         if (nextPage == null) break; // Não há mais páginas
       }
 
-      EnhancedLogger.info('Preloading completed for chat $chatId', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info('Preloading completed for chat $chatId',
+          tag: 'MESSAGE_PAGINATION');
     } catch (e) {
-      EnhancedLogger.error('Error preloading messages for chat $chatId: $e', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error preloading messages for chat $chatId: $e',
+          tag: 'MESSAGE_PAGINATION');
     }
   }
 
@@ -266,10 +273,12 @@ class MessagePaginationService {
     int limit = 10,
   }) async {
     try {
-      final sinceTime = since ?? DateTime.now().subtract(const Duration(minutes: 5));
-      
-      EnhancedLogger.debug('Loading recent messages since $sinceTime for chat $chatId', 
-        tag: 'MESSAGE_PAGINATION');
+      final sinceTime =
+          since ?? DateTime.now().subtract(const Duration(minutes: 5));
+
+      EnhancedLogger.debug(
+          'Loading recent messages since $sinceTime for chat $chatId',
+          tag: 'MESSAGE_PAGINATION');
 
       final query = _firestore
           .collection('chat_messages')
@@ -280,15 +289,16 @@ class MessagePaginationService {
 
       final snapshot = await query.get();
       final messages = snapshot.docs
-          .map((doc) => ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
-      EnhancedLogger.info('Loaded ${messages.length} recent messages', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info('Loaded ${messages.length} recent messages',
+          tag: 'MESSAGE_PAGINATION');
       return messages;
     } catch (e) {
-      EnhancedLogger.error('Error loading recent messages for chat $chatId: $e', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error loading recent messages for chat $chatId: $e',
+          tag: 'MESSAGE_PAGINATION');
       return [];
     }
   }
@@ -329,10 +339,12 @@ class MessagePaginationService {
         }
       }
 
-      EnhancedLogger.info('Cache optimization completed, removed ${chatsToRemove.length} expired chats', 
-        tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.info(
+          'Cache optimization completed, removed ${chatsToRemove.length} expired chats',
+          tag: 'MESSAGE_PAGINATION');
     } catch (e) {
-      EnhancedLogger.error('Error optimizing cache: $e', tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error optimizing cache: $e',
+          tag: 'MESSAGE_PAGINATION');
     }
   }
 
@@ -346,8 +358,9 @@ class MessagePaginationService {
       for (final entry in _pageCache.entries) {
         final chatId = entry.key;
         final pages = entry.value;
-        
-        final messagesCount = pages.fold<int>(0, (sum, page) => sum + page.messages.length);
+
+        final messagesCount =
+            pages.fold<int>(0, (sum, page) => sum + page.messages.length);
         totalPages += pages.length;
         totalMessages += messagesCount;
 
@@ -363,12 +376,15 @@ class MessagePaginationService {
         'totalChatsInCache': _pageCache.length,
         'totalPages': totalPages,
         'totalMessages': totalMessages,
-        'averagePagesPerChat': _pageCache.isNotEmpty ? totalPages / _pageCache.length : 0,
-        'averageMessagesPerChat': _pageCache.isNotEmpty ? totalMessages / _pageCache.length : 0,
+        'averagePagesPerChat':
+            _pageCache.isNotEmpty ? totalPages / _pageCache.length : 0,
+        'averageMessagesPerChat':
+            _pageCache.isNotEmpty ? totalMessages / _pageCache.length : 0,
         'chatStats': chatStats,
       };
     } catch (e) {
-      EnhancedLogger.error('Error getting pagination stats: $e', tag: 'MESSAGE_PAGINATION');
+      EnhancedLogger.error('Error getting pagination stats: $e',
+          tag: 'MESSAGE_PAGINATION');
       return {
         'error': e.toString(),
         'totalChatsInCache': 0,
@@ -390,7 +406,8 @@ class MessagePaginationService {
         .limit(limit)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
+            .map((doc) =>
+                ChatMessageModel.fromMap(doc.data() as Map<String, dynamic>))
             .toList());
   }
 }

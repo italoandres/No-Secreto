@@ -11,7 +11,7 @@ class CorrectedNotificationData {
   final bool isRead;
   final String type;
   final Map<String, dynamic> originalData;
-  
+
   CorrectedNotificationData({
     required this.id,
     required this.fromUserId,
@@ -23,7 +23,7 @@ class CorrectedNotificationData {
     required this.type,
     required this.originalData,
   });
-  
+
   /// Cria instância a partir de dados do Firebase com correções aplicadas
   factory CorrectedNotificationData.fromFirestore(
     String documentId,
@@ -32,22 +32,23 @@ class CorrectedNotificationData {
   ) {
     // Aplicar correções nos dados
     final correctedData = _applyCorrections(data, currentUserId, documentId);
-    
+
     return CorrectedNotificationData(
       id: documentId,
       fromUserId: correctedData['fromUserId'] as String? ?? '',
       fromUserName: correctedData['fromUserName'] as String? ?? 'Usuário',
       targetUserId: correctedData['userId'] as String? ?? currentUserId,
-      message: correctedData['message'] as String? ?? 
-               correctedData['content'] as String? ?? 
-               'Tem interesse em conhecer seu perfil melhor',
-      timestamp: _parseTimestamp(correctedData['timestamp'] ?? correctedData['createdAt']),
+      message: correctedData['message'] as String? ??
+          correctedData['content'] as String? ??
+          'Tem interesse em conhecer seu perfil melhor',
+      timestamp: _parseTimestamp(
+          correctedData['timestamp'] ?? correctedData['createdAt']),
       isRead: correctedData['isRead'] as bool? ?? false,
       type: correctedData['type'] as String? ?? 'interest_match',
       originalData: Map<String, dynamic>.from(data),
     );
   }
-  
+
   /// Aplica correções conhecidas nos dados
   static Map<String, dynamic> _applyCorrections(
     Map<String, dynamic> data,
@@ -55,7 +56,7 @@ class CorrectedNotificationData {
     String notificationId,
   ) {
     final corrected = Map<String, dynamic>.from(data);
-    
+
     // Correções específicas conhecidas
     const knownCorrections = {
       'Iu4C9VdYrT0AaAinZEit': {
@@ -63,24 +64,24 @@ class CorrectedNotificationData {
         'fromUserName': 'Italo Lior',
       },
     };
-    
+
     if (knownCorrections.containsKey(notificationId)) {
       final corrections = knownCorrections[notificationId]!;
       corrected.addAll(corrections);
       print('🔧 [MODEL] Aplicando correções conhecidas para: $notificationId');
     }
-    
+
     // Corrigir userId de destino se inválido
-    if (corrected['userId'] == 'test_target_user' || 
-        corrected['userId'] == null || 
+    if (corrected['userId'] == 'test_target_user' ||
+        corrected['userId'] == null ||
         corrected['userId'] == '') {
       corrected['userId'] = currentUserId;
       print('🔧 [MODEL] UserId de destino corrigido: $currentUserId');
     }
-    
+
     return corrected;
   }
-  
+
   /// Converte Timestamp para DateTime
   static DateTime _parseTimestamp(dynamic timestamp) {
     if (timestamp is Timestamp) {
@@ -92,28 +93,28 @@ class CorrectedNotificationData {
     }
     return DateTime.now();
   }
-  
+
   /// Valida se os dados da notificação são válidos
   bool isValid() {
     return id.isNotEmpty &&
-           fromUserId.isNotEmpty &&
-           fromUserName.isNotEmpty &&
-           targetUserId.isNotEmpty &&
-           message.isNotEmpty;
+        fromUserId.isNotEmpty &&
+        fromUserName.isNotEmpty &&
+        targetUserId.isNotEmpty &&
+        message.isNotEmpty;
   }
-  
+
   /// Valida se o userId é válido
   bool hasValidUserId() {
-    return fromUserId.isNotEmpty && 
-           fromUserId != 'test_target_user' && 
-           fromUserId.length > 10;
+    return fromUserId.isNotEmpty &&
+        fromUserId != 'test_target_user' &&
+        fromUserId.length > 10;
   }
-  
+
   /// Retorna idade da notificação em formato legível
   String getTimeAgo() {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inDays > 0) {
       return 'há ${difference.inDays} dia${difference.inDays > 1 ? 's' : ''}';
     } else if (difference.inHours > 0) {
@@ -124,7 +125,7 @@ class CorrectedNotificationData {
       return 'agora';
     }
   }
-  
+
   /// Converte para Map para debugging
   Map<String, dynamic> toMap() {
     return {
@@ -141,7 +142,7 @@ class CorrectedNotificationData {
       'timeAgo': getTimeAgo(),
     };
   }
-  
+
   /// Cria cópia com campos atualizados
   CorrectedNotificationData copyWith({
     String? id,
@@ -166,7 +167,7 @@ class CorrectedNotificationData {
       originalData: originalData ?? this.originalData,
     );
   }
-  
+
   @override
   String toString() {
     return 'CorrectedNotificationData(id: $id, fromUserName: $fromUserName, message: $message, isValid: ${isValid()})';

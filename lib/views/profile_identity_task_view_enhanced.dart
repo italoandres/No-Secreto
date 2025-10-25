@@ -19,10 +19,12 @@ class ProfileIdentityTaskViewEnhanced extends StatefulWidget {
   });
 
   @override
-  State<ProfileIdentityTaskViewEnhanced> createState() => _ProfileIdentityTaskViewEnhancedState();
+  State<ProfileIdentityTaskViewEnhanced> createState() =>
+      _ProfileIdentityTaskViewEnhancedState();
 }
 
-class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskViewEnhanced> {
+class _ProfileIdentityTaskViewEnhancedState
+    extends State<ProfileIdentityTaskViewEnhanced> {
   final _ageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
@@ -49,7 +51,8 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
     _selectedLanguages = widget.profile.languages ?? [];
   }
 
-  Color get _primaryColor => GenderColors.getPrimaryColor(widget.profile.gender);
+  Color get _primaryColor =>
+      GenderColors.getPrimaryColor(widget.profile.gender);
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +100,8 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
         gradient: LinearGradient(
           colors: [
             GenderColors.getBackgroundColor(widget.profile.gender),
-            GenderColors.getPrimaryColorWithOpacity(widget.profile.gender, 0.05),
+            GenderColors.getPrimaryColorWithOpacity(
+                widget.profile.gender, 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -173,7 +177,7 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // País
           DropdownButtonFormField<String>(
             value: _selectedCountry,
@@ -212,11 +216,11 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
             },
             validator: (value) => value == null ? 'Selecione um país' : null,
           ),
-          
+
           // Mostrar Estado e Cidade apenas se o país for Brasil
           if (_selectedCountry == 'Brasil') ...[
             const SizedBox(height: 16),
-            
+
             // Estado
             DropdownButtonFormField<String>(
               value: _selectedState,
@@ -243,11 +247,12 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
                   _selectedCity = null; // Reset city when state changes
                 });
               },
-              validator: (value) => value == null ? 'Selecione um estado' : null,
+              validator: (value) =>
+                  value == null ? 'Selecione um estado' : null,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Cidade
             DropdownButtonFormField<String>(
               value: _selectedCity,
@@ -263,7 +268,8 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
                 ),
               ),
               items: _selectedState != null
-                  ? BrazilLocationsData.getCitiesForState(_selectedState!).map((city) {
+                  ? BrazilLocationsData.getCitiesForState(_selectedState!)
+                      .map((city) {
                       return DropdownMenuItem(
                         value: city,
                         child: Text(city),
@@ -277,7 +283,8 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
                       });
                     }
                   : null,
-              validator: (value) => value == null ? 'Selecione uma cidade' : null,
+              validator: (value) =>
+                  value == null ? 'Selecione uma cidade' : null,
             ),
           ],
         ],
@@ -324,7 +331,6 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
             ),
           ),
           const SizedBox(height: 16),
-          
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -349,7 +355,8 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
                     }
                   });
                 },
-                selectedColor: GenderColors.getBackgroundColor(widget.profile.gender),
+                selectedColor:
+                    GenderColors.getBackgroundColor(widget.profile.gender),
                 checkmarkColor: _primaryColor,
                 side: BorderSide(
                   color: isSelected ? _primaryColor : Colors.grey[300]!,
@@ -394,7 +401,6 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
             ],
           ),
           const SizedBox(height: 16),
-          
           TextFormField(
             controller: _ageController,
             keyboardType: TextInputType.number,
@@ -496,12 +502,14 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
     try {
       // Construir fullLocation baseado no país
       String fullLocation;
-      if (_selectedCountry == 'Brasil' && _selectedCity != null && _selectedState != null) {
+      if (_selectedCountry == 'Brasil' &&
+          _selectedCity != null &&
+          _selectedState != null) {
         fullLocation = '$_selectedCity - $_selectedState';
       } else {
         fullLocation = _selectedCountry ?? '';
       }
-      
+
       final updates = {
         'country': _selectedCountry,
         'state': _selectedState,
@@ -511,8 +519,9 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
         'age': int.parse(_ageController.text.trim()),
       };
 
-      await SpiritualProfileRepository.updateProfile(widget.profile.id!, updates);
-      
+      await SpiritualProfileRepository.updateProfile(
+          widget.profile.id!, updates);
+
       // Mark task as completed
       await SpiritualProfileRepository.updateTaskCompletion(
         widget.profile.id!,
@@ -531,7 +540,6 @@ class _ProfileIdentityTaskViewEnhancedState extends State<ProfileIdentityTaskVie
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
-
     } catch (e) {
       Get.snackbar(
         'Erro',

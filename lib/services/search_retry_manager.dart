@@ -10,13 +10,14 @@ import 'search_logger.dart';
 /// com estratégias adaptativas e circuit breaker
 class SearchRetryManager {
   static SearchRetryManager? _instance;
-  static SearchRetryManager get instance => _instance ??= SearchRetryManager._();
-  
+  static SearchRetryManager get instance =>
+      _instance ??= SearchRetryManager._();
+
   SearchRetryManager._();
 
   /// Circuit breakers por operação
   final Map<String, CircuitBreaker> _circuitBreakers = {};
-  
+
   /// Configurações de retry por tipo de erro
   final Map<SearchErrorType, RetryConfig> _retryConfigs = {
     SearchErrorType.networkError: RetryConfig(
@@ -89,13 +90,14 @@ class SearchRetryManager {
     if (useCircuitBreaker) {
       final circuitBreaker = _getCircuitBreaker(operationName);
       if (circuitBreaker.state == CircuitBreakerState.open) {
-        final error = Exception('Circuit breaker is open for operation: $operationName');
+        final error =
+            Exception('Circuit breaker is open for operation: $operationName');
         logger.completeSearchOperation(
           operationId: operationId,
           error: error,
           additionalData: {'circuitBreakerState': 'open'},
         );
-        
+
         return SearchResult(
           profiles: [],
           totalResults: 0,
@@ -122,9 +124,10 @@ class SearchRetryManager {
     final startTime = DateTime.now();
 
     // Tentar operação com retry baseado no tipo de erro
-    while (totalAttempts < 10) { // Limite absoluto de segurança
+    while (totalAttempts < 10) {
+      // Limite absoluto de segurança
       totalAttempts++;
-      
+
       try {
         logger.logSearchEvent(
           operationId: operationId,
@@ -134,29 +137,30 @@ class SearchRetryManager {
         );
 
         final result = await operation();
-        
+
         // Sucesso - registrar no circuit breaker e retornar
         if (useCircuitBreaker) {
           _getCircuitBreaker(operationName).recordSuccess();
         }
-        
+
         logger.completeSearchOperation(
           operationId: operationId,
           result: result,
           retryAttempts: totalAttempts - 1,
           additionalData: {
             'finalAttempt': totalAttempts,
-            'circuitBreakerState': useCircuitBreaker ? 
-                _getCircuitBreaker(operationName).state.toString() : 'disabled',
+            'circuitBreakerState': useCircuitBreaker
+                ? _getCircuitBreaker(operationName).state.toString()
+                : 'disabled',
           },
         );
-        
+
         return result;
-        
       } catch (e) {
         lastException = e is Exception ? e : Exception(e.toString());
-        final errorType = SearchErrorHandler.instance._classifyError(lastException);
-        
+        final errorType =
+            SearchErrorHandler.instance._classifyError(lastException);
+
         logger.logSearchEvent(
           operationId: operationId,
           eventType: 'attempt_failed',
@@ -174,14 +178,17 @@ class SearchRetryManager {
         }
 
         // Obter configuração de retry para este tipo de erro
-        final config = customConfig ?? _retryConfigs[errorType] ?? _retryConfigs[SearchErrorType.unknown]!;
-        
+        final config = customConfig ??
+            _retryConfigs[errorType] ??
+            _retryConfigs[SearchErrorType.unknown]!;
+
         // Verificar se deve tentar novamente
         if (totalAttempts >= config.maxAttempts) {
           logger.logSearchEvent(
             operationId: operationId,
             eventType: 'retry_exhausted',
-            message: 'Maximum retry attempts reached for error type: $errorType',
+            message:
+                'Maximum retry attempts reached for error type: $errorType',
             data: {
               'totalAttempts': totalAttempts,
               'maxAttempts': config.maxAttempts,
@@ -193,11 +200,12 @@ class SearchRetryManager {
 
         // Calcular delay para próxima tentativa
         final delay = _calculateDelay(totalAttempts, config, errorType);
-        
+
         logger.logSearchEvent(
           operationId: operationId,
           eventType: 'retry_scheduled',
-          message: 'Scheduling retry attempt ${totalAttempts + 1} after ${delay.inMilliseconds}ms',
+          message:
+              'Scheduling retry attempt ${totalAttempts + 1} after ${delay.inMilliseconds}ms',
           data: {
             'nextAttempt': totalAttempts + 1,
             'delayMs': delay.inMilliseconds,
@@ -211,7 +219,7 @@ class SearchRetryManager {
 
     // Todas as tentativas falharam
     final executionTime = DateTime.now().difference(startTime).inMilliseconds;
-    
+
     logger.completeSearchOperation(
       operationId: operationId,
       error: lastException,
@@ -219,8 +227,9 @@ class SearchRetryManager {
       additionalData: {
         'totalAttempts': totalAttempts,
         'finalError': lastException?.toString(),
-        'circuitBreakerState': useCircuitBreaker ? 
-            _getCircuitBreaker(operationName).state.toString() : 'disabled',
+        'circuitBreakerState': useCircuitBreaker
+            ? _getCircuitBreaker(operationName).state.toString()
+            : 'disabled',
       },
     );
 
@@ -244,19 +253,20 @@ class SearchRetryManager {
   }
 
   /// Calcula delay para retry com backoff exponencial e jitter
-  Duration _calculateDelay(int attempt, RetryConfig config, SearchErrorType errorType) {
+  Duration _calculateDelay(
+      int attempt, RetryConfig config, SearchErrorType errorType) {
     if (config.baseDelay == Duration.zero) {
       return Duration.zero;
     }
 
     // Backoff exponencial
-    final exponentialDelay = config.baseDelay.inMilliseconds * 
+    final exponentialDelay = config.baseDelay.inMilliseconds *
         math.pow(config.backoffMultiplier, attempt - 1);
-    
+
     // Aplicar jitter para evitar thundering herd
     final jitterRange = exponentialDelay * config.jitterFactor;
     final jitter = (math.Random().nextDouble() - 0.5) * 2 * jitterRange;
-    
+
     final totalDelayMs = (exponentialDelay + jitter).clamp(
       config.baseDelay.inMilliseconds.toDouble(),
       config.maxDelay.inMilliseconds.toDouble(),
@@ -281,7 +291,7 @@ class SearchRetryManager {
   /// Obtém estatísticas de retry
   Map<String, dynamic> getRetryStats() {
     final circuitBreakerStats = <String, Map<String, dynamic>>{};
-    
+
     _circuitBreakers.forEach((operation, breaker) {
       circuitBreakerStats[operation] = breaker.getStats();
     });
@@ -289,7 +299,7 @@ class SearchRetryManager {
     return {
       'timestamp': DateTime.now().toIso8601String(),
       'circuitBreakers': circuitBreakerStats,
-      'retryConfigs': _retryConfigs.map((errorType, config) => 
+      'retryConfigs': _retryConfigs.map((errorType, config) =>
           MapEntry(errorType.toString(), config.toJson())),
       'totalCircuitBreakers': _circuitBreakers.length,
     };
@@ -300,35 +310,30 @@ class SearchRetryManager {
     final breaker = _circuitBreakers[operationName];
     if (breaker != null) {
       breaker.reset();
-      
-      EnhancedLogger.info('Circuit breaker reset', 
-        tag: 'SEARCH_RETRY_MANAGER',
-        data: {'operationName': operationName}
-      );
+
+      EnhancedLogger.info('Circuit breaker reset',
+          tag: 'SEARCH_RETRY_MANAGER', data: {'operationName': operationName});
     }
   }
 
   /// Redefine todos os circuit breakers
   void resetAllCircuitBreakers() {
     _circuitBreakers.values.forEach((breaker) => breaker.reset());
-    
-    EnhancedLogger.info('All circuit breakers reset', 
-      tag: 'SEARCH_RETRY_MANAGER',
-      data: {'count': _circuitBreakers.length}
-    );
+
+    EnhancedLogger.info('All circuit breakers reset',
+        tag: 'SEARCH_RETRY_MANAGER', data: {'count': _circuitBreakers.length});
   }
 
   /// Atualiza configuração de retry para um tipo de erro
   void updateRetryConfig(SearchErrorType errorType, RetryConfig config) {
     _retryConfigs[errorType] = config;
-    
-    EnhancedLogger.info('Retry configuration updated', 
-      tag: 'SEARCH_RETRY_MANAGER',
-      data: {
-        'errorType': errorType.toString(),
-        'config': config.toJson(),
-      }
-    );
+
+    EnhancedLogger.info('Retry configuration updated',
+        tag: 'SEARCH_RETRY_MANAGER',
+        data: {
+          'errorType': errorType.toString(),
+          'config': config.toJson(),
+        });
   }
 }
 
@@ -389,10 +394,10 @@ class CircuitBreaker {
 
   void recordSuccess() {
     _successCount++;
-    
+
     if (_state == CircuitBreakerState.halfOpen) {
       _halfOpenCalls++;
-      
+
       if (_halfOpenCalls >= halfOpenMaxCalls) {
         _setState(CircuitBreakerState.closed);
         _failureCount = 0;
@@ -406,8 +411,9 @@ class CircuitBreaker {
   void recordFailure() {
     _failureCount++;
     _lastFailureTime = DateTime.now();
-    
-    if (_state == CircuitBreakerState.closed && _failureCount >= failureThreshold) {
+
+    if (_state == CircuitBreakerState.closed &&
+        _failureCount >= failureThreshold) {
       _setState(CircuitBreakerState.open);
     } else if (_state == CircuitBreakerState.halfOpen) {
       _setState(CircuitBreakerState.open);
@@ -426,7 +432,7 @@ class CircuitBreaker {
   void _updateState() {
     if (_state == CircuitBreakerState.open && _lastFailureTime != null) {
       final timeSinceLastFailure = DateTime.now().difference(_lastFailureTime!);
-      
+
       if (timeSinceLastFailure >= recoveryTimeout) {
         _setState(CircuitBreakerState.halfOpen);
         _halfOpenCalls = 0;
@@ -439,17 +445,16 @@ class CircuitBreaker {
       final oldState = _state;
       _state = newState;
       _lastStateChange = DateTime.now();
-      
-      EnhancedLogger.info('Circuit breaker state changed', 
-        tag: 'CIRCUIT_BREAKER',
-        data: {
-          'operationName': operationName,
-          'oldState': oldState.toString(),
-          'newState': newState.toString(),
-          'failureCount': _failureCount,
-          'successCount': _successCount,
-        }
-      );
+
+      EnhancedLogger.info('Circuit breaker state changed',
+          tag: 'CIRCUIT_BREAKER',
+          data: {
+            'operationName': operationName,
+            'oldState': oldState.toString(),
+            'newState': newState.toString(),
+            'failureCount': _failureCount,
+            'successCount': _successCount,
+          });
     }
   }
 
@@ -473,7 +478,7 @@ class CircuitBreaker {
 
 /// Estados do circuit breaker
 enum CircuitBreakerState {
-  closed,   // Funcionando normalmente
-  open,     // Bloqueando chamadas devido a falhas
+  closed, // Funcionando normalmente
+  open, // Bloqueando chamadas devido a falhas
   halfOpen, // Testando se o serviço se recuperou
 }

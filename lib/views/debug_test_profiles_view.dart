@@ -51,7 +51,7 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              
+
               // Seção: Perfis
               const Align(
                 alignment: Alignment.centerLeft,
@@ -65,7 +65,7 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Botão Criar Perfis
               SizedBox(
                 width: double.infinity,
@@ -88,9 +88,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Atualizar Perfis (adicionar campo purpose)
               SizedBox(
                 width: double.infinity,
@@ -113,9 +113,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Atualizar Deus é Pai
               SizedBox(
                 width: double.infinity,
@@ -138,9 +138,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Atualizar Hobbies
               SizedBox(
                 width: double.infinity,
@@ -163,9 +163,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Seção: Interesses e Matches
               const Align(
                 alignment: Alignment.centerLeft,
@@ -179,7 +179,7 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Botão Criar Interesses
               SizedBox(
                 width: double.infinity,
@@ -202,9 +202,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Criar Matches
               SizedBox(
                 width: double.infinity,
@@ -227,9 +227,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Adicionar Idades
               SizedBox(
                 width: double.infinity,
@@ -252,9 +252,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Criar Notificações "New"
               SizedBox(
                 width: double.infinity,
@@ -277,9 +277,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Botão Criar Tudo
               SizedBox(
                 width: double.infinity,
@@ -302,9 +302,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Seção: Limpeza
               const Align(
                 alignment: Alignment.centerLeft,
@@ -318,7 +318,7 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Botão Remover Tudo
               SizedBox(
                 width: double.infinity,
@@ -341,13 +341,12 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Loading indicator
-              if (_isLoading)
-                const CircularProgressIndicator(),
-              
+              if (_isLoading) const CircularProgressIndicator(),
+
               // Message
               if (_message.isNotEmpty)
                 Container(
@@ -366,9 +365,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Info
               Container(
                 padding: const EdgeInsets.all(16),
@@ -395,11 +394,14 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildProfileInfo('1. Maria Silva (28)', 'Certificada + Movimento'),
+                    _buildProfileInfo(
+                        '1. Maria Silva (28)', 'Certificada + Movimento'),
                     _buildProfileInfo('2. Ana Costa (25)', 'Certificada'),
                     _buildProfileInfo('3. Juliana Santos (30)', 'Movimento'),
-                    _buildProfileInfo('4. Beatriz Oliveira (27)', 'Perfil completo'),
-                    _buildProfileInfo('5. Carolina Ferreira (26)', 'Certificada + Movimento'),
+                    _buildProfileInfo(
+                        '4. Beatriz Oliveira (27)', 'Perfil completo'),
+                    _buildProfileInfo(
+                        '5. Carolina Ferreira (26)', 'Certificada + Movimento'),
                     _buildProfileInfo('6. Fernanda Lima (29)', 'Perfil básico'),
                   ],
                 ),
@@ -532,7 +534,8 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
     try {
       await CreateTestInterestsMatches.createTestInterests();
       setState(() {
-        _message = '✅ 3 interesses criados!\n(Maria, Ana e Carolina demonstraram interesse em você)';
+        _message =
+            '✅ 3 interesses criados!\n(Maria, Ana e Carolina demonstraram interesse em você)';
       });
     } catch (e) {
       setState(() {

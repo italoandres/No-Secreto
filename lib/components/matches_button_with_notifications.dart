@@ -22,10 +22,12 @@ class MatchesButtonWithNotifications extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<MatchesButtonWithNotifications> createState() => _MatchesButtonWithNotificationsState();
+  State<MatchesButtonWithNotifications> createState() =>
+      _MatchesButtonWithNotificationsState();
 }
 
-class _MatchesButtonWithNotificationsState extends State<MatchesButtonWithNotifications> {
+class _MatchesButtonWithNotificationsState
+    extends State<MatchesButtonWithNotifications> {
   int _unreadCount = 0;
   bool _hasNewNotifications = false;
 
@@ -40,7 +42,8 @@ class _MatchesButtonWithNotificationsState extends State<MatchesButtonWithNotifi
     if (currentUser == null) return;
 
     // Stream de notificações em tempo real
-    InterestNotificationRepository.getUserInterestNotifications(currentUser.uid).listen((notifications) {
+    InterestNotificationRepository.getUserInterestNotifications(currentUser.uid)
+        .listen((notifications) {
       if (mounted) {
         final unreadNotifications = notifications
             .where((notification) => notification.isPending)
@@ -165,13 +168,17 @@ class _MatchesButtonWithNotificationsState extends State<MatchesButtonWithNotifi
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _hasNewNotifications 
-                          ? '$_unreadCount nova${_unreadCount > 1 ? 's' : ''} notificaç${_unreadCount > 1 ? 'ões' : 'ão'} de interesse!'
-                          : widget.subtitle,
+                        _hasNewNotifications
+                            ? '$_unreadCount nova${_unreadCount > 1 ? 's' : ''} notificaç${_unreadCount > 1 ? 'ões' : 'ão'} de interesse!'
+                            : widget.subtitle,
                         style: TextStyle(
                           fontSize: 14,
-                          color: _hasNewNotifications ? Colors.red : Colors.grey[600],
-                          fontWeight: _hasNewNotifications ? FontWeight.w500 : FontWeight.normal,
+                          color: _hasNewNotifications
+                              ? Colors.red
+                              : Colors.grey[600],
+                          fontWeight: _hasNewNotifications
+                              ? FontWeight.w500
+                              : FontWeight.normal,
                         ),
                       ),
                     ],

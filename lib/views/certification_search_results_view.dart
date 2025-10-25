@@ -7,34 +7,34 @@ import '../components/certification_request_card.dart';
 import '../components/certification_history_card.dart';
 
 /// View de resultados de busca de certificações
-/// 
+///
 /// Exibe resultados de busca com:
 /// - Destaque de termos encontrados
 /// - Estatísticas de busca
 /// - Filtros rápidos
 class CertificationSearchResultsView extends StatefulWidget {
   @override
-  _CertificationSearchResultsViewState createState() => 
+  _CertificationSearchResultsViewState createState() =>
       _CertificationSearchResultsViewState();
 }
 
-class _CertificationSearchResultsViewState 
+class _CertificationSearchResultsViewState
     extends State<CertificationSearchResultsView> {
-  
-  final CertificationSearchService _searchService = CertificationSearchService();
-  
+  final CertificationSearchService _searchService =
+      CertificationSearchService();
+
   List<CertificationRequestModel> _results = [];
   String _currentSearchTerm = '';
   bool _isSearching = false;
   String? _selectedStatus;
   DateTime? _searchStartTime;
-  
+
   @override
   void dispose() {
     _searchService.dispose();
     super.dispose();
   }
-  
+
   Future<void> _performSearch(String searchTerm) async {
     if (searchTerm.trim().isEmpty) {
       setState(() {
@@ -43,19 +43,19 @@ class _CertificationSearchResultsViewState
       });
       return;
     }
-    
+
     setState(() {
       _isSearching = true;
       _currentSearchTerm = searchTerm;
       _searchStartTime = DateTime.now();
     });
-    
+
     try {
       final results = await _searchService.searchCertifications(
         searchTerm: searchTerm,
         status: _selectedStatus,
       );
-      
+
       if (mounted) {
         setState(() {
           _results = results;
@@ -67,7 +67,7 @@ class _CertificationSearchResultsViewState
         setState(() {
           _isSearching = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao buscar: $e'),
@@ -77,7 +77,7 @@ class _CertificationSearchResultsViewState
       }
     }
   }
-  
+
   void _onClear() {
     setState(() {
       _results = [];
@@ -85,24 +85,24 @@ class _CertificationSearchResultsViewState
       _selectedStatus = null;
     });
   }
-  
+
   void _onStatusFilterChanged(String? status) {
     setState(() {
       _selectedStatus = status;
     });
-    
+
     if (_currentSearchTerm.isNotEmpty) {
       _performSearch(_currentSearchTerm);
     }
   }
-  
+
   String _getSearchDuration() {
     if (_searchStartTime == null) return '';
-    
+
     final duration = DateTime.now().difference(_searchStartTime!);
     return '${duration.inMilliseconds}ms';
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +118,7 @@ class _CertificationSearchResultsViewState
             onClear: _onClear,
             hint: 'Buscar por nome, email ou email de compra...',
           ),
-          
+
           // Filtros rápidos
           if (_currentSearchTerm.isNotEmpty)
             Container(
@@ -143,7 +143,7 @@ class _CertificationSearchResultsViewState
                 ],
               ),
             ),
-          
+
           // Estatísticas de busca
           if (_currentSearchTerm.isNotEmpty && !_isSearching)
             Container(
@@ -182,7 +182,7 @@ class _CertificationSearchResultsViewState
                 ],
               ),
             ),
-          
+
           // Resultados
           Expanded(
             child: _buildResults(),
@@ -191,10 +191,10 @@ class _CertificationSearchResultsViewState
       ),
     );
   }
-  
+
   Widget _buildStatusChip(String label, String? status) {
     final isSelected = _selectedStatus == status;
-    
+
     return FilterChip(
       label: Text(
         label,
@@ -212,7 +212,7 @@ class _CertificationSearchResultsViewState
       backgroundColor: Colors.grey.shade200,
     );
   }
-  
+
   Widget _buildResults() {
     // Estado de carregamento
     if (_isSearching) {
@@ -227,7 +227,7 @@ class _CertificationSearchResultsViewState
         ),
       );
     }
-    
+
     // Estado inicial (sem busca)
     if (_currentSearchTerm.isEmpty) {
       return Center(
@@ -259,7 +259,7 @@ class _CertificationSearchResultsViewState
         ),
       );
     }
-    
+
     // Sem resultados
     if (_results.isEmpty) {
       return Center(
@@ -292,14 +292,14 @@ class _CertificationSearchResultsViewState
         ),
       );
     }
-    
+
     // Lista de resultados
     return ListView.builder(
       padding: EdgeInsets.all(16),
       itemCount: _results.length,
       itemBuilder: (context, index) {
         final certification = _results[index];
-        
+
         return Padding(
           padding: EdgeInsets.only(bottom: 16),
           child: _buildResultCard(certification),
@@ -307,10 +307,10 @@ class _CertificationSearchResultsViewState
       },
     );
   }
-  
+
   Widget _buildResultCard(CertificationRequestModel certification) {
     final isPending = certification.status == CertificationStatus.pending;
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -343,9 +343,9 @@ class _CertificationSearchResultsViewState
                 _buildStatusBadge(certification.status),
               ],
             ),
-            
+
             SizedBox(height: 12),
-            
+
             // Email com destaque
             Row(
               children: [
@@ -367,9 +367,9 @@ class _CertificationSearchResultsViewState
                 ),
               ],
             ),
-            
+
             SizedBox(height: 8),
-            
+
             // Email de compra com destaque
             Row(
               children: [
@@ -391,9 +391,9 @@ class _CertificationSearchResultsViewState
                 ),
               ],
             ),
-            
+
             SizedBox(height: 12),
-            
+
             // Data
             Row(
               children: [
@@ -412,7 +412,7 @@ class _CertificationSearchResultsViewState
                 ),
               ],
             ),
-            
+
             // Botão de ação
             if (isPending) ...[
               SizedBox(height: 12),
@@ -436,12 +436,12 @@ class _CertificationSearchResultsViewState
       ),
     );
   }
-  
+
   Widget _buildStatusBadge(CertificationStatus status) {
     Color color;
     String label;
     IconData icon;
-    
+
     switch (status) {
       case CertificationStatus.pending:
         color = Colors.orange;
@@ -459,7 +459,7 @@ class _CertificationSearchResultsViewState
         icon = Icons.cancel;
         break;
     }
-    
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -484,7 +484,7 @@ class _CertificationSearchResultsViewState
       ),
     );
   }
-  
+
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }

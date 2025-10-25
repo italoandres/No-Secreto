@@ -1,4 +1,3 @@
-
 class LinkDescricaoModel {
   String titulo;
   String descricao;
@@ -13,7 +12,6 @@ class LinkDescricaoModel {
   });
 
   static LinkDescricaoModel fromJson(Map<String, dynamic> json) {
-
     return LinkDescricaoModel(
       titulo: json['titulo'],
       descricao: json['descricao'],
@@ -23,7 +21,6 @@ class LinkDescricaoModel {
   }
 
   static Map<String, dynamic> toJson(LinkDescricaoModel item) {
-
     return {
       'titulo': item.titulo,
       'descricao': item.descricao,

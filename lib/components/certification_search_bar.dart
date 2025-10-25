@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/certification_search_service.dart';
 
 /// Barra de busca avançada para certificações
-/// 
+///
 /// Componente com funcionalidades:
 /// - Busca em tempo real com debounce
 /// - Histórico de buscas
@@ -13,7 +13,7 @@ class CertificationSearchBar extends StatefulWidget {
   final Function()? onClear;
   final String? initialValue;
   final String? hint;
-  
+
   const CertificationSearchBar({
     Key? key,
     required this.onSearch,
@@ -21,7 +21,7 @@ class CertificationSearchBar extends StatefulWidget {
     this.initialValue,
     this.hint,
   }) : super(key: key);
-  
+
   @override
   State<CertificationSearchBar> createState() => _CertificationSearchBarState();
 }
@@ -29,26 +29,27 @@ class CertificationSearchBar extends StatefulWidget {
 class _CertificationSearchBarState extends State<CertificationSearchBar> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final CertificationSearchService _searchService = CertificationSearchService();
-  
+  final CertificationSearchService _searchService =
+      CertificationSearchService();
+
   List<String> _suggestions = [];
   bool _showSuggestions = false;
   bool _isSearching = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.initialValue != null) {
       _controller.text = widget.initialValue!;
     }
-    
+
     _controller.addListener(_onTextChanged);
     _focusNode.addListener(_onFocusChanged);
-    
+
     _loadHistory();
   }
-  
+
   @override
   void dispose() {
     _controller.removeListener(_onTextChanged);
@@ -58,10 +59,10 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
     _searchService.dispose();
     super.dispose();
   }
-  
+
   void _onTextChanged() {
     final text = _controller.text;
-    
+
     if (text.isEmpty) {
       setState(() {
         _isSearching = false;
@@ -76,7 +77,7 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
       widget.onSearch(text);
     }
   }
-  
+
   void _onFocusChanged() {
     if (_focusNode.hasFocus) {
       _loadHistory();
@@ -94,7 +95,7 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
       });
     }
   }
-  
+
   Future<void> _loadHistory() async {
     final history = await _searchService.getSearchHistory();
     if (mounted) {
@@ -103,7 +104,7 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
       });
     }
   }
-  
+
   Future<void> _loadSuggestions(String term) async {
     final suggestions = await _searchService.getSuggestions(term);
     if (mounted) {
@@ -112,25 +113,25 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
       });
     }
   }
-  
+
   void _selectSuggestion(String suggestion) {
     _controller.text = suggestion;
     _focusNode.unfocus();
     widget.onSearch(suggestion);
   }
-  
+
   Future<void> _clearHistory() async {
     await _searchService.clearSearchHistory();
     setState(() {
       _suggestions = [];
     });
   }
-  
+
   Future<void> _removeFromHistory(String term) async {
     await _searchService.removeFromHistory(term);
     _loadHistory();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -206,7 +207,7 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
             },
           ),
         ),
-        
+
         // Sugestões
         if (_showSuggestions && _suggestions.isNotEmpty)
           Container(
@@ -261,9 +262,9 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
                     ],
                   ),
                 ),
-                
+
                 Divider(height: 1),
-                
+
                 // Lista de sugestões
                 ListView.builder(
                   shrinkWrap: true,
@@ -274,9 +275,7 @@ class _CertificationSearchBarState extends State<CertificationSearchBar> {
                     return ListTile(
                       dense: true,
                       leading: Icon(
-                        _controller.text.isEmpty
-                            ? Icons.history
-                            : Icons.search,
+                        _controller.text.isEmpty ? Icons.history : Icons.search,
                         size: 20,
                         color: Colors.grey.shade400,
                       ),

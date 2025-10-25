@@ -7,8 +7,9 @@ import '../utils/enhanced_logger.dart';
 /// Versão simplificada para resolver dependências
 class SearchPerformanceOptimizer {
   static SearchPerformanceOptimizer? _instance;
-  static SearchPerformanceOptimizer get instance => _instance ??= SearchPerformanceOptimizer._();
-  
+  static SearchPerformanceOptimizer get instance =>
+      _instance ??= SearchPerformanceOptimizer._();
+
   SearchPerformanceOptimizer._();
 
   /// Otimiza uma operação de busca

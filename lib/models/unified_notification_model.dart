@@ -8,19 +8,19 @@ import 'package:whatsapp_chat/models/interest_notification_model.dart';
 class UnifiedNotificationModel {
   /// ID único da notificação
   final String id;
-  
+
   /// Categoria da notificação (stories, interest, system)
   final NotificationCategory category;
-  
+
   /// Dados originais da notificação (pode ser NotificationModel, InterestNotificationModel ou Map)
   final dynamic data;
-  
+
   /// Timestamp da notificação
   final DateTime timestamp;
-  
+
   /// Se a notificação foi lida
   final bool isRead;
-  
+
   /// Tipo específico da notificação (like, comment, mention, interest, certification_approved, etc)
   final String? type;
 
@@ -46,7 +46,8 @@ class UnifiedNotificationModel {
   }
 
   /// Factory para criar a partir de InterestNotificationModel
-  factory UnifiedNotificationModel.fromInterest(InterestNotificationModel notification) {
+  factory UnifiedNotificationModel.fromInterest(
+      InterestNotificationModel notification) {
     return UnifiedNotificationModel(
       id: notification.id!,
       category: NotificationCategory.interest,
@@ -58,10 +59,11 @@ class UnifiedNotificationModel {
   }
 
   /// Factory para criar a partir de Map (System notifications)
-  factory UnifiedNotificationModel.fromSystem(Map<String, dynamic> notification) {
+  factory UnifiedNotificationModel.fromSystem(
+      Map<String, dynamic> notification) {
     final createdAt = notification['createdAt'];
     DateTime timestamp;
-    
+
     if (createdAt is Timestamp) {
       timestamp = createdAt.toDate();
     } else if (createdAt is String) {
@@ -90,7 +92,8 @@ class UnifiedNotificationModel {
 
   /// Converte para InterestNotificationModel se for do tipo interest
   InterestNotificationModel? asInterestNotification() {
-    if (category == NotificationCategory.interest && data is InterestNotificationModel) {
+    if (category == NotificationCategory.interest &&
+        data is InterestNotificationModel) {
       return data as InterestNotificationModel;
     }
     return null;
@@ -98,7 +101,8 @@ class UnifiedNotificationModel {
 
   /// Converte para Map se for do tipo system
   Map<String, dynamic>? asSystemNotification() {
-    if (category == NotificationCategory.system && data is Map<String, dynamic>) {
+    if (category == NotificationCategory.system &&
+        data is Map<String, dynamic>) {
       return data as Map<String, dynamic>;
     }
     return null;
@@ -129,7 +133,7 @@ class UnifiedNotificationModel {
   bool get isCommentLike => type == 'comment_like';
 
   /// Verifica se é uma notificação de certificação
-  bool get isCertification => 
+  bool get isCertification =>
       type == 'certification_approved' || type == 'certification_rejected';
 
   /// Verifica se é um match mútuo
@@ -142,8 +146,8 @@ class UnifiedNotificationModel {
     } else if (data is InterestNotificationModel) {
       return (data as InterestNotificationModel).fromUserName;
     } else if (data is Map<String, dynamic>) {
-      return (data as Map<String, dynamic>)['fromUserName'] ?? 
-             (data as Map<String, dynamic>)['title'];
+      return (data as Map<String, dynamic>)['fromUserName'] ??
+          (data as Map<String, dynamic>)['title'];
     }
     return null;
   }
@@ -155,8 +159,8 @@ class UnifiedNotificationModel {
     } else if (data is InterestNotificationModel) {
       return (data as InterestNotificationModel).message;
     } else if (data is Map<String, dynamic>) {
-      return (data as Map<String, dynamic>)['message'] ?? 
-             (data as Map<String, dynamic>)['body'];
+      return (data as Map<String, dynamic>)['message'] ??
+          (data as Map<String, dynamic>)['body'];
     }
     return null;
   }

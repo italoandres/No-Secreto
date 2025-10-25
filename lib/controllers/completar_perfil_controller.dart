@@ -11,12 +11,10 @@ class CompletarPerfilController {
 
   static changeImg() async {
     final ImagePicker picker = ImagePicker();
-    
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 300
-    );
-    if(image != null) {
+
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.gallery, maxWidth: 300);
+    if (image != null) {
       imgData = await image.readAsBytes();
       imgPath.value = image.path;
     }
@@ -24,12 +22,10 @@ class CompletarPerfilController {
 
   static changeImgBg() async {
     final ImagePicker picker = ImagePicker();
-    
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024
-    );
-    if(image != null) {
+
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
+    if (image != null) {
       imgBgData = await image.readAsBytes();
       imgBgPath.value = image.path;
     }

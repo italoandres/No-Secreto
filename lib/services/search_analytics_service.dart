@@ -7,8 +7,9 @@ import '../utils/enhanced_logger.dart';
 /// Versão simplificada para resolver dependências
 class SearchAnalyticsService {
   static SearchAnalyticsService? _instance;
-  static SearchAnalyticsService get instance => _instance ??= SearchAnalyticsService._();
-  
+  static SearchAnalyticsService get instance =>
+      _instance ??= SearchAnalyticsService._();
+
   SearchAnalyticsService._();
 
   /// Registra um evento de busca
@@ -19,15 +20,14 @@ class SearchAnalyticsService {
     required String strategy,
     Map<String, dynamic>? context,
   }) {
-    EnhancedLogger.info('Search event tracked', 
-      tag: 'SEARCH_ANALYTICS_SERVICE',
-      data: {
-        'query': query,
-        'resultCount': result.profiles.length,
-        'strategy': strategy,
-        'executionTime': result.executionTime,
-      }
-    );
+    EnhancedLogger.info('Search event tracked',
+        tag: 'SEARCH_ANALYTICS_SERVICE',
+        data: {
+          'query': query,
+          'resultCount': result.profiles.length,
+          'strategy': strategy,
+          'executionTime': result.executionTime,
+        });
   }
 
   /// Registra evento de interação com resultado
@@ -38,15 +38,14 @@ class SearchAnalyticsService {
     int? resultPosition,
     Map<String, dynamic>? context,
   }) {
-    EnhancedLogger.info('Result interaction tracked', 
-      tag: 'SEARCH_ANALYTICS_SERVICE',
-      data: {
-        'query': query,
-        'profileId': profileId,
-        'interactionType': interactionType,
-        'position': resultPosition,
-      }
-    );
+    EnhancedLogger.info('Result interaction tracked',
+        tag: 'SEARCH_ANALYTICS_SERVICE',
+        data: {
+          'query': query,
+          'profileId': profileId,
+          'interactionType': interactionType,
+          'position': resultPosition,
+        });
   }
 
   /// Registra evento de erro
@@ -58,21 +57,20 @@ class SearchAnalyticsService {
     int? executionTime,
     Map<String, dynamic>? context,
   }) {
-    EnhancedLogger.warning('Search error tracked', 
-      tag: 'SEARCH_ANALYTICS_SERVICE',
-      data: {
-        'query': query,
-        'errorType': errorType,
-        'errorMessage': errorMessage,
-        'executionTime': executionTime,
-      }
-    );
+    EnhancedLogger.warning('Search error tracked',
+        tag: 'SEARCH_ANALYTICS_SERVICE',
+        data: {
+          'query': query,
+          'errorType': errorType,
+          'errorMessage': errorMessage,
+          'executionTime': executionTime,
+        });
   }
 
   /// Obtém relatório completo de analytics
   Map<String, dynamic> getAnalyticsReport() {
     final now = DateTime.now();
-    
+
     return {
       'timestamp': now.toIso8601String(),
       'summary': {
@@ -93,15 +91,13 @@ class SearchAnalyticsService {
 
   /// Limpa todos os dados de analytics
   void clearAnalytics() {
-    EnhancedLogger.info('Analytics data cleared', 
-      tag: 'SEARCH_ANALYTICS_SERVICE'
-    );
+    EnhancedLogger.info('Analytics data cleared',
+        tag: 'SEARCH_ANALYTICS_SERVICE');
   }
 
   /// Para o serviço de analytics
   void dispose() {
-    EnhancedLogger.info('Search analytics service disposed', 
-      tag: 'SEARCH_ANALYTICS_SERVICE'
-    );
+    EnhancedLogger.info('Search analytics service disposed',
+        tag: 'SEARCH_ANALYTICS_SERVICE');
   }
 }

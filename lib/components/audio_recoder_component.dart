@@ -7,7 +7,7 @@ import 'package:whatsapp_chat/locale/language.dart';
 import '/controllers/audio_controller.dart';
 
 class AudioRecoderComponent extends StatefulWidget {
-const AudioRecoderComponent({ Key? key }) : super(key: key);
+  const AudioRecoderComponent({Key? key}) : super(key: key);
 
   @override
   State<AudioRecoderComponent> createState() => _AudioRecoderComponentState();
@@ -22,7 +22,7 @@ class _AudioRecoderComponentState extends State<AudioRecoderComponent> {
   void initState() {
     AudioController.start();
     recordSub = AudioController.record.onStateChanged().listen((recordState) {
-      if(recordState == RecordState.record) {
+      if (recordState == RecordState.record) {
         _timer?.cancel();
         _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
           _recordDuration.value++;
@@ -39,25 +39,25 @@ class _AudioRecoderComponentState extends State<AudioRecoderComponent> {
     recordSub?.cancel();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.mic, color: Colors.red),
-              const SizedBox(width: 6),
-              Obx(() => Text(DateFormat('mm:ss').format(DateTime.utc(0).add(Duration(seconds: _recordDuration.value)))))
-            ],
-          ), 
-          Text(AppLanguage.lang('gravando'), style: const TextStyle(color: Colors.grey))
-        ],
-      )
-    );
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic, color: Colors.red),
+                const SizedBox(width: 6),
+                Obx(() => Text(DateFormat('mm:ss').format(DateTime.utc(0)
+                    .add(Duration(seconds: _recordDuration.value)))))
+              ],
+            ),
+            Text(AppLanguage.lang('gravando'),
+                style: const TextStyle(color: Colors.grey))
+          ],
+        ));
   }
 }

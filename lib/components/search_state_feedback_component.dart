@@ -52,7 +52,8 @@ class SearchStateFeedbackComponent extends StatelessWidget {
                 Positioned.fill(
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[400]!),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Colors.blue[400]!),
                   ),
                 ),
                 // Círculo interno
@@ -85,7 +86,7 @@ class SearchStateFeedbackComponent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            query != null && query!.isNotEmpty 
+            query != null && query!.isNotEmpty
                 ? 'Procurando por "$query"'
                 : 'Carregando perfis disponíveis',
             style: TextStyle(
@@ -220,7 +221,7 @@ class SearchStateFeedbackComponent extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
-          
+
           // Sugestões
           _buildSuggestions(),
         ],
@@ -376,7 +377,7 @@ class SearchStateFeedbackComponent extends StatelessWidget {
           Icon(Icons.check_circle, color: Colors.green[600], size: 20),
           const SizedBox(width: 8),
           Text(
-            resultCount != null 
+            resultCount != null
                 ? '$resultCount perfis encontrados'
                 : 'Busca realizada com sucesso',
             style: TextStyle(

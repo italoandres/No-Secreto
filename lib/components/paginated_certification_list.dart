@@ -5,35 +5,37 @@ import 'certification_request_card.dart';
 import 'certification_history_card.dart';
 
 /// Lista paginada de certificações
-/// 
+///
 /// Componente reutilizável que exibe certificações com paginação automática
 /// ao rolar até o final da lista
 class PaginatedCertificationList extends StatefulWidget {
   final CertificationPaginationController controller;
   final bool isPendingList;
   final VoidCallback? onCertificationProcessed;
-  
+
   const PaginatedCertificationList({
     Key? key,
     required this.controller,
     this.isPendingList = false,
     this.onCertificationProcessed,
   }) : super(key: key);
-  
+
   @override
-  State<PaginatedCertificationList> createState() => _PaginatedCertificationListState();
+  State<PaginatedCertificationList> createState() =>
+      _PaginatedCertificationListState();
 }
 
-class _PaginatedCertificationListState extends State<PaginatedCertificationList> {
+class _PaginatedCertificationListState
+    extends State<PaginatedCertificationList> {
   final ScrollController _scrollController = ScrollController();
-  
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     widget.controller.addListener(_onControllerUpdate);
   }
-  
+
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
@@ -41,21 +43,21 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
     widget.controller.removeListener(_onControllerUpdate);
     super.dispose();
   }
-  
+
   void _onControllerUpdate() {
     if (mounted) {
       setState(() {});
     }
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       // Carregar mais quando estiver próximo do final
       widget.controller.loadNextPage();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Estado de carregamento inicial
@@ -71,7 +73,7 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
         ),
       );
     }
-    
+
     // Estado de erro
     if (widget.controller.error != null) {
       return Center(
@@ -103,7 +105,7 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
         ),
       );
     }
-    
+
     // Lista vazia
     if (widget.controller.certifications.isEmpty) {
       return Center(
@@ -111,9 +113,7 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              widget.isPendingList 
-                  ? Icons.check_circle_outline 
-                  : Icons.history,
+              widget.isPendingList ? Icons.check_circle_outline : Icons.history,
               size: 64,
               color: widget.isPendingList ? Colors.green : Colors.grey,
             ),
@@ -138,30 +138,31 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
         ),
       );
     }
-    
+
     // Lista com dados
     return RefreshIndicator(
       onRefresh: () => widget.controller.refresh(),
       child: ListView.builder(
         controller: _scrollController,
         padding: EdgeInsets.all(16),
-        itemCount: widget.controller.certifications.length + 
-                   (widget.controller.hasMore ? 1 : 0) + 1, // +1 para o header
+        itemCount: widget.controller.certifications.length +
+            (widget.controller.hasMore ? 1 : 0) +
+            1, // +1 para o header
         itemBuilder: (context, index) {
           // Header com informações
           if (index == 0) {
             return _buildHeader();
           }
-          
+
           final certIndex = index - 1;
-          
+
           // Indicador de carregamento no final
           if (certIndex >= widget.controller.certifications.length) {
             return _buildLoadingIndicator();
           }
-          
+
           final certification = widget.controller.certifications[certIndex];
-          
+
           return Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: widget.isPendingList
@@ -184,7 +185,7 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -219,12 +220,12 @@ class _PaginatedCertificationListState extends State<PaginatedCertificationList>
       ),
     );
   }
-  
+
   Widget _buildLoadingIndicator() {
     if (!widget.controller.isLoadingMore) {
       return SizedBox.shrink();
     }
-    
+
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16),
       alignment: Alignment.center,

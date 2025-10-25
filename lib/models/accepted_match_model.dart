@@ -88,11 +88,11 @@ class AcceptedMatchModel {
   /// Obtém nome formatado do usuário
   String get formattedName {
     if (otherUserName.isEmpty) return 'Usuário';
-    return otherUserName.length > 20 
-        ? '${otherUserName.substring(0, 20)}...' 
+    return otherUserName.length > 20
+        ? '${otherUserName.substring(0, 20)}...'
         : otherUserName;
   }
-  
+
   /// Obtém nome com idade para exibição
   String get nameWithAge {
     if (otherUserAge != null) {
@@ -100,7 +100,7 @@ class AcceptedMatchModel {
     }
     return formattedName;
   }
-  
+
   /// Obtém localização formatada
   String get formattedLocation {
     if (otherUserCity != null && otherUserCity!.isNotEmpty) {
@@ -113,12 +113,12 @@ class AcceptedMatchModel {
   String get formattedMatchDate {
     final now = DateTime.now();
     final difference = now.difference(matchDate);
-    
+
     // Normalizar datas para comparação (ignorar hora)
     final today = DateTime(now.year, now.month, now.day);
     final matchDay = DateTime(matchDate.year, matchDate.month, matchDate.day);
     final daysDifference = today.difference(matchDay).inDays;
-    
+
     // Hoje (mesmo dia, independente da hora)
     if (daysDifference == 0) {
       if (difference.inHours == 0) {
@@ -126,17 +126,17 @@ class AcceptedMatchModel {
       }
       return 'hoje';
     }
-    
+
     // Ontem (1 dia atrás)
     if (daysDifference == 1) {
       return 'ontem';
     }
-    
+
     // 2-30 dias atrás
     if (daysDifference <= 30) {
       return '$daysDifference dia${daysDifference > 1 ? 's' : ''} atrás';
     }
-    
+
     // Mais de 30 dias (meses)
     final months = (daysDifference / 30).floor();
     return '$months mês${months > 1 ? 'es' : ''} atrás';
@@ -209,23 +209,24 @@ class AcceptedMatchModel {
   Map<String, dynamic> toJson() => toMap();
 
   /// Cria instância a partir de JSON
-  factory AcceptedMatchModel.fromJson(Map<String, dynamic> json) => AcceptedMatchModel.fromMap(json);
+  factory AcceptedMatchModel.fromJson(Map<String, dynamic> json) =>
+      AcceptedMatchModel.fromMap(json);
 
   @override
   String toString() {
     return 'AcceptedMatchModel(notificationId: $notificationId, '
-           'otherUserId: $otherUserId, otherUserName: $otherUserName, '
-           'matchDate: $matchDate, chatId: $chatId, '
-           'unreadMessages: $unreadMessages, chatExpired: $chatExpired, '
-           'daysRemaining: $daysRemaining)';
+        'otherUserId: $otherUserId, otherUserName: $otherUserName, '
+        'matchDate: $matchDate, chatId: $chatId, '
+        'unreadMessages: $unreadMessages, chatExpired: $chatExpired, '
+        'daysRemaining: $daysRemaining)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is AcceptedMatchModel && 
-           other.notificationId == notificationId &&
-           other.otherUserId == otherUserId;
+    return other is AcceptedMatchModel &&
+        other.notificationId == notificationId &&
+        other.otherUserId == otherUserId;
   }
 
   @override

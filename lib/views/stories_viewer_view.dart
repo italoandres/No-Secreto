@@ -51,12 +51,13 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
     try {
       // Carregar stories do repositório
       final allStories = await _getStoriesFromRepository();
-      
+
       // Filtrar stories válidos (24h e público-alvo)
       final validStories = _filterValidStories(allStories);
-      
+
       print('DEBUG VIEWER: Total stories carregados: ${allStories.length}');
-      print('DEBUG VIEWER: Stories válidos após filtro: ${validStories.length}');
+      print(
+          'DEBUG VIEWER: Stories válidos após filtro: ${validStories.length}');
 
       setState(() {
         stories = validStories;
@@ -98,7 +99,8 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
       // Filtrar APENAS por tempo (24 horas) - NÃO filtrar por stories vistos
       final storyDate = story.dataCadastro?.toDate();
       if (storyDate == null || storyDate.isBefore(twentyFourHoursAgo)) {
-        print('DEBUG VIEWER: Story ${story.id} filtrado por tempo (mais de 24h)');
+        print(
+            'DEBUG VIEWER: Story ${story.id} filtrado por tempo (mais de 24h)');
         return false;
       }
 
@@ -107,9 +109,10 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
         print('DEBUG VIEWER: Story ${story.id} visível para todos');
         return true; // Visível para todos
       }
-      
+
       final isValidForUser = story.publicoAlvo == widget.userSexo;
-      print('DEBUG VIEWER: Story ${story.id} publicoAlvo: ${story.publicoAlvo}, userSexo: ${widget.userSexo}, válido: $isValidForUser');
+      print(
+          'DEBUG VIEWER: Story ${story.id} publicoAlvo: ${story.publicoAlvo}, userSexo: ${widget.userSexo}, válido: $isValidForUser');
       return isValidForUser;
     }).toList();
   }
@@ -118,7 +121,8 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
     if (currentIndex >= stories.length) return;
 
     final currentStory = stories[currentIndex];
-    print('DEBUG VIEWER: Iniciando story ${currentIndex + 1}/${stories.length}');
+    print(
+        'DEBUG VIEWER: Iniciando story ${currentIndex + 1}/${stories.length}');
 
     // Marcar story como visto
     if (currentStory.id != null) {
@@ -195,7 +199,7 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
 
   Widget _buildFallbackImage(String imageUrl) {
     print('DEBUG VIEWER: Tentando fallback para: $imageUrl');
-    
+
     // Tentar diferentes variações da URL
     final variations = [
       imageUrl,
@@ -211,11 +215,11 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
             child: CircularProgressIndicator(color: Colors.white),
           );
         }
-        
+
         if (snapshot.hasData) {
           return snapshot.data!;
         }
-        
+
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -256,7 +260,7 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
     for (int i = 0; i < urls.length; i++) {
       final url = urls[i];
       print('DEBUG VIEWER: Tentando variação ${i + 1}: $url');
-      
+
       try {
         // Tentar carregar a imagem
         final widget = Image.network(
@@ -278,14 +282,14 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
             throw Exception('Failed to load image variation ${i + 1}');
           },
         );
-        
+
         return widget;
       } catch (e) {
         print('DEBUG VIEWER: Variação ${i + 1} falhou: $e');
         continue;
       }
     }
-    
+
     throw Exception('All image variations failed');
   }
 
@@ -353,13 +357,13 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
       children: [
         // Conteúdo principal
         _buildStoryContent(currentStory),
-        
+
         // Barra de progresso
         _buildProgressBar(),
-        
+
         // Controles
         _buildControls(),
-        
+
         // Detector de gestos
         _buildGestureDetector(),
       ],
@@ -376,7 +380,7 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
 
   Widget _buildImageContent(StorieFileModel story) {
     print('DEBUG VIEWER: Carregando imagem: ${story.fileUrl}');
-    
+
     if (story.fileUrl == null || story.fileUrl!.isEmpty) {
       print('DEBUG VIEWER: URL da imagem está vazia');
       return const Center(
@@ -405,13 +409,15 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
           print('DEBUG VIEWER: Imagem carregada com sucesso');
           return child;
         }
-        
+
         final progress = loadingProgress.expectedTotalBytes != null
-            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+            ? loadingProgress.cumulativeBytesLoaded /
+                loadingProgress.expectedTotalBytes!
             : null;
-            
-        print('DEBUG VIEWER: Carregando... ${progress != null ? '${(progress * 100).toInt()}%' : ''}');
-        
+
+        print(
+            'DEBUG VIEWER: Carregando... ${progress != null ? '${(progress * 100).toInt()}%' : ''}');
+
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -434,7 +440,7 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
       errorBuilder: (context, error, stackTrace) {
         print('DEBUG VIEWER: Erro ao carregar imagem: $error');
         print('DEBUG VIEWER: Stack trace: $stackTrace');
-        
+
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -462,7 +468,8 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
                     const SizedBox(height: 4),
                     Text(
                       story.fileUrl!,
-                      style: const TextStyle(color: Colors.white38, fontSize: 10),
+                      style:
+                          const TextStyle(color: Colors.white38, fontSize: 10),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -473,7 +480,8 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
                     const SizedBox(height: 4),
                     Text(
                       error.toString(),
-                      style: const TextStyle(color: Colors.white38, fontSize: 10),
+                      style:
+                          const TextStyle(color: Colors.white38, fontSize: 10),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -519,7 +527,8 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
           return Expanded(
             child: Container(
               height: 3,
-              margin: EdgeInsets.only(right: index < stories.length - 1 ? 4 : 0),
+              margin:
+                  EdgeInsets.only(right: index < stories.length - 1 ? 4 : 0),
               decoration: BoxDecoration(
                 color: Colors.white24,
                 borderRadius: BorderRadius.circular(1.5),
@@ -533,11 +542,12 @@ class _StoriesViewerViewState extends State<StoriesViewerView>
                   } else if (index == currentIndex) {
                     progress = progressController?.value ?? 0;
                   }
-                  
+
                   return LinearProgressIndicator(
                     value: progress,
                     backgroundColor: Colors.transparent,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
                   );
                 },
               ),

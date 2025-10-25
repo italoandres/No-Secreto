@@ -6,20 +6,20 @@ import '../utils/enhanced_logger.dart';
 
 /// Tipos de alerta
 enum AlertType {
-  performance,    // Problemas de performance
-  conflict,       // Conflitos detectados
-  error,          // Erros no sistema
-  critical,       // Problemas críticos
-  validation,     // Falhas de validação
-  user            // Alertas para usuário
+  performance, // Problemas de performance
+  conflict, // Conflitos detectados
+  error, // Erros no sistema
+  critical, // Problemas críticos
+  validation, // Falhas de validação
+  user // Alertas para usuário
 }
 
 /// Severidade do alerta
 enum AlertSeverity {
-  low,      // Informativo
-  medium,   // Atenção necessária
-  high,     // Ação imediata necessária
-  critical  // Sistema comprometido
+  low, // Informativo
+  medium, // Atenção necessária
+  high, // Ação imediata necessária
+  critical // Sistema comprometido
 }
 
 /// Alerta do sistema
@@ -74,18 +74,20 @@ class NotificationAlert {
 
 /// Sistema de alertas para notificações
 class NotificationAlertSystem {
-  static final NotificationAlertSystem _instance = NotificationAlertSystem._internal();
+  static final NotificationAlertSystem _instance =
+      NotificationAlertSystem._internal();
   factory NotificationAlertSystem() => _instance;
   NotificationAlertSystem._internal();
 
   final NotificationSyncLogger _logger = NotificationSyncLogger();
   final SystemValidator _validator = SystemValidator();
-  
+
   final List<NotificationAlert> _alerts = [];
   final Map<String, List<NotificationAlert>> _userAlerts = {};
-  final StreamController<NotificationAlert> _alertStream = StreamController.broadcast();
+  final StreamController<NotificationAlert> _alertStream =
+      StreamController.broadcast();
   final Map<String, Timer> _monitoringTimers = {};
-  
+
   static const int _maxAlerts = 500;
   static const int _maxUserAlerts = 50;
 
@@ -94,17 +96,18 @@ class NotificationAlertSystem {
 
   /// Inicia monitoramento automático
   void startAutomaticMonitoring(String userId) {
-    EnhancedLogger.log('🤖 [ALERT_SYSTEM] Iniciando monitoramento automático para: $userId');
-    
+    EnhancedLogger.log(
+        '🤖 [ALERT_SYSTEM] Iniciando monitoramento automático para: $userId');
+
     _monitoringTimers[userId]?.cancel();
-    
+
     // Monitora logs em tempo real
     _logger.logStream.listen((logEntry) {
       if (logEntry.userId == userId) {
         _processLogEntry(logEntry);
       }
     });
-    
+
     // Validação periódica
     _monitoringTimers[userId] = Timer.periodic(
       const Duration(minutes: 5),
@@ -150,7 +153,7 @@ class NotificationAlertSystem {
         'Reiniciar sistema se necessário',
       ],
     );
-    
+
     _addAlert(alert);
   }
 
@@ -176,7 +179,7 @@ class NotificationAlertSystem {
         'Contatar suporte técnico',
       ],
     );
-    
+
     _addAlert(alert);
     _triggerCriticalNotification(alert);
   }
@@ -208,7 +211,7 @@ class NotificationAlertSystem {
         'Verificar consistência dos dados',
       ],
     );
-    
+
     _addAlert(alert);
   }
 
@@ -216,7 +219,7 @@ class NotificationAlertSystem {
   void _createPerformanceAlert(NotificationLogEntry logEntry) {
     final duration = logEntry.data?['duration'] as int?;
     if (duration == null || duration < 5000) return; // Só alerta se > 5s
-    
+
     final alert = NotificationAlert(
       id: 'perf_${DateTime.now().millisecondsSinceEpoch}',
       type: AlertType.performance,
@@ -232,7 +235,7 @@ class NotificationAlertSystem {
         'Monitorar performance contínua',
       ],
     );
-    
+
     _addAlert(alert);
   }
 
@@ -240,14 +243,13 @@ class NotificationAlertSystem {
   Future<void> _performPeriodicValidation(String userId) async {
     try {
       final result = await _validator.validateSystem(userId);
-      
+
       if (!result.isHealthy) {
         _createValidationAlert(userId, result);
       } else {
         // Resolve alertas de validação anteriores
         _resolveAlertsByType(userId, AlertType.validation);
       }
-      
     } catch (e) {
       EnhancedLogger.log('❌ [ALERT_SYSTEM] Erro na validação periódica: $e');
     }
@@ -255,12 +257,12 @@ class NotificationAlertSystem {
 
   /// Cria alerta de validação
   void _createValidationAlert(String userId, ValidationResult result) {
-    final severity = result.isCritical 
-        ? AlertSeverity.critical 
-        : result.hasWarnings 
-            ? AlertSeverity.medium 
+    final severity = result.isCritical
+        ? AlertSeverity.critical
+        : result.hasWarnings
+            ? AlertSeverity.medium
             : AlertSeverity.low;
-    
+
     final alert = NotificationAlert(
       id: 'validation_${DateTime.now().millisecondsSinceEpoch}',
       type: AlertType.validation,
@@ -272,7 +274,7 @@ class NotificationAlertSystem {
       data: result.details,
       recommendedActions: result.recommendations,
     );
-    
+
     _addAlert(alert);
   }
 
@@ -283,20 +285,21 @@ class NotificationAlertSystem {
     if (_alerts.length > _maxAlerts) {
       _alerts.removeAt(0);
     }
-    
+
     // Adiciona ao histórico do usuário
     _userAlerts.putIfAbsent(alert.userId, () => []).add(alert);
     final userAlerts = _userAlerts[alert.userId]!;
     if (userAlerts.length > _maxUserAlerts) {
       userAlerts.removeAt(0);
     }
-    
+
     // Emite no stream
     _alertStream.add(alert);
-    
+
     // Log do alerta
-    EnhancedLogger.log('🚨 [ALERT] ${alert.severity.toString().toUpperCase()}: ${alert.title}');
-    
+    EnhancedLogger.log(
+        '🚨 [ALERT] ${alert.severity.toString().toUpperCase()}: ${alert.title}');
+
     _logger.logUserAction(
       alert.userId,
       'Alert created: ${alert.type}',
@@ -310,8 +313,9 @@ class NotificationAlertSystem {
 
   /// Dispara notificação crítica
   void _triggerCriticalNotification(NotificationAlert alert) {
-    EnhancedLogger.log('🚨🚨🚨 [CRITICAL_NOTIFICATION] ${alert.title}: ${alert.message}');
-    
+    EnhancedLogger.log(
+        '🚨🚨🚨 [CRITICAL_NOTIFICATION] ${alert.title}: ${alert.message}');
+
     // Aqui pode ser implementado:
     // - Push notification
     // - Email de emergência
@@ -322,11 +326,11 @@ class NotificationAlertSystem {
   /// Resolve alertas por tipo
   void _resolveAlertsByType(String userId, AlertType type) {
     final userAlerts = _userAlerts[userId] ?? [];
-    
+
     for (final alert in userAlerts) {
       if (alert.type == type && !alert.isResolved) {
         alert.resolve();
-        
+
         _logger.logUserAction(
           userId,
           'Alert resolved: ${alert.type}',
@@ -360,7 +364,7 @@ class NotificationAlertSystem {
       data: data,
       recommendedActions: recommendedActions ?? [],
     );
-    
+
     _addAlert(alert);
   }
 
@@ -370,9 +374,9 @@ class NotificationAlertSystem {
       (a) => a.id == alertId,
       orElse: () => throw ArgumentError('Alert not found: $alertId'),
     );
-    
+
     alert.resolve();
-    
+
     _logger.logUserAction(
       alert.userId,
       'Alert manually resolved',
@@ -384,31 +388,34 @@ class NotificationAlertSystem {
   }
 
   /// Obtém alertas por usuário
-  List<NotificationAlert> getUserAlerts(String userId, {bool includeResolved = false}) {
+  List<NotificationAlert> getUserAlerts(String userId,
+      {bool includeResolved = false}) {
     final userAlerts = _userAlerts[userId] ?? [];
-    
+
     if (includeResolved) {
       return List.from(userAlerts);
     }
-    
+
     return userAlerts.where((alert) => !alert.isResolved).toList();
   }
 
   /// Obtém alertas por severidade
-  List<NotificationAlert> getAlertsBySeverity(AlertSeverity severity, {bool includeResolved = false}) {
+  List<NotificationAlert> getAlertsBySeverity(AlertSeverity severity,
+      {bool includeResolved = false}) {
     var alerts = _alerts.where((alert) => alert.severity == severity);
-    
+
     if (!includeResolved) {
       alerts = alerts.where((alert) => !alert.isResolved);
     }
-    
+
     return alerts.toList();
   }
 
   /// Obtém alertas críticos não resolvidos
   List<NotificationAlert> getCriticalAlerts() {
     return _alerts
-        .where((alert) => alert.severity == AlertSeverity.critical && !alert.isResolved)
+        .where((alert) =>
+            alert.severity == AlertSeverity.critical && !alert.isResolved)
         .toList();
   }
 
@@ -423,50 +430,52 @@ class NotificationAlertSystem {
       'typeCounts': <String, int>{},
       'recentAlerts': 0,
     };
-    
+
     // Conta por severidade
     for (final severity in AlertSeverity.values) {
-      stats['severityCounts'][severity.toString()] = 
+      stats['severityCounts'][severity.toString()] =
           _alerts.where((a) => a.severity == severity && !a.isResolved).length;
     }
-    
+
     // Conta por tipo
     for (final type in AlertType.values) {
-      stats['typeCounts'][type.toString()] = 
+      stats['typeCounts'][type.toString()] =
           _alerts.where((a) => a.type == type && !a.isResolved).length;
     }
-    
+
     // Alertas recentes (última hora)
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
-    stats['recentAlerts'] = _alerts
-        .where((a) => a.timestamp.isAfter(oneHourAgo))
-        .length;
-    
+    stats['recentAlerts'] =
+        _alerts.where((a) => a.timestamp.isAfter(oneHourAgo)).length;
+
     return stats;
   }
 
   /// Para monitoramento de um usuário
   void stopMonitoring(String userId) {
     EnhancedLogger.log('⏹️ [ALERT_SYSTEM] Parando monitoramento para: $userId');
-    
+
     _monitoringTimers[userId]?.cancel();
     _monitoringTimers.remove(userId);
   }
 
   /// Limpa alertas antigos
   void cleanupOldAlerts({Duration? olderThan}) {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(days: 30));
-    
+    final cutoff =
+        DateTime.now().subtract(olderThan ?? const Duration(days: 30));
+
     _alerts.removeWhere((alert) => alert.timestamp.isBefore(cutoff));
-    
+
     for (final userId in _userAlerts.keys.toList()) {
-      _userAlerts[userId]!.removeWhere((alert) => alert.timestamp.isBefore(cutoff));
+      _userAlerts[userId]!
+          .removeWhere((alert) => alert.timestamp.isBefore(cutoff));
       if (_userAlerts[userId]!.isEmpty) {
         _userAlerts.remove(userId);
       }
     }
-    
-    EnhancedLogger.log('🧹 [ALERT_SYSTEM] Alertas antigos limpos. Cutoff: $cutoff');
+
+    EnhancedLogger.log(
+        '🧹 [ALERT_SYSTEM] Alertas antigos limpos. Cutoff: $cutoff');
   }
 
   /// Dispose do sistema de alertas
@@ -475,11 +484,11 @@ class NotificationAlertSystem {
       timer.cancel();
     }
     _monitoringTimers.clear();
-    
+
     _alertStream.close();
     _alerts.clear();
     _userAlerts.clear();
-    
+
     EnhancedLogger.log('🧹 [ALERT_SYSTEM] Sistema de alertas disposed');
   }
 }

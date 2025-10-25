@@ -4,7 +4,7 @@ import '../models/certification_request_model.dart';
 /// Repository para gerenciar solicitações de certificação espiritual no Firestore
 class SpiritualCertificationRepository {
   final FirebaseFirestore _firestore;
-  
+
   static const String _collectionName = 'spiritual_certifications';
   static const String _usersCollection = 'users';
 
@@ -16,13 +16,13 @@ class SpiritualCertificationRepository {
     try {
       print('🔍 [CERT_REPO] Tentando salvar em: $_collectionName');
       print('📊 [CERT_REPO] Dados: ${request.toFirestore()}');
-      
+
       final docRef = await _firestore
           .collection(_collectionName)
           .add(request.toFirestore());
-      
+
       print('✅ [CERT_REPO] Documento criado com ID: ${docRef.id}');
-      
+
       return docRef.id;
     } catch (e) {
       print('❌ [CERT_REPO] ERRO ao salvar: $e');
@@ -66,10 +66,8 @@ class SpiritualCertificationRepository {
   /// Buscar solicitação por ID
   Future<CertificationRequestModel?> getById(String requestId) async {
     try {
-      final doc = await _firestore
-          .collection(_collectionName)
-          .doc(requestId)
-          .get();
+      final doc =
+          await _firestore.collection(_collectionName).doc(requestId).get();
 
       if (!doc.exists) {
         return null;
@@ -118,14 +116,12 @@ class SpiritualCertificationRepository {
     bool certified,
   ) async {
     try {
-      await _firestore
-          .collection(_usersCollection)
-          .doc(userId)
-          .update({
-            'isSpiritualCertified': certified,
-          });
+      await _firestore.collection(_usersCollection).doc(userId).update({
+        'isSpiritualCertified': certified,
+      });
     } catch (e) {
-      throw Exception('Erro ao atualizar status de certificação do usuário: $e');
+      throw Exception(
+          'Erro ao atualizar status de certificação do usuário: $e');
     }
   }
 
@@ -168,10 +164,7 @@ class SpiritualCertificationRepository {
   /// Deletar solicitação (admin)
   Future<void> deleteRequest(String requestId) async {
     try {
-      await _firestore
-          .collection(_collectionName)
-          .doc(requestId)
-          .delete();
+      await _firestore.collection(_collectionName).doc(requestId).delete();
     } catch (e) {
       throw Exception('Erro ao deletar solicitação: $e');
     }

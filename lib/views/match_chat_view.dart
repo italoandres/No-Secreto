@@ -34,12 +34,11 @@ class _MatchChatViewState extends State<MatchChatView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
-  
+
   List<ChatMessageModel> _messages = [];
   MatchChatModel? _chatModel;
   StreamSubscription<List<ChatMessageModel>>? _messagesSubscription;
 
-  
   bool _isLoading = true;
   bool _isSendingMessage = false;
   bool _hasError = false;
@@ -82,7 +81,7 @@ class _MatchChatViewState extends State<MatchChatView> {
   Future<void> _initializeChat() async {
     try {
       print('🔄 Inicializando chat ${widget.chatId}...');
-      
+
       setState(() {
         _isLoading = true;
         _hasError = false;
@@ -90,26 +89,26 @@ class _MatchChatViewState extends State<MatchChatView> {
 
       // Buscar o chat existente
       var chat = await MatchChatRepository.getChatById(widget.chatId);
-      
+
       // Se o chat não existe, criar um novo
       if (chat == null) {
         print('📝 Chat não encontrado. Criando novo chat...');
-        
+
         // Criar novo chat (o chatId é gerado automaticamente)
         final newChat = MatchChatModel.create(
           user1Id: widget.otherUserId,
           user2Id: _currentUserId ?? '',
         );
-        
+
         await MatchChatRepository.createChat(newChat);
-        
+
         // Buscar o chat recém-criado
         chat = await MatchChatRepository.getChatById(newChat.id);
-        
+
         if (chat == null) {
           throw Exception('Erro ao criar chat');
         }
-        
+
         print('✅ Chat criado com sucesso: ${chat.id}');
       }
 
@@ -121,10 +120,9 @@ class _MatchChatViewState extends State<MatchChatView> {
       }
 
       print('✅ Chat inicializado: ${chat!.id}');
-
     } catch (e) {
       print('❌ Erro ao inicializar chat: $e');
-      
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -137,18 +135,17 @@ class _MatchChatViewState extends State<MatchChatView> {
 
   /// Configura listener para mensagens em tempo real
   void _setupMessageListener() {
-    _messagesSubscription = MatchChatRepository
-        .getMessagesStream(widget.chatId)
-        .listen(
+    _messagesSubscription =
+        MatchChatRepository.getMessagesStream(widget.chatId).listen(
       (messages) {
         if (mounted) {
           setState(() {
             _messages = messages;
           });
-          
+
           // Marcar mensagens como lidas
           _markMessagesAsRead();
-          
+
           // Scroll para o final
           _scrollToBottom();
         }
@@ -196,7 +193,7 @@ class _MatchChatViewState extends State<MatchChatView> {
   /// Envia uma nova mensagem usando o MessageSenderService
   Future<void> _sendMessage() async {
     final messageText = _messageController.text.trim();
-    
+
     if (messageText.isEmpty || _isSendingMessage) return;
 
     try {
@@ -221,7 +218,7 @@ class _MatchChatViewState extends State<MatchChatView> {
       if (mounted) {
         if (result.isSuccess) {
           print('✅ Mensagem enviada com sucesso');
-          
+
           // Mostrar feedback de sucesso discreto
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -241,19 +238,18 @@ class _MatchChatViewState extends State<MatchChatView> {
         } else {
           // Restaurar texto se houve erro
           _messageController.text = messageText;
-          
+
           // Mostrar erro específico baseado no tipo
           _showSendError(result);
         }
       }
-
     } catch (e) {
       print('❌ Erro inesperado ao enviar mensagem: $e');
-      
+
       if (mounted) {
         // Restaurar texto
         _messageController.text = messageText;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Erro inesperado. Tente novamente.'),
@@ -279,7 +275,6 @@ class _MatchChatViewState extends State<MatchChatView> {
         backgroundColor: Colors.red,
       ),
     );
-
   }
 
   /// Mostra diálogo de chat expirado
@@ -308,10 +303,11 @@ class _MatchChatViewState extends State<MatchChatView> {
       setState(() {
         _chatModel = _chatModel?.copyWith(isExpired: true);
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Este chat expirou. Não é mais possível enviar mensagens.'),
+          content:
+              Text('Este chat expirou. Não é mais possível enviar mensagens.'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 5),
         ),
@@ -348,7 +344,7 @@ class _MatchChatViewState extends State<MatchChatView> {
                 : null,
             child: widget.otherUserPhoto == null
                 ? Text(
-                    widget.otherUserName.isNotEmpty 
+                    widget.otherUserName.isNotEmpty
                         ? widget.otherUserName[0].toUpperCase()
                         : '?',
                     style: const TextStyle(
@@ -358,9 +354,9 @@ class _MatchChatViewState extends State<MatchChatView> {
                   )
                 : null,
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Nome e status
           Expanded(
             child: Column(
@@ -373,10 +369,9 @@ class _MatchChatViewState extends State<MatchChatView> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                
                 if (_chatModel != null)
                   Text(
-                    _chatModel!.hasExpired 
+                    _chatModel!.hasExpired
                         ? 'Chat expirado'
                         : '${_chatModel!.daysRemaining} dias restantes',
                     style: TextStyle(
@@ -435,11 +430,11 @@ class _MatchChatViewState extends State<MatchChatView> {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
     if (_hasError) {
       return _buildErrorState();
     }
-    
+
     return Column(
       children: [
         // Banner de expiração
@@ -460,12 +455,12 @@ class _MatchChatViewState extends State<MatchChatView> {
               ],
             ),
           ),
-        
+
         // Lista de mensagens
         Expanded(
           child: _buildMessagesList(),
         ),
-        
+
         // Campo de input
         _buildMessageInput(),
       ],
@@ -505,29 +500,23 @@ class _MatchChatViewState extends State<MatchChatView> {
               size: 64,
               color: Colors.red.shade400,
             ),
-            
             const SizedBox(height: 16),
-            
             Text(
               'Erro ao Carregar Chat',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.red.shade600,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.red.shade600,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            
             const SizedBox(height: 8),
-            
             Text(
               _errorMessage,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+                    color: Colors.grey.shade600,
+                  ),
             ),
-            
             const SizedBox(height: 24),
-            
             ElevatedButton.icon(
               onPressed: _initializeChat,
               icon: const Icon(Icons.refresh),
@@ -556,7 +545,7 @@ class _MatchChatViewState extends State<MatchChatView> {
       itemBuilder: (context, index) {
         final message = _messages[index];
         final isCurrentUser = message.senderId == _currentUserId;
-        
+
         // Mostrar separador de data se necessário
         bool showDateSeparator = false;
         if (index == 0) {
@@ -589,7 +578,6 @@ class _MatchChatViewState extends State<MatchChatView> {
                   ),
                 ),
               ),
-            
             ChatMessageBubble(
               message: message,
               isCurrentUser: isCurrentUser,
@@ -614,25 +602,21 @@ class _MatchChatViewState extends State<MatchChatView> {
               size: 64,
               color: Colors.grey.shade400,
             ),
-            
             const SizedBox(height: 16),
-            
             Text(
               'Início da Conversa',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            
             const SizedBox(height: 8),
-            
             Text(
               'Vocês deram match! Que tal começar uma conversa com ${widget.otherUserName}?',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade500,
-              ),
+                    color: Colors.grey.shade500,
+                  ),
             ),
           ],
         ),
@@ -643,7 +627,7 @@ class _MatchChatViewState extends State<MatchChatView> {
   /// Campo de input para mensagens
   Widget _buildMessageInput() {
     final isExpired = _chatModel?.hasExpired == true;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -655,9 +639,8 @@ class _MatchChatViewState extends State<MatchChatView> {
           ),
         ),
       ),
-      child: isExpired
-          ? _buildExpiredChatMessage()
-          : _buildActiveMessageInput(),
+      child:
+          isExpired ? _buildExpiredChatMessage() : _buildActiveMessageInput(),
     );
   }
 
@@ -677,9 +660,7 @@ class _MatchChatViewState extends State<MatchChatView> {
             color: Colors.red.shade600,
             size: 20,
           ),
-          
           const SizedBox(width: 12),
-          
           Expanded(
             child: Text(
               'Este chat expirou. Não é mais possível enviar mensagens.',
@@ -724,9 +705,9 @@ class _MatchChatViewState extends State<MatchChatView> {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 8),
-        
+
         // Botão de enviar
         Container(
           decoration: BoxDecoration(
@@ -771,7 +752,6 @@ class _MatchChatViewState extends State<MatchChatView> {
                 Navigator.pop(context);
               },
             ),
-            
             if (message.senderId == _currentUserId)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),

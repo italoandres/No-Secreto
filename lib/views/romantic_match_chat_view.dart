@@ -53,10 +53,8 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
 
   /// Inicializa stream para monitorar status online em tempo real
   void _initializeUserStatusStream() {
-    _userStatusStream = _firestore
-        .collection('usuarios')
-        .doc(widget.otherUserId)
-        .snapshots();
+    _userStatusStream =
+        _firestore.collection('usuarios').doc(widget.otherUserId).snapshots();
   }
 
   void _initializeAnimations() {
@@ -302,7 +300,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
         }
 
         Get.back(); // Voltar para tela anterior
-        
+
         Get.snackbar(
           'Usuário bloqueado',
           '${widget.otherUserName} foi bloqueado com sucesso',
@@ -357,7 +355,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
 
       // Marcar todas como lidas usando batch
       final batch = _firestore.batch();
-      
+
       for (final doc in unreadMessages.docs) {
         batch.update(doc.reference, {'isRead': true});
       }
@@ -419,7 +417,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
             final userData = snapshot.data!.data() as Map<String, dynamic>?;
             final lastSeenTimestamp = userData?['lastSeen'] as Timestamp?;
             final photoUrl = userData?['imgUrl'] as String?;
-            
+
             // Atualizar estado apenas se mudou
             if (photoUrl != _actualPhotoUrl) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -430,7 +428,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 }
               });
             }
-            
+
             // Atualizar lastSeen
             _otherUserLastSeen = lastSeenTimestamp?.toDate();
           }
@@ -445,14 +443,16 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
-                        ? const LinearGradient(
-                            colors: [Color(0xFF39b9ff), Color(0xFFfc6aeb)],
-                          )
-                        : null,
+                    gradient:
+                        (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
+                            ? const LinearGradient(
+                                colors: [Color(0xFF39b9ff), Color(0xFFfc6aeb)],
+                              )
+                            : null,
                     image: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
                         ? DecorationImage(
-                            image: NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!),
+                            image: NetworkImage(
+                                _actualPhotoUrl ?? widget.otherUserPhotoUrl!),
                             fit: BoxFit.cover,
                           )
                         : null,
@@ -612,7 +612,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            
+
             // Animação de corações
             ScaleTransition(
               scale: _heartAnimation,
@@ -638,9 +638,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Título
             Text(
               'Vocês têm um Match! 🎉',
@@ -651,9 +651,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Mensagem espiritual
             Container(
               padding: const EdgeInsets.all(20),
@@ -697,9 +697,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Elementos decorativos
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -711,9 +711,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 _buildFloatingHeart(delay: 1000),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Mensagem de incentivo
             Container(
               padding: const EdgeInsets.all(16),
@@ -748,7 +748,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -808,12 +808,12 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
             final message = messages[index].data() as Map<String, dynamic>;
             final senderId = message['senderId'] as String?;
             final currentUserId = _auth.currentUser?.uid;
-            
+
             // Garantir comparação correta de strings
-            final isMe = senderId != null && 
-                         currentUserId != null && 
-                         senderId == currentUserId;
-            
+            final isMe = senderId != null &&
+                currentUserId != null &&
+                senderId == currentUserId;
+
             return _buildMessageBubble(
               message: message['message'] ?? '',
               isMe: isMe,
@@ -835,13 +835,15 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
             CircleAvatar(
               radius: 16,
-              backgroundImage: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) != null
+              backgroundImage: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) !=
+                      null
                   ? NetworkImage(_actualPhotoUrl ?? widget.otherUserPhotoUrl!)
                   : null,
               child: (_actualPhotoUrl ?? widget.otherUserPhotoUrl) == null
@@ -947,7 +949,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 // Abrir seletor de emoji
               },
             ),
-            
+
             // Campo de texto
             Expanded(
               child: Container(
@@ -971,9 +973,9 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 8),
-            
+
             // Botão de enviar
             Container(
               decoration: BoxDecoration(

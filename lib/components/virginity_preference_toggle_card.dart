@@ -19,9 +19,7 @@ class VirginityPreferenceToggleCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isEnabled
-              ? Colors.pink.withOpacity(0.3)
-              : Colors.grey[300]!,
+          color: isEnabled ? Colors.pink.withOpacity(0.3) : Colors.grey[300]!,
           width: 1.5,
         ),
         boxShadow: [
@@ -61,7 +59,8 @@ class VirginityPreferenceToggleCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isEnabled ? const Color(0xFF333333) : Colors.grey[700],
+                    color:
+                        isEnabled ? const Color(0xFF333333) : Colors.grey[700],
                     height: 1.3,
                   ),
                 ),

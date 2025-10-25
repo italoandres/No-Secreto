@@ -10,7 +10,8 @@ import '../utils/enhanced_logger.dart';
 
 /// Serviço integrador do sistema de interesse
 class InterestSystemIntegrator {
-  static final InterestSystemIntegrator _instance = InterestSystemIntegrator._internal();
+  static final InterestSystemIntegrator _instance =
+      InterestSystemIntegrator._internal();
   factory InterestSystemIntegrator() => _instance;
   InterestSystemIntegrator._internal();
 
@@ -24,13 +25,16 @@ class InterestSystemIntegrator {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        EnhancedLogger.error('Usuário não autenticado', tag: 'INTEREST_INTEGRATOR');
-        _showErrorSnackbar('Você precisa estar logado para demonstrar interesse');
+        EnhancedLogger.error('Usuário não autenticado',
+            tag: 'INTEREST_INTEGRATOR');
+        _showErrorSnackbar(
+            'Você precisa estar logado para demonstrar interesse');
         return false;
       }
 
       // Verificar se já existe interesse
-      final hasInterest = await InterestNotificationRepository.hasUserShownInterest(
+      final hasInterest =
+          await InterestNotificationRepository.hasUserShownInterest(
         currentUser.uid,
         targetUserId,
       );
@@ -41,32 +45,30 @@ class InterestSystemIntegrator {
       }
 
       // Buscar dados do usuário do Firestore
-      EnhancedLogger.info('Buscando dados do usuário do Firestore', 
-        tag: 'INTEREST_INTEGRATOR',
-        data: {'userId': currentUser.uid}
-      );
-      
+      EnhancedLogger.info('Buscando dados do usuário do Firestore',
+          tag: 'INTEREST_INTEGRATOR', data: {'userId': currentUser.uid});
+
       final userDoc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(currentUser.uid)
           .get();
-      
+
       if (!userDoc.exists) {
         throw Exception('Dados do usuário não encontrados');
       }
-      
+
       final userData = userDoc.data()!;
-      final fromUserName = userData['nome'] ?? userData['username'] ?? 'Usuário';
+      final fromUserName =
+          userData['nome'] ?? userData['username'] ?? 'Usuário';
       final fromUserEmail = userData['email'] ?? currentUser.email ?? '';
-      
-      EnhancedLogger.info('Dados do usuário obtidos', 
-        tag: 'INTEREST_INTEGRATOR',
-        data: {
-          'nome': fromUserName,
-          'email': fromUserEmail,
-        }
-      );
-      
+
+      EnhancedLogger.info('Dados do usuário obtidos',
+          tag: 'INTEREST_INTEGRATOR',
+          data: {
+            'nome': fromUserName,
+            'email': fromUserEmail,
+          });
+
       // Criar notificação de interesse
       await InterestNotificationRepository.createInterestNotification(
         fromUserId: currentUser.uid,
@@ -77,19 +79,18 @@ class InterestSystemIntegrator {
         message: message ?? 'Demonstrou interesse no seu perfil',
       );
 
-      EnhancedLogger.info('Interesse enviado com sucesso', 
-        tag: 'INTEREST_INTEGRATOR',
-        data: {
-          'fromUserId': currentUser.uid,
-          'toUserId': targetUserId,
-        }
-      );
+      EnhancedLogger.info('Interesse enviado com sucesso',
+          tag: 'INTEREST_INTEGRATOR',
+          data: {
+            'fromUserId': currentUser.uid,
+            'toUserId': targetUserId,
+          });
 
       _showSuccessSnackbar('Interesse enviado com sucesso! 💕');
       return true;
-
     } catch (e) {
-      EnhancedLogger.error('Erro ao enviar interesse: $e', tag: 'INTEREST_INTEGRATOR');
+      EnhancedLogger.error('Erro ao enviar interesse: $e',
+          tag: 'INTEREST_INTEGRATOR');
       _showErrorSnackbar('Erro ao enviar interesse. Tente novamente.');
       return false;
     }
@@ -101,7 +102,8 @@ class InterestSystemIntegrator {
     required InterestStatus response,
   }) async {
     try {
-      await InterestNotificationRepository.respondToInterestNotification(notificationId, response.value);
+      await InterestNotificationRepository.respondToInterestNotification(
+          notificationId, response.value);
 
       String message;
       switch (response) {
@@ -117,9 +119,9 @@ class InterestSystemIntegrator {
 
       _showSuccessSnackbar(message);
       return true;
-
     } catch (e) {
-      EnhancedLogger.error('Erro ao responder interesse: $e', tag: 'INTEREST_INTEGRATOR');
+      EnhancedLogger.error('Erro ao responder interesse: $e',
+          tag: 'INTEREST_INTEGRATOR');
       _showErrorSnackbar('Erro ao responder. Tente novamente.');
       return false;
     }
@@ -132,7 +134,8 @@ class InterestSystemIntegrator {
       return Stream.value([]);
     }
 
-    return InterestNotificationRepository.getUserInterestNotifications(currentUser.uid);
+    return InterestNotificationRepository.getUserInterestNotifications(
+        currentUser.uid);
   }
 
   /// Verificar se existe interesse entre dois usuários
@@ -141,9 +144,11 @@ class InterestSystemIntegrator {
     required String userId2,
   }) async {
     try {
-      return await InterestNotificationRepository.hasUserShownInterest(userId1, userId2);
+      return await InterestNotificationRepository.hasUserShownInterest(
+          userId1, userId2);
     } catch (e) {
-      EnhancedLogger.error('Erro ao verificar interesse mútuo: $e', tag: 'INTEREST_INTEGRATOR');
+      EnhancedLogger.error('Erro ao verificar interesse mútuo: $e',
+          tag: 'INTEREST_INTEGRATOR');
       return false;
     }
   }
@@ -151,7 +156,8 @@ class InterestSystemIntegrator {
   /// Obter estatísticas de interesse
   Future<Map<String, int>> getInterestStats(String userId) async {
     try {
-      final stats = await InterestNotificationRepository.getUserInterestStats(userId);
+      final stats =
+          await InterestNotificationRepository.getUserInterestStats(userId);
 
       return {
         'sent': stats['sent'] ?? 0,
@@ -159,7 +165,8 @@ class InterestSystemIntegrator {
         'accepted': stats['acceptedReceived'] ?? 0,
       };
     } catch (e) {
-      EnhancedLogger.error('Erro ao obter estatísticas: $e', tag: 'INTEREST_INTEGRATOR');
+      EnhancedLogger.error('Erro ao obter estatísticas: $e',
+          tag: 'INTEREST_INTEGRATOR');
       return {'sent': 0, 'received': 0, 'accepted': 0};
     }
   }
@@ -206,6 +213,4 @@ class InterestSystemIntegrator {
       icon: const Icon(Icons.info, color: Colors.white),
     );
   }
-
-
 }

@@ -12,7 +12,7 @@ class OnboardingController extends GetxController {
   final RxInt currentIndex = 0.obs;
   final RxBool showArrow = false.obs;
   Timer? _arrowTimer;
-  
+
   final List<OnboardingModel> slides = [
     OnboardingModel(
       title: "",
@@ -50,10 +50,11 @@ class OnboardingController extends GetxController {
   void startArrowTimer() {
     // Cancelar timer anterior para evitar múltiplos timers
     _arrowTimer?.cancel();
-    
-    print('OnboardingController: Resetando seta no slide ${currentIndex.value}');
+
+    print(
+        'OnboardingController: Resetando seta no slide ${currentIndex.value}');
     showArrow.value = false;
-    
+
     // A seta será mostrada pelo widget _NonLoopingGif quando a animação terminar
     // Não precisamos mais de timer automático aqui
   }
@@ -97,10 +98,10 @@ class OnboardingController extends GetxController {
     // Salvar que o usuário já viu o onboarding
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('first_time', false);
-    
+
     // Navegar para o próximo fluxo (seleção de idioma ou login)
-    Get.offAll(() => TokenUsuario().idioma.isEmpty 
-        ? const SelectLanguageView() 
+    Get.offAll(() => TokenUsuario().idioma.isEmpty
+        ? const SelectLanguageView()
         : const LoginView());
   }
 

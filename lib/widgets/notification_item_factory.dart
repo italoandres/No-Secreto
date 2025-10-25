@@ -55,7 +55,8 @@ class NotificationItemFactory {
   }
 
   /// Widget de erro quando tipo não é reconhecido
-  static Widget _buildErrorItem(NotificationCategory category, dynamic notification) {
+  static Widget _buildErrorItem(
+      NotificationCategory category, dynamic notification) {
     return Card(
       elevation: 2,
       color: Colors.red.shade50,

@@ -21,7 +21,8 @@ class MatchCacheService {
       _prefs ??= await SharedPreferences.getInstance();
       EnhancedLogger.info('Cache service initialized', tag: 'MATCH_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Failed to initialize cache service: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.error('Failed to initialize cache service: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
@@ -33,10 +34,11 @@ class MatchCacheService {
 
       final updateTime = DateTime.parse(lastUpdate);
       final now = DateTime.now();
-      
+
       return now.difference(updateTime) < _cacheExpiration;
     } catch (e) {
-      EnhancedLogger.warning('Error checking cache validity: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.warning('Error checking cache validity: $e',
+          tag: 'MATCH_CACHE');
       return false;
     }
   }
@@ -44,24 +46,28 @@ class MatchCacheService {
   /// Salvar timestamp do cache
   static Future<void> _saveCacheTimestamp(String key) async {
     try {
-      await _prefs?.setString('${key}_timestamp', DateTime.now().toIso8601String());
+      await _prefs?.setString(
+          '${key}_timestamp', DateTime.now().toIso8601String());
     } catch (e) {
-      EnhancedLogger.warning('Error saving cache timestamp: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.warning('Error saving cache timestamp: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
   /// Cache de matches aceitos
-  static Future<void> cacheAcceptedMatches(List<AcceptedMatchModel> matches) async {
+  static Future<void> cacheAcceptedMatches(
+      List<AcceptedMatchModel> matches) async {
     try {
       await initialize();
-      
+
       final matchesJson = matches.map((m) => m.toJson()).toList();
       final jsonString = jsonEncode(matchesJson);
-      
+
       await _prefs?.setString(_matchesKey, jsonString);
       await _saveCacheTimestamp(_matchesKey);
-      
-      EnhancedLogger.info('Cached ${matches.length} matches', tag: 'MATCH_CACHE');
+
+      EnhancedLogger.info('Cached ${matches.length} matches',
+          tag: 'MATCH_CACHE');
     } catch (e) {
       EnhancedLogger.error('Error caching matches: $e', tag: 'MATCH_CACHE');
     }
@@ -71,7 +77,7 @@ class MatchCacheService {
   static Future<List<AcceptedMatchModel>?> getCachedAcceptedMatches() async {
     try {
       await initialize();
-      
+
       if (!_isCacheValid(_matchesKey)) {
         EnhancedLogger.debug('Matches cache expired', tag: 'MATCH_CACHE');
         return null;
@@ -81,51 +87,57 @@ class MatchCacheService {
       if (jsonString == null) return null;
 
       final List<dynamic> matchesJson = jsonDecode(jsonString);
-      final matches = matchesJson
-          .map((json) => AcceptedMatchModel.fromJson(json))
-          .toList();
+      final matches =
+          matchesJson.map((json) => AcceptedMatchModel.fromJson(json)).toList();
 
-      EnhancedLogger.info('Retrieved ${matches.length} matches from cache', tag: 'MATCH_CACHE');
+      EnhancedLogger.info('Retrieved ${matches.length} matches from cache',
+          tag: 'MATCH_CACHE');
       return matches;
     } catch (e) {
-      EnhancedLogger.error('Error retrieving cached matches: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.error('Error retrieving cached matches: $e',
+          tag: 'MATCH_CACHE');
       return null;
     }
   }
 
   /// Cache de mensagens de um chat específico
-  static Future<void> cacheChatMessages(String chatId, List<ChatMessageModel> messages) async {
+  static Future<void> cacheChatMessages(
+      String chatId, List<ChatMessageModel> messages) async {
     try {
       await initialize();
-      
+
       // Limitar número de mensagens em cache
       final messagesToCache = messages.take(_maxMessagesPerChat).toList();
-      
+
       final messagesJson = messagesToCache.map((m) => m.toJson()).toList();
       final jsonString = jsonEncode(messagesJson);
-      
+
       final key = '$_messagesKeyPrefix$chatId';
       await _prefs?.setString(key, jsonString);
       await _saveCacheTimestamp(key);
-      
+
       // Gerenciar limite de chats em cache
       await _manageCacheSize();
-      
-      EnhancedLogger.info('Cached ${messagesToCache.length} messages for chat $chatId', 
-        tag: 'MATCH_CACHE');
+
+      EnhancedLogger.info(
+          'Cached ${messagesToCache.length} messages for chat $chatId',
+          tag: 'MATCH_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Error caching messages for chat $chatId: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.error('Error caching messages for chat $chatId: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
   /// Obter mensagens de um chat do cache
-  static Future<List<ChatMessageModel>?> getCachedChatMessages(String chatId) async {
+  static Future<List<ChatMessageModel>?> getCachedChatMessages(
+      String chatId) async {
     try {
       await initialize();
-      
+
       final key = '$_messagesKeyPrefix$chatId';
       if (!_isCacheValid(key)) {
-        EnhancedLogger.debug('Messages cache expired for chat $chatId', tag: 'MATCH_CACHE');
+        EnhancedLogger.debug('Messages cache expired for chat $chatId',
+            tag: 'MATCH_CACHE');
         return null;
       }
 
@@ -133,16 +145,17 @@ class MatchCacheService {
       if (jsonString == null) return null;
 
       final List<dynamic> messagesJson = jsonDecode(jsonString);
-      final messages = messagesJson
-          .map((json) => ChatMessageModel.fromJson(json))
-          .toList();
+      final messages =
+          messagesJson.map((json) => ChatMessageModel.fromJson(json)).toList();
 
-      EnhancedLogger.info('Retrieved ${messages.length} messages from cache for chat $chatId', 
-        tag: 'MATCH_CACHE');
+      EnhancedLogger.info(
+          'Retrieved ${messages.length} messages from cache for chat $chatId',
+          tag: 'MATCH_CACHE');
       return messages;
     } catch (e) {
-      EnhancedLogger.error('Error retrieving cached messages for chat $chatId: $e', 
-        tag: 'MATCH_CACHE');
+      EnhancedLogger.error(
+          'Error retrieving cached messages for chat $chatId: $e',
+          tag: 'MATCH_CACHE');
       return null;
     }
   }
@@ -151,9 +164,8 @@ class MatchCacheService {
   static Future<void> _manageCacheSize() async {
     try {
       final keys = _prefs?.getKeys() ?? <String>{};
-      final messageKeys = keys
-          .where((key) => key.startsWith(_messagesKeyPrefix))
-          .toList();
+      final messageKeys =
+          keys.where((key) => key.startsWith(_messagesKeyPrefix)).toList();
 
       if (messageKeys.length <= _maxCachedChats) return;
 
@@ -165,16 +177,18 @@ class MatchCacheService {
       });
 
       // Remover chats mais antigos
-      final keysToRemove = messageKeys.take(messageKeys.length - _maxCachedChats);
+      final keysToRemove =
+          messageKeys.take(messageKeys.length - _maxCachedChats);
       for (final key in keysToRemove) {
         await _prefs?.remove(key);
         await _prefs?.remove('${key}_timestamp');
       }
 
-      EnhancedLogger.info('Removed ${keysToRemove.length} old cached chats', 
-        tag: 'MATCH_CACHE');
+      EnhancedLogger.info('Removed ${keysToRemove.length} old cached chats',
+          tag: 'MATCH_CACHE');
     } catch (e) {
-      EnhancedLogger.warning('Error managing cache size: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.warning('Error managing cache size: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
@@ -184,10 +198,11 @@ class MatchCacheService {
       await initialize();
       await _prefs?.remove(_matchesKey);
       await _prefs?.remove('${_matchesKey}_timestamp');
-      
+
       EnhancedLogger.info('Matches cache invalidated', tag: 'MATCH_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Error invalidating matches cache: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.error('Error invalidating matches cache: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
@@ -198,11 +213,13 @@ class MatchCacheService {
       final key = '$_messagesKeyPrefix$chatId';
       await _prefs?.remove(key);
       await _prefs?.remove('${key}_timestamp');
-      
-      EnhancedLogger.info('Messages cache invalidated for chat $chatId', tag: 'MATCH_CACHE');
+
+      EnhancedLogger.info('Messages cache invalidated for chat $chatId',
+          tag: 'MATCH_CACHE');
     } catch (e) {
-      EnhancedLogger.error('Error invalidating messages cache for chat $chatId: $e', 
-        tag: 'MATCH_CACHE');
+      EnhancedLogger.error(
+          'Error invalidating messages cache for chat $chatId: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
@@ -211,18 +228,20 @@ class MatchCacheService {
     try {
       await initialize();
       final keys = _prefs?.getKeys() ?? <String>{};
-      
-      final cacheKeys = keys.where((key) => 
-        key.startsWith(_matchesKey) || 
-        key.startsWith(_messagesKeyPrefix) ||
-        key.contains('_timestamp')
-      ).toList();
+
+      final cacheKeys = keys
+          .where((key) =>
+              key.startsWith(_matchesKey) ||
+              key.startsWith(_messagesKeyPrefix) ||
+              key.contains('_timestamp'))
+          .toList();
 
       for (final key in cacheKeys) {
         await _prefs?.remove(key);
       }
 
-      EnhancedLogger.info('All cache cleared (${cacheKeys.length} keys)', tag: 'MATCH_CACHE');
+      EnhancedLogger.info('All cache cleared (${cacheKeys.length} keys)',
+          tag: 'MATCH_CACHE');
     } catch (e) {
       EnhancedLogger.error('Error clearing cache: $e', tag: 'MATCH_CACHE');
     }
@@ -233,10 +252,12 @@ class MatchCacheService {
     try {
       await initialize();
       final keys = _prefs?.getKeys() ?? <String>{};
-      
+
       final matchCacheExists = keys.contains(_matchesKey);
-      final messageKeys = keys.where((key) => key.startsWith(_messagesKeyPrefix)).toList();
-      final timestampKeys = keys.where((key) => key.contains('_timestamp')).toList();
+      final messageKeys =
+          keys.where((key) => key.startsWith(_messagesKeyPrefix)).toList();
+      final timestampKeys =
+          keys.where((key) => key.contains('_timestamp')).toList();
 
       // Calcular tamanho aproximado do cache
       int totalSize = 0;
@@ -250,7 +271,7 @@ class MatchCacheService {
       // Verificar validade dos caches
       int validCaches = 0;
       int expiredCaches = 0;
-      
+
       for (final key in [...messageKeys, if (matchCacheExists) _matchesKey]) {
         if (_isCacheValid(key)) {
           validCaches++;
@@ -289,7 +310,8 @@ class MatchCacheService {
       final key = '$_messagesKeyPrefix$chatId';
       return _prefs?.containsKey(key) ?? false;
     } catch (e) {
-      EnhancedLogger.warning('Error checking if chat is cached: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.warning('Error checking if chat is cached: $e',
+          tag: 'MATCH_CACHE');
       return false;
     }
   }
@@ -297,20 +319,24 @@ class MatchCacheService {
   /// Pré-carregar cache para chats mais usados
   static Future<void> preloadFrequentChats(List<String> chatIds) async {
     try {
-      EnhancedLogger.info('Preloading cache for ${chatIds.length} frequent chats', 
-        tag: 'MATCH_CACHE');
-      
+      EnhancedLogger.info(
+          'Preloading cache for ${chatIds.length} frequent chats',
+          tag: 'MATCH_CACHE');
+
       // Esta função seria chamada com dados dos chats mais acessados
       // A implementação real dependeria de ter acesso aos repositórios
-      for (final chatId in chatIds.take(5)) { // Limitar a 5 chats mais frequentes
+      for (final chatId in chatIds.take(5)) {
+        // Limitar a 5 chats mais frequentes
         final isCached = await isChatCached(chatId);
         if (!isCached) {
-          EnhancedLogger.debug('Chat $chatId not in cache, would preload', tag: 'MATCH_CACHE');
+          EnhancedLogger.debug('Chat $chatId not in cache, would preload',
+              tag: 'MATCH_CACHE');
           // TODO: Implementar preload real quando integrado com repositórios
         }
       }
     } catch (e) {
-      EnhancedLogger.error('Error preloading frequent chats: $e', tag: 'MATCH_CACHE');
+      EnhancedLogger.error('Error preloading frequent chats: $e',
+          tag: 'MATCH_CACHE');
     }
   }
 
@@ -318,12 +344,13 @@ class MatchCacheService {
   static Future<void> optimizeCache() async {
     try {
       EnhancedLogger.info('Starting cache optimization', tag: 'MATCH_CACHE');
-      
+
       // Remover caches expirados
       final keys = _prefs?.getKeys() ?? <String>{};
-      final cacheKeys = keys.where((key) => 
-        key.startsWith(_matchesKey) || key.startsWith(_messagesKeyPrefix)
-      ).toList();
+      final cacheKeys = keys
+          .where((key) =>
+              key.startsWith(_matchesKey) || key.startsWith(_messagesKeyPrefix))
+          .toList();
 
       int removedCount = 0;
       for (final key in cacheKeys) {
@@ -337,8 +364,9 @@ class MatchCacheService {
       // Gerenciar tamanho do cache
       await _manageCacheSize();
 
-      EnhancedLogger.info('Cache optimization completed, removed $removedCount expired entries', 
-        tag: 'MATCH_CACHE');
+      EnhancedLogger.info(
+          'Cache optimization completed, removed $removedCount expired entries',
+          tag: 'MATCH_CACHE');
     } catch (e) {
       EnhancedLogger.error('Error optimizing cache: $e', tag: 'MATCH_CACHE');
     }

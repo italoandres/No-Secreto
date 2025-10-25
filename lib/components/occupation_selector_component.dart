@@ -242,7 +242,9 @@ class _OccupationSelectorComponentState
         ],
 
         // Mensagem quando não há resultados
-        if (_showSuggestions && _suggestions.isEmpty && _searchController.text.isNotEmpty) ...[
+        if (_showSuggestions &&
+            _suggestions.isEmpty &&
+            _searchController.text.isNotEmpty) ...[
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),

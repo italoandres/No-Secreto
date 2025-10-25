@@ -63,9 +63,9 @@ class VitrineMenuView extends StatelessWidget {
               ],
             ),
           ),
-          
+
           SizedBox(height: 24),
-          
+
           // Matches Aceitos (PRINCIPAL)
           Card(
             elevation: 2,
@@ -94,9 +94,9 @@ class VitrineMenuView extends StatelessWidget {
               onTap: () => Get.toNamed('/accepted-matches'),
             ),
           ),
-          
+
           SizedBox(height: 12),
-          
+
           // Gerencie seus matches (Notificações de interesse)
           Card(
             elevation: 2,
@@ -140,9 +140,9 @@ class VitrineMenuView extends StatelessWidget {
               onTap: () => Get.toNamed('/interest-dashboard'),
             ),
           ),
-          
+
           SizedBox(height: 12),
-          
+
           // Explorar perfis
           Card(
             elevation: 2,
@@ -171,9 +171,9 @@ class VitrineMenuView extends StatelessWidget {
               onTap: () => Get.toNamed('/explore-profiles'),
             ),
           ),
-          
+
           SizedBox(height: 12),
-          
+
           // Configure sua vitrine
           Card(
             elevation: 2,

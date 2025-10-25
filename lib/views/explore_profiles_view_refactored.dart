@@ -63,7 +63,7 @@ class _ExploreProfilesViewState extends State<ExploreProfilesView> {
   Widget build(BuildContext context) {
     final controller = Get.put(ExploreProfilesController());
     final sinaisController = Get.put(SinaisController());
-    
+
     // Carregar localizações e filtros do usuário
     controller.loadUserLocations();
     controller.loadSearchFilters();
@@ -238,7 +238,7 @@ class _ExploreProfilesViewState extends State<ExploreProfilesView> {
             SliverToBoxAdapter(
               child: Obx(() {
                 final profile = sinaisController.currentProfile;
-                
+
                 if (sinaisController.isLoading.value) {
                   return const Padding(
                     padding: EdgeInsets.all(32),
@@ -648,8 +648,7 @@ class _ExploreProfilesViewState extends State<ExploreProfilesView> {
                     ? controller.primaryState.value
                     : null,
                 additionalLocations: controller.additionalLocations.value,
-                onAddLocation: () =>
-                    controller.showAddLocationDialog(context),
+                onAddLocation: () => controller.showAddLocationDialog(context),
                 onRemoveLocation: (index) =>
                     controller.removeAdditionalLocation(index),
                 onEditLocation: (index) =>
@@ -843,8 +842,7 @@ class _ExploreProfilesViewState extends State<ExploreProfilesView> {
 
           // Filtro de Movimento Deus é Pai
           Obx(() => DeusEPaiFilterCard(
-                requiresDeusEPaiMember:
-                    controller.requiresDeusEPaiMember.value,
+                requiresDeusEPaiMember: controller.requiresDeusEPaiMember.value,
                 onDeusEPaiChanged: (member) {
                   controller.updateRequiresDeusEPaiMember(member);
                 },

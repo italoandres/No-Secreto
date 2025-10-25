@@ -97,7 +97,8 @@ class _LanguagesFilterCardState extends State<LanguagesFilterCard> {
     // Buscar em todos os idiomas (principais + outros)
     final allLanguages = [..._featuredLanguages, ..._otherLanguages];
     return allLanguages
-        .where((lang) => lang.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where(
+            (lang) => lang.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
   }
 
@@ -236,7 +237,9 @@ class _LanguagesFilterCardState extends State<LanguagesFilterCard> {
                   selectedColor: Colors.blue.shade600,
                   checkmarkColor: Colors.white,
                   side: BorderSide(
-                    color: isSelected ? Colors.blue.shade600 : Colors.grey.shade300,
+                    color: isSelected
+                        ? Colors.blue.shade600
+                        : Colors.grey.shade300,
                   ),
                 );
               }).toList(),
@@ -308,7 +311,7 @@ class _LanguagesFilterCardState extends State<LanguagesFilterCard> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Idiomas encontrados como FilterChips
               if (_filteredLanguages.isEmpty)
                 Padding(
@@ -328,14 +331,16 @@ class _LanguagesFilterCardState extends State<LanguagesFilterCard> {
                   spacing: 8,
                   runSpacing: 8,
                   children: _filteredLanguages.map((language) {
-                    final isSelected = widget.selectedLanguages.contains(language);
+                    final isSelected =
+                        widget.selectedLanguages.contains(language);
                     return FilterChip(
                       label: Text(
                         language,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.blue.shade700,
+                          color:
+                              isSelected ? Colors.white : Colors.blue.shade700,
                         ),
                       ),
                       selected: isSelected,
@@ -344,7 +349,9 @@ class _LanguagesFilterCardState extends State<LanguagesFilterCard> {
                       selectedColor: Colors.blue.shade600,
                       checkmarkColor: Colors.white,
                       side: BorderSide(
-                        color: isSelected ? Colors.blue.shade600 : Colors.grey.shade300,
+                        color: isSelected
+                            ? Colors.blue.shade600
+                            : Colors.grey.shade300,
                       ),
                     );
                   }).toList(),

@@ -24,7 +24,7 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
   // Firebase instances
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   final Map<String, bool> _expandedSections = {
     'missao': false,
     'sinais': false,
@@ -93,7 +93,7 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
               ],
             ),
           ),
-          
+
           // Sistema de abas verticais
           Container(
             color: Colors.white,
@@ -102,7 +102,7 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
                 final isSelected = _selectedTabIndex == index;
                 Color tabColor;
                 IconData tabIcon;
-                
+
                 // Definir cor e ícone para cada aba
                 switch (index) {
                   case 0: // Editar Perfil
@@ -125,7 +125,7 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
                     tabColor = Colors.blue.shade600;
                     tabIcon = Icons.tab;
                 }
-                
+
                 return GestureDetector(
                   onTap: () {
                     // Apenas "Nossa Comunidade" (index 3) fica no CommunityInfoView
@@ -144,18 +144,25 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
                   },
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       // Gradiente especial para Vitrine de Propósito
                       gradient: isSelected && index == 1
-                        ? LinearGradient(
-                            colors: [Colors.blue.shade600, Colors.pink.shade400],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                      color: isSelected && index != 1 ? tabColor : Colors.transparent,
+                          ? LinearGradient(
+                              colors: [
+                                Colors.blue.shade600,
+                                Colors.pink.shade400
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: isSelected && index != 1
+                          ? tabColor
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? tabColor : Colors.grey.shade300,
@@ -175,7 +182,9 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
                             _tabTitles[index],
                             style: TextStyle(
                               color: isSelected ? Colors.white : tabColor,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
                               fontSize: 16,
                             ),
                           ),
@@ -193,7 +202,7 @@ class _CommunityInfoViewState extends State<CommunityInfoView> {
               }),
             ),
           ),
-          
+
           // Conteúdo sempre de "Nossa Comunidade"
           // Outras abas vão direto para páginas dedicadas
           Expanded(
@@ -481,7 +490,8 @@ Esse espaço não é apenas para os dois mas para os 3: o Casal e o Pai. Um espa
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.people, color: Colors.white, size: 20),
+                          const Icon(Icons.people,
+                              color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           const Text(
                             'Usuários que já fazem parte:',
@@ -517,7 +527,8 @@ Esse espaço não é apenas para os dois mas para os 3: o Casal e o Pai. Um espa
                       LinearProgressIndicator(
                         value: 12357 / 100000,
                         backgroundColor: Colors.white.withOpacity(0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.amber.shade300),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.amber.shade300),
                       ),
                     ],
                   ),
@@ -570,7 +581,8 @@ Esse espaço não é apenas para os dois mas para os 3: o Casal e o Pai. Um espa
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.monetization_on, color: Colors.white, size: 18),
+                      const Icon(Icons.monetization_on,
+                          color: Colors.white, size: 18),
                       const SizedBox(width: 8),
                       const Text(
                         'Custo médio por usuário: ',
@@ -657,9 +669,8 @@ Esse espaço não é apenas para os dois mas para os 3: o Casal e o Pai. Um espa
   }
 
   void _showJoinDialog(String type) {
-    String title = type == 'divulgacao'
-        ? 'Divulgar a Comunidade'
-        : 'Apoiar a Manutenção';
+    String title =
+        type == 'divulgacao' ? 'Divulgar a Comunidade' : 'Apoiar a Manutenção';
 
     String message = type == 'divulgacao'
         ? 'Obrigado por querer fazer parte! Em breve teremos mais informações sobre como você pode ajudar a divulgar nossa comunidade.'
@@ -1041,8 +1052,6 @@ Esse espaço não é apenas para os dois mas para os 3: o Casal e o Pai. Um espa
   }
 
   // Método removido - Vitrine de Propósito agora vai direto para página dedicada
-
-
 
   void _navigateToVitrineProfile() {
     // Navegar para o perfil de vitrine (ProfileCompletionView)

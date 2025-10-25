@@ -90,16 +90,18 @@ class ChatMessageModel {
   /// Gera string aleatória para garantir unicidade
   static String _generateRandomString(int length) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    return List.generate(length, (index) => 
-        chars[(DateTime.now().millisecondsSinceEpoch + index) % chars.length]).join();
+    return List.generate(
+        length,
+        (index) => chars[(DateTime.now().millisecondsSinceEpoch + index) %
+            chars.length]).join();
   }
 
   /// Valida se a mensagem é válida
   bool get isValid {
-    return message.trim().isNotEmpty && 
-           message.trim().length <= 1000 && // Limite de 1000 caracteres
-           senderId.isNotEmpty &&
-           chatId.isNotEmpty;
+    return message.trim().isNotEmpty &&
+        message.trim().length <= 1000 && // Limite de 1000 caracteres
+        senderId.isNotEmpty &&
+        chatId.isNotEmpty;
   }
 
   /// Verifica se a mensagem foi enviada pelo usuário atual
@@ -116,7 +118,7 @@ class ChatMessageModel {
   String get formattedTime {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d';
     } else if (difference.inHours > 0) {
@@ -221,8 +223,8 @@ class ChatMessageModel {
   @override
   String toString() {
     return 'ChatMessageModel(id: $id, chatId: $chatId, senderId: $senderId, '
-           'message: ${message.length > 50 ? '${message.substring(0, 50)}...' : message}, '
-           'timestamp: $timestamp, isRead: $isRead, type: $type)';
+        'message: ${message.length > 50 ? '${message.substring(0, 50)}...' : message}, '
+        'timestamp: $timestamp, isRead: $isRead, type: $type)';
   }
 
   @override

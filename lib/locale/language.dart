@@ -1,25 +1,23 @@
-
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'package:whatsapp_chat/token_usuario.dart';
-class AppLanguage {
 
-  static List<String> languages() => ['pt','en','es'];
+class AppLanguage {
+  static List<String> languages() => ['pt', 'en', 'es'];
 
   static String lang(String key, {String? idioma}) {
-
-    if(TokenUsuario().idioma.isEmpty) {
-      if(idioma == null || idioma.isEmpty) {
+    if (TokenUsuario().idioma.isEmpty) {
+      if (idioma == null || idioma.isEmpty) {
         // Default to Portuguese for web, use Platform.localeName for mobile
         if (kIsWeb) {
           idioma = 'pt'; // Default to Portuguese on web
         } else {
-          if(Platform.localeName.contains('pt')) {
+          if (Platform.localeName.contains('pt')) {
             idioma = 'pt';
-          } else if(Platform.localeName.contains('en')) {
+          } else if (Platform.localeName.contains('en')) {
             idioma = 'en';
-          } else if(Platform.localeName.contains('es')) {
+          } else if (Platform.localeName.contains('es')) {
             idioma = 'es';
           } else {
             idioma = 'pt'; // Default fallback
@@ -65,16 +63,19 @@ class AppLanguage {
         'cadastrar': 'Cadastrar',
         'ainda_n_tem_conta': 'Ainda não tem uma conta?',
         'ola': 'Olá',
-        'cadastrar_img_chat': 'Cadastre abaixo uma imagem para o papel de parede do chat.',
+        'cadastrar_img_chat':
+            'Cadastre abaixo uma imagem para o papel de parede do chat.',
         'aviso': 'Aviso',
-        'vc_realmente_deseja_continuar_sem_papel': 'Você realmente quer continuar sem selecionar um papel de parede para o chat?',
+        'vc_realmente_deseja_continuar_sem_papel':
+            'Você realmente quer continuar sem selecionar um papel de parede para o chat?',
         'sim': 'Sim',
         'nao': 'Não',
         'contatos': 'Contatos',
         'compartilhar': 'Compartilhar',
         'baixando_file': 'Baixando arquivo...',
         'confira_este_file': 'Confira este arquivo',
-        'aviso_delete_conta': 'Você realmente deseja deletar sua conta de forma definitiva',
+        'aviso_delete_conta':
+            'Você realmente deseja deletar sua conta de forma definitiva',
         'deletar_minha_conta': 'Deletar minha conta',
         'sair': 'Sair',
         'cancelar': 'Cancelar',
@@ -111,7 +112,8 @@ class AppLanguage {
         'pai': 'Pai',
         'visualizou_as': 'Pai visualizou as',
         'salvar': 'Salvar',
-        'msg_editar_papel': 'Abaixo você pode editar o Papel de parede do seu Chat.',
+        'msg_editar_papel':
+            'Abaixo você pode editar o Papel de parede do seu Chat.',
         'select_img': 'Selecionar imagem',
         'enviar_arquivo': 'Enviar áudio',
         'add_legenda': 'Adicione uma legenda...',
@@ -166,14 +168,16 @@ class AppLanguage {
         "ola": "Hello",
         "cadastrar_img_chat": "Register an image for the chat wallpaper below.",
         "aviso": "Notice",
-        "vc_realmente_deseja_continuar_sem_papel": "Do you really want to continue without selecting a chat wallpaper?",
+        "vc_realmente_deseja_continuar_sem_papel":
+            "Do you really want to continue without selecting a chat wallpaper?",
         "sim": "Yes",
         "nao": "No",
         "contatos": "Contacts",
         "compartilhar": "Share",
         "baixando_file": "Downloading file...",
         "confira_este_file": "Check out this file",
-        "aviso_delete_conta": "Do you really want to permanently delete your account?",
+        "aviso_delete_conta":
+            "Do you really want to permanently delete your account?",
         "deletar_minha_conta": "Delete my account",
         "sair": "Logout",
         "cancelar": "Cancel",
@@ -239,14 +243,16 @@ class AppLanguage {
         'esFlag': '🇪🇸',
         "bem_vindo_ao": "Bienvenido(a) a",
         "selecionar_idioma": "Seleccionar idioma",
-        "para_continuar": "Para continuar, selecciona tu idioma a continuación.",
+        "para_continuar":
+            "Para continuar, selecciona tu idioma a continuación.",
         "continuar": "Continuar",
         "como_continuar": "¿Cómo te gustaría continuar?",
         "entrar_com_apple": "Ingresar con Apple",
         "entrar_com_google": "Ingresar con Google",
         "entrar_com_email": "Ingresar con Correo Electrónico y Contraseña",
         "ola_visitante": "¡Hola, visitante!",
-        "prencha_os_campos": "Completa los campos a continuación para continuar",
+        "prencha_os_campos":
+            "Completa los campos a continuación para continuar",
         "digite_aqui": "Escribe aquí...",
         "senha": "Contraseña",
         "confirmar_senha": "Confirmar contraseña",
@@ -262,16 +268,19 @@ class AppLanguage {
         "cadastrar": "Registrar",
         "ainda_n_tem_conta": "¿Todavía no tienes una cuenta?",
         "ola": "Hola",
-        "cadastrar_img_chat": "Registra a continuación una imagen para el fondo de pantalla del chat.",
+        "cadastrar_img_chat":
+            "Registra a continuación una imagen para el fondo de pantalla del chat.",
         "aviso": "Aviso",
-        "vc_realmente_deseja_continuar_sem_papel": "¿Realmente quieres continuar sin seleccionar un fondo de pantalla para el chat?",
+        "vc_realmente_deseja_continuar_sem_papel":
+            "¿Realmente quieres continuar sin seleccionar un fondo de pantalla para el chat?",
         "sim": "Sí",
         "nao": "No",
         "contatos": "Contactos",
         "compartilhar": "Compartir",
         "baixando_file": "Descargando archivo...",
         "confira_este_file": "Consulta este archivo",
-        "aviso_delete_conta": "¿Realmente deseas eliminar tu cuenta de forma permanente?",
+        "aviso_delete_conta":
+            "¿Realmente deseas eliminar tu cuenta de forma permanente?",
         "deletar_minha_conta": "Eliminar mi cuenta",
         "sair": "Salir",
         "cancelar": "Cancelar",
@@ -287,7 +296,8 @@ class AppLanguage {
         "video": "Video",
         "arquivos": "Archivos",
         "adicione_uma_legenda": "Añade una leyenda",
-        "digite_senha_abaixo": "Ingresa tu contraseña a continuación para continuar.",
+        "digite_senha_abaixo":
+            "Ingresa tu contraseña a continuación para continuar.",
         "falha_ao_validar_video": "¡Fallo al validar el video!",
         "falha_ao_entrar_com_google": "Fallo al ingresar con Google",
         "validando": "Validando...",
@@ -300,7 +310,8 @@ class AppLanguage {
         "email_incorreto": "¡Correo electrónico incorrecto o no registrado!",
         "senha_incorreta": "¡Contraseña incorrecta o no válida!",
         "error_login": "Error al iniciar sesión!",
-        "email_indisponivel": "¡El correo electrónico ingresado no está disponible!",
+        "email_indisponivel":
+            "¡El correo electrónico ingresado no está disponible!",
         "validando_img_perfil": "Validando la imagen de perfil...",
         "validando_papel": "Validando fondo de pantalla...",
         "finalizando": "Finalizando...",
@@ -308,7 +319,8 @@ class AppLanguage {
         "pai": "Padre",
         "visualizou_as": "Padre visualizó las",
         "salvar": "Guardar",
-        "msg_editar_papel": "A continuación, puedes editar el fondo de pantalla de tu Chat.",
+        "msg_editar_papel":
+            "A continuación, puedes editar el fondo de pantalla de tu Chat.",
         "select_img": "Seleccionar imagen",
         "enviar_arquivo": "Enviar audio",
         "add_legenda": "Agregar una leyenda...",

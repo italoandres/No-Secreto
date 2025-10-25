@@ -12,10 +12,12 @@ class VitrineInviteNotificationComponent extends StatefulWidget {
   const VitrineInviteNotificationComponent({Key? key}) : super(key: key);
 
   @override
-  State<VitrineInviteNotificationComponent> createState() => _VitrineInviteNotificationComponentState();
+  State<VitrineInviteNotificationComponent> createState() =>
+      _VitrineInviteNotificationComponentState();
 }
 
-class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotificationComponent> {
+class _VitrineInviteNotificationComponentState
+    extends State<VitrineInviteNotificationComponent> {
   List<InterestModel> _pendingInvites = [];
   bool _isLoading = true;
   String? _currentUserId;
@@ -29,11 +31,11 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
   Future<void> _initializeComponent() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
-    
+
     _currentUserId = currentUser.uid;
-    
+
     // MatchesController removido - usando sistema de notificações de interesse
-    
+
     await _loadPendingInvites();
   }
 
@@ -41,20 +43,19 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
     if (_currentUserId == null) return;
 
     try {
-      EnhancedLogger.info('Loading pending vitrine invites', 
-        tag: 'VITRINE_INVITES',
-        data: {'userId': _currentUserId}
-      );
+      EnhancedLogger.info('Loading pending vitrine invites',
+          tag: 'VITRINE_INVITES', data: {'userId': _currentUserId});
 
-      final invites = await SpiritualProfileRepository.getPendingInterestsForUser(_currentUserId!);
-      
+      final invites =
+          await SpiritualProfileRepository.getPendingInterestsForUser(
+              _currentUserId!);
+
       // Filtrar convites válidos e remover duplicatas
       final validInvites = invites.where((invite) {
         if (invite.fromUserId.isEmpty) {
-          EnhancedLogger.error('Filtering out invite with empty fromUserId', 
-            tag: 'VITRINE_INVITES',
-            data: {'inviteId': invite.id, 'toUserId': invite.toUserId}
-          );
+          EnhancedLogger.error('Filtering out invite with empty fromUserId',
+              tag: 'VITRINE_INVITES',
+              data: {'inviteId': invite.id, 'toUserId': invite.toUserId});
           return false;
         }
         return true;
@@ -64,33 +65,30 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
       final uniqueInvites = <String, InterestModel>{};
       for (final invite in validInvites) {
         final existingInvite = uniqueInvites[invite.fromUserId];
-        if (existingInvite == null || 
-            (invite.createdAt != null && existingInvite.createdAt != null && 
-             invite.createdAt.isAfter(existingInvite.createdAt))) {
+        if (existingInvite == null ||
+            (invite.createdAt != null &&
+                existingInvite.createdAt != null &&
+                invite.createdAt.isAfter(existingInvite.createdAt))) {
           uniqueInvites[invite.fromUserId] = invite;
         }
       }
-      
+
       setState(() {
         _pendingInvites = uniqueInvites.values.toList();
         _isLoading = false;
       });
 
-      EnhancedLogger.success('Pending invites loaded', 
-        tag: 'VITRINE_INVITES',
-        data: {
-          'userId': _currentUserId, 
-          'totalInvites': invites.length,
-          'uniqueInvites': _pendingInvites.length
-        }
-      );
+      EnhancedLogger.success('Pending invites loaded',
+          tag: 'VITRINE_INVITES',
+          data: {
+            'userId': _currentUserId,
+            'totalInvites': invites.length,
+            'uniqueInvites': _pendingInvites.length
+          });
     } catch (e) {
-      EnhancedLogger.error('Failed to load pending invites', 
-        tag: 'VITRINE_INVITES',
-        error: e,
-        data: {'userId': _currentUserId}
-      );
-      
+      EnhancedLogger.error('Failed to load pending invites',
+          tag: 'VITRINE_INVITES', error: e, data: {'userId': _currentUserId});
+
       setState(() {
         _isLoading = false;
       });
@@ -99,17 +97,17 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
 
   Future<void> _handleAcceptInvite(InterestModel invite) async {
     try {
-      EnhancedLogger.info('Accepting vitrine invite - creating match', 
-        tag: 'VITRINE_INVITES',
-        data: {'from': invite.fromUserId, 'to': invite.toUserId}
-      );
+      EnhancedLogger.info('Accepting vitrine invite - creating match',
+          tag: 'VITRINE_INVITES',
+          data: {'from': invite.fromUserId, 'to': invite.toUserId});
 
       // 1. Criar interesse mútuo no sistema antigo (compatibilidade)
-      await SpiritualProfileRepository.createMutualInterest(invite.fromUserId, _currentUserId!);
-      
+      await SpiritualProfileRepository.createMutualInterest(
+          invite.fromUserId, _currentUserId!);
+
       // 2. Sistema de matches removido - usando notificações de interesse
       // Aqui poderia integrar com o novo sistema se necessário
-      
+
       // Remover da lista local
       setState(() {
         _pendingInvites.removeWhere((i) => i.id == invite.id);
@@ -129,11 +127,10 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
         );
       }
     } catch (e) {
-      EnhancedLogger.error('Failed to create match', 
-        tag: 'VITRINE_INVITES',
-        error: e,
-        data: {'from': invite.fromUserId, 'to': invite.toUserId}
-      );
+      EnhancedLogger.error('Failed to create match',
+          tag: 'VITRINE_INVITES',
+          error: e,
+          data: {'from': invite.fromUserId, 'to': invite.toUserId});
 
       Get.snackbar(
         'Erro',
@@ -148,14 +145,13 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
 
   Future<void> _handleDeclineInvite(InterestModel invite) async {
     try {
-      EnhancedLogger.info('Declining vitrine invite', 
-        tag: 'VITRINE_INVITES',
-        data: {'from': invite.fromUserId, 'to': invite.toUserId}
-      );
+      EnhancedLogger.info('Declining vitrine invite',
+          tag: 'VITRINE_INVITES',
+          data: {'from': invite.fromUserId, 'to': invite.toUserId});
 
       // Marcar como inativo (recusado)
       await SpiritualProfileRepository.declineInterest(invite.id!);
-      
+
       // Remover da lista local
       setState(() {
         _pendingInvites.removeWhere((i) => i.id == invite.id);
@@ -171,16 +167,14 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
         duration: const Duration(seconds: 2),
       );
 
-      EnhancedLogger.success('Vitrine invite declined', 
-        tag: 'VITRINE_INVITES',
-        data: {'from': invite.fromUserId, 'to': invite.toUserId}
-      );
+      EnhancedLogger.success('Vitrine invite declined',
+          tag: 'VITRINE_INVITES',
+          data: {'from': invite.fromUserId, 'to': invite.toUserId});
     } catch (e) {
-      EnhancedLogger.error('Failed to decline invite', 
-        tag: 'VITRINE_INVITES',
-        error: e,
-        data: {'from': invite.fromUserId, 'to': invite.toUserId}
-      );
+      EnhancedLogger.error('Failed to decline invite',
+          tag: 'VITRINE_INVITES',
+          error: e,
+          data: {'from': invite.fromUserId, 'to': invite.toUserId});
 
       Get.snackbar(
         'Erro',
@@ -196,11 +190,9 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
   Future<void> _viewProfile(String? userId) async {
     try {
       if (userId == null || userId.isEmpty) {
-        EnhancedLogger.error('Invalid userId for profile view', 
-          tag: 'VITRINE_INVITES',
-          data: {'userId': userId}
-        );
-        
+        EnhancedLogger.error('Invalid userId for profile view',
+            tag: 'VITRINE_INVITES', data: {'userId': userId});
+
         Get.snackbar(
           'Erro',
           'Não foi possível acessar o perfil. Usuário inválido.',
@@ -212,10 +204,8 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
         return;
       }
 
-      EnhancedLogger.info('Navigating to profile', 
-        tag: 'VITRINE_INVITES',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.info('Navigating to profile',
+          tag: 'VITRINE_INVITES', data: {'userId': userId});
 
       // Navegar para a vitrine da pessoa
       Get.toNamed('/vitrine-display', arguments: {
@@ -223,12 +213,9 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
         'isOwnProfile': false,
       });
     } catch (e) {
-      EnhancedLogger.error('Failed to view profile', 
-        tag: 'VITRINE_INVITES',
-        error: e,
-        data: {'userId': userId}
-      );
-      
+      EnhancedLogger.error('Failed to view profile',
+          tag: 'VITRINE_INVITES', error: e, data: {'userId': userId});
+
       Get.snackbar(
         'Erro',
         'Não foi possível acessar o perfil. Tente novamente.',
@@ -253,7 +240,8 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
     return Container(
       margin: const EdgeInsets.all(16),
       child: Column(
-        children: _pendingInvites.map((invite) => _buildInviteCard(invite)).toList(),
+        children:
+            _pendingInvites.map((invite) => _buildInviteCard(invite)).toList(),
       ),
     );
   }
@@ -317,9 +305,9 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Message
           Container(
             padding: const EdgeInsets.all(12),
@@ -336,9 +324,9 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Action buttons
           Column(
             children: [
@@ -347,7 +335,8 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () => _viewProfile(invite.fromUserId),
-                  icon: const Icon(Icons.visibility, color: Colors.white, size: 18),
+                  icon: const Icon(Icons.visibility,
+                      color: Colors.white, size: 18),
                   label: const Text(
                     'Ver Perfil',
                     style: TextStyle(
@@ -364,9 +353,9 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Accept and Decline buttons (side by side)
               Row(
                 children: [
@@ -375,7 +364,8 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
                     flex: 2,
                     child: ElevatedButton.icon(
                       onPressed: () => _handleAcceptInvite(invite),
-                      icon: const Icon(Icons.favorite, color: Colors.pink, size: 18),
+                      icon: const Icon(Icons.favorite,
+                          color: Colors.pink, size: 18),
                       label: const Text(
                         'Também Tenho Interesse',
                         style: TextStyle(
@@ -394,14 +384,15 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // Decline Button
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _handleDeclineInvite(invite),
-                      icon: const Icon(Icons.close, color: Colors.white, size: 16),
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
                       label: const Text(
                         'Não Tenho',
                         style: TextStyle(
@@ -411,7 +402,8 @@ class _VitrineInviteNotificationComponentState extends State<VitrineInviteNotifi
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.white.withOpacity(0.7), width: 1),
+                        side: BorderSide(
+                            color: Colors.white.withOpacity(0.7), width: 1),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),

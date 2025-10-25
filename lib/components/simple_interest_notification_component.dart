@@ -11,7 +11,7 @@ class SimpleInterestNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
@@ -27,9 +27,9 @@ class SimpleInterestNotificationComponent extends StatelessWidget {
       builder: (context, snapshot) {
         // Contar notificações não lidas
         final unreadCount = snapshot.hasData ? snapshot.data!.docs.length : 0;
-        
+
         return Container(
-          width: 50, 
+          width: 50,
           height: 50,
           margin: const EdgeInsets.only(left: 16),
           child: ElevatedButton(
@@ -41,7 +41,8 @@ class SimpleInterestNotificationComponent extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Get.to(() => const NotificationsView(contexto: 'interest_matches'));
+              Get.to(
+                  () => const NotificationsView(contexto: 'interest_matches'));
             },
             child: Stack(
               children: [
@@ -53,7 +54,7 @@ class SimpleInterestNotificationComponent extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                
+
                 // Badge com contador (só aparece se houver notificações)
                 if (unreadCount > 0)
                   Positioned(
@@ -100,7 +101,7 @@ class FallbackInterestNotificationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     if (currentUser == null) {
       return const SizedBox.shrink();
     }
@@ -113,18 +114,17 @@ class FallbackInterestNotificationComponent extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         int unreadCount = 0;
-        
+
         if (snapshot.hasData) {
           // Filtrar manualmente as notificações de interesse não lidas
           unreadCount = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return data['type'] == 'interest_match' && 
-                   data['isRead'] == false;
+            return data['type'] == 'interest_match' && data['isRead'] == false;
           }).length;
         }
-        
+
         return Container(
-          width: 50, 
+          width: 50,
           height: 50,
           margin: const EdgeInsets.only(left: 16),
           child: ElevatedButton(
@@ -136,7 +136,8 @@ class FallbackInterestNotificationComponent extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Get.to(() => const NotificationsView(contexto: 'interest_matches'));
+              Get.to(
+                  () => const NotificationsView(contexto: 'interest_matches'));
             },
             child: Stack(
               children: [
@@ -148,7 +149,7 @@ class FallbackInterestNotificationComponent extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                
+
                 // Badge com contador (só aparece se houver notificações)
                 if (unreadCount > 0)
                   Positioned(
@@ -196,9 +197,9 @@ class TestInterestNotificationComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     // Simular 2 notificações para teste
     const unreadCount = 2;
-    
+
     return Container(
-      width: 50, 
+      width: 50,
       height: 50,
       margin: const EdgeInsets.only(left: 16),
       child: ElevatedButton(
@@ -228,7 +229,7 @@ class TestInterestNotificationComponent extends StatelessWidget {
                 size: 24,
               ),
             ),
-            
+
             // Badge com contador
             Positioned(
               right: 8,

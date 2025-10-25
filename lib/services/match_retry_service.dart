@@ -86,8 +86,9 @@ class MatchRetryService {
     bool Function(Exception)? shouldRetry,
   }) async {
     final startTime = DateTime.now();
-    final operationId = operationName ?? 'operation_${DateTime.now().millisecondsSinceEpoch}';
-    
+    final operationId =
+        operationName ?? 'operation_${DateTime.now().millisecondsSinceEpoch}';
+
     Exception? lastError;
     int attempts = 0;
 
@@ -115,17 +116,17 @@ class MatchRetryService {
         }
 
         final result = await operation();
-        
+
         // Sucesso - limpar falhas consecutivas
         _consecutiveFailures.remove(operationId);
-        
+
         // Parar loading
         if (loadingType != null) {
           MatchLoadingManager.instance.stopLoading(loadingType);
         }
 
         final duration = DateTime.now().difference(startTime);
-        
+
         EnhancedLogger.info(
           'Operation $operationId succeeded on attempt $attempts (${duration.inMilliseconds}ms)',
           tag: 'MATCH_RETRY',
@@ -137,18 +138,17 @@ class MatchRetryService {
           attempts: attempts,
           totalDuration: duration,
         );
-
       } catch (error) {
         lastError = error is Exception ? error : Exception(error.toString());
-        
+
         EnhancedLogger.warning(
           'Operation $operationId failed on attempt $attempts: $error',
           tag: 'MATCH_RETRY',
         );
 
         // Verificar se deve tentar novamente
-        final shouldRetryOperation = shouldRetry?.call(lastError) ?? 
-                                   _shouldRetryByDefault(lastError);
+        final shouldRetryOperation =
+            shouldRetry?.call(lastError) ?? _shouldRetryByDefault(lastError);
 
         if (attempts >= config.maxAttempts || !shouldRetryOperation) {
           break;
@@ -156,7 +156,7 @@ class MatchRetryService {
 
         // Calcular delay para próxima tentativa
         final delay = _calculateDelay(attempts, config);
-        
+
         EnhancedLogger.debug(
           'Retrying $operationId in ${delay.inMilliseconds}ms',
           tag: 'MATCH_RETRY',
@@ -167,7 +167,8 @@ class MatchRetryService {
     }
 
     // Falha após todas as tentativas
-    _consecutiveFailures[operationId] = (_consecutiveFailures[operationId] ?? 0) + 1;
+    _consecutiveFailures[operationId] =
+        (_consecutiveFailures[operationId] ?? 0) + 1;
     _lastRetryTimes[operationId] = DateTime.now();
 
     // Parar loading
@@ -176,7 +177,7 @@ class MatchRetryService {
     }
 
     final duration = DateTime.now().difference(startTime);
-    
+
     EnhancedLogger.error(
       'Operation $operationId failed after $attempts attempts (${duration.inMilliseconds}ms) - ${lastError.toString()}',
       tag: 'MATCH_RETRY',
@@ -196,9 +197,9 @@ class MatchRetryService {
       return config.initialDelay;
     }
 
-    final delay = config.initialDelay.inMilliseconds * 
-                  pow(config.backoffMultiplier, attempt - 1);
-    
+    final delay = config.initialDelay.inMilliseconds *
+        pow(config.backoffMultiplier, attempt - 1);
+
     final clampedDelay = delay.clamp(
       config.initialDelay.inMilliseconds.toDouble(),
       config.maxDelay.inMilliseconds.toDouble(),
@@ -206,14 +207,14 @@ class MatchRetryService {
 
     // Adicionar jitter para evitar thundering herd
     final jitter = Random().nextDouble() * 0.1 * clampedDelay;
-    
+
     return Duration(milliseconds: (clampedDelay + jitter).round());
   }
 
   /// Verificar se deve tentar novamente baseado no tipo de erro
   static bool _shouldRetryByDefault(Exception error) {
     final errorMessage = error.toString().toLowerCase();
-    
+
     // Não tentar novamente para estes erros
     final nonRetryableErrors = [
       'permission',
@@ -296,7 +297,8 @@ class MatchRetryService {
   }
 
   /// Verificar se operação teve muitas falhas recentes
-  static bool hasFrequentFailures(String operationName, {
+  static bool hasFrequentFailures(
+    String operationName, {
     Duration timeWindow = const Duration(minutes: 5),
     int threshold = 3,
   }) {
@@ -335,8 +337,9 @@ class MatchRetryService {
       'totalOperations': _lastRetryTimes.length,
       'recentFailures': recentFailures.length,
       'operationsWithFailures': recentFailures,
-      'averageFailures': recentFailures.isNotEmpty 
-          ? recentFailures.values.reduce((a, b) => a + b) / recentFailures.length
+      'averageFailures': recentFailures.isNotEmpty
+          ? recentFailures.values.reduce((a, b) => a + b) /
+              recentFailures.length
           : 0,
     };
   }

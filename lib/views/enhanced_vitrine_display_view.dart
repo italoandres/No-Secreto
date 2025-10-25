@@ -28,13 +28,15 @@ class EnhancedVitrineDisplayView extends StatefulWidget {
   const EnhancedVitrineDisplayView({Key? key}) : super(key: key);
 
   @override
-  State<EnhancedVitrineDisplayView> createState() => _EnhancedVitrineDisplayViewState();
+  State<EnhancedVitrineDisplayView> createState() =>
+      _EnhancedVitrineDisplayViewState();
 }
 
-class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView> {
+class _EnhancedVitrineDisplayViewState
+    extends State<EnhancedVitrineDisplayView> {
   final VitrineDemoController controller = Get.put(VitrineDemoController());
   final VitrineShareService shareService = VitrineShareService();
-  
+
   String? userId;
   bool isOwnProfile = false;
   bool fromCelebration = false;
@@ -47,67 +49,58 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   @override
   void initState() {
     super.initState();
-    EnhancedLogger.info('EnhancedVitrineDisplayView initState called', 
-      tag: 'VITRINE_DISPLAY'
-    );
+    EnhancedLogger.info('EnhancedVitrineDisplayView initState called',
+        tag: 'VITRINE_DISPLAY');
     _initializeData();
   }
 
   /// Helper para obter currentUserId com fallback para Firebase Auth
   String _getCurrentUserId() {
     String currentUserId = controller.currentUserId.value;
-    
+
     if (currentUserId.isEmpty) {
       final firebaseUser = FirebaseAuth.instance.currentUser;
       if (firebaseUser != null) {
         currentUserId = firebaseUser.uid;
-        EnhancedLogger.info('Usando Firebase Auth como fallback', 
-          tag: 'VITRINE_DISPLAY',
-          data: {'currentUserId': currentUserId}
-        );
+        EnhancedLogger.info('Usando Firebase Auth como fallback',
+            tag: 'VITRINE_DISPLAY', data: {'currentUserId': currentUserId});
       }
     }
-    
+
     return currentUserId;
   }
 
   void _initializeData() {
     final arguments = Get.arguments as Map<String, dynamic>? ?? {};
-    
+
     // Tentar pegar userId dos argumentos ou do controller com fallback para Firebase Auth
     userId = arguments['userId'] as String? ?? _getCurrentUserId();
     isOwnProfile = arguments['isOwnProfile'] as bool? ?? true;
     interestStatus = arguments['interestStatus'] as String?;
-    
-    EnhancedLogger.info('Argumentos recebidos', 
-      tag: 'VITRINE_DISPLAY',
-      data: {
-        'userId': userId,
-        'isOwnProfile': isOwnProfile,
-        'interestStatus': interestStatus,
-      }
-    );
+
+    EnhancedLogger.info('Argumentos recebidos', tag: 'VITRINE_DISPLAY', data: {
+      'userId': userId,
+      'isOwnProfile': isOwnProfile,
+      'interestStatus': interestStatus,
+    });
     fromCelebration = arguments['fromCelebration'] as bool? ?? false;
-    
-    EnhancedLogger.info('Initializing vitrine data', 
-      tag: 'VITRINE_DISPLAY',
-      data: {
-        'userId': userId,
-        'isOwnProfile': isOwnProfile,
-        'fromCelebration': fromCelebration,
-        'arguments': arguments,
-        'controllerUserId': controller.currentUserId.value,
-        'willShowButton': !isOwnProfile,
-      }
-    );
-    
+
+    EnhancedLogger.info('Initializing vitrine data',
+        tag: 'VITRINE_DISPLAY',
+        data: {
+          'userId': userId,
+          'isOwnProfile': isOwnProfile,
+          'fromCelebration': fromCelebration,
+          'arguments': arguments,
+          'controllerUserId': controller.currentUserId.value,
+          'willShowButton': !isOwnProfile,
+        });
+
     if (userId?.isNotEmpty == true) {
       _loadVitrineData();
     } else {
-      EnhancedLogger.error('User ID not found', 
-        tag: 'VITRINE_DISPLAY',
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('User ID not found',
+          tag: 'VITRINE_DISPLAY', data: {'userId': userId});
       setState(() {
         errorMessage = 'ID do usuário não encontrado';
         isLoading = false;
@@ -122,90 +115,82 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         errorMessage = null;
       });
 
-      EnhancedLogger.info('Loading vitrine data', 
-        tag: 'VITRINE_DISPLAY',
-        data: {'userId': userId, 'isOwnProfile': isOwnProfile}
-      );
+      EnhancedLogger.info('Loading vitrine data',
+          tag: 'VITRINE_DISPLAY',
+          data: {'userId': userId, 'isOwnProfile': isOwnProfile});
 
       // Usar o repositório para buscar o perfil corretamente
-      EnhancedLogger.info('Searching for profile', 
-        tag: 'VITRINE_DISPLAY',
-        data: {'userId': userId, 'searchMethod': 'getProfileByUserId'}
-      );
-      
-      profileData = await SpiritualProfileRepository.getProfileByUserId(userId!);
+      EnhancedLogger.info('Searching for profile',
+          tag: 'VITRINE_DISPLAY',
+          data: {'userId': userId, 'searchMethod': 'getProfileByUserId'});
+
+      profileData =
+          await SpiritualProfileRepository.getProfileByUserId(userId!);
 
       if (profileData != null) {
-        EnhancedLogger.success('Vitrine data loaded successfully', 
-          tag: 'VITRINE_DISPLAY',
-          data: {
-            'userId': userId, 
-            'hasData': profileData != null, 
-            'profileId': profileData!.id,
-            'profileName': profileData!.displayName,
-            'isComplete': profileData!.isProfileComplete
-          }
-        );
-        
+        EnhancedLogger.success('Vitrine data loaded successfully',
+            tag: 'VITRINE_DISPLAY',
+            data: {
+              'userId': userId,
+              'hasData': profileData != null,
+              'profileId': profileData!.id,
+              'profileName': profileData!.displayName,
+              'isComplete': profileData!.isProfileComplete
+            });
+
         // Verificar se tem certificação aprovada
         await _checkCertificationStatus();
-        
+
         // Se interestStatus não foi fornecido, verificar dinamicamente
         if (interestStatus == null && !isOwnProfile) {
           await _checkInterestStatus();
         }
       } else {
         // Tentar buscar usando o método alternativo
-        EnhancedLogger.warning('Profile not found with getProfileByUserId, trying getOrCreateCurrentUserProfile', 
-          tag: 'VITRINE_DISPLAY',
-          data: {'userId': userId}
-        );
-        
+        EnhancedLogger.warning(
+            'Profile not found with getProfileByUserId, trying getOrCreateCurrentUserProfile',
+            tag: 'VITRINE_DISPLAY',
+            data: {'userId': userId});
+
         try {
-          profileData = await SpiritualProfileRepository.getOrCreateCurrentUserProfile();
-          
+          profileData =
+              await SpiritualProfileRepository.getOrCreateCurrentUserProfile();
+
           if (profileData != null && profileData!.userId == userId) {
-            EnhancedLogger.success('Profile found with alternative method', 
-              tag: 'VITRINE_DISPLAY',
-              data: {
-                'userId': userId, 
-                'profileId': profileData!.id,
-                'method': 'getOrCreateCurrentUserProfile'
-              }
-            );
+            EnhancedLogger.success('Profile found with alternative method',
+                tag: 'VITRINE_DISPLAY',
+                data: {
+                  'userId': userId,
+                  'profileId': profileData!.id,
+                  'method': 'getOrCreateCurrentUserProfile'
+                });
           } else {
             profileData = null;
             errorMessage = 'Perfil não encontrado';
-            
-            EnhancedLogger.error('Profile not found with any method', 
-              tag: 'VITRINE_DISPLAY',
-              data: {
-                'userId': userId,
-                'alternativeProfileUserId': profileData?.userId,
-                'alternativeProfileId': profileData?.id
-              }
-            );
+
+            EnhancedLogger.error('Profile not found with any method',
+                tag: 'VITRINE_DISPLAY',
+                data: {
+                  'userId': userId,
+                  'alternativeProfileUserId': profileData?.userId,
+                  'alternativeProfileId': profileData?.id
+                });
           }
         } catch (e) {
           errorMessage = 'Erro ao buscar perfil';
-          
-          EnhancedLogger.error('Error searching for profile', 
-            tag: 'VITRINE_DISPLAY',
-            error: e,
-            data: {'userId': userId}
-          );
+
+          EnhancedLogger.error('Error searching for profile',
+              tag: 'VITRINE_DISPLAY', error: e, data: {'userId': userId});
         }
       }
-
     } catch (e, stackTrace) {
       errorMessage = 'Erro ao carregar vitrine';
-      
-      EnhancedLogger.error('Failed to load vitrine data', 
-        tag: 'VITRINE_DISPLAY',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'userId': userId}
-      );
+
+      EnhancedLogger.error('Failed to load vitrine data',
+          tag: 'VITRINE_DISPLAY',
+          error: e,
+          stackTrace: stackTrace,
+          data: {'userId': userId});
     } finally {
       setState(() {
         isLoading = false;
@@ -217,29 +202,26 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   Future<void> _checkCertificationStatus() async {
     try {
       if (userId == null || userId!.isEmpty) return;
-      
+
       // Usar o helper que já funciona corretamente
-      final hasApproved = await CertificationStatusHelper.hasApprovedCertification(userId!);
-      
+      final hasApproved =
+          await CertificationStatusHelper.hasApprovedCertification(userId!);
+
       if (mounted) {
         setState(() {
           hasApprovedCertification = hasApproved;
         });
       }
-      
-      EnhancedLogger.info('Certification status checked', 
-        tag: 'VITRINE_DISPLAY',
-        data: {
-          'userId': userId,
-          'hasApprovedCertification': hasApprovedCertification,
-        }
-      );
+
+      EnhancedLogger.info('Certification status checked',
+          tag: 'VITRINE_DISPLAY',
+          data: {
+            'userId': userId,
+            'hasApprovedCertification': hasApprovedCertification,
+          });
     } catch (e) {
-      EnhancedLogger.error('Error checking certification status', 
-        tag: 'VITRINE_DISPLAY',
-        error: e,
-        data: {'userId': userId}
-      );
+      EnhancedLogger.error('Error checking certification status',
+          tag: 'VITRINE_DISPLAY', error: e, data: {'userId': userId});
       // Em caso de erro, não mostrar o selo
       if (mounted) {
         setState(() {
@@ -253,28 +235,27 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   Future<void> _checkInterestStatus() async {
     try {
       final currentUserId = _getCurrentUserId();
-      
+
       if (currentUserId.isEmpty || userId == null || userId!.isEmpty) {
         return;
       }
-      
-      EnhancedLogger.info('Checking interest status dynamically', 
-        tag: 'VITRINE_DISPLAY',
-        data: {
-          'currentUserId': currentUserId,
-          'targetUserId': userId,
-        }
-      );
-      
+
+      EnhancedLogger.info('Checking interest status dynamically',
+          tag: 'VITRINE_DISPLAY',
+          data: {
+            'currentUserId': currentUserId,
+            'targetUserId': userId,
+          });
+
       // Verificar se existe chat entre os usuários (indica match)
       final sortedIds = [currentUserId, userId!]..sort();
       final chatId = 'match_${sortedIds[0]}_${sortedIds[1]}';
-      
+
       final chatDoc = await FirebaseFirestore.instance
           .collection('match_chats')
           .doc(chatId)
           .get();
-      
+
       if (chatDoc.exists) {
         // Existe chat = match confirmado
         if (mounted) {
@@ -282,17 +263,16 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             interestStatus = 'accepted';
           });
         }
-        
-        EnhancedLogger.info('Match found - chat exists', 
-          tag: 'VITRINE_DISPLAY',
-          data: {
-            'chatId': chatId,
-            'interestStatus': 'accepted',
-          }
-        );
+
+        EnhancedLogger.info('Match found - chat exists',
+            tag: 'VITRINE_DISPLAY',
+            data: {
+              'chatId': chatId,
+              'interestStatus': 'accepted',
+            });
         return;
       }
-      
+
       // Verificar se existe notificação de interesse
       final notifications = await FirebaseFirestore.instance
           .collection('interest_notifications')
@@ -301,7 +281,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           .where('status', whereIn: ['pending', 'viewed', 'new'])
           .limit(1)
           .get();
-      
+
       if (notifications.docs.isNotEmpty) {
         // Existe interesse pendente do outro usuário
         if (mounted) {
@@ -309,17 +289,16 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             interestStatus = 'pending';
           });
         }
-        
-        EnhancedLogger.info('Pending interest found', 
-          tag: 'VITRINE_DISPLAY',
-          data: {
-            'notificationId': notifications.docs.first.id,
-            'interestStatus': 'pending',
-          }
-        );
+
+        EnhancedLogger.info('Pending interest found',
+            tag: 'VITRINE_DISPLAY',
+            data: {
+              'notificationId': notifications.docs.first.id,
+              'interestStatus': 'pending',
+            });
         return;
       }
-      
+
       // Verificar se o usuário atual já enviou interesse
       final sentInterest = await FirebaseFirestore.instance
           .collection('interest_notifications')
@@ -328,7 +307,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           .where('status', whereIn: ['pending', 'viewed', 'new'])
           .limit(1)
           .get();
-      
+
       if (sentInterest.docs.isNotEmpty) {
         // Usuário atual já enviou interesse
         if (mounted) {
@@ -336,40 +315,34 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             interestStatus = 'sent';
           });
         }
-        
-        EnhancedLogger.info('Interest already sent', 
-          tag: 'VITRINE_DISPLAY',
-          data: {
-            'notificationId': sentInterest.docs.first.id,
-            'interestStatus': 'sent',
-          }
-        );
+
+        EnhancedLogger.info('Interest already sent',
+            tag: 'VITRINE_DISPLAY',
+            data: {
+              'notificationId': sentInterest.docs.first.id,
+              'interestStatus': 'sent',
+            });
         return;
       }
-      
+
       // Nenhum interesse encontrado
       if (mounted) {
         setState(() {
           interestStatus = null;
         });
       }
-      
-      EnhancedLogger.info('No interest found', 
-        tag: 'VITRINE_DISPLAY',
-        data: {
-          'interestStatus': null,
-        }
-      );
-      
+
+      EnhancedLogger.info('No interest found', tag: 'VITRINE_DISPLAY', data: {
+        'interestStatus': null,
+      });
     } catch (e) {
-      EnhancedLogger.error('Error checking interest status', 
-        tag: 'VITRINE_DISPLAY',
-        error: e,
-        data: {
-          'currentUserId': _getCurrentUserId(),
-          'targetUserId': userId,
-        }
-      );
+      EnhancedLogger.error('Error checking interest status',
+          tag: 'VITRINE_DISPLAY',
+          error: e,
+          data: {
+            'currentUserId': _getCurrentUserId(),
+            'targetUserId': userId,
+          });
     }
   }
 
@@ -377,26 +350,30 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   Widget build(BuildContext context) {
     // Mostrar AppBar se vier da celebration OU se for visualização como visitante
     final shouldShowAppBar = fromCelebration || !isOwnProfile;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: shouldShowAppBar ? AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
-          tooltip: 'Voltar',
-        ),
-        title: Text(
-          fromCelebration ? 'Minha Vitrine' : 'Visualização como Visitante',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ) : null,
+      appBar: shouldShowAppBar
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => Get.back(),
+                tooltip: 'Voltar',
+              ),
+              title: Text(
+                fromCelebration
+                    ? 'Minha Vitrine'
+                    : 'Visualização como Visitante',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: Stack(
         children: [
           // Main content
@@ -412,7 +389,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
               ),
             ],
           ),
-          
+
           // Fixed bottom button
           if (!isLoading && errorMessage == null && profileData != null)
             Positioned(
@@ -473,12 +450,11 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
                 TextButton.icon(
                   onPressed: () {
                     // Recarregar a vitrine como se fosse outro usuário
-                    Get.off(() => const EnhancedVitrineDisplayView(), 
-                      arguments: {
-                        'userId': userId,
-                        'isOwnProfile': false, // Simular como visitante
-                      }
-                    );
+                    Get.off(() => const EnhancedVitrineDisplayView(),
+                        arguments: {
+                          'userId': userId,
+                          'isOwnProfile': false, // Simular como visitante
+                        });
                   },
                   icon: Icon(Icons.visibility, color: AppColors.info, size: 16),
                   label: Text(
@@ -501,10 +477,10 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           color: Colors.white,
           child: OutlinedButton.icon(
             onPressed: () {
-              EnhancedLogger.info('Returning to ProfileCompletionView from vitrine', 
-                tag: 'VITRINE_DISPLAY',
-                data: {'userId': userId}
-              );
+              EnhancedLogger.info(
+                  'Returning to ProfileCompletionView from vitrine',
+                  tag: 'VITRINE_DISPLAY',
+                  data: {'userId': userId});
               Get.back();
             },
             icon: Icon(Icons.arrow_back, size: 18),
@@ -601,10 +577,11 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           ProfileHeaderSection(
             photoUrl: profileData!.mainPhotoUrl,
             displayName: profileData!.displayName ?? 'Usuário',
-            hasVerification: hasApprovedCertification, // Apenas se certificação aprovada
+            hasVerification:
+                hasApprovedCertification, // Apenas se certificação aprovada
             username: profileData!.username,
           ),
-          
+
           // Photo Gallery Section (MOVIDO PARA CIMA - logo abaixo do nome/@)
           PhotoGallerySection(
             mainPhotoUrl: profileData!.mainPhotoUrl,
@@ -612,7 +589,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             secondaryPhoto2Url: profileData!.secondaryPhoto2Url,
           ),
           const SizedBox(height: 16),
-          
+
           // Location Info Section (NOVO)
           LocationInfoSection(
             city: profileData!.city,
@@ -621,7 +598,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             country: profileData!.country,
           ),
           const SizedBox(height: 24),
-          
+
           // Basic Info Section
           BasicInfoSection(
             city: profileData!.city,
@@ -630,22 +607,23 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             isDeusEPaiMember: profileData!.isDeusEPaiMember,
           ),
           const SizedBox(height: 24),
-          
+
           // Languages Section (NOVO)
           LanguagesSection(
             languages: profileData!.languages,
           ),
           const SizedBox(height: 24),
-          
+
           // Spiritual Info Section
           SpiritualInfoSection(
             purpose: profileData!.purpose,
             faithPhrase: profileData!.faithPhrase,
-            readyForPurposefulRelationship: profileData!.readyForPurposefulRelationship,
+            readyForPurposefulRelationship:
+                profileData!.readyForPurposefulRelationship,
             nonNegotiableValue: profileData!.nonNegotiableValue,
           ),
           const SizedBox(height: 24),
-          
+
           // Education Info Section (NOVO)
           EducationInfoSection(
             education: profileData!.education,
@@ -655,7 +633,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             occupation: profileData!.occupation,
           ),
           const SizedBox(height: 24),
-          
+
           // Lifestyle Info Section (NOVO)
           LifestyleInfoSection(
             height: profileData!.height,
@@ -663,13 +641,13 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             drinkingStatus: profileData!.drinkingStatus,
           ),
           const SizedBox(height: 24),
-          
+
           // Hobbies Section (NOVO)
           HobbiesSection(
             hobbies: profileData!.hobbies,
           ),
           const SizedBox(height: 24),
-          
+
           // Relationship Status Section (com isVirgin)
           RelationshipStatusSection(
             relationshipStatus: profileData!.relationshipStatus,
@@ -679,13 +657,13 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             wasPreviouslyMarried: profileData!.wasPreviouslyMarried,
           ),
           const SizedBox(height: 24),
-          
+
           // Additional Info (About Me)
           if (profileData!.aboutMe?.isNotEmpty == true) ...[
             _buildAdditionalInfoSection(),
             const SizedBox(height: 24),
           ],
-          
+
           const SizedBox(height: 100), // Espaço para botão fixo inferior
         ],
       ),
@@ -812,8 +790,13 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   /// Avatar padrão com iniciais
   Widget _buildDefaultAvatar() {
     final name = profileData?.displayName ?? 'U';
-    final initials = name.split(' ').map((n) => n.isNotEmpty ? n[0] : '').take(2).join().toUpperCase();
-    
+    final initials = name
+        .split(' ')
+        .map((n) => n.isNotEmpty ? n[0] : '')
+        .take(2)
+        .join()
+        .toUpperCase();
+
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -837,7 +820,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   /// Seção de propósito
   Widget _buildPurposeSection() {
     final purpose = profileData?.purpose;
-    
+
     if (purpose?.isEmpty != false) {
       return _buildMissingSection(
         'Propósito de Vida',
@@ -857,7 +840,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   /// Seção de biografia
   Widget _buildBiographySection() {
     final biography = profileData?.aboutMe;
-    
+
     if (biography?.isEmpty != false) {
       return _buildMissingSection(
         'Sobre mim',
@@ -875,7 +858,8 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
   }
 
   /// Seção genérica
-  Widget _buildSection(String title, String content, IconData icon, Color color) {
+  Widget _buildSection(
+      String title, String content, IconData icon, Color color) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -1019,7 +1003,8 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
                   color: AppColors.accent.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.photo_library, color: AppColors.accent, size: 20),
+                child: Icon(Icons.photo_library,
+                    color: AppColors.accent, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1171,7 +1156,8 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
                   color: AppColors.success.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.connect_without_contact, color: AppColors.success, size: 20),
+                child: Icon(Icons.connect_without_contact,
+                    color: AppColors.success, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1286,9 +1272,9 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
             fontSize: 12,
           ),
         ),
-        backgroundColor: isActive 
-          ? AppColors.success.withOpacity(0.1)
-          : Colors.grey.withOpacity(0.1),
+        backgroundColor: isActive
+            ? AppColors.success.withOpacity(0.1)
+            : Colors.grey.withOpacity(0.1),
       );
     });
   }
@@ -1346,7 +1332,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
     return GestureDetector(
       onTap: () async {
         Get.back();
-        
+
         try {
           if (type == ShareType.link) {
             final link = await controller.generateShareLink();
@@ -1359,9 +1345,8 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           } else {
             await shareService.shareVitrine(userId!, type);
           }
-          
+
           controller.trackShareAction(type.toString());
-          
         } catch (e) {
           Get.snackbar(
             'Erro',
@@ -1417,7 +1402,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         return Icons.sms;
     }
   }
-  
+
   /// Construir botão de ação baseado no contexto
   Widget _buildActionButton() {
     // Se já tem match (interesse aceito), mostrar botão de conversar
@@ -1439,9 +1424,11 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         ),
       );
     }
-    
+
     // Se é notificação pendente, mostrar botão "Também Tenho"
-    if (interestStatus == 'pending' || interestStatus == 'viewed' || interestStatus == 'new') {
+    if (interestStatus == 'pending' ||
+        interestStatus == 'viewed' ||
+        interestStatus == 'new') {
       return Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton.icon(
@@ -1459,7 +1446,7 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         ),
       );
     }
-    
+
     // Caso padrão: botão de demonstrar interesse
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -1470,19 +1457,18 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
       ),
     );
   }
-  
+
   /// Navegar para chat
   void _navigateToChat() {
     if (userId == null) return;
-    
+
     // Obter currentUserId com fallback para Firebase Auth
     final currentUserId = _getCurrentUserId();
-    
+
     // Validar currentUserId
     if (currentUserId.isEmpty) {
-      EnhancedLogger.error('currentUserId está vazio mesmo com fallback!', 
-        tag: 'VITRINE_DISPLAY'
-      );
+      EnhancedLogger.error('currentUserId está vazio mesmo com fallback!',
+          tag: 'VITRINE_DISPLAY');
       Get.snackbar(
         'Erro',
         'Não foi possível identificar seu usuário',
@@ -1491,27 +1477,23 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
       );
       return;
     }
-    
-    EnhancedLogger.info('Gerando chatId', 
-      tag: 'VITRINE_DISPLAY',
-      data: {
-        'currentUserId': currentUserId,
-        'otherUserId': userId,
-      }
-    );
-    
+
+    EnhancedLogger.info('Gerando chatId', tag: 'VITRINE_DISPLAY', data: {
+      'currentUserId': currentUserId,
+      'otherUserId': userId,
+    });
+
     final sortedIds = [currentUserId, userId!]..sort();
     final chatId = 'match_${sortedIds[0]}_${sortedIds[1]}';
-    
-    EnhancedLogger.info('Navegando para match-chat', 
-      tag: 'VITRINE_DISPLAY',
-      data: {
-        'chatId': chatId,
-        'currentUserId': currentUserId,
-        'otherUserId': userId,
-      }
-    );
-    
+
+    EnhancedLogger.info('Navegando para match-chat',
+        tag: 'VITRINE_DISPLAY',
+        data: {
+          'chatId': chatId,
+          'currentUserId': currentUserId,
+          'otherUserId': userId,
+        });
+
     Get.toNamed('/match-chat', arguments: {
       'chatId': chatId,
       'otherUserId': userId,
@@ -1520,19 +1502,18 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
       'matchDate': DateTime.now(), // Data do match
     });
   }
-  
+
   /// Responder com interesse (Também Tenho)
   void _respondWithInterest() async {
     if (userId == null) return;
-    
+
     try {
       // Obter currentUserId com fallback para Firebase Auth
       final currentUserId = _getCurrentUserId();
-      
+
       if (currentUserId.isEmpty) {
-        EnhancedLogger.error('currentUserId está vazio mesmo com fallback!', 
-          tag: 'VITRINE_DISPLAY'
-        );
+        EnhancedLogger.error('currentUserId está vazio mesmo com fallback!',
+            tag: 'VITRINE_DISPLAY');
         Get.snackbar(
           'Erro',
           'Não foi possível identificar seu usuário',
@@ -1541,15 +1522,14 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         );
         return;
       }
-      
-      EnhancedLogger.info('Respondendo com interesse', 
-        tag: 'VITRINE_DISPLAY',
-        data: {
-          'fromUserId': userId,
-          'toUserId': currentUserId,
-        }
-      );
-      
+
+      EnhancedLogger.info('Respondendo com interesse',
+          tag: 'VITRINE_DISPLAY',
+          data: {
+            'fromUserId': userId,
+            'toUserId': currentUserId,
+          });
+
       // Buscar a notificação pendente
       // fromUserId = quem enviou (userId do perfil)
       // toUserId = quem recebeu (currentUserId)
@@ -1560,23 +1540,21 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           .where('status', whereIn: ['pending', 'viewed', 'new'])
           .limit(1)
           .get();
-      
-      EnhancedLogger.info('Busca de notificação', 
-        tag: 'VITRINE_DISPLAY',
-        data: {
-          'encontradas': notifications.docs.length,
-        }
-      );
-      
-      if (notifications.docs.isEmpty) {
-        EnhancedLogger.error('Notificação não encontrada', 
+
+      EnhancedLogger.info('Busca de notificação',
           tag: 'VITRINE_DISPLAY',
           data: {
-            'fromUserId': userId,
-            'toUserId': currentUserId,
-          }
-        );
-        
+            'encontradas': notifications.docs.length,
+          });
+
+      if (notifications.docs.isEmpty) {
+        EnhancedLogger.error('Notificação não encontrada',
+            tag: 'VITRINE_DISPLAY',
+            data: {
+              'fromUserId': userId,
+              'toUserId': currentUserId,
+            });
+
         Get.snackbar(
           'Erro',
           'Notificação não encontrada',
@@ -1585,23 +1563,21 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
         );
         return;
       }
-      
+
       final notificationId = notifications.docs.first.id;
-      
-      EnhancedLogger.info('Respondendo notificação', 
-        tag: 'VITRINE_DISPLAY',
-        data: {'notificationId': notificationId}
-      );
-      
+
+      EnhancedLogger.info('Respondendo notificação',
+          tag: 'VITRINE_DISPLAY', data: {'notificationId': notificationId});
+
       // Responder com accepted
       await InterestNotificationRepository.respondToInterestNotification(
         notificationId,
         'accepted',
       );
-      
+
       // Obter nome do perfil para exibir na notificação
       final profileName = profileData?.displayName ?? 'esta pessoa';
-      
+
       // Mostrar notificação de match com opção de conversar
       Get.snackbar(
         '💕 Match! Interesse Aceito!',
@@ -1617,11 +1593,11 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           onPressed: () {
             // Fechar snackbar
             Get.closeCurrentSnackbar();
-            
+
             // Gerar ID do chat
             final sortedIds = [currentUserId, userId!]..sort();
             final chatId = 'match_${sortedIds[0]}_${sortedIds[1]}';
-            
+
             // Navegar para o chat
             Get.back(); // Voltar da vitrine
             Get.toNamed('/match-chat', arguments: {
@@ -1640,19 +1616,17 @@ class _EnhancedVitrineDisplayViewState extends State<EnhancedVitrineDisplayView>
           ),
         ),
       );
-      
+
       // Voltar para o dashboard após 1 segundo (dar tempo para ver a notificação)
       Future.delayed(const Duration(seconds: 1), () {
         if (Get.isSnackbarOpen == false) {
           Get.back();
         }
       });
-      
     } catch (e) {
-      EnhancedLogger.error('Erro ao responder interesse: $e', 
-        tag: 'VITRINE_DISPLAY'
-      );
-      
+      EnhancedLogger.error('Erro ao responder interesse: $e',
+          tag: 'VITRINE_DISPLAY');
+
       Get.snackbar(
         'Erro',
         'Não foi possível responder ao interesse',

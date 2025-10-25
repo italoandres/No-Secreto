@@ -19,40 +19,132 @@ class _LocationSelectorDialogState extends State<LocationSelectorDialog> {
 
   // Estados brasileiros
   final List<String> estados = [
-    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-    'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
-    'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+    'AC',
+    'AL',
+    'AP',
+    'AM',
+    'BA',
+    'CE',
+    'DF',
+    'ES',
+    'GO',
+    'MA',
+    'MT',
+    'MS',
+    'MG',
+    'PA',
+    'PB',
+    'PR',
+    'PE',
+    'PI',
+    'RJ',
+    'RN',
+    'RS',
+    'RO',
+    'RR',
+    'SC',
+    'SP',
+    'SE',
+    'TO'
   ];
 
   // Principais cidades por estado (simplificado)
   final Map<String, List<String>> cidadesPorEstado = {
-    'SP': ['São Paulo', 'Campinas', 'Santos', 'Ribeirão Preto', 'Sorocaba', 'São José dos Campos', 'Bauru'],
-    'RJ': ['Rio de Janeiro', 'Niterói', 'Duque de Caxias', 'Nova Iguaçu', 'Petrópolis'],
+    'SP': [
+      'São Paulo',
+      'Campinas',
+      'Santos',
+      'Ribeirão Preto',
+      'Sorocaba',
+      'São José dos Campos',
+      'Bauru'
+    ],
+    'RJ': [
+      'Rio de Janeiro',
+      'Niterói',
+      'Duque de Caxias',
+      'Nova Iguaçu',
+      'Petrópolis'
+    ],
     'MG': ['Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora', 'Betim'],
-    'BA': ['Salvador', 'Feira de Santana', 'Vitória da Conquista', 'Camaçari', 'Itabuna'],
+    'BA': [
+      'Salvador',
+      'Feira de Santana',
+      'Vitória da Conquista',
+      'Camaçari',
+      'Itabuna'
+    ],
     'PR': ['Curitiba', 'Londrina', 'Maringá', 'Ponta Grossa', 'Cascavel'],
     'RS': ['Porto Alegre', 'Caxias do Sul', 'Pelotas', 'Canoas', 'Santa Maria'],
-    'PE': ['Recife', 'Jaboatão dos Guararapes', 'Olinda', 'Caruaru', 'Petrolina'],
+    'PE': [
+      'Recife',
+      'Jaboatão dos Guararapes',
+      'Olinda',
+      'Caruaru',
+      'Petrolina'
+    ],
     'CE': ['Fortaleza', 'Caucaia', 'Juazeiro do Norte', 'Maracanaú', 'Sobral'],
     'PA': ['Belém', 'Ananindeua', 'Santarém', 'Marabá', 'Castanhal'],
     'SC': ['Florianópolis', 'Joinville', 'Blumenau', 'São José', 'Chapecó'],
-    'GO': ['Goiânia', 'Aparecida de Goiânia', 'Anápolis', 'Rio Verde', 'Luziânia'],
+    'GO': [
+      'Goiânia',
+      'Aparecida de Goiânia',
+      'Anápolis',
+      'Rio Verde',
+      'Luziânia'
+    ],
     'MA': ['São Luís', 'Imperatriz', 'São José de Ribamar', 'Timon', 'Caxias'],
     'ES': ['Vitória', 'Vila Velha', 'Serra', 'Cariacica', 'Linhares'],
     'PB': ['João Pessoa', 'Campina Grande', 'Santa Rita', 'Patos', 'Bayeux'],
-    'RN': ['Natal', 'Mossoró', 'Parnamirim', 'São Gonçalo do Amarante', 'Macaíba'],
-    'AL': ['Maceió', 'Arapiraca', 'Rio Largo', 'Palmeira dos Índios', 'União dos Palmares'],
-    'MT': ['Cuiabá', 'Várzea Grande', 'Rondonópolis', 'Sinop', 'Tangará da Serra'],
+    'RN': [
+      'Natal',
+      'Mossoró',
+      'Parnamirim',
+      'São Gonçalo do Amarante',
+      'Macaíba'
+    ],
+    'AL': [
+      'Maceió',
+      'Arapiraca',
+      'Rio Largo',
+      'Palmeira dos Índios',
+      'União dos Palmares'
+    ],
+    'MT': [
+      'Cuiabá',
+      'Várzea Grande',
+      'Rondonópolis',
+      'Sinop',
+      'Tangará da Serra'
+    ],
     'MS': ['Campo Grande', 'Dourados', 'Três Lagoas', 'Corumbá', 'Ponta Porã'],
     'PI': ['Teresina', 'Parnaíba', 'Picos', 'Piripiri', 'Floriano'],
     'DF': ['Brasília', 'Taguatinga', 'Ceilândia', 'Samambaia', 'Planaltina'],
-    'SE': ['Aracaju', 'Nossa Senhora do Socorro', 'Lagarto', 'Itabaiana', 'Estância'],
+    'SE': [
+      'Aracaju',
+      'Nossa Senhora do Socorro',
+      'Lagarto',
+      'Itabaiana',
+      'Estância'
+    ],
     'RO': ['Porto Velho', 'Ji-Paraná', 'Ariquemes', 'Cacoal', 'Vilhena'],
-    'AC': ['Rio Branco', 'Cruzeiro do Sul', 'Sena Madureira', 'Tarauacá', 'Feijó'],
+    'AC': [
+      'Rio Branco',
+      'Cruzeiro do Sul',
+      'Sena Madureira',
+      'Tarauacá',
+      'Feijó'
+    ],
     'AM': ['Manaus', 'Parintins', 'Itacoatiara', 'Manacapuru', 'Coari'],
     'RR': ['Boa Vista', 'Rorainópolis', 'Caracaraí', 'Alto Alegre', 'Mucajaí'],
     'AP': ['Macapá', 'Santana', 'Laranjal do Jari', 'Oiapoque', 'Mazagão'],
-    'TO': ['Palmas', 'Araguaína', 'Gurupi', 'Porto Nacional', 'Paraíso do Tocantins'],
+    'TO': [
+      'Palmas',
+      'Araguaína',
+      'Gurupi',
+      'Porto Nacional',
+      'Paraíso do Tocantins'
+    ],
   };
 
   @override
@@ -120,7 +212,8 @@ class _LocationSelectorDialogState extends State<LocationSelectorDialog> {
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text('Selecione o estado'),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   borderRadius: BorderRadius.circular(12),
                   items: estados.map((estado) {
                     return DropdownMenuItem(
@@ -153,7 +246,9 @@ class _LocationSelectorDialogState extends State<LocationSelectorDialog> {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: selectedState == null ? Colors.grey[200]! : Colors.grey[300]!,
+                  color: selectedState == null
+                      ? Colors.grey[200]!
+                      : Colors.grey[300]!,
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -168,11 +263,14 @@ class _LocationSelectorDialogState extends State<LocationSelectorDialog> {
                           ? 'Selecione o estado primeiro'
                           : 'Selecione a cidade',
                       style: TextStyle(
-                        color: selectedState == null ? Colors.grey[400] : Colors.grey[600],
+                        color: selectedState == null
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
                       ),
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   borderRadius: BorderRadius.circular(12),
                   items: selectedState != null
                       ? (cidadesPorEstado[selectedState!] ?? []).map((cidade) {
@@ -246,14 +344,16 @@ class _LocationSelectorDialogState extends State<LocationSelectorDialog> {
                 ElevatedButton(
                   onPressed: selectedCity != null && selectedState != null
                       ? () {
-                          widget.onLocationSelected(selectedCity!, selectedState!);
+                          widget.onLocationSelected(
+                              selectedCity!, selectedState!);
                           Navigator.of(context).pop();
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7B68EE),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
