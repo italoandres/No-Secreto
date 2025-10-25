@@ -5,7 +5,7 @@ import '../models/search_filters.dart';
 import '../services/search_profiles_service.dart';
 import '../utils/enhanced_logger.dart';
 import '../utils/text_matcher.dart';
-import '../utils/unified_profile_search.dart';
+// REMOVIDO: import '../utils/unified_profile_search.dart'; (arquivo deletado)
 import '../utils/vitrine_profile_filter.dart';
 
 /// Repository para exploração de perfis

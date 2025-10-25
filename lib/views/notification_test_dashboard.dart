@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../utils/test_current_notification_system.dart';
-import '../utils/debug_notification_flow.dart';
+// REMOVIDO: import '../utils/debug_notification_flow.dart'; (arquivo deletado)
 import '../views/interest_dashboard_view.dart';
 
 /// Dashboard de teste para o sistema de notificações
@@ -101,20 +101,20 @@ class NotificationTestDashboard extends StatelessWidget {
               
               _buildActionCard(
                 title: 'Debug Detalhado',
-                subtitle: 'Investigar problemas (ver console)',
+                subtitle: '⚠️ Funcionalidade desabilitada',
                 icon: Icons.bug_report,
-                color: Colors.orange,
-                onTap: () => DebugNotificationFlow.debugCurrentState(),
+                color: Colors.grey,
+                onTap: () => print('Debug desabilitado (arquivo removido)'),
               ),
               
               const SizedBox(height: 12),
               
               _buildActionCard(
                 title: 'Criar Notificação de Teste',
-                subtitle: 'Adicionar notificação para testar',
+                subtitle: '⚠️ Funcionalidade desabilitada',
                 icon: Icons.add_alert,
-                color: Colors.purple,
-                onTap: () => DebugNotificationFlow.createTestNotification(),
+                color: Colors.grey,
+                onTap: () => print('Criação de teste desabilitada (arquivo removido)'),
               ),
               
               const SizedBox(height: 20),

@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/create_test_profiles_sinais.dart';
-import '../utils/create_test_interests_matches.dart';
-import '../utils/update_test_profiles_purpose.dart';
-import '../utils/update_profiles_deus_e_pai.dart';
-import '../utils/update_profiles_hobbies.dart';
-import '../utils/add_age_to_test_profiles.dart';
-import '../utils/create_new_interest_notifications.dart';
+// REMOVIDO: import '../utils/create_test_profiles_sinais.dart'; (arquivo deletado)
 
 /// View de debug para criar/remover perfis de teste
 class DebugTestProfilesView extends StatefulWidget {
@@ -442,9 +436,9 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
     });
 
     try {
-      await CreateTestProfilesSinais.createTestProfiles();
+      // REMOVIDO: await CreateTestProfilesSinais.createTestProfiles(); (arquivo deletado)
       setState(() {
-        _message = '✅ 6 perfis criados com sucesso!\nAgora você pode testar a aba Sinais.';
+        _message = '⚠️ Funcionalidade desabilitada (arquivo removido)';
       });
     } catch (e) {
       setState(() {
@@ -580,15 +574,14 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
     });
 
     try {
-      await CreateTestProfilesSinais.createTestProfiles();
+      // REMOVIDO: await CreateTestProfilesSinais.createTestProfiles(); (arquivo deletado)
       await CreateTestInterestsMatches.createTestInterests();
       await CreateTestInterestsMatches.createTestMatches();
       setState(() {
-        _message = '✅ Tudo criado com sucesso!\n\n'
-            '• 6 perfis de teste\n'
+        _message = '⚠️ Parcialmente criado (perfis desabilitados):\n\n'
             '• 3 interesses (Maria, Ana, Carolina)\n'
             '• 2 matches (Juliana, Beatriz)\n\n'
-            'Agora você pode testar todas as abas!';
+            'Nota: Criação de perfis foi removida';
       });
     } catch (e) {
       setState(() {
@@ -654,10 +647,10 @@ class _DebugTestProfilesViewState extends State<DebugTestProfilesView> {
     });
 
     try {
-      await CreateTestProfilesSinais.deleteTestProfiles();
+      // REMOVIDO: await CreateTestProfilesSinais.deleteTestProfiles(); (arquivo deletado)
       await CreateTestInterestsMatches.deleteTestInterestsAndMatches();
       setState(() {
-        _message = '✅ Todos os dados de teste foram removidos!';
+        _message = '⚠️ Parcialmente removido (perfis não afetados)';
       });
     } catch (e) {
       setState(() {

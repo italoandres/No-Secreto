@@ -19,12 +19,7 @@ import '/views/simple_accepted_matches_view.dart';
 import '/views/romantic_match_chat_view.dart';
 import '/views/vitrine_menu_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/utils/test_vitrine_complete_search.dart'; // 🔍 DEBUG VITRINE
-import '/utils/deep_vitrine_investigation.dart'; // 🔍 INVESTIGAÇÃO PROFUNDA
-import '/utils/simple_vitrine_debug.dart'; // 🔍 DEBUG SIMPLES
-import '/utils/dual_collection_debug.dart'; // 🔍 DEBUG DUAS COLEÇÕES
-import '/utils/force_notifications_now.dart'; // 🚀 SOLUÇÃO DEFINITIVA NOTIFICAÇÕES
-import '/utils/fix_timestamp_chat_errors.dart'; // 🔧 CORREÇÃO DE TIMESTAMPS
+// REMOVIDOS: imports de arquivos debug deletados
 import '/services/auto_chat_monitor.dart'; // 🔍 MONITOR AUTOMÁTICO
 import '/services/online_status_service.dart'; // 🟢 STATUS ONLINE
 
@@ -104,11 +99,7 @@ void main() async {
       // Sistema de matches removido - usando sistema de notificações de interesse
       debugPrint('✅ Sistema de notificações de interesse ativo');
       
-      // 🔍 DEBUG: Registrar funções de teste de vitrine
-      if (kDebugMode) {
-        TestVitrineCompleteSearch.registerGlobalTestFunction();
-        DeepVitrineInvestigation.registerConsoleFunction();
-      }
+      // 🔍 DEBUG: Funções de teste removidas (arquivos deletados)
       
       // 🔧 CORREÇÃO DE EMERGÊNCIA: COMENTADO - Causava erros de permissão
       // Future.delayed(const Duration(seconds: 3), () async {

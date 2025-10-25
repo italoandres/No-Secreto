@@ -7,11 +7,10 @@ import '../repositories/usuario_repository.dart';
 import '../components/username_editor_component.dart';
 import '../components/sync_status_indicator.dart';
 import '../services/ui_state_manager.dart';
-import '../utils/test_profile_completion.dart';
+// REMOVIDO: import '../utils/test_profile_completion.dart'; (arquivo deletado)
 import '../utils/enhanced_logger.dart';
 import '../utils/vitrine_navigation_helper.dart';
 import '../utils/certification_status_helper.dart';
-import '../utils/fix_completed_profiles.dart';
 import '../locale/language.dart';
 
 class ProfileCompletionView extends StatelessWidget {

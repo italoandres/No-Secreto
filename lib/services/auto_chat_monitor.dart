@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../utils/fix_timestamp_chat_errors.dart';
+// REMOVIDO: import '../utils/fix_timestamp_chat_errors.dart'; (arquivo deletado)
 
 /// Monitor automático para detectar e corrigir erros de chat
 class AutoChatMonitor {
@@ -49,10 +49,10 @@ class AutoChatMonitor {
       if (problematicChats.isNotEmpty) {
         print('🚨 [AUTO_MONITOR] ${problematicChats.length} chats com problemas detectados');
         
-        // Corrigir automaticamente
-        await TimestampChatErrorsFixer.fixAllTimestampErrors();
+        // REMOVIDO: Correção automática (arquivo fix_timestamp_chat_errors.dart deletado)
+        // await TimestampChatErrorsFixer.fixAllTimestampErrors();
         
-        print('✅ [AUTO_MONITOR] Correção automática aplicada');
+        print('⚠️ [AUTO_MONITOR] Correção automática desabilitada');
       } else {
         print('✅ [AUTO_MONITOR] Nenhum problema detectado');
       }
@@ -129,8 +129,8 @@ class AutoChatMonitor {
       
       if (hasProblems) {
         print('🔧 [AUTO_MONITOR] Corrigindo chat específico: $chatId');
-        await TimestampChatErrorsFixer.fixSpecificMissingChat();
-        print('✅ [AUTO_MONITOR] Chat específico corrigido');
+        // REMOVIDO: await TimestampChatErrorsFixer.fixSpecificMissingChat(); (arquivo deletado)
+        print('⚠️ [AUTO_MONITOR] Correção automática desabilitada');
       }
       
     } catch (e) {

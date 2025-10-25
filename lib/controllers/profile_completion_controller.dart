@@ -12,7 +12,7 @@ import '../services/username_management_service.dart';
 import '../utils/enhanced_logger.dart';
 import '../utils/error_handler.dart';
 import '../utils/vitrine_navigation_helper.dart';
-import '../utils/debug_profile_completion.dart';
+// REMOVIDO: import '../utils/debug_profile_completion.dart'; (arquivo deletado)
 import '../views/vitrine_confirmation_view.dart';
 import 'vitrine_demo_controller.dart';
 import '../views/profile_photos_task_view.dart';
@@ -200,8 +200,8 @@ class ProfileCompletionController extends GetxController {
             }
           );
           
-          // Executar debug detalhado
-          DebugProfileCompletion.debugProfileStatus(profile.value!.userId!);
+          // REMOVIDO: Debug detalhado (arquivo deletado)
+          // DebugProfileCompletion.debugProfileStatus(profile.value!.userId!);
         }
       },
       context: 'ProfileCompletionController._checkAndHandleProfileCompletion',
