@@ -35,7 +35,7 @@ static Future<void> _syncUserSexo() async {
     if (currentUser == null) return;
     
     final sexoFromToken = TokenUsuario().sexo;
-    debugPrint('🔄 Sincronizando sexo: ${sexoFromToken.name}');
+    safePrint('🔄 Sincronizando sexo: ${sexoFromToken.name}');
     
     await FirebaseFirestore.instance
         .collection('usuarios')
@@ -44,9 +44,9 @@ static Future<void> _syncUserSexo() async {
       'sexo': sexoFromToken.name,
     });
     
-    debugPrint('✅ Sexo sincronizado no Firestore: ${sexoFromToken.name}');
+    safePrint('✅ Sexo sincronizado no Firestore: ${sexoFromToken.name}');
   } catch (e) {
-    debugPrint('❌ Erro ao sincronizar sexo: $e');
+    safePrint('❌ Erro ao sincronizar sexo: $e');
   }
 }
 ```
@@ -62,7 +62,7 @@ final sexoFromFirestore = u.sexo ?? UserSexo.none;
 
 // Se o sexo no Firestore for 'none' mas o TokenUsuario tiver um sexo válido, corrigir
 if (sexoFromFirestore == UserSexo.none && sexoFromToken != UserSexo.none) {
-  debugPrint('🔄 Corrigindo sexo no Firestore: ${sexoFromToken.name}');
+  safePrint('🔄 Corrigindo sexo no Firestore: ${sexoFromToken.name}');
   FirebaseFirestore.instance.collection('usuarios').doc(u.id).update({
     'sexo': sexoFromToken.name,
   });

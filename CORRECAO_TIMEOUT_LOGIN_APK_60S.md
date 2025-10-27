@@ -32,7 +32,7 @@ Aumentamos o timeout de **30 segundos** para **60 segundos**.
 ```dart
 // Timeout de 30 segundos para evitar travamento
 Timer? timeoutTimer = Timer(const Duration(seconds: 30), () {
-  debugPrint('❌ TIMEOUT: Login demorou mais de 30 segundos');
+  safePrint('❌ TIMEOUT: Login demorou mais de 30 segundos');
   // ...
 });
 ```
@@ -41,7 +41,7 @@ Timer? timeoutTimer = Timer(const Duration(seconds: 30), () {
 ```dart
 // Timeout de 60 segundos para conexões lentas (APK em celular)
 Timer? timeoutTimer = Timer(const Duration(seconds: 60), () {
-  debugPrint('❌ TIMEOUT: Login demorou mais de 60 segundos');
+  safePrint('❌ TIMEOUT: Login demorou mais de 60 segundos');
   // ...
 });
 ```

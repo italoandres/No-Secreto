@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart'; // ✅ IMPORT ADICIONADO
 
 /// Gerencia erros relacionados ao carregamento de dados de localização
 class LocationErrorHandler {
   /// Trata erro ao carregar dados de um país
   static void handleDataLoadError(String countryCode, dynamic error) {
     // Log erro para debugging
-    debugPrint(
+    safePrint(
         '❌ Erro ao carregar dados de localização de $countryCode: $error');
 
     // TODO: Adicionar analytics quando necessário

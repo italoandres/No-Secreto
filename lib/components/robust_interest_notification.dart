@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/robust_notification_handler.dart';
 import '../components/robust_conversar_button.dart';
 
@@ -321,6 +322,7 @@ class _RobustInterestNotificationsListState
           .collection('interests')
           .where('toUserId', isEqualTo: widget.userId)
           .orderBy('dataCriacao', descending: true)
+          .limit(50) // ✅ LIMITE ADICIONADO (últimas 50 notificações)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {

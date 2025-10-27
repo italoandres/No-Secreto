@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/spiritual_profile_model.dart';
@@ -20,6 +20,7 @@ import '../views/profile_identity_task_view.dart';
 import '../views/profile_biography_task_view.dart';
 import '../views/preferences_interaction_view.dart';
 import '../views/spiritual_certification_request_view.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class ProfileCompletionController extends GetxController {
   final Rx<SpiritualProfileModel?> profile = Rx<SpiritualProfileModel?>(null);
@@ -91,14 +92,14 @@ class ProfileCompletionController extends GetxController {
   /// Sincroniza dados do perfil do usuário (Editar Perfil) com a Vitrine de Propósito
   Future<void> _syncWithUserData(SpiritualProfileModel spiritualProfile) async {
     try {
-      debugPrint('🔄 Sincronizando dados do usuário...');
+      safePrint('🔄 Sincronizando dados do usuário...');
 
       // Get user data from "Editar Perfil"
       final userStream = UsuarioRepository.getUser();
       final userData = await userStream.first;
 
       if (userData == null) {
-        debugPrint('⚠️ Dados do usuário não encontrados');
+        safePrint('⚠️ Dados do usuário não encontrados');
         return;
       }
 
@@ -111,15 +112,15 @@ class ProfileCompletionController extends GetxController {
           (userData.imgUrl?.isNotEmpty ?? false)) {
         updates['mainPhotoUrl'] = userData.imgUrl;
         needsUpdate = true;
-        debugPrint('📸 Sincronizando foto principal: ${userData.imgUrl}');
+        safePrint('📸 Sincronizando foto principal: ${userData.imgUrl}');
       }
 
       // Force sync user data for display (não salva no perfil espiritual, apenas para exibição)
-      debugPrint('👤 Dados do usuário carregados:');
-      debugPrint('   Nome: ${userData.nome}');
-      debugPrint('   Username: ${userData.username}');
-      debugPrint('   Email: ${userData.email}');
-      debugPrint('   Foto: ${userData.imgUrl}');
+      safePrint('👤 Dados do usuário carregados:');
+      safePrint('   Nome: ${userData.nome}');
+      safePrint('   Username: ${userData.username}');
+      safePrint('   Email: ${userData.email}');
+      safePrint('   Foto: ${userData.imgUrl}');
 
       // Update spiritual profile if needed
       if (needsUpdate && spiritualProfile.id != null) {
@@ -129,10 +130,10 @@ class ProfileCompletionController extends GetxController {
         // Update local profile object
         spiritualProfile.mainPhotoUrl = updates['mainPhotoUrl'];
 
-        debugPrint('✅ Dados sincronizados com sucesso');
+        safePrint('✅ Dados sincronizados com sucesso');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao sincronizar dados: $e');
+      safePrint('❌ Erro ao sincronizar dados: $e');
       // Don't throw error, just log it - sync is not critical
     }
   }
@@ -231,7 +232,7 @@ class ProfileCompletionController extends GetxController {
   }
 
   void openTask(String taskKey) {
-    debugPrint('🎯 Abrindo tarefa: $taskKey');
+    safePrint('🎯 Abrindo tarefa: $taskKey');
 
     switch (taskKey) {
       case 'photos':
@@ -267,7 +268,7 @@ class ProfileCompletionController extends GetxController {
         try {
           Get.to(() => const SpiritualCertificationRequestView());
         } catch (e) {
-          debugPrint('❌ Erro ao abrir certificação: $e');
+          safePrint('❌ Erro ao abrir certificação: $e');
           Get.snackbar(
             'Erro',
             'Não foi possível abrir a certificação. Tente novamente.',
@@ -402,9 +403,9 @@ class ProfileCompletionController extends GetxController {
   /// Inicia a demonstração da vitrine após completar o perfil (método legado mantido para compatibilidade)
   Future<void> _startVitrineDemo() async {
     try {
-      debugPrint('🚀 DEBUG: Iniciando demonstração da vitrine...');
+      safePrint('🚀 DEBUG: Iniciando demonstração da vitrine...');
       final user = FirebaseAuth.instance.currentUser;
-      debugPrint('🔍 DEBUG: User UID = ${user?.uid}');
+      safePrint('🔍 DEBUG: User UID = ${user?.uid}');
 
       if (user?.uid != null) {
         EnhancedLogger.info('Starting vitrine demo after profile completion',
@@ -433,7 +434,7 @@ class ProfileCompletionController extends GetxController {
         throw Exception('Perfil não encontrado');
       }
 
-      debugPrint('🔄 Atualizando tarefa $taskKey: $isCompleted');
+      safePrint('🔄 Atualizando tarefa $taskKey: $isCompleted');
 
       await SpiritualProfileRepository.updateTaskCompletion(
         profile.value!.id!,
@@ -451,9 +452,9 @@ class ProfileCompletionController extends GetxController {
         updatedAt: DateTime.now(),
       );
 
-      debugPrint('✅ Tarefa atualizada localmente');
+      safePrint('✅ Tarefa atualizada localmente');
     } catch (e) {
-      debugPrint('❌ Erro ao atualizar tarefa: $e');
+      safePrint('❌ Erro ao atualizar tarefa: $e');
 
       Get.snackbar(
         'Erro',
@@ -635,7 +636,7 @@ class ProfileCompletionController extends GetxController {
 
   @override
   void onClose() {
-    debugPrint('🔄 ProfileCompletionController fechado');
+    safePrint('🔄 ProfileCompletionController fechado');
     super.onClose();
   }
 }

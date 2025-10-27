@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:ffmpeg_kit_flutter_min_gpl/ffprobe_kit.dart'; // Removido temporariamente
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +16,7 @@ import '../token_usuario.dart';
 import '../controllers/stories_gallery_controller.dart';
 import '../services/stories_history_service.dart';
 import '../utils/context_utils.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class StoriesRepository {
   static final StoriesHistoryService _historyService = StoriesHistoryService();
@@ -24,24 +25,24 @@ class StoriesRepository {
   static Future<bool> testAuthentication() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      debugPrint('🔍 TESTE AUTH: Usuário atual: ${user?.email ?? "null"}');
+      safePrint('🔍 TESTE AUTH: Usuário atual: ${user?.email ?? "null"}');
 
       if (user == null) {
-        debugPrint('❌ TESTE AUTH: Usuário não autenticado');
+        safePrint('❌ TESTE AUTH: Usuário não autenticado');
         return false;
       }
 
       // Testar se o token ainda é válido
       final token = await user.getIdToken(true);
-      debugPrint('✅ TESTE AUTH: Token obtido com sucesso');
+      safePrint('✅ TESTE AUTH: Token obtido com sucesso');
 
       // Testar acesso ao Firestore
       await FirebaseFirestore.instance.collection('test').limit(1).get();
-      debugPrint('✅ TESTE AUTH: Acesso ao Firestore OK');
+      safePrint('✅ TESTE AUTH: Acesso ao Firestore OK');
 
       return true;
     } catch (e) {
-      debugPrint('❌ TESTE AUTH: Erro: $e');
+      safePrint('❌ TESTE AUTH: Erro: $e');
       return false;
     }
   }
@@ -1230,19 +1231,19 @@ class StoriesRepository {
   }
 
   static Future<String> _uploadImg(Uint8List fileData) async {
-    debugPrint('DEBUG REPO: Iniciando upload para Firebase Storage');
-    debugPrint('DEBUG REPO: Tamanho: ${fileData.length} bytes');
+    safePrint('DEBUG REPO: Iniciando upload para Firebase Storage');
+    safePrint('DEBUG REPO: Tamanho: ${fileData.length} bytes');
 
     try {
       // Verificar se o usuário está autenticado
       final user = FirebaseAuth.instance.currentUser;
-      debugPrint('DEBUG REPO: Usuário atual: ${user?.email ?? "null"}');
-      debugPrint('DEBUG REPO: UID: ${user?.uid ?? "null"}');
-      debugPrint('DEBUG REPO: Está autenticado: ${user != null}');
+      safePrint('DEBUG REPO: Usuário atual: ${user?.email ?? "null"}');
+      safePrint('DEBUG REPO: UID: ${user?.uid ?? "null"}');
+      safePrint('DEBUG REPO: Está autenticado: ${user != null}');
 
       if (user == null) {
         // Tentar reautenticar
-        debugPrint('DEBUG REPO: Tentando reautenticar...');
+        safePrint('DEBUG REPO: Tentando reautenticar...');
         await FirebaseAuth.instance.authStateChanges().first;
         final userAfterWait = FirebaseAuth.instance.currentUser;
 
@@ -1250,7 +1251,7 @@ class StoriesRepository {
           throw Exception('Usuário não autenticado. Faça login novamente.');
         }
 
-        debugPrint(
+        safePrint(
             'DEBUG REPO: Reautenticação bem-sucedida: ${userAfterWait.email}');
       }
 
@@ -1274,7 +1275,7 @@ class StoriesRepository {
 
       final fileName = 'stories_files/${userId}_${timestamp}.png';
 
-      debugPrint('DEBUG REPO: Nome do arquivo: $fileName');
+      safePrint('DEBUG REPO: Nome do arquivo: $fileName');
 
       // Criar referência do Firebase Storage
       Reference ref = FirebaseStorage.instance.ref().child(fileName);
@@ -1347,7 +1348,7 @@ class StoriesRepository {
       }
       throw Exception(errorMessage);
     } catch (e, stackTrace) {
-      debugPrint('DEBUG REPO: Erro geral no upload: $e');
+      safePrint('DEBUG REPO: Erro geral no upload: $e');
 
       // Tratar outros tipos de erro de forma simples
       if (e.toString().contains('timeout')) {

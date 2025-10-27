@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:whatsapp_chat/repositories/chat_repository.dart';
 import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/models/usuario_model.dart';
+import '../utils/debug_utils.dart';
 
 class AutomaticMessageService {
   static Timer? _timer;
@@ -52,12 +53,12 @@ class AutomaticMessageService {
       // Enviar mensagem para Sinais de Rebeca
       await ChatRepository.sendAutomaticPaiMessageToContext('sinais_rebeca');
 
-      print('Mensagens automáticas do Pai enviadas após 3 dias de inatividade');
+      safePrint('Mensagens automáticas do Pai enviadas após 3 dias de inatividade');
 
       // Reiniciar o timer para o próximo ciclo
       _startInactivityTimer();
     } catch (e) {
-      print('Erro ao enviar mensagens automáticas: $e');
+      safePrint('Erro ao enviar mensagens automáticas: $e');
       // Reiniciar o timer mesmo em caso de erro
       _startInactivityTimer();
     }
@@ -105,7 +106,7 @@ class AutomaticMessageService {
       // Se não encontrou atividade em nenhum chat, usuário está inativo
       return true;
     } catch (e) {
-      print('Erro ao verificar inatividade do usuário: $e');
+      safePrint('Erro ao verificar inatividade do usuário: $e');
       return false;
     }
   }

@@ -3,6 +3,7 @@ import '../services/certification_approval_service.dart';
 import '../controllers/certification_pagination_controller.dart';
 import '../components/paginated_certification_list.dart';
 import '../components/certification_filters_component.dart';
+import '../utils/debug_utils.dart';
 
 /// Painel administrativo para aprovação de certificações espirituais com paginação
 ///
@@ -107,7 +108,7 @@ class _CertificationApprovalPanelPaginatedViewState
         });
       }
     } catch (e) {
-      print('Erro ao carregar admins: $e');
+      safePrint('Erro ao carregar admins: $e');
     }
   }
 

@@ -50,7 +50,7 @@ if (user?.username != null && user!.username!.isNotEmpty) ...[
 **Adicionado debug para verificar carregamento dos dados:**
 
 ```dart
-debugPrint('🔍 DEBUG: User data - Nome: ${user?.nome}, Username: ${user?.username}');
+safePrint('🔍 DEBUG: User data - Nome: ${user?.nome}, Username: ${user?.username}');
 ```
 
 ## 🚀 **Como Testar**

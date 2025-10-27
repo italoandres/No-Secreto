@@ -33,11 +33,11 @@ if (widget.match.formattedLocation.isNotEmpty) ...[
 
 #### Mudança 3: Logs de Debug
 ```dart
-debugPrint('🎨 [MATCH_CARD] Exibindo: ${widget.match.otherUserName}');
-debugPrint('   nameWithAge: ${widget.match.nameWithAge}');
-debugPrint('   formattedLocation: ${widget.match.formattedLocation}');
-debugPrint('   otherUserAge: ${widget.match.otherUserAge}');
-debugPrint('   otherUserCity: ${widget.match.otherUserCity}');
+safePrint('🎨 [MATCH_CARD] Exibindo: ${widget.match.otherUserName}');
+safePrint('   nameWithAge: ${widget.match.nameWithAge}');
+safePrint('   formattedLocation: ${widget.match.formattedLocation}');
+safePrint('   otherUserAge: ${widget.match.otherUserAge}');
+safePrint('   otherUserCity: ${widget.match.otherUserCity}');
 ```
 
 ## 📱 Como Testar

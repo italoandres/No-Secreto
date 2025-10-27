@@ -39,7 +39,7 @@ if (originalValue is Timestamp) {
 // Detecção mais agressiva, ignorando migrationVersion
 for (final field in booleanFields) {
   if (data[field] != null && data[field] is! bool) {
-    debugPrint('🔍 [DataMigration] Campo $field precisa migração');
+    safePrint('🔍 [DataMigration] Campo $field precisa migração');
     return true;
   }
 }

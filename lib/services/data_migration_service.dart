@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Serviço responsável por migrar e corrigir dados corrompidos no Firestore
 class DataMigrationService {
@@ -9,7 +10,7 @@ class DataMigrationService {
   static Future<Map<String, dynamic>> migrateProfileData(
       String profileId, Map<String, dynamic> rawData) async {
     try {
-      debugPrint(
+      safePrint(
           '🔄 [DataMigration] Iniciando migração para perfil: $profileId');
 
       bool needsUpdate = false;
@@ -31,7 +32,7 @@ class DataMigrationService {
           final originalValue = rawData[field];
           final originalType = originalValue.runtimeType.toString();
 
-          debugPrint(
+          safePrint(
               '🔄 [DataMigration] Migrando campo $field de $originalType para bool');
           migrationLog.add('$field: $originalType → bool');
 
@@ -40,7 +41,7 @@ class DataMigrationService {
           migratedData[field] = convertedValue;
           needsUpdate = true;
 
-          debugPrint(
+          safePrint(
               '✅ [DataMigration] $field: $originalValue → $convertedValue');
         }
       }
@@ -60,7 +61,7 @@ class DataMigrationService {
 
             migrationLog.add(
                 'completionTasks.${entry.key}: ${originalValue.runtimeType} → bool');
-            debugPrint(
+            safePrint(
                 '🔄 [DataMigration] Task ${entry.key}: $originalValue → $convertedValue');
           } else {
             migratedTasks[entry.key] = entry.value as bool;
@@ -83,7 +84,7 @@ class DataMigrationService {
       ];
       for (final field in stringFields) {
         if (rawData[field] != null && rawData[field] is! String) {
-          debugPrint(
+          safePrint(
               '⚠️ [DataMigration] Campo $field tem tipo incorreto: ${rawData[field].runtimeType}');
           migratedData[field] = rawData[field].toString();
           needsUpdate = true;
@@ -103,7 +104,7 @@ class DataMigrationService {
             migrationLog.add('age: ${rawData['age'].runtimeType} → int');
           }
         } catch (e) {
-          debugPrint('⚠️ [DataMigration] Não foi possível converter age: $e');
+          safePrint('⚠️ [DataMigration] Não foi possível converter age: $e');
           migratedData['age'] = null;
           needsUpdate = true;
         }
@@ -120,21 +121,21 @@ class DataMigrationService {
             .doc(profileId)
             .update(migratedData);
 
-        debugPrint(
+        safePrint(
             '✅ [DataMigration] Migração concluída para perfil: $profileId');
-        debugPrint(
+        safePrint(
             '📊 [DataMigration] Campos migrados: ${migrationLog.join(', ')}');
 
         // Log da migração para auditoria
         await _logMigration(profileId, migrationLog);
       } else {
-        debugPrint(
+        safePrint(
             'ℹ️ [DataMigration] Nenhuma migração necessária para perfil: $profileId');
       }
 
       return migratedData;
     } catch (e) {
-      debugPrint('❌ [DataMigration] Erro na migração de dados: $e');
+      safePrint('❌ [DataMigration] Erro na migração de dados: $e');
       // Em caso de erro, retorna os dados originais para não quebrar o sistema
       return rawData;
     }
@@ -175,7 +176,7 @@ class DataMigrationService {
         'type': 'profile_data_migration'
       });
     } catch (e) {
-      debugPrint('⚠️ [DataMigration] Erro ao registrar log de migração: $e');
+      safePrint('⚠️ [DataMigration] Erro ao registrar log de migração: $e');
     }
   }
 
@@ -196,7 +197,7 @@ class DataMigrationService {
     // Verifica se algum campo boolean tem tipo incorreto
     for (final field in booleanFields) {
       if (data[field] != null && data[field] is! bool) {
-        debugPrint(
+        safePrint(
             '🔍 [DataMigration] Campo $field precisa migração: ${data[field].runtimeType}');
         return true;
       }
@@ -207,7 +208,7 @@ class DataMigrationService {
       final tasks = data['completionTasks'] as Map<String, dynamic>;
       for (final entry in tasks.entries) {
         if (entry.value is! bool) {
-          debugPrint(
+          safePrint(
               '🔍 [DataMigration] Task ${entry.key} precisa migração: ${entry.value.runtimeType}');
           return true;
         }
@@ -221,7 +222,7 @@ class DataMigrationService {
   static Future<Map<String, dynamic>> migrateUserData(
       String userId, Map<String, dynamic> rawData) async {
     try {
-      debugPrint('🔄 [DataMigration] Verificando dados do usuário: $userId');
+      safePrint('🔄 [DataMigration] Verificando dados do usuário: $userId');
 
       bool needsUpdate = false;
       final migratedData = Map<String, dynamic>.from(rawData);
@@ -263,8 +264,8 @@ class DataMigrationService {
             .doc(userId)
             .update(migratedData);
 
-        debugPrint('✅ [DataMigration] Dados do usuário migrados: $userId');
-        debugPrint(
+        safePrint('✅ [DataMigration] Dados do usuário migrados: $userId');
+        safePrint(
             '📊 [DataMigration] Campos migrados: ${migrationLog.join(', ')}');
 
         await _logUserMigration(userId, migrationLog);
@@ -272,7 +273,7 @@ class DataMigrationService {
 
       return migratedData;
     } catch (e) {
-      debugPrint('❌ [DataMigration] Erro na migração de dados do usuário: $e');
+      safePrint('❌ [DataMigration] Erro na migração de dados do usuário: $e');
       return rawData;
     }
   }
@@ -289,7 +290,7 @@ class DataMigrationService {
         'type': 'user_data_migration'
       });
     } catch (e) {
-      debugPrint(
+      safePrint(
           '⚠️ [DataMigration] Erro ao registrar log de migração do usuário: $e');
     }
   }
@@ -297,7 +298,7 @@ class DataMigrationService {
   /// Executa migração em lote para múltiplos perfis
   static Future<void> batchMigrateProfiles({int limit = 50}) async {
     try {
-      debugPrint('🔄 [DataMigration] Iniciando migração em lote...');
+      safePrint('🔄 [DataMigration] Iniciando migração em lote...');
 
       final querySnapshot =
           await _firestore.collection('spiritual_profiles').limit(limit).get();
@@ -312,10 +313,10 @@ class DataMigrationService {
         }
       }
 
-      debugPrint(
+      safePrint(
           '✅ [DataMigration] Migração em lote concluída. $migratedCount perfis migrados.');
     } catch (e) {
-      debugPrint('❌ [DataMigration] Erro na migração em lote: $e');
+      safePrint('❌ [DataMigration] Erro na migração em lote: $e');
     }
   }
 }

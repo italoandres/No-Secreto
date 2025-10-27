@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'debug_utils.dart';
 
 /// Script para adicionar o campo lastSeen a todos os usuários existentes
 class AddLastSeenToUsers {
@@ -7,7 +8,7 @@ class AddLastSeenToUsers {
   /// Adiciona o campo lastSeen a todos os usuários que não têm
   static Future<void> addLastSeenToAllUsers() async {
     try {
-      print('🔄 Iniciando atualização de lastSeen para todos os usuários...');
+      safePrint('🔄 Iniciando atualização de lastSeen para todos os usuários...');
 
       // Buscar todos os usuários
       final usersQuery = await _firestore.collection('usuarios').get();
@@ -27,31 +28,31 @@ class AddLastSeenToUsers {
             'lastSeen': FieldValue.serverTimestamp(),
           });
           updated++;
-          print('✅ Adicionando lastSeen para usuário: ${userDoc.id}');
+          safePrint('✅ Adicionando lastSeen para usuário: ${userDoc.id}');
         } else {
           skipped++;
-          print('⏭️ Usuário ${userDoc.id} já tem lastSeen');
+          safePrint('⏭️ Usuário ${userDoc.id} já tem lastSeen');
         }
       }
 
       // Executa todas as atualizações
       if (updated > 0) {
         await batch.commit();
-        print('🎉 Atualização concluída!');
-        print('📊 Usuários atualizados: $updated');
-        print('📊 Usuários ignorados: $skipped');
+        safePrint('🎉 Atualização concluída!');
+        safePrint('📊 Usuários atualizados: $updated');
+        safePrint('📊 Usuários ignorados: $skipped');
       } else {
-        print('ℹ️ Nenhum usuário precisava de atualização');
+        safePrint('ℹ️ Nenhum usuário precisava de atualização');
       }
     } catch (e) {
-      print('❌ Erro ao atualizar usuários: $e');
+      safePrint('❌ Erro ao atualizar usuários: $e');
     }
   }
 
   /// Versão para executar em lote pequeno (para evitar timeout)
   static Future<void> addLastSeenToUsersBatch({int batchSize = 50}) async {
     try {
-      print('🔄 Iniciando atualização em lotes de $batchSize usuários...');
+      safePrint('🔄 Iniciando atualização em lotes de $batchSize usuários...');
 
       DocumentSnapshot? lastDoc;
       bool hasMore = true;
@@ -66,7 +67,7 @@ class AddLastSeenToUsers {
 
         final querySnapshot = await query.get();
 
-        print('📋 Lote recebido: ${querySnapshot.docs.length} documentos');
+        safePrint('📋 Lote recebido: ${querySnapshot.docs.length} documentos');
 
         if (querySnapshot.docs.isEmpty) {
           hasMore = false;
@@ -81,7 +82,7 @@ class AddLastSeenToUsers {
             final userData = userDoc.data() as Map<String, dynamic>?;
 
             if (userData == null) {
-              print('⚠️ Documento ${userDoc.id} sem dados');
+              safePrint('⚠️ Documento ${userDoc.id} sem dados');
               continue;
             }
 
@@ -91,12 +92,12 @@ class AddLastSeenToUsers {
                 'lastSeen': FieldValue.serverTimestamp(),
               });
               batchUpdated++;
-              print('✅ Lote: Adicionando lastSeen para ${userDoc.id}');
+              safePrint('✅ Lote: Adicionando lastSeen para ${userDoc.id}');
             } else {
-              print('⏭️ Usuário ${userDoc.id} já tem lastSeen');
+              safePrint('⏭️ Usuário ${userDoc.id} já tem lastSeen');
             }
           } catch (e) {
-            print('❌ Erro ao processar usuário ${userDoc.id}: $e');
+            safePrint('❌ Erro ao processar usuário ${userDoc.id}: $e');
           }
         }
 
@@ -104,12 +105,12 @@ class AddLastSeenToUsers {
           try {
             await batch.commit();
             totalUpdated += batchUpdated;
-            print('📦 Lote processado: $batchUpdated usuários atualizados');
+            safePrint('📦 Lote processado: $batchUpdated usuários atualizados');
           } catch (e) {
-            print('❌ Erro ao commitar lote: $e');
+            safePrint('❌ Erro ao commitar lote: $e');
           }
         } else {
-          print('ℹ️ Nenhum usuário neste lote precisava de atualização');
+          safePrint('ℹ️ Nenhum usuário neste lote precisava de atualização');
         }
 
         lastDoc = querySnapshot.docs.last;
@@ -118,11 +119,11 @@ class AddLastSeenToUsers {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      print('🎉 Atualização em lotes concluída!');
-      print('📊 Total de usuários atualizados: $totalUpdated');
+      safePrint('🎉 Atualização em lotes concluída!');
+      safePrint('📊 Total de usuários atualizados: $totalUpdated');
     } catch (e, stackTrace) {
-      print('❌ Erro ao atualizar usuários em lotes: $e');
-      print('Stack trace: $stackTrace');
+      safePrint('❌ Erro ao atualizar usuários em lotes: $e');
+      safePrint('Stack trace: $stackTrace');
       rethrow;
     }
   }

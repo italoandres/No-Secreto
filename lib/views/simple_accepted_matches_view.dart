@@ -1,4 +1,4 @@
-import 'dart:async'; // ✨ NOVO: Para StreamSubscription
+﻿import 'dart:async'; // ✨ NOVO: Para StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // ✨ NOVO: Para Timesta
 import '../models/accepted_match_model.dart';
 import '../repositories/simple_accepted_matches_repository.dart';
 import '../views/romantic_match_chat_view.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Tela moderna e elegante de matches aceitos
 class SimpleAcceptedMatchesView extends StatefulWidget {
@@ -28,7 +29,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
   @override
   void initState() {
     super.initState();
-    debugPrint('🔍 [MATCHES_VIEW] Iniciando stream de matches aceitos');
+    safePrint('🔍 [MATCHES_VIEW] Iniciando stream de matches aceitos');
   }
 
   @override
@@ -122,7 +123,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
 
         // Error
         if (snapshot.hasError) {
-          debugPrint('❌ [MATCHES_VIEW] Erro no stream: ${snapshot.error}');
+          safePrint('❌ [MATCHES_VIEW] Erro no stream: ${snapshot.error}');
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -152,7 +153,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
 
         final matches = snapshot.data ?? [];
 
-        debugPrint('📊 [MATCHES_VIEW] Matches recebidos: ${matches.length}');
+        safePrint('📊 [MATCHES_VIEW] Matches recebidos: ${matches.length}');
 
         // Empty
         if (matches.isEmpty) {
@@ -190,9 +191,9 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
           itemBuilder: (context, index) {
             final match = matches[index];
 
-            debugPrint('🎨 [UI] Exibindo match: ${match.otherUserName}');
-            debugPrint('   nameWithAge: ${match.nameWithAge}');
-            debugPrint('   formattedLocation: ${match.formattedLocation}');
+            safePrint('🎨 [UI] Exibindo match: ${match.otherUserName}');
+            safePrint('   nameWithAge: ${match.nameWithAge}');
+            safePrint('   formattedLocation: ${match.formattedLocation}');
 
             return _buildMatchCard(match);
           },
@@ -478,7 +479,7 @@ class _SimpleAcceptedMatchesViewState extends State<SimpleAcceptedMatchesView> {
               hasPhoto ? NetworkImage(match.otherUserPhoto!) : null,
           onBackgroundImageError: hasPhoto
               ? (exception, stackTrace) {
-                  debugPrint('Erro ao carregar foto: $exception');
+                  safePrint('Erro ao carregar foto: $exception');
                 }
               : null,
           child: !hasPhoto

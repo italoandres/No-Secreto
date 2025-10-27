@@ -11,6 +11,7 @@ import '../services/enhanced_image_manager.dart';
 import '../services/profile_data_synchronizer.dart';
 import '../utils/enhanced_logger.dart';
 import '../utils/error_handler.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart'; // ✅ IMPORT ADICIONADO
 
 class ProfilePhotosTaskController extends GetxController {
   final SpiritualProfileModel profile;
@@ -27,13 +28,13 @@ class ProfilePhotosTaskController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    debugPrint(
-        '🔄 ProfilePhotosTaskController iniciado para perfil: ${profile.id}');
+    safePrint(
+        'ðŸ"„ ProfilePhotosTaskController iniciado para perfil: ${profile.id}');
   }
 
   Future<void> selectMainPhoto() async {
     try {
-      debugPrint('📸 Selecionando foto principal...');
+      safePrint('ðŸ"¸ Selecionando foto principal...');
 
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -45,13 +46,13 @@ class ProfilePhotosTaskController extends GetxController {
       if (image != null) {
         final bytes = await image.readAsBytes();
         mainPhotoData.value = bytes;
-        debugPrint('✅ Foto principal selecionada: ${bytes.length} bytes');
+        safePrint('âœ… Foto principal selecionada: ${bytes.length} bytes');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao selecionar foto principal: $e');
+      safePrint('âŒ Erro ao selecionar foto principal: $e');
       Get.snackbar(
         'Erro',
-        'Não foi possível selecionar a foto. Tente novamente.',
+        'NÃ£o foi possÃ­vel selecionar a foto. Tente novamente.',
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
         snackPosition: SnackPosition.BOTTOM,
@@ -61,7 +62,7 @@ class ProfilePhotosTaskController extends GetxController {
 
   Future<void> selectSecondaryPhoto1() async {
     try {
-      debugPrint('📸 Selecionando foto secundária 1...');
+      safePrint('ðŸ"¸ Selecionando foto secundÃ¡ria 1...');
 
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -73,13 +74,13 @@ class ProfilePhotosTaskController extends GetxController {
       if (image != null) {
         final bytes = await image.readAsBytes();
         secondaryPhoto1Data.value = bytes;
-        debugPrint('✅ Foto secundária 1 selecionada: ${bytes.length} bytes');
+        safePrint('âœ… Foto secundÃ¡ria 1 selecionada: ${bytes.length} bytes');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao selecionar foto secundária 1: $e');
+      safePrint('âŒ Erro ao selecionar foto secundÃ¡ria 1: $e');
       Get.snackbar(
         'Erro',
-        'Não foi possível selecionar a foto. Tente novamente.',
+        'NÃ£o foi possÃ­vel selecionar a foto. Tente novamente.',
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
         snackPosition: SnackPosition.BOTTOM,
@@ -89,7 +90,7 @@ class ProfilePhotosTaskController extends GetxController {
 
   Future<void> selectSecondaryPhoto2() async {
     try {
-      debugPrint('📸 Selecionando foto secundária 2...');
+      safePrint('ðŸ"¸ Selecionando foto secundÃ¡ria 2...');
 
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -101,13 +102,13 @@ class ProfilePhotosTaskController extends GetxController {
       if (image != null) {
         final bytes = await image.readAsBytes();
         secondaryPhoto2Data.value = bytes;
-        debugPrint('✅ Foto secundária 2 selecionada: ${bytes.length} bytes');
+        safePrint('âœ… Foto secundÃ¡ria 2 selecionada: ${bytes.length} bytes');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao selecionar foto secundária 2: $e');
+      safePrint('âŒ Erro ao selecionar foto secundÃ¡ria 2: $e');
       Get.snackbar(
         'Erro',
-        'Não foi possível selecionar a foto. Tente novamente.',
+        'NÃ£o foi possÃ­vel selecionar a foto. Tente novamente.',
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
         snackPosition: SnackPosition.BOTTOM,
@@ -119,10 +120,10 @@ class ProfilePhotosTaskController extends GetxController {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        throw Exception('Usuário não autenticado');
+        throw Exception('UsuÃ¡rio nÃ£o autenticado');
       }
 
-      debugPrint('☁️ Fazendo upload da foto: $fileName');
+      safePrint('â˜ï¸ Fazendo upload da foto: $fileName');
 
       final ref = FirebaseStorage.instance
           .ref()
@@ -138,10 +139,10 @@ class ProfilePhotosTaskController extends GetxController {
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      debugPrint('✅ Upload concluído: $downloadUrl');
+      safePrint('âœ… Upload concluÃ­do: $downloadUrl');
       return downloadUrl;
     } catch (e) {
-      debugPrint('❌ Erro no upload da foto $fileName: $e');
+      safePrint('âŒ Erro no upload da foto $fileName: $e');
       rethrow;
     }
   }
@@ -149,7 +150,7 @@ class ProfilePhotosTaskController extends GetxController {
   Future<void> savePhotos() async {
     try {
       isSaving.value = true;
-      debugPrint('💾 Salvando fotos do perfil...');
+      safePrint('💾 Salvando fotos do perfil...');
 
       final Map<String, dynamic> updates = {};
 
@@ -160,7 +161,7 @@ class ProfilePhotosTaskController extends GetxController {
           'main_photo_${DateTime.now().millisecondsSinceEpoch}.jpg',
         );
         updates['mainPhotoUrl'] = mainPhotoUrl;
-        debugPrint('✅ Foto principal salva: $mainPhotoUrl');
+        safePrint('âœ… Foto principal salva: $mainPhotoUrl');
       }
 
       // Upload secondary photo 1 if changed
@@ -170,7 +171,7 @@ class ProfilePhotosTaskController extends GetxController {
           'secondary1_${DateTime.now().millisecondsSinceEpoch}.jpg',
         );
         updates['secondaryPhoto1Url'] = secondaryPhoto1Url;
-        debugPrint('✅ Foto secundária 1 salva: $secondaryPhoto1Url');
+        safePrint('âœ… Foto secundÃ¡ria 1 salva: $secondaryPhoto1Url');
       }
 
       // Upload secondary photo 2 if changed
@@ -180,13 +181,13 @@ class ProfilePhotosTaskController extends GetxController {
           'secondary2_${DateTime.now().millisecondsSinceEpoch}.jpg',
         );
         updates['secondaryPhoto2Url'] = secondaryPhoto2Url;
-        debugPrint('✅ Foto secundária 2 salva: $secondaryPhoto2Url');
+        safePrint('âœ… Foto secundÃ¡ria 2 salva: $secondaryPhoto2Url');
       }
 
       // Update profile in Firestore if there are changes
       if (updates.isNotEmpty) {
         await SpiritualProfileRepository.updateProfile(profile.id!, updates);
-        debugPrint('✅ Perfil atualizado no Firestore');
+        safePrint('âœ… Perfil atualizado no Firestore');
       }
 
       // Mark photos task as completed
@@ -196,7 +197,7 @@ class ProfilePhotosTaskController extends GetxController {
         true,
       );
 
-      debugPrint('🎉 Fotos salvas com sucesso!');
+      safePrint('ðŸŽ‰ Fotos salvas com sucesso!');
 
       Get.snackbar(
         'Sucesso!',
@@ -207,11 +208,11 @@ class ProfilePhotosTaskController extends GetxController {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      debugPrint('❌ Erro ao salvar fotos: $e');
+      safePrint('âŒ Erro ao salvar fotos: $e');
 
       Get.snackbar(
         'Erro',
-        'Não foi possível salvar as fotos. Verifique sua conexão e tente novamente.',
+        'NÃ£o foi possÃ­vel salvar as fotos. Verifique sua conexÃ£o e tente novamente.',
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
         snackPosition: SnackPosition.BOTTOM,
@@ -260,7 +261,7 @@ class ProfilePhotosTaskController extends GetxController {
     secondaryPhoto2Data.value = null;
   }
 
-  // Novos métodos para trabalhar com EnhancedImageManager
+  // Novos mÃ©todos para trabalhar com EnhancedImageManager
 
   /// Atualiza a foto principal
   Future<void> updateMainPhoto(String imageUrl) async {
@@ -278,7 +279,7 @@ class ProfilePhotosTaskController extends GetxController {
           'lastSyncAt': FieldValue.serverTimestamp(),
         });
 
-        // 2. Atualizar diretamente na collection usuarios (CRÍTICO para chats/stories)
+        // 2. Atualizar diretamente na collection usuarios (CRÃTICO para chats/stories)
         if (profile.userId != null) {
           try {
             await FirebaseFirestore.instance
@@ -296,7 +297,7 @@ class ProfilePhotosTaskController extends GetxController {
           } catch (e) {
             EnhancedLogger.error('Failed to sync image to usuarios collection',
                 tag: 'PHOTOS_TASK', error: e, data: {'userId': profile.userId});
-            // Tentar método alternativo
+            // Tentar mÃ©todo alternativo
             await ProfileDataSynchronizer.updateProfileImage(
                 profile.userId!, imageUrl);
           }
@@ -311,10 +312,10 @@ class ProfilePhotosTaskController extends GetxController {
         EnhancedLogger.success('Main photo updated successfully',
             tag: 'PHOTOS_TASK');
 
-        // 5. Mostrar feedback ao usuário
+        // 5. Mostrar feedback ao usuÃ¡rio
         Get.snackbar(
           'Foto Atualizada!',
-          'Sua foto de perfil foi atualizada e já está visível para outros usuários.',
+          'Sua foto de perfil foi atualizada e jÃ¡ estÃ¡ visÃ­vel para outros usuÃ¡rios.',
           backgroundColor: Colors.green[100],
           colorText: Colors.green[800],
           snackPosition: SnackPosition.BOTTOM,
@@ -358,7 +359,7 @@ class ProfilePhotosTaskController extends GetxController {
     );
   }
 
-  /// Atualiza foto secundária 1
+  /// Atualiza foto secundÃ¡ria 1
   Future<void> updateSecondaryPhoto1(String imageUrl) async {
     await ErrorHandler.safeExecute(
       () async {
@@ -375,7 +376,7 @@ class ProfilePhotosTaskController extends GetxController {
     );
   }
 
-  /// Remove foto secundária 1
+  /// Remove foto secundÃ¡ria 1
   Future<void> removeSecondaryPhoto1() async {
     await ErrorHandler.safeExecute(
       () async {
@@ -391,7 +392,7 @@ class ProfilePhotosTaskController extends GetxController {
     );
   }
 
-  /// Atualiza foto secundária 2
+  /// Atualiza foto secundÃ¡ria 2
   Future<void> updateSecondaryPhoto2(String imageUrl) async {
     await ErrorHandler.safeExecute(
       () async {
@@ -408,7 +409,7 @@ class ProfilePhotosTaskController extends GetxController {
     );
   }
 
-  /// Remove foto secundária 2
+  /// Remove foto secundÃ¡ria 2
   Future<void> removeSecondaryPhoto2() async {
     await ErrorHandler.safeExecute(
       () async {
@@ -424,7 +425,7 @@ class ProfilePhotosTaskController extends GetxController {
     );
   }
 
-  /// Verifica e atualiza o status de conclusão da tarefa
+  /// Verifica e atualiza o status de conclusÃ£o da tarefa
   Future<void> _checkAndUpdateTaskCompletion() async {
     try {
       final isComplete = profile.mainPhotoUrl?.isNotEmpty == true;
@@ -450,13 +451,13 @@ class ProfilePhotosTaskController extends GetxController {
   @override
   void onClose() {
     try {
-      debugPrint('🔄 ProfilePhotosTaskController fechado');
-      // Limpar dados das imagens para evitar vazamentos de memória
+      safePrint('ðŸ"„ ProfilePhotosTaskController fechado');
+      // Limpar dados das imagens para evitar vazamentos de memÃ³ria
       mainPhotoData.value = null;
       secondaryPhoto1Data.value = null;
       secondaryPhoto2Data.value = null;
     } catch (e) {
-      debugPrint('⚠️ Erro ao fechar ProfilePhotosTaskController: $e');
+      safePrint('âš ï¸ Erro ao fechar ProfilePhotosTaskController: $e');
     } finally {
       super.onClose();
     }

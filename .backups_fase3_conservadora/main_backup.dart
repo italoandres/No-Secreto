@@ -65,7 +65,7 @@ void main() async {
       NotificationController().initNotification();
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     } catch (e) {
-      debugPrint('⚠️ Erro na inicialização de recursos específicos da plataforma: $e');
+      safePrint('⚠️ Erro na inicialização de recursos específicos da plataforma: $e');
     }
   }
   
@@ -73,36 +73,36 @@ void main() async {
   if(!kIsWeb) {
     try {
       await Firebase.initializeApp();
-      debugPrint('✅ Firebase inicializado com sucesso');
+      safePrint('✅ Firebase inicializado com sucesso');
       
       // Firebase Admin desabilitado para evitar crashes em dispositivos reais
       // if(kDebugMode && LoginRepository.appFirebaseAdmin == null) {
       //   try {
       //     await LoginRepository.initFirebaseAdmin();
-      //     debugPrint('✅ Firebase Admin inicializado');
+      //     safePrint('✅ Firebase Admin inicializado');
       //   } catch (e) {
-      //     debugPrint('⚠️ Firebase Admin não pôde ser inicializado: $e');
+      //     safePrint('⚠️ Firebase Admin não pôde ser inicializado: $e');
       //   }
       // }
       
       try {
         FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
         FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-        debugPrint('✅ Crashlytics configurado');
+        safePrint('✅ Crashlytics configurado');
       } catch (e) {
-        debugPrint('⚠️ Erro ao configurar Crashlytics: $e');
+        safePrint('⚠️ Erro ao configurar Crashlytics: $e');
       }
       
       // Inicializar serviço de mensagens automáticas
       try {
         AutomaticMessageService.initialize();
-        debugPrint('✅ Serviço de mensagens automáticas inicializado');
+        safePrint('✅ Serviço de mensagens automáticas inicializado');
       } catch (e) {
-        debugPrint('⚠️ Erro ao inicializar serviço de mensagens automáticas: $e');
+        safePrint('⚠️ Erro ao inicializar serviço de mensagens automáticas: $e');
       }
       
       // Sistema de matches removido - usando sistema de notificações de interesse
-      debugPrint('✅ Sistema de notificações de interesse ativo');
+      safePrint('✅ Sistema de notificações de interesse ativo');
       
       // 🔍 DEBUG: Registrar funções de teste de vitrine
       if (kDebugMode) {
@@ -113,15 +113,15 @@ void main() async {
       // 🔧 CORREÇÃO DE EMERGÊNCIA: COMENTADO - Causava erros de permissão
       // Future.delayed(const Duration(seconds: 3), () async {
       //   try {
-      //     debugPrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS...');
+      //     safePrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS...');
       //     await TimestampChatErrorsFixer.fixAllTimestampErrors();
-      //     debugPrint('✅ CORREÇÃO DE TIMESTAMPS CONCLUÍDA!');
+      //     safePrint('✅ CORREÇÃO DE TIMESTAMPS CONCLUÍDA!');
       //     
       //     // Iniciar monitoramento automático após correção
       //     AutoChatMonitor.startMonitoring();
-      //     debugPrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO!');
+      //     safePrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO!');
       //   } catch (e) {
-      //     debugPrint('❌ Erro na correção de timestamps: $e');
+      //     safePrint('❌ Erro na correção de timestamps: $e');
       //   }
       // });
       
@@ -129,13 +129,13 @@ void main() async {
       // Future.delayed(const Duration(seconds: 8), () async {
       //   try {
       //     await ForceNotificationsNow.execute('St2kw3cgX2MMPxlLRmBDjYm2nO22');
-      //     debugPrint('🎉 SOLUÇÃO DEFINITIVA DE NOTIFICAÇÕES EXECUTADA!');
+      //     safePrint('🎉 SOLUÇÃO DEFINITIVA DE NOTIFICAÇÕES EXECUTADA!');
       //   } catch (e) {
-      //     debugPrint('⚠️ Erro na solução definitiva: $e');
+      //     safePrint('⚠️ Erro na solução definitiva: $e');
       //   }
       // });
     } catch (e) {
-      debugPrint('❌ Erro na inicialização do Firebase: $e');
+      safePrint('❌ Erro na inicialização do Firebase: $e');
       // Continuar mesmo com erro do Firebase
     }
   } else {
@@ -161,15 +161,15 @@ void main() async {
     //   // 🔧 CORREÇÃO DE EMERGÊNCIA NA WEB: Executar fix de timestamps após 5 segundos
     //   Future.delayed(const Duration(seconds: 5), () async {
     //     try {
-    //       debugPrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS NA WEB...');
+    //       safePrint('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA DE TIMESTAMPS NA WEB...');
     //       await TimestampChatErrorsFixer.fixAllTimestampErrors();
-    //       debugPrint('✅ CORREÇÃO DE TIMESTAMPS NA WEB CONCLUÍDA!');
+    //       safePrint('✅ CORREÇÃO DE TIMESTAMPS NA WEB CONCLUÍDA!');
     //       
     //       // Iniciar monitoramento automático na web
     //       AutoChatMonitor.startMonitoring();
-    //       debugPrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO NA WEB!');
+    //       safePrint('🔍 MONITOR AUTOMÁTICO DE CHAT INICIADO NA WEB!');
     //     } catch (e) {
-    //       debugPrint('❌ Erro na correção de timestamps na web: $e');
+    //       safePrint('❌ Erro na correção de timestamps na web: $e');
     //     }
     //   });
     //   
@@ -177,9 +177,9 @@ void main() async {
     //   Future.delayed(const Duration(seconds: 10), () async {
     //     try {
     //       await ForceNotificationsNow.execute('St2kw3cgX2MMPxlLRmBDjYm2nO22');
-    //       debugPrint('🎉 SOLUÇÃO DEFINITIVA DE NOTIFICAÇÕES EXECUTADA NA WEB!');
+    //       safePrint('🎉 SOLUÇÃO DEFINITIVA DE NOTIFICAÇÕES EXECUTADA NA WEB!');
     //     } catch (e) {
-    //       debugPrint('⚠️ Erro na solução definitiva na web: $e');
+    //       safePrint('⚠️ Erro na solução definitiva na web: $e');
     //     }
     //   });
     // }

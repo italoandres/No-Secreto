@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,6 +14,7 @@ import '../components/story_comments_component.dart';
 import '../utils/enhanced_image_loader.dart';
 import '../utils/firebase_image_loader.dart';
 import '../utils/context_utils.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class EnhancedStoriesViewerView extends StatefulWidget {
   final String contexto;
@@ -264,9 +265,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     if (currentIndex >= stories.length) return;
 
     final currentStory = stories[currentIndex];
-    debugPrint(
+    safePrint(
         '🎬 VIEWER: Inicializando story ${currentStory.id} (${currentIndex + 1}/${stories.length})');
-    debugPrint(
+    safePrint(
         '🎬 VIEWER: Tipo: ${currentStory.fileType?.name}, URL: ${currentStory.fileUrl}');
 
     // Limpa recursos do story anterior
@@ -478,12 +479,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   /// Inicia auto-close para o story atual
   void _startAutoCloseForCurrentStory(StorieFileModel story) {
-    debugPrint('⏰ AUTO-CLOSE: Iniciando para story ${story.id}');
+    safePrint('⏰ AUTO-CLOSE: Iniciando para story ${story.id}');
     autoCloseController.startAutoCloseForMedia(
       fileType: story.fileType?.name ?? 'img',
       videoDuration: story.videoDuration,
       onClose: () {
-        debugPrint('⏰ AUTO-CLOSE: Story fechado automaticamente');
+        safePrint('⏰ AUTO-CLOSE: Story fechado automaticamente');
         _nextStory();
       },
     );
@@ -688,14 +689,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
             controller: pageController,
             itemCount: stories.length,
             onPageChanged: (index) {
-              debugPrint('📄 VIEWER: Mudando para página $index');
+              safePrint('📄 VIEWER: Mudando para página $index');
               setState(() {
                 currentIndex = index;
               });
               _initializeCurrentStory();
             },
             itemBuilder: (context, index) {
-              debugPrint('📄 VIEWER: Construindo página $index');
+              safePrint('📄 VIEWER: Construindo página $index');
               return _buildStoryContent(stories[index]);
             },
           ),
@@ -943,9 +944,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   Widget _buildStoryContent(StorieFileModel story) {
-    debugPrint(
+    safePrint(
         '🖼️ VIEWER: Construindo conteúdo do story ${story.id} - Tipo: ${story.fileType?.name}');
-    debugPrint('🖼️ VIEWER: URL da imagem: ${story.fileUrl}');
+    safePrint('🖼️ VIEWER: URL da imagem: ${story.fileUrl}');
 
     if (story.fileType == StorieFileType.video) {
       return _buildVideoContent(story);
@@ -973,8 +974,8 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   Widget _buildImageContent(StorieFileModel story) {
-    debugPrint('🖼️ VIEWER: Construindo imagem para story ${story.id}');
-    debugPrint('🖼️ VIEWER: URL completa: ${story.fileUrl}');
+    safePrint('🖼️ VIEWER: Construindo imagem para story ${story.id}');
+    safePrint('🖼️ VIEWER: URL completa: ${story.fileUrl}');
 
     return Container(
       width: double.infinity,
@@ -1154,9 +1155,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   Widget _buildImageWithFallbacks(StorieFileModel story) {
-    debugPrint(
+    safePrint(
         '🖼️ VIEWER: Construindo imagem com proxy para story ${story.id}');
-    debugPrint('🖼️ VIEWER: URL original: ${story.fileUrl}');
+    safePrint('🖼️ VIEWER: URL original: ${story.fileUrl}');
 
     if (story.fileUrl == null || story.fileUrl!.isEmpty) {
       return _buildFallbackContent(story, 'URL da imagem não disponível');

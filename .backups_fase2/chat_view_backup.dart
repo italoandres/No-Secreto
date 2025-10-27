@@ -101,7 +101,7 @@ class _ChatViewState extends State<ChatView> {
       'lastSeen': FieldValue.serverTimestamp(),
       'isOnline': true,
     }).catchError((e) {
-      debugPrint('⚠️ Erro ao atualizar status online: $e');
+      safePrint('⚠️ Erro ao atualizar status online: $e');
     });
     
     // Atualizar a cada 30 segundos
@@ -114,7 +114,7 @@ class _ChatViewState extends State<ChatView> {
           'lastSeen': FieldValue.serverTimestamp(),
           'isOnline': true,
         }).catchError((e) {
-          debugPrint('⚠️ Erro ao atualizar status online: $e');
+          safePrint('⚠️ Erro ao atualizar status online: $e');
         });
       }
     });
@@ -133,7 +133,7 @@ class _ChatViewState extends State<ChatView> {
         'lastSeen': FieldValue.serverTimestamp(),
         'isOnline': false,
       }).catchError((e) {
-        debugPrint('⚠️ Erro ao marcar como offline: $e');
+        safePrint('⚠️ Erro ao marcar como offline: $e');
       });
     }
   }

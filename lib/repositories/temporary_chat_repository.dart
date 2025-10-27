@@ -1,10 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/temporary_chat_model.dart';
 import '../models/spiritual_profile_model.dart';
 import '../models/usuario_model.dart';
 import '../repositories/usuario_repository.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class TemporaryChatRepository {
   static const String _chatsCollection = 'temporary_chats';
@@ -17,7 +18,7 @@ class TemporaryChatRepository {
     MutualInterestModel mutualInterest,
   ) async {
     try {
-      debugPrint(
+      safePrint(
           '💬 Criando chat temporário para interesse mútuo: ${mutualInterest.id}');
 
       // Get user information
@@ -57,10 +58,10 @@ class TemporaryChatRepository {
       // Send welcome message
       await _sendWelcomeMessage(temporaryChat);
 
-      debugPrint('✅ Chat temporário criado: ${temporaryChat.id}');
+      safePrint('✅ Chat temporário criado: ${temporaryChat.id}');
       return temporaryChat;
     } catch (e) {
-      debugPrint('❌ Erro ao criar chat temporário: $e');
+      safePrint('❌ Erro ao criar chat temporário: $e');
       rethrow;
     }
   }
@@ -85,9 +86,9 @@ class TemporaryChatRepository {
           .collection(_messagesCollection)
           .add(welcomeMessage.toJson());
 
-      debugPrint('✅ Mensagem de boas-vindas enviada');
+      safePrint('✅ Mensagem de boas-vindas enviada');
     } catch (e) {
-      debugPrint('❌ Erro ao enviar mensagem de boas-vindas: $e');
+      safePrint('❌ Erro ao enviar mensagem de boas-vindas: $e');
     }
   }
 
@@ -112,7 +113,7 @@ class TemporaryChatRepository {
 
       return chat;
     } catch (e) {
-      debugPrint('❌ Erro ao buscar chat por interesse mútuo: $e');
+      safePrint('❌ Erro ao buscar chat por interesse mútuo: $e');
       return null;
     }
   }
@@ -136,7 +137,7 @@ class TemporaryChatRepository {
 
       return chat;
     } catch (e) {
-      debugPrint('❌ Erro ao buscar chat por room ID: $e');
+      safePrint('❌ Erro ao buscar chat por room ID: $e');
       return null;
     }
   }
@@ -147,7 +148,7 @@ class TemporaryChatRepository {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return [];
 
-      debugPrint(
+      safePrint(
           '🔍 Buscando chats temporários para usuário: ${currentUser.uid}');
 
       // Query for chats where user is participant
@@ -186,10 +187,10 @@ class TemporaryChatRepository {
         return bTime.compareTo(aTime);
       });
 
-      debugPrint('✅ Encontrados ${chats.length} chats temporários');
+      safePrint('✅ Encontrados ${chats.length} chats temporários');
       return chats;
     } catch (e) {
-      debugPrint('❌ Erro ao buscar chats do usuário: $e');
+      safePrint('❌ Erro ao buscar chats do usuário: $e');
       return [];
     }
   }
@@ -225,7 +226,7 @@ class TemporaryChatRepository {
         throw Exception('Este chat expirou');
       }
 
-      debugPrint('💬 Enviando mensagem para chat: $chatRoomId');
+      safePrint('💬 Enviando mensagem para chat: $chatRoomId');
 
       // Create message
       final chatMessage = TemporaryChatMessageModel(
@@ -251,9 +252,9 @@ class TemporaryChatRepository {
         'messageCount': FieldValue.increment(1),
       });
 
-      debugPrint('✅ Mensagem enviada com sucesso');
+      safePrint('✅ Mensagem enviada com sucesso');
     } catch (e) {
-      debugPrint('❌ Erro ao enviar mensagem: $e');
+      safePrint('❌ Erro ao enviar mensagem: $e');
       rethrow;
     }
   }
@@ -278,7 +279,7 @@ class TemporaryChatRepository {
   /// Move temporary chat to "Nosso Propósito"
   static Future<void> moveToNossoProposito(String chatId) async {
     try {
-      debugPrint('🔄 Movendo chat para Nosso Propósito: $chatId');
+      safePrint('🔄 Movendo chat para Nosso Propósito: $chatId');
 
       await _firestore.collection(_chatsCollection).doc(chatId).update({
         'movedToNossoProposito': true,
@@ -289,9 +290,9 @@ class TemporaryChatRepository {
       // TODO: Create "Nosso Propósito" chat
       // This would integrate with the existing purpose chat system
 
-      debugPrint('✅ Chat movido para Nosso Propósito');
+      safePrint('✅ Chat movido para Nosso Propósito');
     } catch (e) {
-      debugPrint('❌ Erro ao mover chat: $e');
+      safePrint('❌ Erro ao mover chat: $e');
       rethrow;
     }
   }
@@ -299,7 +300,7 @@ class TemporaryChatRepository {
   /// Expire chat (called when 7 days pass)
   static Future<void> expireChat(String chatId) async {
     try {
-      debugPrint('⏰ Expirando chat: $chatId');
+      safePrint('⏰ Expirando chat: $chatId');
 
       await _firestore.collection(_chatsCollection).doc(chatId).update({
         'isActive': false,
@@ -327,16 +328,16 @@ class TemporaryChatRepository {
             .add(expirationMessage.toJson());
       }
 
-      debugPrint('✅ Chat expirado');
+      safePrint('✅ Chat expirado');
     } catch (e) {
-      debugPrint('❌ Erro ao expirar chat: $e');
+      safePrint('❌ Erro ao expirar chat: $e');
     }
   }
 
   /// Clean up expired chats (should be called periodically)
   static Future<void> cleanupExpiredChats() async {
     try {
-      debugPrint('🧹 Limpando chats expirados...');
+      safePrint('🧹 Limpando chats expirados...');
 
       final now = DateTime.now();
       final querySnapshot = await _firestore
@@ -355,12 +356,12 @@ class TemporaryChatRepository {
 
       if (expiredCount > 0) {
         await batch.commit();
-        debugPrint('✅ $expiredCount chats expirados foram desativados');
+        safePrint('✅ $expiredCount chats expirados foram desativados');
       } else {
-        debugPrint('✅ Nenhum chat expirado encontrado');
+        safePrint('✅ Nenhum chat expirado encontrado');
       }
     } catch (e) {
-      debugPrint('❌ Erro na limpeza de chats expirados: $e');
+      safePrint('❌ Erro na limpeza de chats expirados: $e');
     }
   }
 
@@ -389,7 +390,7 @@ class TemporaryChatRepository {
         'total': activeChats.docs.length + expiredChats.docs.length,
       };
     } catch (e) {
-      debugPrint('❌ Erro ao obter estatísticas: $e');
+      safePrint('❌ Erro ao obter estatísticas: $e');
       return {'active': 0, 'expired': 0, 'moved': 0, 'total': 0};
     }
   }
@@ -413,9 +414,9 @@ class TemporaryChatRepository {
       }
 
       await batch.commit();
-      debugPrint('✅ Mensagens marcadas como lidas');
+      safePrint('✅ Mensagens marcadas como lidas');
     } catch (e) {
-      debugPrint('❌ Erro ao marcar mensagens como lidas: $e');
+      safePrint('❌ Erro ao marcar mensagens como lidas: $e');
     }
   }
 }

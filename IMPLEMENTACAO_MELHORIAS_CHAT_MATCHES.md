@@ -233,7 +233,7 @@ Widget _buildMessagesList() {
           // ✅ CORREÇÃO CRÍTICA: Comparar senderId com userId atual
           final isMe = senderId == _auth.currentUser?.uid;
           
-          debugPrint('📨 Mensagem: senderId=$senderId, currentUser=${_auth.currentUser?.uid}, isMe=$isMe');
+          safePrint('📨 Mensagem: senderId=$senderId, currentUser=${_auth.currentUser?.uid}, isMe=$isMe');
           
           return _buildMessageBubble(
             message: message['message'] ?? '',
@@ -264,7 +264,7 @@ Future<void> _markMessagesAsRead() async {
     final currentUserId = _auth.currentUser?.uid;
     if (currentUserId == null) return;
 
-    debugPrint('📖 Marcando mensagens como lidas para $currentUserId');
+    safePrint('📖 Marcando mensagens como lidas para $currentUserId');
 
     // Buscar mensagens não lidas do outro usuário
     final unreadMessages = await _firestore
@@ -276,11 +276,11 @@ Future<void> _markMessagesAsRead() async {
         .get();
 
     if (unreadMessages.docs.isEmpty) {
-      debugPrint('✅ Nenhuma mensagem não lida');
+      safePrint('✅ Nenhuma mensagem não lida');
       return;
     }
 
-    debugPrint('📖 Marcando ${unreadMessages.docs.length} mensagens como lidas');
+    safePrint('📖 Marcando ${unreadMessages.docs.length} mensagens como lidas');
 
     // Marcar como lidas usando batch
     final batch = _firestore.batch();
@@ -297,9 +297,9 @@ Future<void> _markMessagesAsRead() async {
       'unreadCount.$currentUserId': 0,
     });
 
-    debugPrint('✅ Mensagens marcadas como lidas com sucesso');
+    safePrint('✅ Mensagens marcadas como lidas com sucesso');
   } catch (e) {
-    debugPrint('❌ Erro ao marcar mensagens como lidas: $e');
+    safePrint('❌ Erro ao marcar mensagens como lidas: $e');
   }
 }
 ```

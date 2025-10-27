@@ -115,7 +115,7 @@ void _startOnlineTracking() {
     'lastSeen': FieldValue.serverTimestamp(),
     'isOnline': true,
   }).catchError((e) {
-    debugPrint('⚠️ Erro ao atualizar status online: $e');
+    safePrint('⚠️ Erro ao atualizar status online: $e');
   });
   
   // Atualizar a cada 30 segundos
@@ -128,7 +128,7 @@ void _startOnlineTracking() {
         'lastSeen': FieldValue.serverTimestamp(),
         'isOnline': true,
       }).catchError((e) {
-        debugPrint('⚠️ Erro ao atualizar status online: $e');
+        safePrint('⚠️ Erro ao atualizar status online: $e');
       });
     }
   });
@@ -147,7 +147,7 @@ void _stopOnlineTracking() {
       'lastSeen': FieldValue.serverTimestamp(),
       'isOnline': false,
     }).catchError((e) {
-      debugPrint('⚠️ Erro ao marcar como offline: $e');
+      safePrint('⚠️ Erro ao marcar como offline: $e');
     });
   }
 }

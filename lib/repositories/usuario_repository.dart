@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,6 +15,7 @@ import '../models/usuario_model.dart';
 import '../services/data_migration_service.dart';
 import '../utils/enhanced_logger.dart';
 import '../services/user_profile_cache_service.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class UsuarioRepository {
   // ==================== CACHE SERVICE ====================
@@ -39,10 +40,10 @@ class UsuarioRepository {
     final welcomeShown = prefs.getBool('welcome_shown') ?? false;
 
     if (!welcomeShown) {
-      debugPrint('UsuarioRepository: Mostrando WelcomeView (slide5)');
+      safePrint('UsuarioRepository: Mostrando WelcomeView (slide5)');
       Get.offAll(() => const WelcomeView());
     } else {
-      debugPrint(
+      safePrint(
           'UsuarioRepository: Welcome já visto, indo direto para HomeView');
       Get.offAll(() => const HomeView());
     }
@@ -161,16 +162,16 @@ class UsuarioRepository {
           // 💾 Salvar no cache
           await _cacheService.saveUser(u);
         } catch (e) {
-          debugPrint('Erro ao processar usuário ${element.id}: $e');
+          safePrint('Erro ao processar usuário ${element.id}: $e');
         }
       }
 
-      debugPrint(
+      safePrint(
           'UsuarioRepository: ${all.length} usuários carregados (limit: $limit)');
 
       return all;
     } catch (e) {
-      debugPrint('UsuarioRepository: Erro ao buscar usuários: $e');
+      safePrint('UsuarioRepository: Erro ao buscar usuários: $e');
       return [];
     }
   }
@@ -207,16 +208,16 @@ class UsuarioRepository {
           // 💾 Salvar no cache
           await _cacheService.saveUser(u);
         } catch (e) {
-          debugPrint('Erro ao processar usuário: $e');
+          safePrint('Erro ao processar usuário: $e');
         }
       }
 
-      debugPrint(
+      safePrint(
           'UsuarioRepository: ${all.length} usuários (sexo: ${sexo.name}) carregados');
 
       return all;
     } catch (e) {
-      debugPrint('UsuarioRepository: Erro ao buscar usuários por sexo: $e');
+      safePrint('UsuarioRepository: Erro ao buscar usuários por sexo: $e');
       return [];
     }
   }
@@ -246,12 +247,12 @@ class UsuarioRepository {
       return true;
     } on FirebaseAuthException catch (e) {
       Get.back();
-      debugPrint(e.code);
-      debugPrint(e.message);
+      safePrint(e.code);
+      safePrint(e.message ?? 'null');
 
       return false;
     } catch (e) {
-      debugPrint('$e');
+      safePrint('$e');
       return false;
     }
   }
@@ -345,7 +346,7 @@ class UsuarioRepository {
   /// Sincroniza o status de admin de todos os usuários baseado na lista de emails admin
   static Future<void> syncAllUsersAdminStatus() async {
     try {
-      debugPrint('UsuarioRepository: Iniciando sincronização de status admin');
+      safePrint('UsuarioRepository: Iniciando sincronização de status admin');
 
       final querySnapshot =
           await FirebaseFirestore.instance.collection('usuarios').get();
@@ -361,7 +362,7 @@ class UsuarioRepository {
         if (shouldBeAdmin != currentIsAdmin) {
           await doc.reference.update({'isAdmin': shouldBeAdmin});
           updatedCount++;
-          debugPrint(
+          safePrint(
               'UsuarioRepository: Updated admin status for $email to $shouldBeAdmin');
 
           // 🗑️ Invalidar cache do usuário
@@ -369,10 +370,10 @@ class UsuarioRepository {
         }
       }
 
-      debugPrint(
+      safePrint(
           'UsuarioRepository: Sincronização concluída. $updatedCount usuários atualizados.');
     } catch (e) {
-      debugPrint('UsuarioRepository: Erro na sincronização: $e');
+      safePrint('UsuarioRepository: Erro na sincronização: $e');
     }
   }
 

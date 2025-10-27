@@ -22,9 +22,9 @@ Removi a inicialização manual do `AdminCertificationService` do `main.dart`.
 // Inicializar serviço de certificações admin
 try {
   Get.put(AdminCertificationService());
-  debugPrint('✅ Serviço de certificações admin inicializado');
+  safePrint('✅ Serviço de certificações admin inicializado');
 } catch (e) {
-  debugPrint('⚠️ Erro ao inicializar serviço de certificações: $e');
+  safePrint('⚠️ Erro ao inicializar serviço de certificações: $e');
 }
 ```
 

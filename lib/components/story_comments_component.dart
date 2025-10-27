@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,6 +7,7 @@ import '../models/story_comment_model.dart';
 import '../models/usuario_model.dart';
 import '../views/profile_display_view.dart';
 import '../repositories/spiritual_profile_repository.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class StoryCommentsComponent extends StatelessWidget {
   final String storyId;
@@ -393,7 +394,7 @@ class StoryCommentsComponent extends StatelessWidget {
       // Navigate to profile display
       Get.to(() => ProfileDisplayView(userId: userId));
     } catch (e) {
-      debugPrint('❌ Erro ao abrir perfil: $e');
+      safePrint('❌ Erro ao abrir perfil: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível abrir o perfil. Tente novamente.',

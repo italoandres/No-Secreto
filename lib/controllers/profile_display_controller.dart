@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/spiritual_profile_model.dart';
@@ -8,6 +8,7 @@ import '../repositories/usuario_repository.dart';
 import '../repositories/temporary_chat_repository.dart';
 import '../utils/enhanced_logger.dart';
 import '../utils/error_handler.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 // import 'package:whatsapp_chat/views/temporary_chat_view.dart'; // Temporariamente comentado
 
 class ProfileDisplayController extends GetxController {
@@ -127,7 +128,7 @@ class ProfileDisplayController extends GetxController {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
 
-      debugPrint('🔄 Carregando estados de interação...');
+      safePrint('🔄 Carregando estados de interação...');
 
       // Check if current user has expressed interest
       final expressedInterest =
@@ -140,14 +141,14 @@ class ProfileDisplayController extends GetxController {
       if (mutualInterest != null) {
         hasMutualInterest.value = true;
         mutualInterestData.value = mutualInterest;
-        debugPrint('💕 Interesse mútuo detectado: ${mutualInterest.id}');
+        safePrint('💕 Interesse mútuo detectado: ${mutualInterest.id}');
       }
 
-      debugPrint('✅ Estados de interação carregados');
-      debugPrint('   - Interesse expressado: $expressedInterest');
-      debugPrint('   - Interesse mútuo: ${hasMutualInterest.value}');
+      safePrint('✅ Estados de interação carregados');
+      safePrint('   - Interesse expressado: $expressedInterest');
+      safePrint('   - Interesse mútuo: ${hasMutualInterest.value}');
     } catch (e) {
-      debugPrint('❌ Erro ao carregar estados de interação: $e');
+      safePrint('❌ Erro ao carregar estados de interação: $e');
     }
   }
 
@@ -197,7 +198,7 @@ class ProfileDisplayController extends GetxController {
       }
 
       isProcessingInterest.value = true;
-      debugPrint('💝 Expressando interesse em: $userId');
+      safePrint('💝 Expressando interesse em: $userId');
 
       final success = await SpiritualProfileRepository.expressInterest(userId);
 
@@ -228,7 +229,7 @@ class ProfileDisplayController extends GetxController {
         }
       }
     } catch (e) {
-      debugPrint('❌ Erro ao expressar interesse: $e');
+      safePrint('❌ Erro ao expressar interesse: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível demonstrar interesse. Tente novamente.',
@@ -243,7 +244,7 @@ class ProfileDisplayController extends GetxController {
 
   Future<void> startTemporaryChat() async {
     try {
-      debugPrint('💬 Iniciando chat temporário...');
+      safePrint('💬 Iniciando chat temporário...');
 
       final mutualInterest = mutualInterestData.value;
       if (mutualInterest == null) {
@@ -291,7 +292,7 @@ class ProfileDisplayController extends GetxController {
         duration: const Duration(seconds: 3),
       );
     } catch (e) {
-      debugPrint('❌ Erro ao iniciar chat temporário: $e');
+      safePrint('❌ Erro ao iniciar chat temporário: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível iniciar o chat. Tente novamente.',
@@ -304,7 +305,7 @@ class ProfileDisplayController extends GetxController {
 
   Future<void> blockUser() async {
     try {
-      debugPrint('🚫 Bloqueando usuário: $userId');
+      safePrint('🚫 Bloqueando usuário: $userId');
 
       await SpiritualProfileRepository.blockUser(userId);
 
@@ -319,7 +320,7 @@ class ProfileDisplayController extends GetxController {
       // Return to previous screen
       Get.back();
     } catch (e) {
-      debugPrint('❌ Erro ao bloquear usuário: $e');
+      safePrint('❌ Erro ao bloquear usuário: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível bloquear o usuário. Tente novamente.',
@@ -332,7 +333,7 @@ class ProfileDisplayController extends GetxController {
 
   Future<void> reportUser() async {
     try {
-      debugPrint('🚨 Reportando usuário: $userId');
+      safePrint('🚨 Reportando usuário: $userId');
 
       // For now, show a placeholder message
       // In the future, this will integrate with a reporting system
@@ -350,7 +351,7 @@ class ProfileDisplayController extends GetxController {
       // 2. Notify administrators
       // 3. Track report history
     } catch (e) {
-      debugPrint('❌ Erro ao reportar usuário: $e');
+      safePrint('❌ Erro ao reportar usuário: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível enviar o reporte. Tente novamente.',
@@ -388,7 +389,7 @@ class ProfileDisplayController extends GetxController {
 
   @override
   void onClose() {
-    debugPrint('🔄 ProfileDisplayController fechado');
+    safePrint('🔄 ProfileDisplayController fechado');
     super.onClose();
   }
 }

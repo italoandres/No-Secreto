@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/certification_pagination_service.dart';
 import '../models/certification_request_model.dart';
+import '../utils/debug_utils.dart';
 
 /// Controller para gerenciar paginação de certificações
 ///
@@ -69,7 +70,7 @@ class CertificationPaginationController extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = 'Erro ao carregar certificações: $e';
-      print(_error);
+      safePrint(_error);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -97,7 +98,7 @@ class CertificationPaginationController extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = 'Erro ao carregar mais certificações: $e';
-      print(_error);
+      safePrint(_error);
     } finally {
       _isLoadingMore = false;
       notifyListeners();

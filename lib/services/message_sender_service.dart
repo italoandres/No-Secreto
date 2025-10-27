@@ -100,12 +100,12 @@ class MessageSenderService {
     MessageType messageType = MessageType.text,
   }) async {
     try {
-      debugPrint('📤 Iniciando envio de mensagem para chat: $chatId');
+      safePrint('📤 Iniciando envio de mensagem para chat: $chatId');
 
       // 1. Validar se o chat não expirou
       final expirationResult = _validateChatExpiration(matchDate);
       if (expirationResult != null) {
-        debugPrint('❌ Chat expirado: $chatId');
+        safePrint('❌ Chat expirado: $chatId');
         return expirationResult;
       }
 
@@ -113,7 +113,7 @@ class MessageSenderService {
       final validationResult =
           _validateMessageContent(messageText, messageType);
       if (validationResult != null) {
-        debugPrint('❌ Validação falhou: ${validationResult.message}');
+        safePrint('❌ Validação falhou: ${validationResult.message}');
         return validationResult;
       }
 
@@ -130,18 +130,18 @@ class MessageSenderService {
       final sendResult = await _sendWithRetry(message);
 
       if (sendResult.isSuccess) {
-        debugPrint('✅ Mensagem enviada com sucesso: ${message.id}');
+        safePrint('✅ Mensagem enviada com sucesso: ${message.id}');
 
         // 5. Atualizar contador de mensagens não lidas
         await _updateUnreadCount(chatId, senderId);
 
         return MessageSendResponse.success(message);
       } else {
-        debugPrint('❌ Falha no envio: ${sendResult.message}');
+        safePrint('❌ Falha no envio: ${sendResult.message}');
         return sendResult;
       }
     } catch (e) {
-      debugPrint('❌ Erro inesperado no envio: $e');
+      safePrint('❌ Erro inesperado no envio: $e');
       return MessageSendResponse.error(
         MessageSendResult.unknownError,
         e is Exception ? e : Exception(e.toString()),
@@ -248,20 +248,20 @@ class MessageSenderService {
 
     for (int attempt = 1; attempt <= _maxRetryAttempts; attempt++) {
       try {
-        debugPrint(
+        safePrint(
             '📤 Tentativa $attempt de $_maxRetryAttempts para enviar mensagem: ${message.id}');
 
         await MatchChatRepository.sendMessage(message);
 
-        debugPrint('✅ Mensagem enviada na tentativa $attempt');
+        safePrint('✅ Mensagem enviada na tentativa $attempt');
         return MessageSendResponse.success(message);
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        debugPrint('❌ Tentativa $attempt falhou: $e');
+        safePrint('❌ Tentativa $attempt falhou: $e');
 
         // Se não é a última tentativa, aguardar antes de tentar novamente
         if (attempt < _maxRetryAttempts) {
-          debugPrint(
+          safePrint(
               '⏳ Aguardando ${_retryDelay.inSeconds}s antes da próxima tentativa...');
           await Future.delayed(_retryDelay);
         }
@@ -269,7 +269,7 @@ class MessageSenderService {
     }
 
     // Todas as tentativas falharam
-    debugPrint('❌ Todas as $_maxRetryAttempts tentativas falharam');
+    safePrint('❌ Todas as $_maxRetryAttempts tentativas falharam');
 
     // Determinar tipo de erro baseado na exceção
     final errorType = _determineErrorType(lastError);
@@ -295,13 +295,13 @@ class MessageSenderService {
   /// Atualiza contador de mensagens não lidas
   static Future<void> _updateUnreadCount(String chatId, String senderId) async {
     try {
-      debugPrint(
+      safePrint(
           '📊 Atualizando contador de mensagens não lidas para chat: $chatId');
       // TODO: Implementar atualização do contador quando o método estiver disponível
       // await MatchChatRepository.updateUnreadCount(chatId, senderId);
-      debugPrint('✅ Contador atualizado com sucesso');
+      safePrint('✅ Contador atualizado com sucesso');
     } catch (e) {
-      debugPrint('⚠️ Erro ao atualizar contador (não crítico): $e');
+      safePrint('⚠️ Erro ao atualizar contador (não crítico): $e');
       // Não propagar erro pois não é crítico
     }
   }

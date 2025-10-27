@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -18,6 +18,7 @@ import '../repositories/notificacoes_repository.dart';
 import '../repositories/stories_repository.dart';
 import '../repositories/chat_repository.dart';
 import '../token_usuario.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 void onDidReceiveLocalNotification(
     int id, String? title, String? body, String? payload) async {
@@ -262,8 +263,8 @@ class NotificationController {
       body: jsonEncode(sendNotificationMap),
     );
 
-    debugPrint('-------');
-    debugPrint(res.body);
-    debugPrint('-------');
+    safePrint('-------');
+    safePrint(res.body);
+    safePrint('-------');
   }
 }

@@ -100,7 +100,7 @@ TestWorldLocationSystem.testPerformance();
 ### Debug
 ```dart
 // Ative logs detalhados
-debugPrint('🌍 Testando sistema de localização');
+safePrint('🌍 Testando sistema de localização');
 TestWorldLocationSystem.testAllImplementedCountries();
 ```
 

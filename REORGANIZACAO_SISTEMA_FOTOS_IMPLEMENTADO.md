@@ -31,13 +31,13 @@ final controller = Get.put(
 @override
 void onClose() {
   try {
-    debugPrint('🔄 ProfilePhotosTaskController fechado');
+    safePrint('🔄 ProfilePhotosTaskController fechado');
     // Limpar dados das imagens para evitar vazamentos de memória
     mainPhotoData.value = null;
     secondaryPhoto1Data.value = null;
     secondaryPhoto2Data.value = null;
   } catch (e) {
-    debugPrint('⚠️ Erro ao fechar ProfilePhotosTaskController: $e');
+    safePrint('⚠️ Erro ao fechar ProfilePhotosTaskController: $e');
   } finally {
     super.onClose();
   }

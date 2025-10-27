@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whatsapp_chat/components/video_player.dart';
 import 'package:whatsapp_chat/controllers/stories_controller.dart';
@@ -9,6 +9,7 @@ import 'package:whatsapp_chat/theme.dart';
 import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/views/story_favorites_view.dart';
 import 'package:whatsapp_chat/utils/enhanced_image_loader.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class StoriesView extends StatelessWidget {
   final String? contexto; // Novo parâmetro para filtrar por contexto
@@ -436,7 +437,7 @@ class StoriesView extends StatelessWidget {
         }),
       );
     } catch (e) {
-      debugPrint('Erro na tela de stories: $e');
+      safePrint('Erro na tela de stories: $e');
       return Scaffold(
         appBar: AppBar(
           title: const Text('Stories'),

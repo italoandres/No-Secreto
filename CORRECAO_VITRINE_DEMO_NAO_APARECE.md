@@ -37,11 +37,11 @@ Future<void> refreshProfile() async {
 
 ```dart
 void _checkProfileCompletion() {
-  debugPrint('🔍 DEBUG: Verificando completude do perfil...');
-  debugPrint('🔍 DEBUG: profile.value?.isProfileComplete = ${profile.value?.isProfileComplete}');
+  safePrint('🔍 DEBUG: Verificando completude do perfil...');
+  safePrint('🔍 DEBUG: profile.value?.isProfileComplete = ${profile.value?.isProfileComplete}');
   
   if (profile.value?.isProfileComplete == true) {
-    debugPrint('✅ DEBUG: Perfil completo detectado! Mostrando diálogo...');
+    safePrint('✅ DEBUG: Perfil completo detectado! Mostrando diálogo...');
     
     // Usar um delay para garantir que a UI está pronta
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -66,7 +66,7 @@ Future.delayed(const Duration(milliseconds: 500), () {
 ```dart
 // Verificar completude após um delay para permitir que o Firestore seja atualizado
 Future.delayed(const Duration(milliseconds: 1500), () {
-  debugPrint('🔄 DEBUG: Fazendo refresh do perfil após completar tarefa...');
+  safePrint('🔄 DEBUG: Fazendo refresh do perfil após completar tarefa...');
   refreshProfile();
 });
 ```

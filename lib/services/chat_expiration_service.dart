@@ -1,6 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Serviço responsável por gerenciar a expiração automática dos chats de matches
 ///
@@ -155,7 +156,7 @@ class ChatExpirationService {
       return expiredChatIds;
     } catch (e) {
       // Log error for debugging - in production, use proper logging service
-      debugPrint('ChatExpirationService: Erro ao marcar chats expirados: $e');
+      safePrint('ChatExpirationService: Erro ao marcar chats expirados: $e');
       return [];
     }
   }
@@ -190,7 +191,7 @@ class ChatExpirationService {
       return query.docs.length;
     } catch (e) {
       // Log error for debugging - in production, use proper logging service
-      debugPrint('ChatExpirationService: Erro ao limpar mensagens antigas: $e');
+      safePrint('ChatExpirationService: Erro ao limpar mensagens antigas: $e');
       return 0;
     }
   }
@@ -203,7 +204,7 @@ class ChatExpirationService {
     return Timer.periodic(Duration(hours: intervalHours), (timer) async {
       final expiredChats = await markExpiredChats();
       if (expiredChats.isNotEmpty) {
-        debugPrint(
+        safePrint(
             'ChatExpirationService: Marcados ${expiredChats.length} chats como expirados');
       }
     });

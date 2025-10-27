@@ -193,6 +193,7 @@ class EnhancedInterestHandler {
   }
 
   /// Busca interesses enviados por um usuário
+  /// ✅ CORRIGIDO: Adicionado .limit(100)
   static Future<List<Map<String, dynamic>>> getSentInterests(
       String userId) async {
     try {
@@ -200,6 +201,7 @@ class EnhancedInterestHandler {
           .collection('interests')
           .where('fromUserId', isEqualTo: userId)
           .orderBy('dataCriacao', descending: true)
+          .limit(100) // ✅ LIMITE ADICIONADO
           .get();
 
       final interests = query.docs.map((doc) {
@@ -220,6 +222,7 @@ class EnhancedInterestHandler {
   }
 
   /// Busca interesses recebidos por um usuário
+  /// ✅ CORRIGIDO: Adicionado .limit(100)
   static Future<List<Map<String, dynamic>>> getReceivedInterests(
       String userId) async {
     try {
@@ -227,6 +230,7 @@ class EnhancedInterestHandler {
           .collection('interests')
           .where('toUserId', isEqualTo: userId)
           .orderBy('dataCriacao', descending: true)
+          .limit(100) // ✅ LIMITE ADICIONADO
           .get();
 
       final interests = query.docs.map((doc) {
@@ -247,6 +251,7 @@ class EnhancedInterestHandler {
   }
 
   /// Verifica se já existe interesse entre dois usuários
+  /// ✅ CORRIGIDO: Adicionado .limit(1)
   static Future<Map<String, dynamic>?> checkExistingInterest(
       String fromUserId, String toUserId) async {
     try {
@@ -254,6 +259,7 @@ class EnhancedInterestHandler {
           .collection('interests')
           .where('fromUserId', isEqualTo: fromUserId)
           .where('toUserId', isEqualTo: toUserId)
+          .limit(1) // ✅ LIMITE ADICIONADO (só precisa de 1)
           .get();
 
       if (query.docs.isNotEmpty) {
@@ -273,18 +279,21 @@ class EnhancedInterestHandler {
   }
 
   /// Obtém estatísticas de interesses de um usuário
+  /// ✅ CORRIGIDO: Adicionado .limit(500) em ambas as queries
   static Future<Map<String, int>> getInterestStats(String userId) async {
     try {
       // Interesses enviados
       final sentQuery = await _firestore
           .collection('interests')
           .where('fromUserId', isEqualTo: userId)
+          .limit(500) // ✅ LIMITE ADICIONADO
           .get();
 
       // Interesses recebidos
       final receivedQuery = await _firestore
           .collection('interests')
           .where('toUserId', isEqualTo: userId)
+          .limit(500) // ✅ LIMITE ADICIONADO
           .get();
 
       final stats = <String, int>{
@@ -372,6 +381,7 @@ class EnhancedInterestHandler {
   }
 
   /// Limpa interesses antigos (mais de 30 dias sem resposta)
+  /// ✅ CORRIGIDO: Adicionado .limit(1000) para processar em lotes
   static Future<void> cleanupOldInterests() async {
     try {
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
@@ -380,6 +390,7 @@ class EnhancedInterestHandler {
           .collection('interests')
           .where('status', isEqualTo: 'pending')
           .where('dataCriacao', isLessThan: Timestamp.fromDate(thirtyDaysAgo))
+          .limit(1000) // ✅ LIMITE ADICIONADO (processar em lotes)
           .get();
 
       final batch = _firestore.batch();

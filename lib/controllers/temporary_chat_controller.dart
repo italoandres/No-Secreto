@@ -33,7 +33,7 @@ class TemporaryChatController extends GetxController {
     _messagesSubscription?.cancel();
     _expirationTimer?.cancel();
     messageController.dispose();
-    debugPrint('🔄 TemporaryChatController fechado');
+    safePrint('🔄 TemporaryChatController fechado');
     super.onClose();
   }
 
@@ -42,7 +42,7 @@ class TemporaryChatController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      debugPrint('🔄 Carregando chat temporário: $chatRoomId');
+      safePrint('🔄 Carregando chat temporário: $chatRoomId');
 
       // Load chat data
       final chatData =
@@ -73,10 +73,10 @@ class TemporaryChatController extends GetxController {
         _setupExpirationTimer();
       }
 
-      debugPrint('✅ Chat carregado: ${chatData.id}');
-      debugPrint('   - Expira em: ${chatData.timeRemainingText}');
+      safePrint('✅ Chat carregado: ${chatData.id}');
+      safePrint('   - Expira em: ${chatData.timeRemainingText}');
     } catch (e) {
-      debugPrint('❌ Erro ao carregar chat: $e');
+      safePrint('❌ Erro ao carregar chat: $e');
       errorMessage.value = 'Erro ao carregar chat. Tente novamente.';
     } finally {
       isLoading.value = false;
@@ -90,10 +90,10 @@ class TemporaryChatController extends GetxController {
         TemporaryChatRepository.getMessagesStream(chatRoomId).listen(
       (messagesList) {
         messages.value = messagesList;
-        debugPrint('📨 Mensagens atualizadas: ${messagesList.length}');
+        safePrint('📨 Mensagens atualizadas: ${messagesList.length}');
       },
       onError: (error) {
-        debugPrint('❌ Erro no stream de mensagens: $error');
+        safePrint('❌ Erro no stream de mensagens: $error');
       },
     );
   }
@@ -107,12 +107,12 @@ class TemporaryChatController extends GetxController {
 
     _expirationTimer?.cancel();
     _expirationTimer = Timer(timeUntilExpiration, () {
-      debugPrint('⏰ Chat expirou: $chatRoomId');
+      safePrint('⏰ Chat expirou: $chatRoomId');
       // Reload chat to update expiration status
       loadChat();
     });
 
-    debugPrint(
+    safePrint(
         '⏰ Timer de expiração configurado: ${timeUntilExpiration.inMinutes} minutos');
   }
 
@@ -145,16 +145,16 @@ class TemporaryChatController extends GetxController {
 
     try {
       isSending.value = true;
-      debugPrint('💬 Enviando mensagem: $message');
+      safePrint('💬 Enviando mensagem: $message');
 
       // Clear input immediately for better UX
       messageController.clear();
 
       await TemporaryChatRepository.sendMessage(chatRoomId, message);
 
-      debugPrint('✅ Mensagem enviada com sucesso');
+      safePrint('✅ Mensagem enviada com sucesso');
     } catch (e) {
-      debugPrint('❌ Erro ao enviar mensagem: $e');
+      safePrint('❌ Erro ao enviar mensagem: $e');
 
       // Restore message in input if failed
       messageController.text = message;
@@ -176,7 +176,7 @@ class TemporaryChatController extends GetxController {
     if (chatData == null) return;
 
     try {
-      debugPrint('🔄 Movendo para Nosso Propósito...');
+      safePrint('🔄 Movendo para Nosso Propósito...');
 
       // Show confirmation dialog
       final confirmed = await Get.defaultDialog<bool>(
@@ -229,7 +229,7 @@ class TemporaryChatController extends GetxController {
         duration: const Duration(seconds: 3),
       );
     } catch (e) {
-      debugPrint('❌ Erro ao mover para Nosso Propósito: $e');
+      safePrint('❌ Erro ao mover para Nosso Propósito: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível mover o chat. Tente novamente.',
@@ -251,7 +251,7 @@ class TemporaryChatController extends GetxController {
     final otherUserName = chatData.getOtherUserName(currentUserId);
 
     try {
-      debugPrint('🚫 Bloqueando usuário: $otherUserId');
+      safePrint('🚫 Bloqueando usuário: $otherUserId');
 
       // Show confirmation dialog
       final confirmed = await Get.defaultDialog<bool>(
@@ -303,7 +303,7 @@ class TemporaryChatController extends GetxController {
       // Return to previous screen
       Get.back();
     } catch (e) {
-      debugPrint('❌ Erro ao bloquear usuário: $e');
+      safePrint('❌ Erro ao bloquear usuário: $e');
       Get.snackbar(
         'Erro',
         'Não foi possível bloquear o usuário. Tente novamente.',

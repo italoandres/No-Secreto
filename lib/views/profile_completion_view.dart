@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_completion_controller.dart';
 import '../models/spiritual_profile_model.dart';
@@ -12,6 +12,7 @@ import '../utils/enhanced_logger.dart';
 import '../utils/vitrine_navigation_helper.dart';
 import '../utils/certification_status_helper.dart';
 import '../locale/language.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class ProfileCompletionView extends StatelessWidget {
   const ProfileCompletionView({super.key});
@@ -111,7 +112,7 @@ class ProfileCompletionView extends StatelessWidget {
             future: UsuarioRepository.getUser().first,
             builder: (context, snapshot) {
               final user = snapshot.data;
-              debugPrint(
+              safePrint(
                   '🔍 DEBUG: User data - Nome: ${user?.nome}, Username: ${user?.username}');
 
               return Row(

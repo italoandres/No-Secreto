@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:async'; // ✨ NOVO: Para Timer
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +28,7 @@ import 'package:whatsapp_chat/repositories/usuario_repository.dart';
 import 'package:whatsapp_chat/theme.dart';
 import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/views/community_info_view.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 import 'package:whatsapp_chat/views/login_view.dart';
 import 'package:whatsapp_chat/components/notification_icon_component.dart';
 import 'package:whatsapp_chat/views/nosso_proposito_view.dart';
@@ -45,6 +46,7 @@ import '../components/editar_capa_component.dart';
 import '../components/purpose_invites_component.dart';
 import '../models/storie_file_model.dart';
 import '../models/storie_visto_model.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({super.key});
@@ -90,7 +92,7 @@ class _ChatViewState extends State<ChatView> {
       'lastSeen': FieldValue.serverTimestamp(),
       'isOnline': true,
     }).catchError((e) {
-      debugPrint('⚠️ Erro ao atualizar status online: $e');
+      safePrint('⚠️ Erro ao atualizar status online: $e');
     });
 
     // Atualizar a cada 30 segundos
@@ -100,7 +102,7 @@ class _ChatViewState extends State<ChatView> {
           'lastSeen': FieldValue.serverTimestamp(),
           'isOnline': true,
         }).catchError((e) {
-          debugPrint('⚠️ Erro ao atualizar status online: $e');
+          safePrint('⚠️ Erro ao atualizar status online: $e');
         });
       }
     });
@@ -116,7 +118,7 @@ class _ChatViewState extends State<ChatView> {
         'lastSeen': FieldValue.serverTimestamp(),
         'isOnline': false,
       }).catchError((e) {
-        debugPrint('⚠️ Erro ao marcar como offline: $e');
+        safePrint('⚠️ Erro ao marcar como offline: $e');
       });
     }
   }
@@ -135,6 +137,24 @@ class _ChatViewState extends State<ChatView> {
       body: StreamBuilder<UsuarioModel?>(
           stream: UsuarioRepository.getUser(),
           builder: (context, snapshot) {
+            // ✅ TRATAMENTO DE ERRO OBRIGATÓRIO
+            if (snapshot.hasError) {
+              safePrint('ChatView: Erro no stream de usuário: ${snapshot.error}');
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Erro ao carregar dados',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              );
+            }
+            
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -286,6 +306,24 @@ class _ChatViewState extends State<ChatView> {
                                 StreamBuilder<List<ChatModel>>(
                                     stream: ChatRepository.getAll(),
                                     builder: (context, snapshot) {
+                                      // ✅ TRATAMENTO DE ERRO OBRIGATÓRIO
+                                      if (snapshot.hasError) {
+                                        safePrint('ChatView: Erro no stream de chats: ${snapshot.error}');
+                                        return Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey),
+                                              const SizedBox(height: 16),
+                                              const Text(
+                                                'Erro ao carregar conversas',
+                                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                      
                                       if (!snapshot.hasData) {
                                         return const Center(
                                             child: CircularProgressIndicator());
@@ -497,6 +535,12 @@ class _ChatViewState extends State<ChatView> {
                         return StreamBuilder<List<StorieVistoModel>>(
                             stream: StoriesRepository.getStoreVisto(),
                             builder: (context, snapshot) {
+                              // ✅ TRATAMENTO DE ERRO
+                              if (snapshot.hasError) {
+                                safePrint('ChatView: Erro no stream de stories vistos: ${snapshot.error}');
+                                return child; // Retorna logo padrão em caso de erro
+                              }
+                              
                               List<StorieVistoModel> vistos = [];
                               List<String> vistosIds = [];
                               if (snapshot.hasData) {
@@ -507,6 +551,12 @@ class _ChatViewState extends State<ChatView> {
                               return StreamBuilder<List<StorieFileModel>>(
                                   stream: StoriesRepository.getAllAntigos(),
                                   builder: (context, snapshot) {
+                                    // ✅ TRATAMENTO DE ERRO
+                                    if (snapshot.hasError) {
+                                      safePrint('ChatView: Erro no stream de stories antigos: ${snapshot.error}');
+                                      return child;
+                                    }
+                                    
                                     if (!snapshot.hasData) {
                                       return child;
                                     }
@@ -515,6 +565,12 @@ class _ChatViewState extends State<ChatView> {
                                     return StreamBuilder<List<StorieFileModel>>(
                                         stream: StoriesRepository.getAll(),
                                         builder: (context, snapshot) {
+                                          // ✅ TRATAMENTO DE ERRO
+                                          if (snapshot.hasError) {
+                                            safePrint('ChatView: Erro no stream de stories: ${snapshot.error}');
+                                            return child;
+                                          }
+                                          
                                           if (snapshot.hasData) {
                                             List<StorieFileModel> listStories =
                                                 [];
@@ -620,15 +676,15 @@ class _ChatViewState extends State<ChatView> {
                                                           .toList();
 
                                                   // Debug para verificar stories não vistos
-                                                  print(
+                                                  safePrint(
                                                       'DEBUG CHAT: Stories totais: ${listStories.length}');
-                                                  print(
+                                                  safePrint(
                                                       'DEBUG CHAT: Stories válidos: ${validStories.length}');
-                                                  print(
+                                                  safePrint(
                                                       'DEBUG CHAT: Stories vistos: ${vistosIds.length}');
-                                                  print(
+                                                  safePrint(
                                                       'DEBUG CHAT: Stories não vistos: ${listStoriesNaoVisto.length}');
-                                                  print(
+                                                  safePrint(
                                                       'DEBUG CHAT: Círculo verde: ${listStoriesNaoVisto.isNotEmpty}');
 
                                                   return Container(

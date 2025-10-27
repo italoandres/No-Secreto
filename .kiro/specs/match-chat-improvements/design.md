@@ -224,9 +224,9 @@ Future<void> _markMessagesAsRead() async {
       'unreadCount.$currentUserId': 0,
     });
 
-    debugPrint('✅ Mensagens marcadas como lidas');
+    safePrint('✅ Mensagens marcadas como lidas');
   } catch (e) {
-    debugPrint('❌ Erro ao marcar mensagens como lidas: $e');
+    safePrint('❌ Erro ao marcar mensagens como lidas: $e');
   }
 }
 ```
@@ -412,7 +412,7 @@ Hero(
 try {
   await _markMessagesAsRead();
 } catch (e) {
-  debugPrint('❌ Erro ao marcar mensagens como lidas: $e');
+  safePrint('❌ Erro ao marcar mensagens como lidas: $e');
   // Não bloquear a UI, apenas logar
 }
 ```

@@ -19,6 +19,7 @@ import 'package:whatsapp_chat/models/progress_model.dart';
 import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/models/usuario_model.dart';
 import 'package:whatsapp_chat/services/automatic_message_service.dart';
+import '../utils/debug_utils.dart';
 
 class ChatRepository {
   static final listObs = Rx<List<ProgressModel>>([]);
@@ -407,7 +408,7 @@ class ChatRepository {
 
       return true;
     } catch (e) {
-      print('Erro ao enviar mensagem automática do Pai: $e');
+      safePrint('Erro ao enviar mensagem automática do Pai: $e');
       return false;
     }
   }
@@ -437,7 +438,7 @@ class ChatRepository {
 
       return true;
     } catch (e) {
-      print(
+      safePrint(
           'Erro ao enviar mensagem automática do Pai para contexto $contexto: $e');
       return false;
     }

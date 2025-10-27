@@ -31,19 +31,19 @@ Adicionei logs detalhados no `openTask()` para diagnosticar:
 
 ```dart
 case 'certification':
-  debugPrint('🔍 DEBUG: Tentando abrir ProfileCertificationTaskView');
-  debugPrint('🔍 DEBUG: Profile ID: ${profile.value?.id}');
-  debugPrint('🔍 DEBUG: Profile User ID: ${profile.value?.userId}');
+  safePrint('🔍 DEBUG: Tentando abrir ProfileCertificationTaskView');
+  safePrint('🔍 DEBUG: Profile ID: ${profile.value?.id}');
+  safePrint('🔍 DEBUG: Profile User ID: ${profile.value?.userId}');
   
   try {
     final result = Get.to(() => ProfileCertificationTaskView(
       profile: profile.value!,
       onCompleted: _onTaskCompleted,
     ));
-    debugPrint('✅ DEBUG: Navegação iniciada - Result: $result');
+    safePrint('✅ DEBUG: Navegação iniciada - Result: $result');
   } catch (e, stackTrace) {
-    debugPrint('❌ DEBUG: Erro ao navegar: $e');
-    debugPrint('❌ DEBUG: StackTrace: $stackTrace');
+    safePrint('❌ DEBUG: Erro ao navegar: $e');
+    safePrint('❌ DEBUG: StackTrace: $stackTrace');
     
     Get.snackbar(
       'Erro',
@@ -126,9 +126,9 @@ Se o profile estiver null, precisamos investigar por que:
 
 ```dart
 // No ProfileCompletionController
-debugPrint('Profile value: ${profile.value}');
-debugPrint('Profile ID: ${profile.value?.id}');
-debugPrint('Is Loading: ${isLoading.value}');
+safePrint('Profile value: ${profile.value}');
+safePrint('Profile ID: ${profile.value?.id}');
+safePrint('Is Loading: ${isLoading.value}');
 ```
 
 ## 🎯 Teste Definitivo

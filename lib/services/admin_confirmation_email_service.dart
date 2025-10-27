@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/debug_utils.dart';
 
 /// Serviço para enviar emails de confirmação para administradores
 ///
@@ -72,10 +73,10 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print(
+      safePrint(
           '📧 Email de confirmação de aprovação enviado para $finalAdminEmail');
     } catch (e) {
-      print('❌ Erro ao enviar email de confirmação de aprovação: $e');
+      safePrint('❌ Erro ao enviar email de confirmação de aprovação: $e');
       // Não falhar a operação principal por causa do email
     }
   }
@@ -131,10 +132,10 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print(
+      safePrint(
           '📧 Email de confirmação de reprovação enviado para $finalAdminEmail');
     } catch (e) {
-      print('❌ Erro ao enviar email de confirmação de reprovação: $e');
+      safePrint('❌ Erro ao enviar email de confirmação de reprovação: $e');
       // Não falhar a operação principal por causa do email
     }
   }
@@ -175,9 +176,9 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('📧 Email de resumo diário enviado para $adminEmail');
+      safePrint('📧 Email de resumo diário enviado para $adminEmail');
     } catch (e) {
-      print('❌ Erro ao enviar email de resumo diário: $e');
+      safePrint('❌ Erro ao enviar email de resumo diário: $e');
     }
   }
 
@@ -215,9 +216,9 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('📧 Email de alerta enviado para $adminEmail');
+      safePrint('📧 Email de alerta enviado para $adminEmail');
     } catch (e) {
-      print('❌ Erro ao enviar email de alerta: $e');
+      safePrint('❌ Erro ao enviar email de alerta: $e');
     }
   }
 
@@ -247,9 +248,9 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('📧 Email enviado para ${adminEmails.length} administradores');
+      safePrint('📧 Email enviado para ${adminEmails.length} administradores');
     } catch (e) {
-      print('❌ Erro ao enviar email para múltiplos admins: $e');
+      safePrint('❌ Erro ao enviar email para múltiplos admins: $e');
     }
   }
 
@@ -270,7 +271,7 @@ class AdminConfirmationEmailService {
 
       return adminEmails;
     } catch (e) {
-      print('❌ Erro ao buscar emails de administradores: $e');
+      safePrint('❌ Erro ao buscar emails de administradores: $e');
       return [];
     }
   }
@@ -289,7 +290,7 @@ class AdminConfirmationEmailService {
       final adminEmails = await getAdminEmails();
 
       if (adminEmails.isEmpty) {
-        print('⚠️ Nenhum administrador encontrado para notificar');
+        safePrint('⚠️ Nenhum administrador encontrado para notificar');
         return;
       }
 
@@ -300,7 +301,7 @@ class AdminConfirmationEmailService {
         templateData: templateData,
       );
     } catch (e) {
-      print('❌ Erro ao notificar todos os administradores: $e');
+      safePrint('❌ Erro ao notificar todos os administradores: $e');
     }
   }
 
@@ -338,15 +339,15 @@ class AdminConfirmationEmailService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('📧 Email de teste enviado para $adminEmail');
+      safePrint('📧 Email de teste enviado para $adminEmail');
     } catch (e) {
-      print('❌ Erro ao enviar email de teste: $e');
+      safePrint('❌ Erro ao enviar email de teste: $e');
       rethrow;
     }
   }
 
   /// Dispose do serviço
   void dispose() {
-    print('🧹 AdminConfirmationEmailService disposed');
+    safePrint('🧹 AdminConfirmationEmailService disposed');
   }
 }

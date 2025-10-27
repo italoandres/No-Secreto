@@ -71,6 +71,7 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
           .where('chatId', isEqualTo: widget.chatId)
           .where('senderId', isNotEqualTo: currentUserId)
           .where('isRead', isEqualTo: false)
+          .limit(500) // ✅ LIMITE ADICIONADO (mensagens não lidas)
           .get();
 
       // Marcar como lidas em batch
@@ -209,6 +210,7 @@ class _RobustMatchChatViewState extends State<RobustMatchChatView> {
           .collection('chat_messages')
           .where('chatId', isEqualTo: widget.chatId)
           .orderBy('timestamp', descending: false)
+          .limit(500) // ✅ LIMITE ADICIONADO (últimas 500 mensagens)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {

@@ -1,9 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/spiritual_profile_model.dart';
 import '../services/data_migration_service.dart';
 import '../utils/enhanced_logger.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class SpiritualProfileRepository {
   static const String _collection = 'spiritual_profiles';
@@ -28,16 +29,16 @@ class SpiritualProfileRepository {
         updatedAt: DateTime.now(),
       );
 
-      debugPrint(
+      safePrint(
           '🔄 Criando perfil espiritual para usuário: ${currentUser.uid}');
 
       final docRef =
           await _firestore.collection(_collection).add(profile.toJson());
 
-      debugPrint('✅ Perfil espiritual criado com ID: ${docRef.id}');
+      safePrint('✅ Perfil espiritual criado com ID: ${docRef.id}');
       return docRef.id;
     } catch (e) {
-      debugPrint('❌ Erro ao criar perfil espiritual: $e');
+      safePrint('❌ Erro ao criar perfil espiritual: $e');
       rethrow;
     }
   }
@@ -311,7 +312,7 @@ class SpiritualProfileRepository {
   static Future<void> updateTaskCompletion(
       String profileId, String taskName, bool isCompleted) async {
     try {
-      debugPrint('🔄 Atualizando tarefa "$taskName": $isCompleted');
+      safePrint('🔄 Atualizando tarefa "$taskName": $isCompleted');
 
       await _firestore.collection(_collection).doc(profileId).update({
         'completionTasks.$taskName': isCompleted,
@@ -337,14 +338,14 @@ class SpiritualProfileRepository {
             'isProfileComplete': true,
             'profileCompletedAt': Timestamp.fromDate(DateTime.now()),
           });
-          debugPrint(
+          safePrint(
               '🎉 Perfil espiritual completado! Todas as tarefas obrigatórias foram concluídas.');
         }
       }
 
-      debugPrint('✅ Tarefa atualizada: $taskName');
+      safePrint('✅ Tarefa atualizada: $taskName');
     } catch (e) {
-      debugPrint('❌ Erro ao atualizar tarefa: $e');
+      safePrint('❌ Erro ao atualizar tarefa: $e');
       rethrow;
     }
   }
@@ -361,7 +362,7 @@ class SpiritualProfileRepository {
 
     if (profile == null) {
       // Create new profile
-      debugPrint(
+      safePrint(
           '📝 Criando novo perfil espiritual para usuário: ${currentUser.uid}');
       final newProfile = SpiritualProfileModel(userId: currentUser.uid);
       final profileId = await createProfile(newProfile);
@@ -386,7 +387,7 @@ class SpiritualProfileRepository {
         throw Exception('Não é possível demonstrar interesse em si mesmo');
       }
 
-      debugPrint(
+      safePrint(
           '💝 Expressando interesse: ${currentUser.uid} → $targetUserId');
 
       // Check if interest already exists
@@ -398,7 +399,7 @@ class SpiritualProfileRepository {
           .get();
 
       if (existingInterest.docs.isNotEmpty) {
-        debugPrint('⚠️ Interesse já existe');
+        safePrint('⚠️ Interesse já existe');
         return false;
       }
 
@@ -422,13 +423,13 @@ class SpiritualProfileRepository {
       if (mutualInterest.docs.isNotEmpty) {
         // Create mutual interest record
         await _createMutualInterest(currentUser.uid, targetUserId);
-        debugPrint('💕 Interesse mútuo detectado!');
+        safePrint('💕 Interesse mútuo detectado!');
       }
 
-      debugPrint('✅ Interesse expressado com sucesso');
+      safePrint('✅ Interesse expressado com sucesso');
       return true;
     } catch (e) {
-      debugPrint('❌ Erro ao expressar interesse: $e');
+      safePrint('❌ Erro ao expressar interesse: $e');
       rethrow;
     }
   }
@@ -448,9 +449,9 @@ class SpiritualProfileRepository {
           .collection(_mutualInterestsCollection)
           .add(mutualInterest.toJson());
 
-      debugPrint('✅ Interesse mútuo criado: $user1Id ↔ $user2Id');
+      safePrint('✅ Interesse mútuo criado: $user1Id ↔ $user2Id');
     } catch (e) {
-      debugPrint('❌ Erro ao criar interesse mútuo: $e');
+      safePrint('❌ Erro ao criar interesse mútuo: $e');
       rethrow;
     }
   }
@@ -470,7 +471,7 @@ class SpiritualProfileRepository {
 
       return query.docs.isNotEmpty;
     } catch (e) {
-      debugPrint('❌ Erro ao verificar interesse: $e');
+      safePrint('❌ Erro ao verificar interesse: $e');
       return false;
     }
   }
@@ -716,7 +717,7 @@ class SpiritualProfileRepository {
   /// Get all profiles with spiritual certification seal
   static Future<List<SpiritualProfileModel>> getProfilesWithSeal() async {
     try {
-      debugPrint('🏆 Buscando perfis com selo espiritual');
+      safePrint('🏆 Buscando perfis com selo espiritual');
 
       final querySnapshot = await _firestore
           .collection(_collection)
@@ -731,10 +732,10 @@ class SpiritualProfileRepository {
         return profile;
       }).toList();
 
-      debugPrint('✅ Encontrados ${profiles.length} perfis com selo');
+      safePrint('✅ Encontrados ${profiles.length} perfis com selo');
       return profiles;
     } catch (e) {
-      debugPrint('❌ Erro ao buscar perfis com selo: $e');
+      safePrint('❌ Erro ao buscar perfis com selo: $e');
       return [];
     }
   }
@@ -743,7 +744,7 @@ class SpiritualProfileRepository {
   static Future<List<SpiritualProfileModel>> getProfilesByRelationshipStatus(
       RelationshipStatus status) async {
     try {
-      debugPrint('💑 Buscando perfis com status: ${status.name}');
+      safePrint('💑 Buscando perfis com status: ${status.name}');
 
       final querySnapshot = await _firestore
           .collection(_collection)
@@ -759,11 +760,11 @@ class SpiritualProfileRepository {
         return profile;
       }).toList();
 
-      debugPrint(
+      safePrint(
           '✅ Encontrados ${profiles.length} perfis com status ${status.name}');
       return profiles;
     } catch (e) {
-      debugPrint('❌ Erro ao buscar perfis por status: $e');
+      safePrint('❌ Erro ao buscar perfis por status: $e');
       return [];
     }
   }
@@ -789,10 +790,10 @@ class SpiritualProfileRepository {
           'blockedUsers': updatedBlockedUsers,
         });
 
-        debugPrint('🚫 Usuário bloqueado: $userIdToBlock');
+        safePrint('🚫 Usuário bloqueado: $userIdToBlock');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao bloquear usuário: $e');
+      safePrint('❌ Erro ao bloquear usuário: $e');
       rethrow;
     }
   }
@@ -817,9 +818,9 @@ class SpiritualProfileRepository {
         'blockedUsers': updatedBlockedUsers,
       });
 
-      debugPrint('✅ Usuário desbloqueado: $userIdToUnblock');
+      safePrint('✅ Usuário desbloqueado: $userIdToUnblock');
     } catch (e) {
-      debugPrint('❌ Erro ao desbloquear usuário: $e');
+      safePrint('❌ Erro ao desbloquear usuário: $e');
       rethrow;
     }
   }
@@ -832,7 +833,7 @@ class SpiritualProfileRepository {
 
       return profile.blockedUsers.contains(userId);
     } catch (e) {
-      debugPrint('❌ Erro ao verificar bloqueio: $e');
+      safePrint('❌ Erro ao verificar bloqueio: $e');
       return false;
     }
   }
@@ -840,13 +841,13 @@ class SpiritualProfileRepository {
   /// Delete spiritual profile
   static Future<void> deleteProfile(String profileId) async {
     try {
-      debugPrint('🗑️ Deletando perfil espiritual: $profileId');
+      safePrint('🗑️ Deletando perfil espiritual: $profileId');
 
       await _firestore.collection(_collection).doc(profileId).delete();
 
-      debugPrint('✅ Perfil espiritual deletado: $profileId');
+      safePrint('✅ Perfil espiritual deletado: $profileId');
     } catch (e) {
-      debugPrint('❌ Erro ao deletar perfil espiritual: $e');
+      safePrint('❌ Erro ao deletar perfil espiritual: $e');
       rethrow;
     }
   }
@@ -876,7 +877,7 @@ class SpiritualProfileRepository {
         'withSeal': profilesWithSeal,
       };
     } catch (e) {
-      debugPrint('❌ Erro ao obter estatísticas: $e');
+      safePrint('❌ Erro ao obter estatísticas: $e');
       return {'total': 0, 'completed': 0, 'withSeal': 0};
     }
   }

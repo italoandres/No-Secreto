@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,6 +7,7 @@ import 'package:whatsapp_chat/token_usuario.dart';
 
 import '../repositories/login_repository.dart';
 import 'completar_perfil_controller.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class LoginController {
   static final emailController = TextEditingController();
@@ -60,19 +61,19 @@ class LoginController {
       // Verificar se há configurações básicas do Firebase
       final auth = FirebaseAuth.instance;
       if (auth.app.options.apiKey.isEmpty) {
-        debugPrint('❌ API Key não configurada');
+        safePrint('❌ API Key não configurada');
         return false;
       }
 
       if (auth.app.options.projectId.isEmpty) {
-        debugPrint('❌ Project ID não configurado');
+        safePrint('❌ Project ID não configurado');
         return false;
       }
 
-      debugPrint('✅ Configurações básicas do Firebase OK');
+      safePrint('✅ Configurações básicas do Firebase OK');
       return true;
     } catch (e) {
-      debugPrint('❌ Erro ao verificar configuração: $e');
+      safePrint('❌ Erro ao verificar configuração: $e');
       return false;
     }
   }
@@ -85,30 +86,30 @@ class LoginController {
   }
 
   static validadeLogin() {
-    debugPrint('=== INÍCIO VALIDAÇÃO LOGIN ===');
+    safePrint('=== INÍCIO VALIDAÇÃO LOGIN ===');
 
     String email = emailController.text.trim();
     String senha = senhaController.text.trim();
 
-    debugPrint('Email digitado: $email');
-    debugPrint(
+    safePrint('Email digitado: $email');
+    safePrint(
         'Senha digitada: ${senha.isNotEmpty ? '[SENHA PREENCHIDA]' : '[SENHA VAZIA]'}');
 
     if (email == '' || senha == '') {
-      debugPrint('❌ Campos obrigatórios vazios');
+      safePrint('❌ Campos obrigatórios vazios');
       Get.rawSnackbar(message: 'Todos os campos são obrigatórios!');
       return;
     }
 
     if (!email.isEmail) {
-      debugPrint('❌ Email inválido: $email');
+      safePrint('❌ Email inválido: $email');
       Get.rawSnackbar(message: 'Digite um E-mail válido!');
       return;
     }
 
-    debugPrint('✅ Validação passou, chamando LoginRepository.login');
+    safePrint('✅ Validação passou, chamando LoginRepository.login');
     LoginRepository.login(email: email, senha: senha);
-    debugPrint('=== FIM VALIDAÇÃO LOGIN ===');
+    safePrint('=== FIM VALIDAÇÃO LOGIN ===');
   }
 
   static validadeCadastro() {
@@ -190,7 +191,7 @@ class LoginController {
           ]);
     } on FirebaseAuthException catch (e) {
       Get.back();
-      debugPrint('Password Reset Error: ${e.code} - ${e.message}');
+      safePrint('Password Reset Error: ${e.code} - ${e.message}');
 
       String errorMessage;
       switch (e.code) {
@@ -230,7 +231,7 @@ class LoginController {
           ]);
     } catch (e) {
       Get.back();
-      debugPrint('Unexpected error in password reset: $e');
+      safePrint('Unexpected error in password reset: $e');
       Get.defaultDialog(
           title: 'Erro Inesperado',
           content: Text(
@@ -248,111 +249,111 @@ class LoginController {
 
   /// Função para testar conectividade básica com Firebase
   static Future<void> testarConectividadeFirebase() async {
-    debugPrint('=== TESTE CONECTIVIDADE FIREBASE ===');
+    safePrint('=== TESTE CONECTIVIDADE FIREBASE ===');
 
     try {
       // Testar Firebase Auth
       final auth = FirebaseAuth.instance;
-      debugPrint('✅ Firebase Auth inicializado: ${auth.app.name}');
-      debugPrint('✅ Project ID: ${auth.app.options.projectId}');
-      debugPrint('✅ API Key: ${auth.app.options.apiKey.substring(0, 10)}...');
+      safePrint('✅ Firebase Auth inicializado: ${auth.app.name}');
+      safePrint('✅ Project ID: ${auth.app.options.projectId}');
+      safePrint('✅ API Key: ${auth.app.options.apiKey.substring(0, 10)}...');
 
       // Testar Firestore
       final firestore = FirebaseFirestore.instance;
       await firestore.collection('test').limit(1).get();
-      debugPrint('✅ Firestore conectado e acessível');
+      safePrint('✅ Firestore conectado e acessível');
 
       // Testar criação de usuário simples
       try {
         await auth.createUserWithEmailAndPassword(
             email: 'teste${DateTime.now().millisecondsSinceEpoch}@teste.com',
             password: '123456');
-        debugPrint('✅ Criação de usuário funcionando');
+        safePrint('✅ Criação de usuário funcionando');
         await auth.currentUser?.delete();
-        debugPrint('✅ Usuário de teste removido');
+        safePrint('✅ Usuário de teste removido');
       } catch (e) {
-        debugPrint('❌ Erro ao criar usuário de teste: $e');
+        safePrint('❌ Erro ao criar usuário de teste: $e');
       }
     } catch (e) {
-      debugPrint('❌ Erro de conectividade Firebase: $e');
+      safePrint('❌ Erro de conectividade Firebase: $e');
     }
 
-    debugPrint('=== FIM TESTE CONECTIVIDADE ===');
+    safePrint('=== FIM TESTE CONECTIVIDADE ===');
   }
 
   /// Função para testar especificamente a recuperação de senha
   static Future<void> testarRecuperacaoSenha() async {
-    debugPrint('=== TESTE RECUPERAÇÃO DE SENHA ===');
+    safePrint('=== TESTE RECUPERAÇÃO DE SENHA ===');
 
     try {
       // Testar com um email fictício para ver o tipo de erro
       await FirebaseAuth.instance
           .sendPasswordResetEmail(email: 'teste@exemplo.com');
     } catch (e) {
-      debugPrint('Erro esperado com email fictício: $e');
+      safePrint('Erro esperado com email fictício: $e');
 
       if (e.toString().contains('configuration-not-found') ||
           e.toString().contains('auth/configuration-not-found')) {
-        debugPrint(
+        safePrint(
             '❌ PROBLEMA: Templates de email não configurados no Firebase Console');
       } else if (e.toString().contains('user-not-found')) {
-        debugPrint(
+        safePrint(
             '✅ CONFIGURAÇÃO OK: Firebase consegue processar emails (usuário não encontrado é esperado)');
       } else {
-        debugPrint('❓ ERRO INESPERADO: $e');
+        safePrint('❓ ERRO INESPERADO: $e');
       }
     }
 
-    debugPrint('=== FIM TESTE RECUPERAÇÃO ===');
+    safePrint('=== FIM TESTE RECUPERAÇÃO ===');
   }
 
   /// Função para testar configuração do Firebase (apenas para debug)
   static Future<void> testarConfiguracaoFirebase() async {
-    debugPrint('=== TESTE CONFIGURAÇÃO FIREBASE ===');
+    safePrint('=== TESTE CONFIGURAÇÃO FIREBASE ===');
 
     try {
       // Testar se Firebase Auth está inicializado
       final auth = FirebaseAuth.instance;
-      debugPrint('✅ Firebase Auth inicializado: ${auth.app.name}');
+      safePrint('✅ Firebase Auth inicializado: ${auth.app.name}');
 
       // Testar se Firestore está acessível
       final firestore = FirebaseFirestore.instance;
       await firestore.collection('test').limit(1).get();
-      debugPrint('✅ Firestore acessível');
+      safePrint('✅ Firestore acessível');
 
       // Verificar configurações do projeto
-      debugPrint('App ID: ${auth.app.options.appId}');
-      debugPrint('Project ID: ${auth.app.options.projectId}');
+      safePrint('App ID: ${auth.app.options.appId}');
+      safePrint('Project ID: ${auth.app.options.projectId}');
     } catch (e) {
-      debugPrint('❌ Erro na configuração Firebase: $e');
+      safePrint('❌ Erro na configuração Firebase: $e');
     }
 
-    debugPrint('=== FIM TESTE CONFIGURAÇÃO ===');
+    safePrint('=== FIM TESTE CONFIGURAÇÃO ===');
   }
 
   /// Função para diagnosticar problemas com recuperação de senha
   static Future<void> _diagnosticarRecuperacaoSenha(String email) async {
-    debugPrint('=== DIAGNÓSTICO RECUPERAÇÃO DE SENHA ===');
-    debugPrint('Email: $email');
-    debugPrint('Firebase Auth instance: ${FirebaseAuth.instance}');
-    debugPrint('Current user: ${FirebaseAuth.instance.currentUser?.email}');
+    safePrint('=== DIAGNÓSTICO RECUPERAÇÃO DE SENHA ===');
+    safePrint('Email: $email');
+    safePrint('Firebase Auth instance: ${FirebaseAuth.instance}');
+    safePrint('Current user: ${FirebaseAuth.instance.currentUser?.email}');
 
     try {
       // Verificar se o usuário existe
       final methods =
           await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
-      debugPrint('Sign-in methods for $email: $methods');
+      safePrint('Sign-in methods for $email: $methods');
 
       if (methods.isEmpty) {
-        debugPrint('❌ Email não está cadastrado no Firebase Auth');
+        safePrint('❌ Email não está cadastrado no Firebase Auth');
       } else {
-        debugPrint('✅ Email encontrado com métodos: $methods');
+        safePrint('✅ Email encontrado com métodos: $methods');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao verificar email: $e');
+      safePrint('❌ Erro ao verificar email: $e');
     }
 
-    debugPrint('=== FIM DIAGNÓSTICO ===');
+    safePrint('=== FIM DIAGNÓSTICO ===');
   }
 
   static Future<void> recuperarSenha() async {
@@ -461,7 +462,7 @@ class LoginController {
                           return;
                         }
                       } catch (e) {
-                        debugPrint('Erro ao verificar email: $e');
+                        safePrint('Erro ao verificar email: $e');
                         // Continuar mesmo se não conseguir verificar
                       }
 
@@ -483,12 +484,12 @@ class LoginController {
                           ]);
                     } on FirebaseAuthException catch (e) {
                       Get.back();
-                      debugPrint('=== ERRO DETALHADO FIREBASE AUTH ===');
-                      debugPrint('Código: ${e.code}');
-                      debugPrint('Mensagem: ${e.message}');
-                      debugPrint('Plugin: ${e.plugin}');
-                      debugPrint('Stack trace: ${e.stackTrace}');
-                      debugPrint('=== FIM ERRO DETALHADO ===');
+                      safePrint('=== ERRO DETALHADO FIREBASE AUTH ===');
+                      safePrint('Código: ${e.code}');
+                      safePrint('Mensagem: ${e.message}');
+                      safePrint('Plugin: ${e.plugin}');
+                      safePrint('Stack trace: ${e.stackTrace}');
+                      safePrint('=== FIM ERRO DETALHADO ===');
 
                       String errorMessage;
                       String errorTitle = 'Erro na Recuperação';
@@ -578,7 +579,7 @@ class LoginController {
                           ]);
                     } catch (e) {
                       Get.back();
-                      debugPrint('Unexpected error in password reset: $e');
+                      safePrint('Unexpected error in password reset: $e');
                       Get.defaultDialog(
                           title: 'Erro Inesperado',
                           content: Text(

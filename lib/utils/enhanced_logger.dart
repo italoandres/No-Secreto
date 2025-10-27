@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Sistema de logging aprimorado para debug e monitoramento
 class EnhancedLogger {
@@ -14,16 +15,16 @@ class EnhancedLogger {
   /// Log geral (compatibilidade)
   static void log(String message) {
     final timestamp = DateTime.now().toIso8601String();
-    debugPrint('[$timestamp] $message');
+    safePrint('[$timestamp] $message');
   }
 
   /// Log de informação geral
   static void info(String message, {String? tag, Map<String, dynamic>? data}) {
     final logMessage = _formatMessage('INFO', message, tag);
-    debugPrint(logMessage);
+    safePrint(logMessage);
 
     if (_isDebugMode && data != null) {
-      debugPrint('📊 Data: ${data.toString()}');
+      safePrint('📊 Data: ${data.toString()}');
     }
 
     _saveToFirestore('info', message, tag, data);
@@ -36,18 +37,18 @@ class EnhancedLogger {
       StackTrace? stackTrace,
       Map<String, dynamic>? data}) {
     final logMessage = _formatMessage('ERROR', message, tag);
-    debugPrint('❌ $logMessage');
+    safePrint('❌ $logMessage');
 
     if (error != null) {
-      debugPrint('🔍 Error Details: $error');
+      safePrint('🔍 Error Details: $error');
     }
 
     if (stackTrace != null && _isDebugMode) {
-      debugPrint('📍 Stack Trace: $stackTrace');
+      safePrint('📍 Stack Trace: $stackTrace');
     }
 
     if (data != null) {
-      debugPrint('📊 Error Data: ${data.toString()}');
+      safePrint('📊 Error Data: ${data.toString()}');
     }
 
     _saveToFirestore('error', message, tag, {
@@ -61,10 +62,10 @@ class EnhancedLogger {
   static void warning(String message,
       {String? tag, Map<String, dynamic>? data}) {
     final logMessage = _formatMessage('WARNING', message, tag);
-    debugPrint('⚠️ $logMessage');
+    safePrint('⚠️ $logMessage');
 
     if (_isDebugMode && data != null) {
-      debugPrint('📊 Warning Data: ${data.toString()}');
+      safePrint('📊 Warning Data: ${data.toString()}');
     }
 
     _saveToFirestore('warning', message, tag, data);
@@ -75,10 +76,10 @@ class EnhancedLogger {
     if (!_isDebugMode) return;
 
     final logMessage = _formatMessage('DEBUG', message, tag);
-    debugPrint('🔍 $logMessage');
+    safePrint('🔍 $logMessage');
 
     if (data != null) {
-      debugPrint('📊 Debug Data: ${data.toString()}');
+      safePrint('📊 Debug Data: ${data.toString()}');
     }
   }
 
@@ -86,10 +87,10 @@ class EnhancedLogger {
   static void success(String message,
       {String? tag, Map<String, dynamic>? data}) {
     final logMessage = _formatMessage('SUCCESS', message, tag);
-    debugPrint('✅ $logMessage');
+    safePrint('✅ $logMessage');
 
     if (_isDebugMode && data != null) {
-      debugPrint('📊 Success Data: ${data.toString()}');
+      safePrint('📊 Success Data: ${data.toString()}');
     }
 
     _saveToFirestore('success', message, tag, data);
@@ -102,10 +103,10 @@ class EnhancedLogger {
         ? ' (${(percentage * 100).toStringAsFixed(1)}%)'
         : '';
     final logMessage = _formatMessage('PROGRESS', '$message$progressInfo', tag);
-    debugPrint('🔄 $logMessage');
+    safePrint('🔄 $logMessage');
 
     if (_isDebugMode && data != null) {
-      debugPrint('📊 Progress Data: ${data.toString()}');
+      safePrint('📊 Progress Data: ${data.toString()}');
     }
   }
 
@@ -167,7 +168,7 @@ class EnhancedLogger {
       });
     } catch (e) {
       // Não queremos que o logging cause erros no app
-      debugPrint('⚠️ Failed to save log to Firestore: $e');
+      safePrint('⚠️ Failed to save log to Firestore: $e');
     }
   }
 

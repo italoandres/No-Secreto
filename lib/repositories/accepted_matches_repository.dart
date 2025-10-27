@@ -32,12 +32,12 @@ class AcceptedMatchesRepository {
     try {
       // Verificar cache primeiro
       if (useCache && _isCacheValid(userId)) {
-        debugPrint(
+        safePrint(
             'AcceptedMatchesRepository: Usando cache para usuário $userId');
         return _cache[userId] ?? [];
       }
 
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Buscando matches aceitos para usuário $userId');
 
       // Buscar notificações de interesse aceitas
@@ -54,7 +54,7 @@ class AcceptedMatchesRepository {
             matches.add(match);
           }
         } catch (e) {
-          debugPrint(
+          safePrint(
               'AcceptedMatchesRepository: Erro ao converter notificação ${notification.id}: $e');
           // Continue processando outras notificações
         }
@@ -66,16 +66,16 @@ class AcceptedMatchesRepository {
       // Atualizar cache
       _updateCache(userId, matches);
 
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Encontrados ${matches.length} matches aceitos');
       return matches;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Erro ao buscar matches aceitos: $e');
 
       // Retornar cache se disponível, mesmo expirado
       if (_cache.containsKey(userId)) {
-        debugPrint(
+        safePrint(
             'AcceptedMatchesRepository: Retornando cache expirado devido ao erro');
         return _cache[userId] ?? [];
       }
@@ -100,7 +100,7 @@ class AcceptedMatchesRepository {
             matches.add(match);
           }
         } catch (e) {
-          debugPrint(
+          safePrint(
               'AcceptedMatchesRepository: Erro no stream para notificação ${notification.id}: $e');
         }
       }
@@ -152,7 +152,7 @@ class AcceptedMatchesRepository {
 
       return await _convertNotificationToMatch(notification, userId);
     } catch (e) {
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Erro ao buscar match $matchId: $e');
       return null;
     }
@@ -177,7 +177,7 @@ class AcceptedMatchesRepository {
 
       return true;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Erro ao atualizar status de leitura: $e');
       return false;
     }
@@ -199,7 +199,7 @@ class AcceptedMatchesRepository {
 
       return query.count ?? 0;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Erro ao contar matches não lidos: $e');
       return 0;
     }
@@ -254,7 +254,7 @@ class AcceptedMatchesRepository {
           await _firestore.collection('usuarios').doc(otherUserId).get();
 
       if (!otherUserDoc.exists) {
-        debugPrint(
+        safePrint(
             'AcceptedMatchesRepository: Usuário $otherUserId não encontrado');
         return null;
       }
@@ -283,7 +283,7 @@ class AcceptedMatchesRepository {
         daysRemaining: daysRemaining.clamp(0, 30),
       );
     } catch (e) {
-      debugPrint(
+      safePrint(
           'AcceptedMatchesRepository: Erro ao converter notificação: $e');
       return null;
     }

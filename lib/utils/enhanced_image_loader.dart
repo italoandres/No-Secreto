@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'storage_proxy.dart';
 import 'dart:async';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class EnhancedImageLoader {
   static final Map<String, bool> _preloadedImages = {};
@@ -179,7 +180,7 @@ class EnhancedImageLoader {
           ? StorageProxy.getProxiedUrl(imageUrl)
           : imageUrl;
 
-      debugPrint('🖼️ PRELOAD: Pré-carregando imagem: $proxiedUrl');
+      safePrint('🖼️ PRELOAD: Pré-carregando imagem: $proxiedUrl');
 
       await precacheImage(
         CachedNetworkImageProvider(proxiedUrl),
@@ -187,9 +188,9 @@ class EnhancedImageLoader {
       );
 
       _preloadedImages[imageUrl] = true;
-      debugPrint('✅ PRELOAD: Imagem pré-carregada com sucesso: $imageUrl');
+      safePrint('✅ PRELOAD: Imagem pré-carregada com sucesso: $imageUrl');
     } catch (e) {
-      debugPrint('❌ PRELOAD: Erro ao pré-carregar imagem $imageUrl: $e');
+      safePrint('❌ PRELOAD: Erro ao pré-carregar imagem $imageUrl: $e');
     } finally {
       _preloadingImages.remove(imageUrl);
       completer.complete();
@@ -206,13 +207,13 @@ class EnhancedImageLoader {
   /// Limpa o cache de imagens
   static Future<void> clearImageCache() async {
     try {
-      debugPrint('🧹 CACHE: Limpando cache de imagens');
+      safePrint('🧹 CACHE: Limpando cache de imagens');
       await CachedNetworkImage.evictFromCache('');
       _preloadedImages.clear();
       _preloadingImages.clear();
-      debugPrint('✅ CACHE: Cache limpo com sucesso');
+      safePrint('✅ CACHE: Cache limpo com sucesso');
     } catch (e) {
-      debugPrint('❌ CACHE: Erro ao limpar cache: $e');
+      safePrint('❌ CACHE: Erro ao limpar cache: $e');
     }
   }
 
@@ -231,9 +232,9 @@ class EnhancedImageLoader {
     try {
       await CachedNetworkImage.evictFromCache(imageUrl);
       _preloadedImages.remove(imageUrl);
-      debugPrint('🗑️ CACHE: Imagem removida do cache: $imageUrl');
+      safePrint('🗑️ CACHE: Imagem removida do cache: $imageUrl');
     } catch (e) {
-      debugPrint('❌ CACHE: Erro ao remover imagem do cache: $e');
+      safePrint('❌ CACHE: Erro ao remover imagem do cache: $e');
     }
   }
 

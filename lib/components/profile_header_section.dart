@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../theme.dart';
 import 'photo_gallery_section.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Seção de cabeçalho do perfil com foto, nome e badge de verificação centralizados
 class ProfileHeaderSection extends StatelessWidget {
@@ -69,9 +70,9 @@ class ProfileHeaderSection extends StatelessWidget {
                                   return _buildLoadingAvatar();
                                 },
                                 errorBuilder: (context, error, stackTrace) {
-                                  debugPrint(
+                                  safePrint(
                                       '❌ Error loading profile image (Web): $error');
-                                  debugPrint('📸 Image URL: $photoUrl');
+                                  safePrint('📸 Image URL: $photoUrl');
                                   return _buildAvatarFallback();
                                 },
                               )
@@ -82,9 +83,9 @@ class ProfileHeaderSection extends StatelessWidget {
                                 placeholder: (context, url) =>
                                     _buildLoadingAvatar(),
                                 errorWidget: (context, url, error) {
-                                  debugPrint(
+                                  safePrint(
                                       '❌ Error loading profile image (Mobile): $error');
-                                  debugPrint('📸 Image URL: $photoUrl');
+                                  safePrint('📸 Image URL: $photoUrl');
                                   return _buildAvatarFallback();
                                 },
                               )

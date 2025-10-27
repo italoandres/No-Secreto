@@ -22,7 +22,7 @@ GetPage(name: '/match-chat', page: () => const MatchChatView()),
 
 // ✅ SUBSTITUÍDO POR:
 // Sistema de matches removido - usando sistema de notificações de interesse
-debugPrint('✅ Sistema de notificações de interesse ativo');
+safePrint('✅ Sistema de notificações de interesse ativo');
 ```
 
 ### 2. **lib/components/interest_button_component.dart**

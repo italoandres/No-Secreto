@@ -50,11 +50,11 @@ if (data[field].toString().toLowerCase() == 'true' || data[field] == 1) {
 Adicionei logs detalhados para verificar se os dados do usuário estão sendo carregados:
 
 ```dart
-debugPrint('👤 Dados do usuário carregados:');
-debugPrint('   Nome: ${userData.nome}');
-debugPrint('   Username: ${userData.username}');
-debugPrint('   Email: ${userData.email}');
-debugPrint('   Foto: ${userData.imgUrl}');
+safePrint('👤 Dados do usuário carregados:');
+safePrint('   Nome: ${userData.nome}');
+safePrint('   Username: ${userData.username}');
+safePrint('   Email: ${userData.email}');
+safePrint('   Foto: ${userData.imgUrl}');
 ```
 
 ## 🚀 **Como Funciona**

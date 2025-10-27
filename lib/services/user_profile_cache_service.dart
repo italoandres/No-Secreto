@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/usuario_model.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Serviço de cache para perfis de usuário
 ///
@@ -27,17 +28,17 @@ class UserProfileCacheService {
     if (_memoryCache.containsKey(userId)) {
       final timestamp = _cacheTimestamps[userId];
       if (timestamp != null && !_isExpired(timestamp)) {
-        print('✅ CACHE HIT (memória): $userId');
+        safePrint('✅ CACHE HIT (memória): $userId');
         return _memoryCache[userId];
       } else {
         // Expirou - remover
-        print('⏰ CACHE EXPIRED (memória): $userId');
+        safePrint('⏰ CACHE EXPIRED (memória): $userId');
         _memoryCache.remove(userId);
         _cacheTimestamps.remove(userId);
       }
     }
 
-    print('❌ CACHE MISS (memória): $userId');
+    safePrint('❌ CACHE MISS (memória): $userId');
     return null;
   }
 
@@ -46,7 +47,7 @@ class UserProfileCacheService {
     if (user.id != null) {
       _memoryCache[user.id!] = user;
       _cacheTimestamps[user.id!] = DateTime.now();
-      print('💾 CACHE SAVED (memória): ${user.id}');
+      safePrint('💾 CACHE SAVED (memória): ${user.id}');
     }
   }
 
@@ -54,7 +55,7 @@ class UserProfileCacheService {
   static void clearMemory() {
     _memoryCache.clear();
     _cacheTimestamps.clear();
-    print('🗑️ CACHE CLEARED (memória)');
+    safePrint('🗑️ CACHE CLEARED (memória)');
   }
 
   // ============================================================================
@@ -69,7 +70,7 @@ class UserProfileCacheService {
 
       final jsonString = prefs.getString(key);
       if (jsonString == null) {
-        print('❌ CACHE MISS (persistente): $userId');
+        safePrint('❌ CACHE MISS (persistente): $userId');
         return null;
       }
 
@@ -78,7 +79,7 @@ class UserProfileCacheService {
       // Verificar timestamp
       final timestamp = DateTime.parse(json['_cache_timestamp'] as String);
       if (_isExpired(timestamp)) {
-        print('⏰ CACHE EXPIRED (persistente): $userId');
+        safePrint('⏰ CACHE EXPIRED (persistente): $userId');
         await prefs.remove(key);
         return null;
       }
@@ -89,14 +90,14 @@ class UserProfileCacheService {
       final user = UsuarioModel.fromJson(json);
       user.id = userId;
 
-      print('✅ CACHE HIT (persistente): $userId');
+      safePrint('✅ CACHE HIT (persistente): $userId');
 
       // Colocar também na memória
       saveToMemory(user);
 
       return user;
     } catch (e) {
-      print('❌ Erro ao ler cache persistente: $e');
+      safePrint('❌ Erro ao ler cache persistente: $e');
       return null;
     }
   }
@@ -115,12 +116,12 @@ class UserProfileCacheService {
       final jsonString = jsonEncode(json);
       await prefs.setString(key, jsonString);
 
-      print('💾 CACHE SAVED (persistente): ${user.id}');
+      safePrint('💾 CACHE SAVED (persistente): ${user.id}');
 
       // Salvar também na memória
       saveToMemory(user);
     } catch (e) {
-      print('❌ Erro ao salvar cache persistente: $e');
+      safePrint('❌ Erro ao salvar cache persistente: $e');
     }
   }
 
@@ -138,9 +139,9 @@ class UserProfileCacheService {
         }
       }
 
-      print('🗑️ CACHE CLEARED (persistente): $removed perfis');
+      safePrint('🗑️ CACHE CLEARED (persistente): $removed perfis');
     } catch (e) {
-      print('❌ Erro ao limpar cache persistente: $e');
+      safePrint('❌ Erro ao limpar cache persistente: $e');
     }
   }
 
@@ -154,9 +155,9 @@ class UserProfileCacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('$_keyPrefix$userId');
-      print('🗑️ CACHE REMOVED: $userId');
+      safePrint('🗑️ CACHE REMOVED: $userId');
     } catch (e) {
-      print('❌ Erro ao remover do cache: $e');
+      safePrint('❌ Erro ao remover do cache: $e');
     }
   }
 
@@ -271,9 +272,9 @@ class UserProfileCacheService {
         }
       }
 
-      print('🧹 CACHE CLEANUP: $removed perfis expirados removidos');
+      safePrint('🧹 CACHE CLEANUP: $removed perfis expirados removidos');
     } catch (e) {
-      print('❌ Erro ao limpar cache expirado: $e');
+      safePrint('❌ Erro ao limpar cache expirado: $e');
     }
   }
 }

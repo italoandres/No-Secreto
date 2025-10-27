@@ -14,6 +14,7 @@ import 'package:whatsapp_chat/token_usuario.dart';
 import 'package:whatsapp_chat/views/chat_view.dart';
 import 'package:whatsapp_chat/views/completar_perfil_view.dart';
 import 'package:whatsapp_chat/views/login_view.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (kDebugMode) {
-      print(state);
+      safePrint(state);
     }
     if (state != AppLifecycleState.resumed) {
       showSenha.value = true;
@@ -56,12 +57,12 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
             .toDate();
         Duration difference = timestamp1.difference(timestamp2);
         if (kDebugMode) {
-          print('---difference.inSeconds---');
-          print(difference.inSeconds);
-          print('---difference.inSeconds---');
-          print('---HomeController.disableShowSenha---');
-          print(HomeController.disableShowSenha);
-          print('---HomeController.disableShowSenha---');
+          safePrint('---difference.inSeconds---');
+          safePrint(difference.inSeconds);
+          safePrint('---difference.inSeconds---');
+          safePrint('---HomeController.disableShowSenha---');
+          safePrint(HomeController.disableShowSenha);
+          safePrint('---HomeController.disableShowSenha---');
         }
         TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
         if (difference.inSeconds > 5) {
@@ -82,6 +83,32 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
         body: StreamBuilder<UsuarioModel?>(
             stream: UsuarioRepository.getUser(),
             builder: (context, snapshot) {
+              // ✅ TRATAMENTO DE ERRO OBRIGATÓRIO
+              if (snapshot.hasError) {
+                safePrint('HomeView: Erro no stream de usuário: ${snapshot.error}');
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erro ao carregar dados do usuário',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Tentar recarregar
+                          setState(() {});
+                        },
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }

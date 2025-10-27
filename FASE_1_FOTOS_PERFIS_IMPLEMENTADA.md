@@ -67,7 +67,7 @@ CircleAvatar(
       ? NetworkImage(match.otherUserPhoto!)
       : null,
   onBackgroundImageError: (exception, stackTrace) {
-    debugPrint('Erro ao carregar foto: $exception');
+    safePrint('Erro ao carregar foto: $exception');
   },
   child: // Fallback com inicial do nome
 )
@@ -168,7 +168,7 @@ Todos os novos campos são opcionais e não quebram se não existirem:
 ```dart
 // Erro ao carregar foto
 onBackgroundImageError: (exception, stackTrace) {
-  debugPrint('Erro ao carregar foto: $exception');
+  safePrint('Erro ao carregar foto: $exception');
 }
 ```
 

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:whatsapp_chat/repositories/chat_repository.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 import '../models/chat_model.dart';
 import 'chat_controller.dart';
@@ -18,7 +19,7 @@ class AudioController {
   static Future<void> stop() async {
     String? path = await record.stop();
     if (kDebugMode) {
-      print(path);
+      safePrint(path);
     }
 
     if (path == null) {

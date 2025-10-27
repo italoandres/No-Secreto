@@ -181,6 +181,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
             .collection('match_chats')
             .doc(widget.chatId)
             .collection('messages')
+          .limit(1000) // ✅ LIMITE ADICIONADO (deletar em lotes)
             .get();
 
         final batch = _firestore.batch();
@@ -787,6 +788,7 @@ class _RomanticMatchChatViewState extends State<RomanticMatchChatView>
           .doc(widget.chatId)
           .collection('messages')
           .orderBy('timestamp', descending: true)
+          .limit(500) // ✅ LIMITE ADICIONADO (últimas 500 mensagens)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

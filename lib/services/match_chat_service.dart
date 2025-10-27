@@ -1,9 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/match_chat_model.dart';
 import '../models/chat_message_model.dart';
 import '../services/chat_expiration_service.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Serviço responsável por gerenciar operações de chat entre matches
 ///
@@ -47,7 +48,7 @@ class MatchChatService {
     try {
       // Verificar cache primeiro
       if (_isChatCacheValid(chatId)) {
-        debugPrint('MatchChatService: Usando cache para chat $chatId');
+        safePrint('MatchChatService: Usando cache para chat $chatId');
         return _chatCache[chatId]!;
       }
 
@@ -60,7 +61,7 @@ class MatchChatService {
       if (chatDoc.exists) {
         // Chat já existe, carregar dados
         chat = MatchChatModel.fromMap(chatDoc.data() as Map<String, dynamic>);
-        debugPrint('MatchChatService: Chat $chatId já existe');
+        safePrint('MatchChatService: Chat $chatId já existe');
       } else {
         // Criar novo chat
         chat = MatchChatModel.create(
@@ -74,7 +75,7 @@ class MatchChatService {
             .doc(chatId)
             .set(chat.toMap());
 
-        debugPrint('MatchChatService: Novo chat $chatId criado');
+        safePrint('MatchChatService: Novo chat $chatId criado');
       }
 
       // Atualizar cache
@@ -82,7 +83,7 @@ class MatchChatService {
 
       return chat;
     } catch (e) {
-      debugPrint('MatchChatService: Erro ao criar/obter chat $chatId: $e');
+      safePrint('MatchChatService: Erro ao criar/obter chat $chatId: $e');
       rethrow;
     }
   }
@@ -98,7 +99,7 @@ class MatchChatService {
 
       return ChatExpirationService.isChatExpired(chat.createdAt);
     } catch (e) {
-      debugPrint(
+      safePrint(
           'MatchChatService: Erro ao verificar expiração do chat $chatId: $e');
       return true; // Assumir expirado em caso de erro
     }
@@ -128,7 +129,7 @@ class MatchChatService {
 
       return chat;
     } catch (e) {
-      debugPrint('MatchChatService: Erro ao buscar chat $chatId: $e');
+      safePrint('MatchChatService: Erro ao buscar chat $chatId: $e');
       return null;
     }
   }
@@ -146,14 +147,14 @@ class MatchChatService {
     try {
       final chat = await getChatById(chatId);
       if (chat == null) {
-        debugPrint(
+        safePrint(
             'MatchChatService: Chat $chatId não encontrado para atualizar última mensagem');
         return false;
       }
 
       // Verificar se chat não expirou
       if (ChatExpirationService.isChatExpired(chat.createdAt)) {
-        debugPrint(
+        safePrint(
             'MatchChatService: Tentativa de atualizar chat expirado $chatId');
         return false;
       }
@@ -175,11 +176,11 @@ class MatchChatService {
       // Invalidar cache para forçar atualização
       _clearChatCache(chatId);
 
-      debugPrint(
+      safePrint(
           'MatchChatService: Última mensagem atualizada para chat $chatId');
       return true;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'MatchChatService: Erro ao atualizar última mensagem do chat $chatId: $e');
       return false;
     }
@@ -193,7 +194,7 @@ class MatchChatService {
     try {
       final chat = await getChatById(chatId);
       if (chat == null) {
-        debugPrint(
+        safePrint(
             'MatchChatService: Chat $chatId não encontrado para marcar como lido');
         return false;
       }
@@ -201,7 +202,7 @@ class MatchChatService {
       // Verificar se há mensagens não lidas
       final currentUnreadCount = chat.unreadCount[userId] ?? 0;
       if (currentUnreadCount == 0) {
-        debugPrint(
+        safePrint(
             'MatchChatService: Nenhuma mensagem não lida para usuário $userId no chat $chatId');
         return true; // Já está atualizado
       }
@@ -218,11 +219,11 @@ class MatchChatService {
       // Invalidar cache
       _clearChatCache(chatId);
 
-      debugPrint(
+      safePrint(
           'MatchChatService: Mensagens marcadas como lidas para usuário $userId no chat $chatId');
       return true;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'MatchChatService: Erro ao marcar mensagens como lidas no chat $chatId: $e');
       return false;
     }
@@ -240,7 +241,7 @@ class MatchChatService {
 
       return chat.unreadCount[userId] ?? 0;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'MatchChatService: Erro ao obter contagem não lida do chat $chatId: $e');
       return 0;
     }
@@ -261,10 +262,10 @@ class MatchChatService {
       // Invalidar cache
       _clearChatCache(chatId);
 
-      debugPrint('MatchChatService: Chat $chatId desativado. Motivo: $reason');
+      safePrint('MatchChatService: Chat $chatId desativado. Motivo: $reason');
       return true;
     } catch (e) {
-      debugPrint('MatchChatService: Erro ao desativar chat $chatId: $e');
+      safePrint('MatchChatService: Erro ao desativar chat $chatId: $e');
       return false;
     }
   }
@@ -283,10 +284,10 @@ class MatchChatService {
       // Invalidar cache
       _clearChatCache(chatId);
 
-      debugPrint('MatchChatService: Chat $chatId reativado');
+      safePrint('MatchChatService: Chat $chatId reativado');
       return true;
     } catch (e) {
-      debugPrint('MatchChatService: Erro ao reativar chat $chatId: $e');
+      safePrint('MatchChatService: Erro ao reativar chat $chatId: $e');
       return false;
     }
   }
@@ -327,7 +328,7 @@ class MatchChatService {
         'lastMessageAt': chat.lastMessageAt?.toIso8601String(),
       };
     } catch (e) {
-      debugPrint(
+      safePrint(
           'MatchChatService: Erro ao obter estatísticas do chat $chatId: $e');
       return {'error': 'Erro ao obter estatísticas'};
     }

@@ -7,7 +7,7 @@ O autofix do Kiro IDE comentou o código de forma incorreta, deixando linhas sol
 ```dart
 // ERRADO (código solto fora do comentário)
 //   } catch (e) {
-      debugPrint('⚠️ Erro na solução definitiva na web: $e');
+      safePrint('⚠️ Erro na solução definitiva na web: $e');
     }
   });
 }
@@ -20,7 +20,7 @@ Comentei corretamente todas as linhas:
 ```dart
 // CORRETO (tudo comentado)
 //   } catch (e) {
-//     debugPrint('⚠️ Erro na solução definitiva na web: $e');
+//     safePrint('⚠️ Erro na solução definitiva na web: $e');
 //   }
 // });
 // }

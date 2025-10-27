@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_admin/firebase_admin.dart';
+import 'package:firebase_admin/firebase_admin.dart' hide FirebaseException;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +27,7 @@ import '/token_usuario.dart';
 
 import '../controllers/login_controller.dart';
 import '../views/home_view.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class LoginRepository {
   // Lista de emails que são automaticamente admin
@@ -43,35 +44,35 @@ class LoginRepository {
 
   // Helper para navegar após login/inscrição
   static Future<void> _navigateAfterAuth() async {
-    debugPrint('=== INÍCIO _navigateAfterAuth ===');
+    safePrint('=== INÍCIO _navigateAfterAuth ===');
 
     try {
       // CORREÇÃO: Validar e sincronizar sexo do Firestore para TokenUsuario
       await _validateAndSyncUserSexo();
 
       final prefs = await SharedPreferences.getInstance();
-      debugPrint('✅ SharedPreferences obtido');
+      safePrint('✅ SharedPreferences obtido');
 
       final welcomeShown = prefs.getBool('welcome_shown') ?? false;
-      debugPrint('Welcome shown: $welcomeShown');
+      safePrint('Welcome shown: $welcomeShown');
 
       if (!welcomeShown) {
-        debugPrint('LoginRepository: Mostrando WelcomeView (slide5)');
+        safePrint('LoginRepository: Mostrando WelcomeView (slide5)');
         Get.offAll(() => const WelcomeView());
-        debugPrint('✅ Navegação para WelcomeView executada');
+        safePrint('✅ Navegação para WelcomeView executada');
       } else {
-        debugPrint(
+        safePrint(
             'LoginRepository: Welcome já visto, indo direto para HomeView');
         Get.offAll(() => const HomeView());
-        debugPrint('✅ Navegação para HomeView executada');
+        safePrint('✅ Navegação para HomeView executada');
       }
     } catch (e) {
-      debugPrint('❌ Erro em _navigateAfterAuth: $e');
+      safePrint('❌ Erro em _navigateAfterAuth: $e');
       // Fallback para HomeView em caso de erro
       Get.offAll(() => const HomeView());
     }
 
-    debugPrint('=== FIM _navigateAfterAuth ===');
+    safePrint('=== FIM _navigateAfterAuth ===');
   }
 
   // Helper para validar e sincronizar sexo do Firestore para TokenUsuario
@@ -80,7 +81,7 @@ class LoginRepository {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
 
-      debugPrint('🔍 Validando sexo do usuário...');
+      safePrint('🔍 Validando sexo do usuário...');
 
       // Ler sexo do Firestore (fonte de verdade)
       final userDoc = await FirebaseFirestore.instance
@@ -89,15 +90,15 @@ class LoginRepository {
           .get();
 
       if (!userDoc.exists) {
-        debugPrint('❌ Documento do usuário não existe no Firestore');
+        safePrint('❌ Documento do usuário não existe no Firestore');
         return;
       }
 
       final userData = userDoc.data();
       final firestoreSexoString = userData?['sexo'] as String?;
 
-      debugPrint('📊 Sexo no Firestore: $firestoreSexoString');
-      debugPrint('📊 Sexo no TokenUsuario: ${TokenUsuario().sexo.name}');
+      safePrint('📊 Sexo no Firestore: $firestoreSexoString');
+      safePrint('📊 Sexo no TokenUsuario: ${TokenUsuario().sexo.name}');
 
       if (firestoreSexoString != null && firestoreSexoString != 'none') {
         // Converter string para enum
@@ -107,26 +108,26 @@ class LoginRepository {
               (e) => e.name == firestoreSexoString,
               orElse: () => UserSexo.none);
         } catch (e) {
-          debugPrint('❌ Erro ao converter sexo do Firestore: $e');
+          safePrint('❌ Erro ao converter sexo do Firestore: $e');
           return;
         }
 
         // Verificar se precisa atualizar TokenUsuario
         if (TokenUsuario().sexo != firestoreSexo) {
-          debugPrint(
+          safePrint(
               '🔄 Atualizando TokenUsuario: ${TokenUsuario().sexo.name} → ${firestoreSexo.name}');
           TokenUsuario().sexo = firestoreSexo;
-          debugPrint(
+          safePrint(
               '✅ TokenUsuario atualizado com valor do Firestore: ${firestoreSexo.name}');
         } else {
-          debugPrint('✅ Sexo já está sincronizado: ${firestoreSexo.name}');
+          safePrint('✅ Sexo já está sincronizado: ${firestoreSexo.name}');
         }
       } else {
-        debugPrint(
+        safePrint(
             '⚠️ Sexo não definido no Firestore - usuário pode precisar completar perfil');
       }
     } catch (e) {
-      debugPrint('❌ Erro ao validar sexo: $e');
+      safePrint('❌ Erro ao validar sexo: $e');
     }
   }
 
@@ -169,49 +170,49 @@ class LoginRepository {
   }
 
   static Future<void> loginComGoogle() async {
-    debugPrint('Google Sign-In: Starting authentication process');
+    safePrint('Google Sign-In: Starting authentication process');
 
     final GoogleSignIn googleSignIn = GoogleSignIn(
       scopes: ['email'],
     );
 
     try {
-      debugPrint('Google Sign-In: Calling googleSignIn.signIn()');
+      safePrint('Google Sign-In: Calling googleSignIn.signIn()');
       GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        debugPrint('Google Sign-In: User cancelled the sign-in');
+        safePrint('Google Sign-In: User cancelled the sign-in');
         return;
       }
 
-      debugPrint('Google Sign-In: User signed in: ${googleUser.email}');
+      safePrint('Google Sign-In: User signed in: ${googleUser.email}');
       GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
 
       if (googleAuth == null) {
-        debugPrint('Google Sign-In: Authentication is null');
+        safePrint('Google Sign-In: Authentication is null');
         return;
       }
 
-      debugPrint('Google Sign-In: Got authentication tokens');
-      debugPrint(
+      safePrint('Google Sign-In: Got authentication tokens');
+      safePrint(
           'Google Sign-In: idToken available: ${googleAuth.idToken != null}');
 
       OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
-      debugPrint('Google Sign-In: Creating Firebase credential');
+      safePrint('Google Sign-In: Creating Firebase credential');
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userCredential.user == null) {
-        debugPrint('Google Sign-In: Firebase user is null');
+        safePrint('Google Sign-In: Firebase user is null');
         Get.rawSnackbar(
             message: AppLanguage.lang('falha_ao_entrar_com_google'));
         return;
       }
 
-      debugPrint('Google Sign-In: Firebase authentication successful');
+      safePrint('Google Sign-In: Firebase authentication successful');
 
       Get.defaultDialog(
           title: AppLanguage.lang('validando'),
@@ -223,17 +224,17 @@ class LoginRepository {
           .doc(userCredential.user!.uid)
           .get();
 
-      debugPrint('Google Sign-In: User authenticated successfully');
-      debugPrint('Google Sign-In: User ID: ${userCredential.user!.uid}');
-      debugPrint('Google Sign-In: User exists in Firestore: ${query.exists}');
+      safePrint('Google Sign-In: User authenticated successfully');
+      safePrint('Google Sign-In: User ID: ${userCredential.user!.uid}');
+      safePrint('Google Sign-In: User exists in Firestore: ${query.exists}');
 
       if (!query.exists) {
-        debugPrint('Google Sign-In: Creating new user document');
+        safePrint('Google Sign-In: Creating new user document');
         // Create new user document with basic information from Firebase Auth
         final userEmail = userCredential.user?.email;
         final isAdmin = _isAdminEmail(userEmail);
 
-        debugPrint('Google Sign-In: Email: $userEmail, IsAdmin: $isAdmin');
+        safePrint('Google Sign-In: Email: $userEmail, IsAdmin: $isAdmin');
 
         await FirebaseFirestore.instance
             .collection('usuarios')
@@ -248,13 +249,13 @@ class LoginRepository {
         });
         setStoriesAntigos();
         Get.back();
-        debugPrint('Google Sign-In: Showing password setup dialog');
+        safePrint('Google Sign-In: Showing password setup dialog');
         _cadastrarSenha();
         return; // Important: return here to prevent further execution
       }
 
       if (query.exists) {
-        debugPrint('Google Sign-In: User exists, checking password status');
+        safePrint('Google Sign-In: User exists, checking password status');
 
         // Verificar e atualizar status de admin se necessário
         final userEmail = userCredential.user?.email;
@@ -262,7 +263,7 @@ class LoginRepository {
         final currentIsAdmin = query.data()!['isAdmin'] ?? false;
 
         if (shouldBeAdmin != currentIsAdmin) {
-          debugPrint(
+          safePrint(
               'Google Sign-In: Updating admin status for $userEmail to $shouldBeAdmin');
           await FirebaseFirestore.instance
               .collection('usuarios')
@@ -273,12 +274,12 @@ class LoginRepository {
         }
 
         if ('${query.data()!['senhaIsSeted']}' != 'true') {
-          debugPrint(
+          safePrint(
               'Google Sign-In: Password not set, showing password setup');
           Get.back();
           _cadastrarSenha();
         } else {
-          debugPrint('Google Sign-In: Password set, navigating to home');
+          safePrint('Google Sign-In: Password set, navigating to home');
           // Set default language if not set
           if (TokenUsuario().idioma.isEmpty) {
             TokenUsuario().idioma = 'pt';
@@ -289,7 +290,7 @@ class LoginRepository {
       }
     } on FirebaseAuthException catch (e) {
       Get.back();
-      debugPrint('Firebase Auth Error: ${e.code} - ${e.message}');
+      safePrint('Firebase Auth Error: ${e.code} - ${e.message}');
 
       if (e.code == 'user-disabled') {
         Get.rawSnackbar(
@@ -307,13 +308,13 @@ class LoginRepository {
       String errorMessage = e.toString();
       if (errorMessage.contains('People API') ||
           errorMessage.contains('people.googleapis.com')) {
-        debugPrint('People API error (expected for demo): $e');
+        safePrint('People API error (expected for demo): $e');
         // Continue with authentication flow despite People API error
         // Don't return here - let the authentication complete
       } else {
         Get.back();
         Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_acesso'));
-        debugPrint('Google Sign-In Error: $e');
+        safePrint('Google Sign-In Error: $e');
         return;
       }
     }
@@ -342,9 +343,9 @@ class LoginRepository {
     uid = credential.userIdentifier;
     nome = credential.givenName ?? '';
 
-    debugPrint(uid);
-    debugPrint(email);
-    debugPrint(nome);
+    safePrint(uid ?? 'null');
+    safePrint(email ?? 'null');
+    safePrint(nome);
 
     Get.defaultDialog(
         title: AppLanguage.lang('validando'),
@@ -374,7 +375,7 @@ class LoginRepository {
         String imgUrl = '';
         final isAdmin = _isAdminEmail(email);
 
-        debugPrint('Apple Sign-In: Email: $email, IsAdmin: $isAdmin');
+        safePrint('Apple Sign-In: Email: $email, IsAdmin: $isAdmin');
 
         await FirebaseFirestore.instance
             .collection('usuarios')
@@ -394,7 +395,7 @@ class LoginRepository {
       Get.back();
       Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_acesso'));
 
-      debugPrint('$e');
+      safePrint('$e');
     }
   }
 
@@ -444,35 +445,35 @@ class LoginRepository {
                         barrierDismissible: false);
 
                     try {
-                      debugPrint(
+                      safePrint(
                           'Password setup: Starting password setup process');
 
                       // Firebase Admin is not available on web, so we'll skip password update for web
                       if (!kIsWeb && appFirebaseAdmin != null) {
-                        debugPrint(
+                        safePrint(
                             'Password setup: Updating password via Firebase Admin');
                         await appFirebaseAdmin!.auth().updateUser(
                             FirebaseAuth.instance.currentUser!.uid,
                             password: senhaController.text);
                       } else {
-                        debugPrint(
+                        safePrint(
                             'Password setup: Skipping Firebase Admin password update (web or admin not available)');
                       }
 
-                      debugPrint('Password setup: Updating Firestore document');
+                      safePrint('Password setup: Updating Firestore document');
                       await FirebaseFirestore.instance
                           .collection('usuarios')
                           .doc(FirebaseAuth.instance.currentUser!.uid)
                           .update({'senhaIsSeted': true});
 
-                      debugPrint('Password setup: Navigating after auth');
+                      safePrint('Password setup: Navigating after auth');
                       await _navigateAfterAuth();
                     } catch (e) {
                       Get.back();
                       Get.rawSnackbar(
                           message: AppLanguage.lang('error_login') ??
                               'Erro ao definir senha');
-                      debugPrint('Password setup error: $e');
+                      safePrint('Password setup error: $e');
                     }
                   }
                 },
@@ -493,124 +494,193 @@ class LoginRepository {
     await snapshot;
     return await ref.getDownloadURL();
   }
+static Future<void> login({
+  required String email,
+  required String senha,
+}) async {
+  Get.defaultDialog(
+      title: AppLanguage.lang('validando'),
+      content: const CircularProgressIndicator(),
+      barrierDismissible: false);
 
-  static Future<void> login({
-    required String email,
-    required String senha,
-  }) async {
-    Get.defaultDialog(
-        title: AppLanguage.lang('validando'),
-        content: const CircularProgressIndicator(),
-        barrierDismissible: false);
+  // ⚡ TIMEOUT GLOBAL: 90 segundos para conexões MUITO lentas
+  Timer? timeoutTimer = Timer(const Duration(seconds: 90), () {
+    safePrint('❌ TIMEOUT GLOBAL: Login demorou mais de 90 segundos');
+    if (Get.isDialogOpen == true) {
+      Get.back();
+      Get.rawSnackbar(
+        message: 'Login demorou muito. Verifique sua conexão e tente novamente.',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      );
+    }
+  });
 
-    // Timeout de 60 segundos para conexões lentas (APK em celular)
-    Timer? timeoutTimer = Timer(const Duration(seconds: 60), () {
-      debugPrint('❌ TIMEOUT: Login demorou mais de 60 segundos');
-      if (Get.isDialogOpen == true) {
-        Get.back();
-        Get.rawSnackbar(
-          message:
-              'Login demorou muito. Verifique sua conexão e tente novamente.',
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
+  try {
+    safePrint('=== INÍCIO LOGIN ===');
+    safePrint('Email: $email');
+    safePrint('⏱️ Iniciando autenticação Firebase...');
+
+    // ⚡ ETAPA 1: Firebase Authentication (timeout 30s)
+    UserCredential user = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: senha)
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            safePrint('❌ TIMEOUT: Firebase Auth demorou mais de 30s');
+            throw TimeoutException('Firebase Auth timeout após 30s');
+          },
         );
+    
+    safePrint('✅ Firebase Auth OK - UID: ${user.user?.uid}');
+    safePrint('⏱️ Consultando Firestore...');
+
+    // ⚡ ETAPA 2: Verificar se usuário existe no Firestore (timeout 30s)
+    final query = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.user!.uid)
+        .get()
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            safePrint('❌ TIMEOUT: Firestore demorou mais de 30s');
+            throw TimeoutException('Firestore timeout após 30s');
+          },
+        );
+    
+    safePrint('✅ Firestore Query OK - Exists: ${query.exists}');
+
+    // Fechar dialog de loading
+    Get.back();
+    
+    if (query.exists) {
+      safePrint('✅ Usuário existe no Firestore');
+
+      // Verificar e atualizar status de admin se necessário
+      final userEmail = user.user?.email;
+      final shouldBeAdmin = _isAdminEmail(userEmail);
+      final currentIsAdmin = query.data()!['isAdmin'] ?? false;
+
+      safePrint('Admin check - Email: $userEmail, Should be admin: $shouldBeAdmin, Current: $currentIsAdmin');
+
+      Map<String, dynamic> updateData = {'senhaIsSeted': true};
+
+      if (shouldBeAdmin != currentIsAdmin) {
+        safePrint('Email Login: Updating admin status for $userEmail to $shouldBeAdmin');
+        updateData['isAdmin'] = shouldBeAdmin;
       }
-    });
 
-    try {
-      debugPrint('=== INÍCIO LOGIN ===');
-      debugPrint('Email: $email');
-
-      UserCredential user = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: senha);
-      debugPrint('✅ Firebase Auth OK - UID: ${user.user?.uid}');
-
-      final query = await FirebaseFirestore.instance
+      safePrint('🔄 Atualizando dados do usuário...');
+      safePrint('⏱️ Salvando no Firestore...');
+      
+      // ⚡ ETAPA 3: Atualizar dados do usuário (timeout 20s)
+      await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(user.user!.uid)
-          .get();
-      debugPrint('✅ Firestore Query OK - Exists: ${query.exists}');
+          .update(updateData)
+          .timeout(
+            const Duration(seconds: 20),
+            onTimeout: () {
+              safePrint('❌ TIMEOUT: Update Firestore demorou mais de 20s');
+              throw TimeoutException('Update timeout após 20s');
+            },
+          );
+      
+      safePrint('✅ Dados atualizados');
 
-      Get.back();
-      if (query.exists) {
-        debugPrint('✅ Usuário existe no Firestore');
-
-        // Verificar e atualizar status de admin se necessário
-        final userEmail = user.user?.email;
-        final shouldBeAdmin = _isAdminEmail(userEmail);
-        final currentIsAdmin = query.data()!['isAdmin'] ?? false;
-
-        debugPrint(
-            'Admin check - Email: $userEmail, Should be admin: $shouldBeAdmin, Current: $currentIsAdmin');
-
-        Map<String, dynamic> updateData = {'senhaIsSeted': true};
-
-        if (shouldBeAdmin != currentIsAdmin) {
-          debugPrint(
-              'Email Login: Updating admin status for $userEmail to $shouldBeAdmin');
-          updateData['isAdmin'] = shouldBeAdmin;
-        }
-
-        debugPrint('🔄 Atualizando dados do usuário...');
-        await FirebaseFirestore.instance
-            .collection('usuarios')
-            .doc(user.user!.uid)
-            .update(updateData);
-        debugPrint('✅ Dados atualizados');
-
-        // Set default language if not set
-        if (TokenUsuario().idioma.isEmpty) {
-          TokenUsuario().idioma = 'pt';
-        }
-
-        debugPrint('🧹 Limpando controller...');
-        LoginController.clean();
-
-        debugPrint('🚀 Navegando após auth...');
-        await _navigateAfterAuth();
-        debugPrint('✅ Navegação concluída');
-
-        // Cancelar timeout
-        timeoutTimer?.cancel();
-      } else {
-        debugPrint('❌ Usuário não existe no Firestore');
-        Get.rawSnackbar(message: AppLanguage.lang('usuario_n_econtrado'));
-        FirebaseAuth.instance.signOut();
-        timeoutTimer?.cancel();
+      // Set default language if not set
+      if (TokenUsuario().idioma.isEmpty) {
+        TokenUsuario().idioma = 'pt';
       }
-    } on FirebaseAuthException catch (e) {
-      Get.back();
-      timeoutTimer?.cancel();
-      debugPrint('❌ FirebaseAuthException: ${e.code}');
-      debugPrint('❌ Mensagem: ${e.message}');
 
-      if (e.code == 'user-not-found') {
-        Get.rawSnackbar(message: AppLanguage.lang('email_incorreto'));
-      } else if (e.code == 'wrong-password') {
-        Get.rawSnackbar(message: AppLanguage.lang('senha_incorreta'));
-      } else if (e.code == 'network-request-failed') {
-        Get.rawSnackbar(
-            message:
-                '🌐 Erro de conexão. Verifique sua internet e tente novamente.');
-      } else if (e.code == 'unknown' &&
-          e.message?.contains('Connection reset by peer') == true) {
-        Get.rawSnackbar(
-            message:
-                '🔄 Problema de conexão. Tente novamente em alguns segundos.');
-      } else {
-        Get.rawSnackbar(message: AppLanguage.lang('error_login'));
-      }
-    } catch (e) {
-      Get.back();
+      safePrint('🧹 Limpando controller...');
+      LoginController.clean();
+
+      safePrint('🚀 Navegando após auth...');
+      await _navigateAfterAuth();
+      safePrint('✅ Navegação concluída');
+      safePrint('🎉 LOGIN COMPLETO COM SUCESSO!');
+
+      // ✅ Cancelar timeout
       timeoutTimer?.cancel();
-      debugPrint('❌ Erro geral no login: $e');
+      
+    } else {
+      safePrint('❌ Usuário não existe no Firestore');
+      Get.rawSnackbar(message: AppLanguage.lang('usuario_n_econtrado'));
+      FirebaseAuth.instance.signOut();
+      timeoutTimer?.cancel();
+    }
+    
+  } on TimeoutException catch (e) {
+    // ⚡ NOVO: Tratamento específico para timeout
+    Get.back();
+    timeoutTimer?.cancel();
+    safePrint('❌ TimeoutException: ${e.message}');
+    
+    Get.rawSnackbar(
+      message: '⏱️ Operação demorou muito. Verifique sua internet e tente novamente.',
+      backgroundColor: Colors.orange,
+      duration: const Duration(seconds: 5),
+    );
+    
+  } on FirebaseAuthException catch (e) {
+    Get.back();
+    timeoutTimer?.cancel();
+    safePrint('❌ FirebaseAuthException: ${e.code}');
+    safePrint('❌ Mensagem: ${e.message}');
+
+    if (e.code == 'user-not-found') {
+      Get.rawSnackbar(message: AppLanguage.lang('email_incorreto'));
+    } else if (e.code == 'wrong-password') {
+      Get.rawSnackbar(message: AppLanguage.lang('senha_incorreta'));
+    } else if (e.code == 'network-request-failed') {
       Get.rawSnackbar(
-        message: 'Erro inesperado no login. Tente novamente.',
+          message: '🌐 Erro de conexão. Verifique sua internet e tente novamente.');
+    } else if (e.code == 'unknown' &&
+        e.message?.contains('Connection reset by peer') == true) {
+      Get.rawSnackbar(
+          message: '🔄 Problema de conexão. Tente novamente em alguns segundos.');
+    } else if (e.code == 'too-many-requests') {
+      Get.rawSnackbar(
+          message: '⚠️ Muitas tentativas. Aguarde alguns minutos e tente novamente.');
+    } else {
+      Get.rawSnackbar(message: AppLanguage.lang('error_login'));
+    }
+    
+  } on FirebaseException catch (e) {
+    // ⚡ NOVO: Tratamento para erros do Firestore
+    Get.back();
+    timeoutTimer?.cancel();
+    safePrint('❌ FirebaseException: ${e.code}');
+    safePrint('❌ Mensagem: ${e.message}');
+    
+    if (e.code == 'unavailable') {
+      Get.rawSnackbar(
+        message: '🌐 Servidor indisponível. Tente novamente em alguns segundos.',
+        backgroundColor: Colors.orange,
+      );
+    } else {
+      Get.rawSnackbar(
+        message: 'Erro ao acessar banco de dados. Tente novamente.',
         backgroundColor: Colors.red,
       );
     }
+    
+  } catch (e) {
+    Get.back();
+    timeoutTimer?.cancel();
+    safePrint('❌ Erro geral no login: $e');
+    safePrint('❌ Tipo do erro: ${e.runtimeType}');
+    
+    Get.rawSnackbar(
+      message: 'Erro inesperado no login. Tente novamente.',
+      backgroundColor: Colors.red,
+      duration: const Duration(seconds: 5),
+    );
   }
-
+  
+  safePrint('=== FIM LOGIN ===');
+}
   static Future<void> cadastrarComEmail({
     required String email,
     required String senha,
@@ -629,7 +699,7 @@ class LoginRepository {
           .createUserWithEmailAndPassword(email: email, password: senha);
 
       final isAdmin = _isAdminEmail(email);
-      debugPrint('Email Signup: Email: $email, IsAdmin: $isAdmin');
+      safePrint('Email Signup: Email: $email, IsAdmin: $isAdmin');
 
       await FirebaseFirestore.instance
           .collection('usuarios')
@@ -647,8 +717,8 @@ class LoginRepository {
           imgData: imgData, imgBgData: imgBgData, sexo: sexo);
     } on FirebaseAuthException catch (e) {
       Get.back();
-      debugPrint(e.code);
-      debugPrint(e.message);
+      safePrint(e.code);
+      safePrint(e.message ?? 'null');
 
       if (e.code == 'user-not-found') {
         Get.rawSnackbar(message: AppLanguage.lang('email_incorreto'));
@@ -660,7 +730,7 @@ class LoginRepository {
         Get.rawSnackbar(message: AppLanguage.lang('error_login'));
       }
     } catch (e) {
-      debugPrint('$e');
+      safePrint('$e');
     }
   }
 
@@ -682,7 +752,7 @@ class LoginRepository {
       Get.offAll(() => const LoginView());
     } on FirebaseAuthException catch (e) {
       Get.back();
-      debugPrint(e.code);
+      safePrint(e.code);
 
       if (e.code == 'user-not-found') {
         Get.rawSnackbar(message: AppLanguage.lang('email_incorreto'));
@@ -704,5 +774,25 @@ class LoginRepository {
       old['idUsuario'] = FirebaseAuth.instance.currentUser!.uid;
       FirebaseFirestore.instance.collection('stories_antigos').add(old);
     }
+  }
+
+  /// ⚡ Helper para converter Timestamp do Firebase para JSON
+  /// Resolve o erro: "Converting object to an encodable object failed: Instance of 'Timestamp'"
+  static Map<String, dynamic> convertTimestampToJson(Map<String, dynamic> data) {
+    return data.map((key, value) {
+      if (value is Timestamp) {
+        return MapEntry(key, value.toDate().toIso8601String());
+      } else if (value is Map) {
+        return MapEntry(key, convertTimestampToJson(Map<String, dynamic>.from(value)));
+      } else if (value is List) {
+        return MapEntry(key, value.map((item) {
+          if (item is Map) {
+            return convertTimestampToJson(Map<String, dynamic>.from(item));
+          }
+          return item;
+        }).toList());
+      }
+      return MapEntry(key, value);
+    });
   }
 }

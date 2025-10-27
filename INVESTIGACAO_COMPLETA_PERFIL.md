@@ -101,7 +101,7 @@ if (profile != null) {
       'isProfileComplete': true,
       'profileCompletedAt': Timestamp.fromDate(DateTime.now()),
     });
-    debugPrint('🎉 Perfil espiritual completado!');
+    safePrint('🎉 Perfil espiritual completado!');
   }
 }
 ```
@@ -176,14 +176,14 @@ static Future<void> fixCompletedProfiles() async {
             'profileCompletedAt': FieldValue.serverTimestamp(),
           });
           fixed++;
-          debugPrint('✅ Perfil corrigido: ${doc.id}');
+          safePrint('✅ Perfil corrigido: ${doc.id}');
         }
       }
     }
     
-    debugPrint('🎉 Total de perfis corrigidos: $fixed');
+    safePrint('🎉 Total de perfis corrigidos: $fixed');
   } catch (e) {
-    debugPrint('❌ Erro ao corrigir perfis: $e');
+    safePrint('❌ Erro ao corrigir perfis: $e');
   }
 }
 ```

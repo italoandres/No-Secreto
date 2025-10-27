@@ -1,5 +1,6 @@
 import '../models/storie_file_model.dart';
 import 'context_validator.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Utilitário para filtrar stories por contexto
 ///
@@ -19,9 +20,9 @@ class StoryContextFilter {
         ContextValidator.normalizeContext(expectedContext);
 
     if (debugEnabled) {
-      print(
+      safePrint(
           '🔍 STORY_FILTER: Iniciando filtro por contexto "$normalizedContext"');
-      print('🔍 STORY_FILTER: Stories recebidos: ${stories.length}');
+      safePrint('🔍 STORY_FILTER: Stories recebidos: ${stories.length}');
     }
 
     final filteredStories = stories.where((story) {
@@ -29,7 +30,7 @@ class StoryContextFilter {
       final matches = storyContext == normalizedContext;
 
       if (debugEnabled && !matches) {
-        print(
+        safePrint(
             '⚠️ STORY_FILTER: Story ${story.id} removido - contexto "${story.contexto}" não corresponde ao esperado "$normalizedContext"');
       }
 
@@ -37,9 +38,9 @@ class StoryContextFilter {
     }).toList();
 
     if (debugEnabled) {
-      print('✅ STORY_FILTER: Stories após filtro: ${filteredStories.length}');
+      safePrint('✅ STORY_FILTER: Stories após filtro: ${filteredStories.length}');
       if (filteredStories.length != stories.length) {
-        print(
+        safePrint(
             '🚨 STORY_FILTER: VAZAMENTO DETECTADO! ${stories.length - filteredStories.length} stories de contextos incorretos foram removidos');
       }
     }
@@ -63,10 +64,10 @@ class StoryContextFilter {
 
     if (debugEnabled) {
       if (isValid) {
-        print(
+        safePrint(
             '✅ STORY_VALIDATOR: Story ${story.id} válido para contexto "$normalizedExpected"');
       } else {
-        print(
+        safePrint(
             '❌ STORY_VALIDATOR: Story ${story.id} inválido - contexto "${story.contexto}" não corresponde ao esperado "$normalizedExpected"');
       }
     }
@@ -87,7 +88,7 @@ class StoryContextFilter {
         ContextValidator.normalizeContext(expectedContext);
 
     if (debugEnabled) {
-      print(
+      safePrint(
           '🧹 STORY_CLEANER: Limpando stories para contexto "$normalizedContext"');
     }
 
@@ -100,17 +101,17 @@ class StoryContextFilter {
       } else {
         invalidStories.add(story);
         if (debugEnabled) {
-          print(
+          safePrint(
               '🗑️ STORY_CLEANER: Removendo story ${story.id} (contexto: "${story.contexto}", título: "${story.titulo ?? 'Sem título'}")');
         }
       }
     }
 
     if (debugEnabled && invalidStories.isNotEmpty) {
-      print(
+      safePrint(
           '🚨 STORY_CLEANER: VAZAMENTO CRÍTICO! ${invalidStories.length} stories de contextos incorretos foram encontrados:');
       for (final story in invalidStories) {
-        print(
+        safePrint(
             '   - Story ${story.id}: contexto "${story.contexto}" (esperado: "$normalizedContext")');
       }
     }
@@ -134,9 +135,9 @@ class StoryContextFilter {
     }
 
     if (debugEnabled) {
-      print('📊 STORY_ANALYZER: Distribuição de stories por contexto:');
+      safePrint('📊 STORY_ANALYZER: Distribuição de stories por contexto:');
       distribution.forEach((context, count) {
-        print('   - $context: $count stories');
+        safePrint('   - $context: $count stories');
       });
     }
 
@@ -165,14 +166,14 @@ class StoryContextFilter {
 
     if (debugEnabled) {
       if (hasLeaks) {
-        print(
+        safePrint(
             '🚨 LEAK_DETECTOR: VAZAMENTOS DETECTADOS para contexto "$normalizedExpected":');
         leaks.forEach((context, count) {
-          print(
+          safePrint(
               '   - $count stories do contexto "$context" encontrados incorretamente');
         });
       } else {
-        print(
+        safePrint(
             '✅ LEAK_DETECTOR: Nenhum vazamento detectado para contexto "$normalizedExpected"');
       }
     }

@@ -1,8 +1,9 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/accepted_match_model.dart';
 import '../models/interest_notification_model.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 /// Repositório simplificado para matches aceitos que funciona sem índices complexos
 class SimpleAcceptedMatchesRepository {
@@ -14,7 +15,7 @@ class SimpleAcceptedMatchesRepository {
   /// Busca matches aceitos usando método simples sem índices complexos
   Future<List<AcceptedMatchModel>> getAcceptedMatches(String userId) async {
     try {
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Buscando matches aceitos para $userId');
 
       // Buscar notificações onde o usuário RECEBEU interesse (toUserId)
@@ -29,7 +30,7 @@ class SimpleAcceptedMatchesRepository {
           .where('fromUserId', isEqualTo: userId)
           .get();
 
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Recebidas: ${receivedNotifications.docs.length}, Enviadas: ${sentNotifications.docs.length}');
 
       // Combinar todas as notificações
@@ -56,7 +57,7 @@ class SimpleAcceptedMatchesRepository {
               InterestNotificationModel.fromMap({...doc.data(), 'id': doc.id}))
           .toList();
 
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Encontradas ${acceptedNotifications.length} notificações aceitas (sem duplicatas)');
 
       // Converter para AcceptedMatchModel
@@ -69,7 +70,7 @@ class SimpleAcceptedMatchesRepository {
             matches.add(match);
           }
         } catch (e) {
-          debugPrint(
+          safePrint(
               'SimpleAcceptedMatchesRepository: Erro ao converter notificação ${notification.id}: $e');
         }
       }
@@ -77,11 +78,11 @@ class SimpleAcceptedMatchesRepository {
       // Ordenar por data de aceitação (mais recentes primeiro)
       matches.sort((a, b) => b.matchDate.compareTo(a.matchDate));
 
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Retornando ${matches.length} matches aceitos');
       return matches;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Erro ao buscar matches aceitos: $e');
       return [];
     }
@@ -134,7 +135,7 @@ class SimpleAcceptedMatchesRepository {
             matches.add(match);
           }
         } catch (e) {
-          debugPrint(
+          safePrint(
               'SimpleAcceptedMatchesRepository: Erro no stream para notificação ${notification.id}: $e');
         }
       }
@@ -167,7 +168,7 @@ class SimpleAcceptedMatchesRepository {
 
       return count;
     } catch (e) {
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Erro ao contar matches não lidos: $e');
       return 0;
     }
@@ -185,7 +186,7 @@ class SimpleAcceptedMatchesRepository {
           : notification.fromUserId;
 
       if (otherUserId == null) {
-        debugPrint('SimpleAcceptedMatchesRepository: otherUserId é null');
+        safePrint('SimpleAcceptedMatchesRepository: otherUserId é null');
         return null;
       }
 
@@ -194,7 +195,7 @@ class SimpleAcceptedMatchesRepository {
           await _firestore.collection('usuarios').doc(otherUserId).get();
 
       if (!otherUserDoc.exists) {
-        debugPrint(
+        safePrint(
             'SimpleAcceptedMatchesRepository: Usuário $otherUserId não encontrado');
         return null;
       }
@@ -235,7 +236,7 @@ class SimpleAcceptedMatchesRepository {
           unreadMessages = unreadCount?[currentUserId] ?? 0;
         }
       } catch (e) {
-        debugPrint(
+        safePrint(
             'SimpleAcceptedMatchesRepository: Erro ao buscar mensagens não lidas: $e');
       }
 
@@ -246,11 +247,11 @@ class SimpleAcceptedMatchesRepository {
       // Buscar foto do perfil da collection usuarios
       final String? photo = otherUserData['imgUrl'] as String?;
 
-      debugPrint('🔍 [MATCH_DATA] Dados extraídos do usuário $otherUserId:');
-      debugPrint('   Nome: ${otherUserData['nome']}');
-      debugPrint('   Foto: $photo');
-      debugPrint('   Idade: $age (de spiritual_profiles)');
-      debugPrint('   Cidade: $city (de spiritual_profiles)');
+      safePrint('🔍 [MATCH_DATA] Dados extraídos do usuário $otherUserId:');
+      safePrint('   Nome: ${otherUserData['nome']}');
+      safePrint('   Foto: $photo');
+      safePrint('   Idade: $age (de spiritual_profiles)');
+      safePrint('   Cidade: $city (de spiritual_profiles)');
 
       return AcceptedMatchModel.fromNotification(
         notificationId: notification.id!,
@@ -266,7 +267,7 @@ class SimpleAcceptedMatchesRepository {
         daysRemaining: daysRemaining.clamp(0, 30),
       );
     } catch (e) {
-      debugPrint(
+      safePrint(
           'SimpleAcceptedMatchesRepository: Erro ao converter notificação: $e');
       return null;
     }

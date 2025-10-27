@@ -1,3 +1,5 @@
+import 'package:whatsapp_chat/utils/debug_utils.dart';
+
 /// Configurações e utilitários para debug de contexto
 ///
 /// Esta classe centraliza as configurações de debug e fornece
@@ -36,10 +38,10 @@ class ContextDebug {
       String context, String collection, int count, String operation) {
     if (!ENABLE_CONTEXT_LOGS) return;
 
-    print('$_PREFIX_LOAD: $operation');
-    print('   - Contexto: "$context"');
-    print('   - Coleção: "$collection"');
-    print('   - Stories carregados: $count');
+    safePrint('$_PREFIX_LOAD: $operation');
+    safePrint('   - Contexto: "$context"');
+    safePrint('   - Coleção: "$collection"');
+    safePrint('   - Stories carregados: $count');
   }
 
   /// Log de operação de filtro
@@ -53,12 +55,12 @@ class ContextDebug {
     if (!ENABLE_CONTEXT_LOGS) return;
 
     final removed = originalCount - filteredCount;
-    print('$_PREFIX_FILTER: $operation');
-    print('   - Contexto: "$context"');
-    print('   - Stories originais: $originalCount');
-    print('   - Stories após filtro: $filteredCount');
+    safePrint('$_PREFIX_FILTER: $operation');
+    safePrint('   - Contexto: "$context"');
+    safePrint('   - Stories originais: $originalCount');
+    safePrint('   - Stories após filtro: $filteredCount');
     if (removed > 0) {
-      print('   - ⚠️ Stories removidos: $removed');
+      safePrint('   - ⚠️ Stories removidos: $removed');
     }
   }
 
@@ -71,9 +73,9 @@ class ContextDebug {
     if (!ENABLE_CONTEXT_LOGS) return;
 
     if (isValid) {
-      print('$_PREFIX_VALIDATE: $operation - Contexto "$context" é válido');
+      safePrint('$_PREFIX_VALIDATE: $operation - Contexto "$context" é válido');
     } else {
-      print('$_PREFIX_ERROR: $operation - Contexto "$context" é inválido');
+      safePrint('$_PREFIX_ERROR: $operation - Contexto "$context" é inválido');
     }
   }
 
@@ -86,10 +88,10 @@ class ContextDebug {
       String expectedContext, Map<String, int> leaks, String operation) {
     if (!ENABLE_CONTEXT_LOGS || !DETECT_CONTEXT_LEAKS) return;
 
-    print(
+    safePrint(
         '$_PREFIX_LEAK: $operation - Vazamentos detectados para contexto "$expectedContext":');
     leaks.forEach((context, count) {
-      print('   - $count stories do contexto "$context"');
+      safePrint('   - $count stories do contexto "$context"');
     });
   }
 
@@ -103,10 +105,10 @@ class ContextDebug {
       String operation, Duration duration, String context, int count) {
     if (!ENABLE_CONTEXT_LOGS || !LOG_QUERY_PERFORMANCE) return;
 
-    print('$_PREFIX_PERF: $operation');
-    print('   - Contexto: "$context"');
-    print('   - Duração: ${duration.inMilliseconds}ms');
-    print('   - Resultados: $count');
+    safePrint('$_PREFIX_PERF: $operation');
+    safePrint('   - Contexto: "$context"');
+    safePrint('   - Duração: ${duration.inMilliseconds}ms');
+    safePrint('   - Resultados: $count');
   }
 
   /// Log de erro crítico de contexto
@@ -116,9 +118,9 @@ class ContextDebug {
   /// [context] - Contexto relacionado ao erro
   static void logCriticalError(
       String operation, String error, String? context) {
-    print('$_PREFIX_ERROR: ERRO CRÍTICO em $operation');
-    print('   - Contexto: "$context"');
-    print('   - Erro: $error');
+    safePrint('$_PREFIX_ERROR: ERRO CRÍTICO em $operation');
+    safePrint('   - Contexto: "$context"');
+    safePrint('   - Erro: $error');
   }
 
   /// Executa uma operação com medição de performance
@@ -156,10 +158,10 @@ class ContextDebug {
       String operation, String context, Map<String, dynamic> data) {
     if (!ENABLE_CONTEXT_LOGS) return;
 
-    print('📋 CONTEXT_SUMMARY: $operation');
-    print('   - Contexto: "$context"');
+    safePrint('📋 CONTEXT_SUMMARY: $operation');
+    safePrint('   - Contexto: "$context"');
     data.forEach((key, value) {
-      print('   - $key: $value');
+      safePrint('   - $key: $value');
     });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class StoriesHistoryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -11,7 +12,7 @@ class StoriesHistoryService {
       final user = _auth.currentUser;
       if (user == null) return;
 
-      print(
+      safePrint(
           '🕒 HISTORY: Verificando stories expirados para usuário ${user.uid}');
 
       // Data limite: 24 horas atrás
@@ -29,7 +30,7 @@ class StoriesHistoryService {
         await _moveExpiredFromCollection(collection, cutoffTime, user.uid);
       }
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro ao mover stories expirados: $e');
+      safePrint('❌ HISTORY ERROR: Erro ao mover stories expirados: $e');
     }
   }
 
@@ -37,21 +38,21 @@ class StoriesHistoryService {
   Future<void> _moveExpiredFromCollection(
       String collection, Timestamp cutoffTime, String userId) async {
     try {
-      print('🔍 HISTORY: Verificando coleção $collection');
+      safePrint('🔍 HISTORY: Verificando coleção $collection');
 
       final query = await _firestore
           .collection(collection)
           .where('dataCadastro', isLessThan: cutoffTime)
           .get();
 
-      print(
+      safePrint(
           '📊 HISTORY: Encontrados ${query.docs.length} stories expirados em $collection');
 
       for (var doc in query.docs) {
         await moveStoryToHistory(doc.id, collection, doc.data());
       }
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro ao processar coleção $collection: $e');
+      safePrint('❌ HISTORY ERROR: Erro ao processar coleção $collection: $e');
     }
   }
 
@@ -59,7 +60,7 @@ class StoriesHistoryService {
   Future<void> moveStoryToHistory(String storyId, String sourceCollection,
       Map<String, dynamic> storyData) async {
     try {
-      print(
+      safePrint(
           '📦 HISTORY: Movendo story $storyId de $sourceCollection para histórico');
 
       // Adicionar metadados do histórico
@@ -79,9 +80,9 @@ class StoriesHistoryService {
       // Remover da coleção original
       await _firestore.collection(sourceCollection).doc(storyId).delete();
 
-      print('✅ HISTORY: Story $storyId movido com sucesso para o histórico');
+      safePrint('✅ HISTORY: Story $storyId movido com sucesso para o histórico');
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro ao mover story $storyId: $e');
+      safePrint('❌ HISTORY ERROR: Erro ao mover story $storyId: $e');
       rethrow;
     }
   }
@@ -95,7 +96,7 @@ class StoriesHistoryService {
       final user = _auth.currentUser;
       if (user == null) return [];
 
-      print('📚 HISTORY: Carregando histórico de stories para ${user.uid}');
+      safePrint('📚 HISTORY: Carregando histórico de stories para ${user.uid}');
 
       Query query = _firestore
           .collection('stories_antigos')
@@ -122,10 +123,10 @@ class StoriesHistoryService {
         return data;
       }).toList();
 
-      print('📊 HISTORY: Carregados ${stories.length} stories do histórico');
+      safePrint('📊 HISTORY: Carregados ${stories.length} stories do histórico');
       return stories;
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro ao carregar histórico: $e');
+      safePrint('❌ HISTORY ERROR: Erro ao carregar histórico: $e');
       return [];
     }
   }
@@ -136,7 +137,7 @@ class StoriesHistoryService {
       final user = _auth.currentUser;
       if (user == null) return;
 
-      print('🧹 HISTORY: Limpando stories antigos (>${daysToKeep} dias)');
+      safePrint('🧹 HISTORY: Limpando stories antigos (>${daysToKeep} dias)');
 
       final cutoffTime = Timestamp.fromDate(
           DateTime.now().subtract(Duration(days: daysToKeep)));
@@ -146,7 +147,7 @@ class StoriesHistoryService {
           .where('movedToHistoryAt', isLessThan: cutoffTime)
           .get();
 
-      print(
+      safePrint(
           '🗑️ HISTORY: Encontrados ${query.docs.length} stories para limpeza');
 
       // Deletar em lotes para performance
@@ -156,16 +157,16 @@ class StoriesHistoryService {
       }
 
       await batch.commit();
-      print('✅ HISTORY: Limpeza concluída');
+      safePrint('✅ HISTORY: Limpeza concluída');
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro na limpeza: $e');
+      safePrint('❌ HISTORY ERROR: Erro na limpeza: $e');
     }
   }
 
   /// Restaura um story do histórico (se necessário)
   Future<void> restoreStoryFromHistory(String historyStoryId) async {
     try {
-      print('🔄 HISTORY: Restaurando story $historyStoryId do histórico');
+      safePrint('🔄 HISTORY: Restaurando story $historyStoryId do histórico');
 
       final historyDoc = await _firestore
           .collection('stories_antigos')
@@ -196,9 +197,9 @@ class StoriesHistoryService {
           .doc(historyStoryId)
           .delete();
 
-      print('✅ HISTORY: Story restaurado com sucesso');
+      safePrint('✅ HISTORY: Story restaurado com sucesso');
     } catch (e) {
-      print('❌ HISTORY ERROR: Erro ao restaurar story: $e');
+      safePrint('❌ HISTORY ERROR: Erro ao restaurar story: $e');
       rethrow;
     }
   }

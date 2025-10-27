@@ -29,7 +29,7 @@ case 'certification':
   try {
     Get.to(() => const SpiritualCertificationRequestView());
   } catch (e) {
-    debugPrint('❌ Erro ao abrir certificação: $e');
+    safePrint('❌ Erro ao abrir certificação: $e');
     Get.snackbar(
       'Erro',
       'Não foi possível abrir a certificação. Tente novamente.',

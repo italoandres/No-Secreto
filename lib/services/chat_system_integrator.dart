@@ -105,6 +105,7 @@ class ChatSystemIntegrator {
   }
 
   /// Substitui o carregamento de mensagens existente
+  /// ✅ CORRIGIDO: Adicionado .limit(500)
   static Stream<QuerySnapshot> getMessagesStream(String chatId) {
     print('📡 [INTEGRATOR] Criando stream de mensagens robusto para: $chatId');
 
@@ -113,6 +114,7 @@ class ChatSystemIntegrator {
           .collection('chat_messages')
           .where('chatId', isEqualTo: chatId)
           .orderBy('timestamp', descending: false)
+          .limit(500) // ✅ LIMITE ADICIONADO (últimas 500 mensagens)
           .snapshots()
           .handleError((error) {
         print('❌ [INTEGRATOR] Erro no stream de mensagens: $error');
@@ -123,6 +125,7 @@ class ChatSystemIntegrator {
           return _firestore
               .collection('chat_messages')
               .where('chatId', isEqualTo: chatId)
+              .limit(500) // ✅ LIMITE ADICIONADO também no fallback
               .snapshots();
         }
 
@@ -137,6 +140,7 @@ class ChatSystemIntegrator {
   }
 
   /// Substitui a marcação de mensagens como lidas
+  /// ✅ CORRIGIDO: Adicionado .limit(500) em ambas as queries
   static Future<void> markMessagesAsRead(
       String chatId, String currentUserId) async {
     print('👁️ [INTEGRATOR] Marcando mensagens como lidas com sistema robusto');
@@ -151,6 +155,7 @@ class ChatSystemIntegrator {
             .where('chatId', isEqualTo: chatId)
             .where('senderId', isNotEqualTo: currentUserId)
             .where('isRead', isEqualTo: false)
+            .limit(500) // ✅ LIMITE ADICIONADO
             .get();
       } catch (indexError) {
         print('⚠️ [INTEGRATOR] Erro de índice, usando método alternativo');
@@ -159,6 +164,7 @@ class ChatSystemIntegrator {
         final allMessages = await _firestore
             .collection('chat_messages')
             .where('chatId', isEqualTo: chatId)
+            .limit(500) // ✅ LIMITE ADICIONADO
             .get();
 
         final unreadDocs = allMessages.docs.where((doc) {
@@ -232,6 +238,7 @@ class ChatSystemIntegrator {
   }
 
   /// Substitui a busca de matches aceitos existente
+  /// ✅ CORRIGIDO: Adicionado .limit(200) em ambas as queries
   static Future<List<Map<String, dynamic>>> getAcceptedMatches(
       String userId) async {
     print('🔍 [INTEGRATOR] Buscando matches aceitos com sistema robusto');
@@ -242,6 +249,7 @@ class ChatSystemIntegrator {
           .collection('interests')
           .where('toUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'accepted')
+          .limit(200) // ✅ LIMITE ADICIONADO
           .get();
 
       // Buscar interesses aceitos onde o usuário é o remetente
@@ -249,6 +257,7 @@ class ChatSystemIntegrator {
           .collection('interests')
           .where('fromUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'accepted')
+          .limit(200) // ✅ LIMITE ADICIONADO
           .get();
 
       final matches = <Map<String, dynamic>>[];

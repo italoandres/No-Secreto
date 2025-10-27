@@ -450,7 +450,7 @@ class [Country]LocationsData {
 class LocationErrorHandler {
   static void handleDataLoadError(String countryCode, dynamic error) {
     // Log erro
-    debugPrint('Erro ao carregar dados de $countryCode: $error');
+    safePrint('Erro ao carregar dados de $countryCode: $error');
     
     // Analytics
     FirebaseAnalytics.instance.logEvent(

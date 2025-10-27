@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:whatsapp_chat/utils/debug_utils.dart';
 
 class FirebaseImageLoader {
   /// Carrega imagem do Firebase Storage com headers apropriados para Web
@@ -11,7 +12,7 @@ class FirebaseImageLoader {
     Widget? placeholder,
     Widget? errorWidget,
   }) {
-    debugPrint('🔥 FIREBASE IMAGE: Carregando $imageUrl');
+    safePrint('🔥 FIREBASE IMAGE: Carregando $imageUrl');
 
     // Para Flutter Web, usar Image.network com headers específicos
     return Image.network(
@@ -27,7 +28,7 @@ class FirebaseImageLoader {
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
-          debugPrint('✅ FIREBASE IMAGE: Carregada com sucesso');
+          safePrint('✅ FIREBASE IMAGE: Carregada com sucesso');
           return child;
         }
 
@@ -45,8 +46,8 @@ class FirebaseImageLoader {
             );
       },
       errorBuilder: (context, error, stackTrace) {
-        debugPrint('❌ FIREBASE IMAGE ERROR: $error');
-        debugPrint('❌ STACK: $stackTrace');
+        safePrint('❌ FIREBASE IMAGE ERROR: $error');
+        safePrint('❌ STACK: $stackTrace');
 
         // Tentar com CachedNetworkImage como fallback
         return CachedNetworkImage(
@@ -60,7 +61,7 @@ class FirebaseImageLoader {
                 child: CircularProgressIndicator(color: Colors.white),
               ),
           errorWidget: (context, url, error) {
-            debugPrint('❌ CACHED IMAGE ERROR: $error');
+            safePrint('❌ CACHED IMAGE ERROR: $error');
             return errorWidget ??
                 const Center(
                   child: Column(
@@ -90,7 +91,7 @@ class FirebaseImageLoader {
     required String imageUrl,
     BoxFit fit = BoxFit.contain,
   }) {
-    debugPrint('🔥 SIMPLE IMAGE: Carregando $imageUrl');
+    safePrint('🔥 SIMPLE IMAGE: Carregando $imageUrl');
 
     return Container(
       color: Colors.black,

@@ -5,6 +5,7 @@ import '../repositories/interest_notification_repository.dart';
 import '../models/interest_notification_model.dart';
 import '../services/interest_system_integrator.dart';
 import '../utils/enhanced_logger.dart';
+import '../utils/debug_utils.dart';
 import '../components/enhanced_interest_notification_card.dart';
 import '../views/received_interests_view.dart';
 
@@ -160,19 +161,33 @@ class _InterestDashboardViewState extends State<InterestDashboardView>
             stream: InterestNotificationRepository.getUserInterestNotifications(
                 currentUser.uid),
             builder: (context, snapshot) {
+              // ✅ TRATAMENTO DE ERRO OBRIGATÓRIO
+              if (snapshot.hasError) {
+                safePrint('InterestDashboard: Erro no stream de notificações: ${snapshot.error}');
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Erro ao carregar notificações',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
               // DEBUG: Log do estado do stream
-              print(
-                  '🔍 [INTEREST_DASHBOARD] Stream state: ${snapshot.connectionState}');
-              print('🔍 [INTEREST_DASHBOARD] Has error: ${snapshot.hasError}');
-              print('🔍 [INTEREST_DASHBOARD] Has data: ${snapshot.hasData}');
-              print(
-                  '🔍 [INTEREST_DASHBOARD] Data length: ${snapshot.data?.length ?? 0}');
+              safePrint('🔍 [INTEREST_DASHBOARD] Stream state: ${snapshot.connectionState}');
+              safePrint('🔍 [INTEREST_DASHBOARD] Has data: ${snapshot.hasData}');
+              safePrint('🔍 [INTEREST_DASHBOARD] Data length: ${snapshot.data?.length ?? 0}');
 
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                print('📋 [INTEREST_DASHBOARD] Notificações recebidas:');
+                safePrint('📋 [INTEREST_DASHBOARD] Notificações recebidas:');
                 for (var notif in snapshot.data!) {
-                  print(
-                      '   - ID: ${notif.id}, Type: ${notif.type}, Status: ${notif.status}, From: ${notif.fromUserName}');
+                  safePrint('   - ID: ${notif.id}, Type: ${notif.type}, Status: ${notif.status}, From: ${notif.fromUserName}');
                 }
               }
 
