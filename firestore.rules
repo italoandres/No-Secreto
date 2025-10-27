@@ -1,6 +1,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // ===== FUNÇÕES AUXILIARES (DEVEM VIR PRIMEIRO) =====
+    
+    // Verifica se usuário é admin
+    function isAdmin(userId) {
+      let userDoc = get(/databases/$(database)/documents/users/$(userId));
+      return userDoc.data.isAdmin == true;
+    }
+    
+    // Verifica se usuário é participante de um match
+    function isMatchParticipant(matchId, userId) {
+      let matchDoc = get(/databases/$(database)/documents/matches/$(matchId));
+      return userId == matchDoc.data.user1Id || userId == matchDoc.data.user2Id;
+    }
+    
+    // Verifica se usuário é participante de um chat
+    function isChatParticipant(chatId, userId) {
+      let chatDoc = get(/databases/$(database)/documents/match_chats/$(chatId));
+      return isMatchParticipant(chatDoc.data.matchId, userId);
+    }
+    
     // Regras para usuários
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -74,10 +95,61 @@ service cloud.firestore {
         request.auth.uid == resource.data.userId;
     }
     
+    // ✅ ADICIONADO: Regras para stories visualizados (stores_visto)
+    match /stores_visto/{docId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && 
+        request.resource.data.idUser == request.auth.uid;
+      allow delete: if request.auth != null && 
+        resource.data.idUser == request.auth.uid;
+    }
+    
+    // ✅ ADICIONADO: Regras para arquivos de stories (stories_files)
+    match /stories_files/{storyId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.authorId;
+    }
+    
+    // ✅ ADICIONADO: Regras para stories Sinais Isaque
+    match /stories_sinais_isaque/{storyId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.authorId;
+    }
+    
+    // ✅ ADICIONADO: Regras para stories Sinais Rebeca
+    match /stories_sinais_rebeca/{storyId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.authorId;
+    }
+    
     // ✅ ADICIONADO: Regra explícita para coleção sistema
     match /sistema/{docId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null;
+    }
+    
+    // ✅ ADICIONADO: Regras para logs da aplicação
+    match /app_logs/{logId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if false; // Logs são imutáveis
+    }
+    
+    // ✅ ADICIONADO: Regras para certificações (alias de certification_requests)
+    match /certifications/{certificationId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null && 
+        isAdmin(request.auth.uid);
+      allow delete: if request.auth != null && 
+        isAdmin(request.auth.uid);
     }
     
     // ✅ ADICIONADO: Regras para notificações de interesse
@@ -373,31 +445,12 @@ service cloud.firestore {
     }
     
     
-    // ===== REGRA TEMPORÁRIA PARA DESENVOLVIMENTO =====
-    // ⚠️  ATENÇÃO: Esta regra permite acesso amplo para debug
-    // TODO: Remover após identificar todas as coleções necessárias
+    // ===== REGRA CATCH-ALL PARA DESENVOLVIMENTO =====
+    // ⚠️  ATENÇÃO: Esta regra permite acesso amplo para qualquer coleção não mapeada acima
+    // ✅ POSICIONADA NO FINAL: Funciona como fallback quando nenhuma regra específica se aplica
+    // 🎯 PRODUÇÃO: Refinar regras específicas e remover esta regra depois
     match /{document=**} {
       allow read, write: if request.auth != null;
-    }
-    
-    // ===== FUNÇÕES AUXILIARES =====
-    
-    // Verifica se usuário é admin
-    function isAdmin(userId) {
-      let userDoc = get(/databases/$(database)/documents/users/$(userId));
-      return userDoc.data.isAdmin == true;
-    }
-    
-    // Verifica se usuário é participante de um match
-    function isMatchParticipant(matchId, userId) {
-      let matchDoc = get(/databases/$(database)/documents/matches/$(matchId));
-      return userId == matchDoc.data.user1Id || userId == matchDoc.data.user2Id;
-    }
-    
-    // Verifica se usuário é participante de um chat
-    function isChatParticipant(chatId, userId) {
-      let chatDoc = get(/databases/$(database)/documents/match_chats/$(chatId));
-      return isMatchParticipant(chatDoc.data.matchId, userId);
     }
   }
 }
