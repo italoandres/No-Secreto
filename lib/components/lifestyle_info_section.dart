@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 
 /// Seção que exibe informações de estilo de vida do perfil
 ///
-/// Exibe altura, status de fumante e consumo de bebida
+/// Exibe altura, status de fumante, consumo de bebida e tatuagens
 class LifestyleInfoSection extends StatelessWidget {
   final String? height;
   final String? smokingStatus;
   final String? drinkingStatus;
+  final String? tattoosStatus;
 
   const LifestyleInfoSection({
     Key? key,
     this.height,
     this.smokingStatus,
     this.drinkingStatus,
+    this.tattoosStatus,
   }) : super(key: key);
 
   @override
@@ -78,7 +80,7 @@ class LifestyleInfoSection extends StatelessWidget {
                     iconColor: Colors.orange[600]!,
                     iconBgColor: Colors.orange[100]!,
                     label: 'Fumante',
-                    value: smokingStatus!,
+                    value: _formatSmokingStatus(smokingStatus!),
                   ),
                   if (drinkingStatus?.isNotEmpty == true)
                     const SizedBox(height: 16),
@@ -91,7 +93,20 @@ class LifestyleInfoSection extends StatelessWidget {
                     iconColor: Colors.purple[600]!,
                     iconBgColor: Colors.purple[100]!,
                     label: 'Bebida',
-                    value: drinkingStatus!,
+                    value: _formatDrinkingStatus(drinkingStatus!),
+                  ),
+                  if (tattoosStatus?.isNotEmpty == true)
+                    const SizedBox(height: 16),
+                ],
+
+                // Status de Tatuagens
+                if (tattoosStatus?.isNotEmpty == true) ...[
+                  _buildLifestyleItem(
+                    icon: Icons.brush,
+                    iconColor: Colors.indigo[600]!,
+                    iconBgColor: Colors.indigo[100]!,
+                    label: 'Tatuagens',
+                    value: _formatTattoosStatus(tattoosStatus!),
                   ),
                 ],
               ],
@@ -100,6 +115,51 @@ class LifestyleInfoSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatSmokingStatus(String status) {
+    switch (status) {
+      case 'sim':
+        return 'Sim';
+      case 'nao':
+        return 'Não';
+      case 'ocasionalmente':
+        return 'Ocasionalmente';
+      case 'prefiro_nao_informar':
+        return 'Prefiro não informar';
+      default:
+        return status;
+    }
+  }
+
+  String _formatDrinkingStatus(String status) {
+    switch (status) {
+      case 'sim_frequentemente':
+        return 'Sim, frequentemente';
+      case 'sim_as_vezes':
+        return 'Sim, às vezes';
+      case 'nao':
+        return 'Não';
+      case 'prefiro_nao_informar':
+        return 'Prefiro não informar';
+      default:
+        return status;
+    }
+  }
+
+  String _formatTattoosStatus(String status) {
+    switch (status) {
+      case 'nao':
+        return 'Não';
+      case 'sim_poucas':
+        return 'Sim, poucas';
+      case 'mais_de_5':
+        return 'Mais de 5';
+      case 'mais_de_10':
+        return 'Mais de 10';
+      default:
+        return status;
+    }
   }
 
   /// Constrói um item de estilo de vida
@@ -157,6 +217,7 @@ class LifestyleInfoSection extends StatelessWidget {
   bool _hasLifestyleInfo() {
     return height?.isNotEmpty == true ||
         smokingStatus?.isNotEmpty == true ||
-        drinkingStatus?.isNotEmpty == true;
+        drinkingStatus?.isNotEmpty == true ||
+        tattoosStatus?.isNotEmpty == true;
   }
 }

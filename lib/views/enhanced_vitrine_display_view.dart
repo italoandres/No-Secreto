@@ -639,6 +639,7 @@ class _EnhancedVitrineDisplayViewState
             height: profileData!.height,
             smokingStatus: profileData!.smokingStatus,
             drinkingStatus: profileData!.drinkingStatus,
+            tattoosStatus: profileData!.tattoosStatus,
           ),
           const SizedBox(height: 24),
 
@@ -648,12 +649,13 @@ class _EnhancedVitrineDisplayViewState
           ),
           const SizedBox(height: 24),
 
-          // Relationship Status Section (com isVirgin)
+          // Relationship Status Section (com isVirgin e controle de privacidade)
           RelationshipStatusSection(
             relationshipStatus: profileData!.relationshipStatus,
             hasChildren: profileData!.hasChildren,
             childrenDetails: profileData!.childrenDetails,
-            isVirgin: profileData!.isVirgin, // Agora público
+            isVirgin: profileData!.isVirgin,
+            isVirginityPublic: profileData!.isVirginityPublic, // Controle de privacidade
             wasPreviouslyMarried: profileData!.wasPreviouslyMarried,
           ),
           const SizedBox(height: 24),

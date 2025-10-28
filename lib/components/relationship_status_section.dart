@@ -9,6 +9,7 @@ class RelationshipStatusSection extends StatelessWidget {
   final String? childrenDetails;
   final bool? isVirgin;
   final bool? wasPreviouslyMarried;
+  final bool isVirginityPublic; // Nova propriedade para controle de privacidade
 
   const RelationshipStatusSection({
     Key? key,
@@ -17,6 +18,7 @@ class RelationshipStatusSection extends StatelessWidget {
     this.childrenDetails,
     this.isVirgin,
     this.wasPreviouslyMarried,
+    this.isVirginityPublic = false, // Por padrão é privado
   }) : super(key: key);
 
   @override
@@ -83,14 +85,15 @@ class RelationshipStatusSection extends StatelessWidget {
       ));
     }
 
-    // Virginity Status (PUBLIC - user chose to share)
-    if (isVirgin != null) {
+    // Virginity Status - APENAS SE PÚBLICO
+    // Só exibe se o usuário marcou como público (isVirginityPublic = true)
+    if (isVirgin != null && isVirginityPublic) {
       statusCards.add(_buildStatusCard(
         icon: Icons.favorite_border,
         iconColor: Colors.pink[400]!,
         title: 'Intimidade',
         value: _getVirginityStatusText(),
-        isPrivate: false, // Agora é público
+        isPrivate: false, // Usuário escolheu tornar público
       ));
     }
 

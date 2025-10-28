@@ -37,6 +37,7 @@ class SpiritualProfileModel {
   String? university; // Instituição de ensino
   String? smokingStatus; // Status de fumante
   String? drinkingStatus; // Status de consumo de álcool
+  String? tattoosStatus; // Status de tatuagens (NOVO)
   List<String>? hobbies; // Hobbies e interesses
 
   // Biography Questions
@@ -57,6 +58,7 @@ class SpiritualProfileModel {
   bool? hasChildren; // "Você tem filhos?"
   String? childrenDetails; // "2 filhos" ou "Sem filhos"
   bool? isVirgin; // "Você é virgem?" (optional/private)
+  bool isVirginityPublic; // Controle de privacidade para isVirgin (padrão: false/privado)
   bool? wasPreviouslyMarried; // "Você já foi casado(a)?"
 
   // Interaction Settings
@@ -115,6 +117,7 @@ class SpiritualProfileModel {
     this.university,
     this.smokingStatus,
     this.drinkingStatus,
+    this.tattoosStatus,
     this.hobbies,
     this.purpose,
     this.isDeusEPaiMember,
@@ -128,6 +131,7 @@ class SpiritualProfileModel {
     this.hasChildren,
     this.childrenDetails,
     this.isVirgin,
+    this.isVirginityPublic = false, // Padrão: privado
     this.wasPreviouslyMarried,
     this.allowInteractions = true,
     this.blockedUsers = const [],
@@ -195,6 +199,7 @@ class SpiritualProfileModel {
       university: json['university'],
       smokingStatus: json['smokingStatus'],
       drinkingStatus: json['drinkingStatus'],
+      tattoosStatus: json['tattoosStatus'],
       hobbies:
           json['hobbies'] != null ? List<String>.from(json['hobbies']) : null,
       purpose: json['purpose'],
@@ -222,6 +227,9 @@ class SpiritualProfileModel {
       isVirgin: json['isVirgin'] is bool
           ? json['isVirgin']
           : (json['isVirgin'] != null ? true : null),
+      isVirginityPublic: json['isVirginityPublic'] is bool
+          ? json['isVirginityPublic']
+          : false, // Padrão: privado
       wasPreviouslyMarried: json['wasPreviouslyMarried'] is bool
           ? json['wasPreviouslyMarried']
           : (json['wasPreviouslyMarried'] != null ? true : null),
@@ -282,6 +290,7 @@ class SpiritualProfileModel {
       'university': university,
       'smokingStatus': smokingStatus,
       'drinkingStatus': drinkingStatus,
+      'tattoosStatus': tattoosStatus,
       'hobbies': hobbies,
       'purpose': purpose,
       'isDeusEPaiMember': isDeusEPaiMember,
@@ -296,6 +305,7 @@ class SpiritualProfileModel {
       'hasChildren': hasChildren,
       'childrenDetails': childrenDetails,
       'isVirgin': isVirgin,
+      'isVirginityPublic': isVirginityPublic, // Controle de privacidade
       'wasPreviouslyMarried': wasPreviouslyMarried,
       'allowInteractions': allowInteractions,
       'blockedUsers': blockedUsers,

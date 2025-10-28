@@ -72,6 +72,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
   // Status de Bebida Alcólica
   String? _selectedDrinkingStatus;
 
+  // Status de Tatuagens
+  String? _selectedTattoosStatus;
+
   // Hobbies e Interesses
   List<String> _selectedHobbies = [];
 
@@ -96,6 +99,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
     _selectedUniversity = widget.profile.university;
     _selectedSmokingStatus = widget.profile.smokingStatus;
     _selectedDrinkingStatus = widget.profile.drinkingStatus;
+    _selectedTattoosStatus = widget.profile.tattoosStatus;
     _selectedHobbies = widget.profile.hobbies ?? [];
 
     // Carregar dados estruturados se país já selecionado
@@ -223,6 +227,9 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
 
               const SizedBox(height: 24),
               _buildDrinkingSection(),
+
+              const SizedBox(height: 24),
+              _buildTattoosSection(),
 
               const SizedBox(height: 24),
               _buildHobbiesSection(),
@@ -1169,6 +1176,113 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
     );
   }
 
+  Widget _buildTattoosSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.brush, color: _primaryColor),
+              const SizedBox(width: 8),
+              const Text(
+                'Você tem tatuagens?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Selecione uma opção',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Opções de status de tatuagens
+          Column(
+            children: [
+              _buildTattoosOption('nao', 'Não', Icons.block),
+              const SizedBox(height: 12),
+              _buildTattoosOption('sim_poucas', 'Sim, poucas', Icons.brush_outlined),
+              const SizedBox(height: 12),
+              _buildTattoosOption('mais_de_5', 'Mais de 5', Icons.brush),
+              const SizedBox(height: 12),
+              _buildTattoosOption('mais_de_10', 'Mais de 10', Icons.palette),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTattoosOption(String value, String label, IconData icon) {
+    final isSelected = _selectedTattoosStatus == value;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedTattoosStatus = value;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? _primaryColor.withOpacity(0.1) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? _primaryColor : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? _primaryColor : Colors.grey[600],
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? _primaryColor : Colors.black87,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: _primaryColor,
+                size: 24,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHobbiesSection() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1358,6 +1472,7 @@ class _ProfileIdentityTaskViewState extends State<ProfileIdentityTaskView> {
         'university': _selectedUniversity,
         'smokingStatus': _selectedSmokingStatus,
         'drinkingStatus': _selectedDrinkingStatus,
+        'tattoosStatus': _selectedTattoosStatus,
         'hobbies': _selectedHobbies.isNotEmpty ? _selectedHobbies : null,
       };
 
