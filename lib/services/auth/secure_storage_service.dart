@@ -21,6 +21,7 @@ class SecureStorageService {
   static const String _keyPasswordHash = 'password_hash';
   static const String _keyTimeoutMinutes = 'timeout_minutes';
   static const String _keyLastAuthTime = 'last_auth_time';
+  static const String _keyAutoBiometricEnabled = 'auto_biometric_enabled';
 
   // App Lock Enabled
   Future<void> setAppLockEnabled(bool enabled) async {
@@ -95,6 +96,17 @@ class SecureStorageService {
     if (timestamp == null) return null;
 
     return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  // Auto Biometric Enabled (preferência do usuário)
+  Future<void> setAutoBiometricEnabled(bool enabled) async {
+    await _storage.write(key: _keyAutoBiometricEnabled, value: enabled.toString());
+  }
+
+  Future<bool> getAutoBiometricEnabled() async {
+    final value = await _storage.read(key: _keyAutoBiometricEnabled);
+    // Por padrão, retorna false (usuário precisa optar por biometria automática)
+    return value == 'true';
   }
 
   // Clear All

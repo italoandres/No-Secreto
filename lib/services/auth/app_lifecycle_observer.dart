@@ -15,12 +15,10 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
       case AppLifecycleState.paused:
         // App foi para background
         _backgroundTime = DateTime.now();
-        print('🔐 App foi para background: $_backgroundTime');
         break;
 
       case AppLifecycleState.resumed:
         // App voltou para foreground
-        print('🔐 App voltou para foreground');
         _checkIfAuthNeeded();
         break;
 
@@ -44,14 +42,8 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
       final duration = DateTime.now().difference(_backgroundTime!);
       final timeoutMinutes = await _authService.getTimeoutMinutes();
 
-      print('🔐 Tempo em background: ${duration.inMinutes} minutos');
-      print('🔐 Timeout configurado: $timeoutMinutes minutos');
-
       if (duration.inMinutes >= timeoutMinutes) {
-        print('🔐 Timeout excedido! Mostrando tela de autenticação...');
         _showAuthScreen();
-      } else {
-        print('🔐 Dentro do timeout. Não precisa autenticar.');
       }
     }
   }
@@ -87,8 +79,6 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
     // Verificar se precisa autenticar
     final needsAuth = await authService.needsAuthentication();
     if (!needsAuth) return;
-
-    print('🔐 Mostrando tela de autenticação no startup...');
 
     // Mostrar tela de bloqueio
     await Get.dialog(

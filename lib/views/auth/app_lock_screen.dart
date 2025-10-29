@@ -40,36 +40,27 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
   Future<void> _initialize() async {
     try {
-      print('🔐 === INICIANDO DETECÇÃO DE BIOMETRIA ===');
-      
       // Carregar método de autenticação
       _authMethod = await _authService.getPreferredAuthMethod();
-      print('📱 Método de auth configurado: $_authMethod');
       
       // Verificar biometria de forma mais robusta
       final localAuth = LocalAuthentication();
       
       // 1. Verificar se dispositivo suporta biometria
       _deviceHasBiometricHardware = await localAuth.isDeviceSupported();
-      print('🔍 Dispositivo suporta biometria: $_deviceHasBiometricHardware');
       
       // 2. Se suporta, verificar se há biometrias cadastradas
       if (_deviceHasBiometricHardware) {
         final availableBiometrics = await localAuth.getAvailableBiometrics();
         _biometricIsEnrolled = availableBiometrics.isNotEmpty;
-        print('👆 Biometrias disponíveis: $availableBiometrics');
-        print('✅ Biometria cadastrada: $_biometricIsEnrolled');
       } else {
         _biometricIsEnrolled = false;
-        print('❌ Dispositivo não tem hardware de biometria');
       }
 
       // Carregar informações de biometria se disponível
       if (_authMethod == AuthMethod.biometric ||
           _authMethod == AuthMethod.biometricWithPasswordFallback) {
         _biometricInfo = await _authService.getBiometricInfo();
-        print('📊 BiometricInfo.isAvailable: ${_biometricInfo?.isAvailable}');
-        print('📊 BiometricInfo.types: ${_biometricInfo?.types}');
       }
 
       // Marcar como inicializado
@@ -77,15 +68,17 @@ class _AppLockScreenState extends State<AppLockScreen> {
         _isInitialized = true;
       });
 
-      // Se tem biometria configurada, tentar autenticar automaticamente
-      if (_biometricIsEnrolled && _biometricInfo?.isAvailable == true) {
-        print('🚀 Tentando autenticação biométrica automática...');
+      // ✅ NOVA LÓGICA: Só chama biometria automaticamente se usuário já habilitou antes
+      final autoBiometricEnabled = await _authService.getAutoBiometricEnabled();
+      
+      if (autoBiometricEnabled && 
+          _biometricIsEnrolled && 
+          _biometricInfo?.isAvailable == true) {
+        // Usuário já optou por biometria automática anteriormente
         await _authenticateWithBiometric();
       }
-      
-      print('🔐 === FIM DA DETECÇÃO ===');
+      // Caso contrário, aguarda usuário clicar no botão "Usar Biometria"
     } catch (e) {
-      print('❌ ERRO na inicialização: $e');
       // Em caso de erro, marcar como inicializado mesmo assim
       setState(() {
         _isInitialized = true;
@@ -94,15 +87,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
   }
 
   Future<void> _authenticateWithBiometric() async {
-    print('🔐 === INICIANDO AUTENTICAÇÃO BIOMÉTRICA ===');
-    print('📊 Estado atual:');
-    print('  - _isAuthenticating: $_isAuthenticating');
-    print('  - _authMethod: $_authMethod');
-    print('  - _biometricIsEnrolled: $_biometricIsEnrolled');
-    print('  - _biometricInfo?.isAvailable: ${_biometricInfo?.isAvailable}');
-    
     if (_isAuthenticating) {
-      print('⚠️ Já está autenticando, ignorando clique...');
       return;
     }
 
@@ -112,20 +97,15 @@ class _AppLockScreenState extends State<AppLockScreen> {
     });
 
     try {
-      print('📱 Chamando _authService.authenticate()...');
       final authenticated = await _authService.authenticate(
         reason: 'Autentique-se para acessar o aplicativo',
       );
-      print('✅ Resultado da autenticação: $authenticated');
 
       if (authenticated) {
-        print('🎉 Autenticação bem-sucedida! Chamando onAuthenticated()...');
         widget.onAuthenticated();
       } else {
-        print('❌ Autenticação falhou (usuário cancelou ou falhou)');
         _failedAttempts++;
         if (_failedAttempts >= 3) {
-          print('⚠️ 3 tentativas falhadas, mudando para senha');
           _switchToPasswordFallback();
         } else {
           setState(() {
@@ -134,12 +114,9 @@ class _AppLockScreenState extends State<AppLockScreen> {
         }
       }
     } catch (e) {
-      print('❌ ERRO na autenticação biométrica: $e');
-      print('❌ Tipo do erro: ${e.runtimeType}');
       _failedAttempts++;
       if (_failedAttempts >= 3 ||
           _authMethod == AuthMethod.biometricWithPasswordFallback) {
-        print('⚠️ Mudando para senha devido ao erro');
         _switchToPasswordFallback();
       } else {
         setState(() {
@@ -152,7 +129,6 @@ class _AppLockScreenState extends State<AppLockScreen> {
           _isAuthenticating = false;
         });
       }
-      print('🔐 === FIM DA AUTENTICAÇÃO BIOMÉTRICA ===');
     }
   }
 
@@ -464,18 +440,16 @@ class _AppLockScreenState extends State<AppLockScreen> {
             Column(
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    print('👆 BOTÃO "Usar Biometria" CLICADO!');
-                    // Mostrar na tela também
-                    Get.rawSnackbar(
-                      message: '👆 Botão clicado! Iniciando biometria...',
-                      backgroundColor: Colors.blue,
-                      duration: const Duration(seconds: 2),
-                    );
+                  onPressed: () async {
                     setState(() {
                       _errorMessage = null;
                     });
-                    _authenticateWithBiometric();
+                    
+                    // ✅ Salvar preferência: usuário quer biometria automática
+                    await _authService.setAutoBiometricEnabled(true);
+                    
+                    // Autenticar
+                    await _authenticateWithBiometric();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,

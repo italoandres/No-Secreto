@@ -23,58 +23,12 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
-  final showSenha = false.obs;
-
+class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
     NotificationController.startFCM();
-    WidgetsBinding.instance.addObserver(this);
   }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (kDebugMode) {
-      safePrint(state);
-    }
-    if (state != AppLifecycleState.resumed) {
-      showSenha.value = true;
-      TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
-    } else {
-      if (HomeController.disableShowSenha == true) {
-        showSenha.value = false;
-      } else {
-        final DateTime timestamp1 = DateTime.now();
-        final DateTime timestamp2 = Timestamp.fromMillisecondsSinceEpoch(
-                TokenUsuario().lastTimestempFocused * 1000)
-            .toDate();
-        Duration difference = timestamp1.difference(timestamp2);
-        if (kDebugMode) {
-          safePrint('---difference.inSeconds---');
-          safePrint(difference.inSeconds);
-          safePrint('---difference.inSeconds---');
-          safePrint('---HomeController.disableShowSenha---');
-          safePrint(HomeController.disableShowSenha);
-          safePrint('---HomeController.disableShowSenha---');
-        }
-        TokenUsuario().lastTimestempFocused = Timestamp.now().seconds;
-        if (difference.inSeconds > 5) {
-          showSenha.value = true;
-        } else {
-          showSenha.value = false;
-        }
-      }
-    }
-  }
-
-  final senhaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -120,83 +74,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
               if (user.perfilIsComplete != true) {
                 return CompletarPerfilView(user: user);
               }
-              return Stack(
-                children: [
-                  const ChatView(),
-                  Obx(() => showSenha.value == false ||
-                          (kIsWeb ? true : !Platform.isAndroid)
-                      ? const SizedBox()
-                      : SingleChildScrollView(
-                          child: Container(
-                            color: Colors.white,
-                            constraints: BoxConstraints(minHeight: Get.height),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset('lib/assets/img/logo.png',
-                                    width: Get.width * 0.42),
-                                const SizedBox(height: 52),
-                                Text(AppLanguage.lang('digite_senha_abaixo'),
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 18)),
-                                const SizedBox(height: 32),
-                                TextField(
-                                  textAlign: TextAlign.center,
-                                  controller: senhaController,
-                                  decoration: InputDecoration(
-                                    hintText: AppLanguage.lang('digite_aqui'),
-                                  ),
-                                  obscureText: true,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      height: 35,
-                                      margin: const EdgeInsets.only(bottom: 16),
-                                      child: TextButton(
-                                        style: TextButton.styleFrom(
-                                            padding: const EdgeInsets.all(0)),
-                                        onPressed: () => LoginController
-                                            .recuperarSenhaSemEmail(),
-                                        child: Text(
-                                            AppLanguage.lang('esqueci_senha')),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                SizedBox(
-                                  width: Get.width,
-                                  height: 52,
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      if (senhaController.text.trim().isEmpty) {
-                                        return;
-                                      }
-                                      bool r =
-                                          await UsuarioRepository.validateSenha(
-                                              senhaController.text.trim());
-                                      if (r == false) {
-                                        Get.rawSnackbar(
-                                            message: AppLanguage.lang(
-                                                'senha_invalida'));
-                                        return;
-                                      }
-
-                                      showSenha.value = false;
-                                      senhaController.clear();
-                                    },
-                                    child: Text(AppLanguage.lang('continuar')),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ))
-                ],
-              );
+              return const ChatView();
             }));
   }
 }

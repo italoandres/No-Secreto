@@ -77,6 +77,8 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
+          
+          // Botão de biometria - APENAS se disponível
           if (hasBiometric) ...[
             SizedBox(
               width: double.infinity,
@@ -95,20 +97,35 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
             ),
             const SizedBox(height: 8),
           ],
+          
+          // Botão de senha - SEMPRE disponível (mesmo sem biometria)
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Get.back();
-                _enablePasswordSecurity();
-              },
-              icon: const Icon(Icons.lock),
-              label: const Text('Apenas Senha'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blue,
-                side: const BorderSide(color: Colors.blue),
-              ),
-            ),
+            child: hasBiometric
+                ? OutlinedButton.icon(
+                    onPressed: () {
+                      Get.back();
+                      _enablePasswordSecurity();
+                    },
+                    icon: const Icon(Icons.lock),
+                    label: const Text('Apenas Senha'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                    ),
+                  )
+                : ElevatedButton.icon(
+                    onPressed: () {
+                      Get.back();
+                      _enablePasswordSecurity();
+                    },
+                    icon: const Icon(Icons.lock),
+                    label: const Text('Proteger com Senha'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
           ),
         ],
       ),

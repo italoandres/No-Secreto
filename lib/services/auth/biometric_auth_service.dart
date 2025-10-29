@@ -73,29 +73,19 @@ class BiometricAuthService {
   Future<bool> authenticate({
     String reason = 'Autentique-se para acessar o aplicativo',
   }) async {
-    print('🔒 [BiometricAuthService] authenticate() chamado');
-    print('🔒 Motivo: $reason');
-    
     try {
-      print('🔒 Verificando canCheckBiometrics()...');
       final canCheck = await canCheckBiometrics();
-      print('🔒 canCheckBiometrics() = $canCheck');
       
       if (!canCheck) {
-        print('❌ canCheckBiometrics() retornou false!');
         throw AuthException.biometricNotAvailable();
       }
 
-      print('🔒 Obtendo biometrias disponíveis...');
       final availableBiometrics = await getAvailableBiometrics();
-      print('🔒 Biometrias disponíveis: $availableBiometrics');
       
       if (availableBiometrics.isEmpty) {
-        print('❌ Nenhuma biometria disponível!');
         throw AuthException.biometricNotEnrolled();
       }
 
-      print('🔒 Chamando _localAuth.authenticate()...');
       final authenticated = await _localAuth.authenticate(
         localizedReason: reason,
         authMessages: const <AuthMessages>[
@@ -120,25 +110,17 @@ class BiometricAuthService {
           biometricOnly: true,
         ),
       );
-      
-      print('🔒 _localAuth.authenticate() retornou: $authenticated');
 
       if (authenticated) {
-        print('✅ Autenticação bem-sucedida! Salvando timestamp...');
         _isAuthenticated = true;
         _lastAuthTime = DateTime.now();
         await _storage.setLastAuthTime(_lastAuthTime!);
-      } else {
-        print('⚠️ Autenticação retornou false (usuário cancelou?)');
       }
 
       return authenticated;
-    } on AuthException catch (e) {
-      print('❌ AuthException capturada: ${e.message}');
+    } on AuthException {
       rethrow;
     } catch (e) {
-      print('❌ Erro inesperado na autenticação biométrica: $e');
-      print('❌ Tipo do erro: ${e.runtimeType}');
       throw AuthException.systemError(e.toString());
     }
   }
@@ -301,6 +283,18 @@ class BiometricAuthService {
   void invalidateSession() {
     _isAuthenticated = false;
     _lastAuthTime = null;
+  }
+
+  // ========== Preferência de Biometria Automática ==========
+
+  /// Define se biometria deve ser chamada automaticamente
+  Future<void> setAutoBiometricEnabled(bool enabled) async {
+    await _storage.setAutoBiometricEnabled(enabled);
+  }
+
+  /// Verifica se biometria automática está habilitada
+  Future<bool> getAutoBiometricEnabled() async {
+    return await _storage.getAutoBiometricEnabled();
   }
 
   /// Limpa todas as configurações
