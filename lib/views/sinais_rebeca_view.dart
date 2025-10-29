@@ -351,7 +351,7 @@ class _SinaisRebecaViewState extends State<SinaisRebecaView> {
                                                   left: 16,
                                                   right: 16,
                                                   bottom: 16,
-                                                  top: appBarHeight * 0.2),
+                                                  top: appBarHeight * 0.6),
                                               child: Text(
                                                   AppLanguage.lang(
                                                       'send_first_msg'),

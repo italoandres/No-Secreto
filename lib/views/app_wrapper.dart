@@ -8,6 +8,8 @@ import '/views/onboarding_view.dart';
 import '/views/login_view.dart';
 import '/views/home_view.dart';
 import '/utils/debug_utils.dart';
+import '/services/auth/app_lifecycle_observer.dart';
+import '/services/auth/biometric_auth_service.dart';
 
 class AppWrapper extends StatefulWidget {
   const AppWrapper({Key? key}) : super(key: key);
@@ -19,11 +21,21 @@ class AppWrapper extends StatefulWidget {
 class _AppWrapperState extends State<AppWrapper> {
   bool? _isFirstTime;
   bool _isLoading = true;
+  final AppLifecycleObserver _lifecycleObserver = AppLifecycleObserver();
 
   @override
   void initState() {
     super.initState();
     _checkFirstTime();
+    // Adicionar observer para detectar background/foreground
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+  }
+
+  @override
+  void dispose() {
+    // Remover observer ao destruir widget
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
+    super.dispose();
   }
 
   Future<void> _checkFirstTime() async {
@@ -124,6 +136,10 @@ class _AppWrapperState extends State<AppWrapper> {
         // 2. Usuário autenticado - pode acessar HomeView
         if (snapshot.hasData && snapshot.data != null) {
           safePrint('AppWrapper: Usuário autenticado, mostrando HomeView');
+          // Verificar se precisa mostrar tela de autenticação
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            AppLifecycleObserver.showAuthScreenIfNeeded();
+          });
           return const HomeView();
         }
         

@@ -68,6 +68,8 @@
 	<string>Este aplicativo requer acesso à biblioteca de fotos para atualizar a imagem do seu perfil.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>speech</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Este aplicativo usa Face ID para proteger seu acesso e manter suas informações seguras.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>

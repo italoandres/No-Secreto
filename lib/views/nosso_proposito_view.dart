@@ -2124,7 +2124,7 @@ class _NossoPropositoViewState extends State<NossoPropositoView> {
                     left: 16,
                     right: 16,
                     bottom: 16,
-                    top: (Get.width * 339 / 1289) * 0.2),
+                    top: (Get.width * 339 / 1289) * 0.6),
                 child: Text(AppLanguage.lang('send_first_msg'),
                     style: TextStyle(color: Colors.grey.shade700)),
               ),

@@ -13,6 +13,9 @@ import '../views/login_view.dart';
 import '../views/select_language_view.dart';
 import '../repositories/purpose_partnership_repository.dart';
 import '../models/purpose_partnership_model.dart';
+import '../services/auth/biometric_auth_service.dart';
+import '../models/auth/auth_method.dart';
+import '../models/auth/biometric_info.dart';
 
 class UsernameSettingsView extends StatefulWidget {
   final UsuarioModel user;
@@ -35,27 +38,141 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   );
 
   bool _isSaving = false;
-  bool _passwordEnabled = false;
+  final BiometricAuthService _authService = BiometricAuthService();
 
   @override
   void initState() {
     super.initState();
     _initializeFields();
     _initializeImageControllers();
-    _loadPasswordSettings();
   }
 
-  void _loadPasswordSettings() async {
-    // Verificar se o usuário tem senha configurada (se não é login social)
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Se o usuário tem providerData com password, significa que tem senha
-      bool hasPassword = user.providerData
-          .any((provider) => provider.providerId == 'password');
-      setState(() {
-        _passwordEnabled = hasPassword;
-      });
-    }
+  Future<Map<String, dynamic>> _loadSecuritySettings() async {
+    final isEnabled = await _authService.isAppLockEnabled();
+    final method = await _authService.getPreferredAuthMethod();
+    final biometricInfo = await _authService.getBiometricInfo();
+
+    return {
+      'isEnabled': isEnabled,
+      'authMethod': method.description,
+      'biometricInfo': biometricInfo.description,
+      'biometricIcon': biometricInfo.iconData,
+    };
+  }
+
+  void _showEnableSecurityDialog(String biometricInfo) async {
+    final hasBiometric = biometricInfo.isNotEmpty &&
+        !biometricInfo.contains('não disponível');
+
+    Get.defaultDialog(
+      title: 'Ativar Proteção',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.security, color: Colors.blue, size: 48),
+          const SizedBox(height: 16),
+          const Text(
+            'Escolha como proteger o aplicativo:',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 16),
+          if (hasBiometric) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Get.back();
+                  _enableBiometricSecurity();
+                },
+                icon: const Icon(Icons.fingerprint),
+                label: const Text('Biometria + Senha'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Get.back();
+                _enablePasswordSecurity();
+              },
+              icon: const Icon(Icons.lock),
+              label: const Text('Apenas Senha'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.blue,
+                side: const BorderSide(color: Colors.blue),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancelar'),
+        ),
+      ],
+    );
+  }
+
+  void _enableBiometricSecurity() {
+    _showPasswordDialog(useBiometric: true);
+  }
+
+  void _enablePasswordSecurity() {
+    _showPasswordDialog(useBiometric: false);
+  }
+
+  void _showDisableSecurityDialog() {
+    Get.defaultDialog(
+      title: 'Desativar Proteção',
+      content: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.warning, color: Colors.orange, size: 48),
+          SizedBox(height: 16),
+          Text(
+            'Tem certeza que deseja desativar a proteção?',
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8),
+          Text(
+            'O app ficará acessível sem autenticação.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await _authService.disableAppLock();
+            Get.back();
+            setState(() {});
+            Get.rawSnackbar(
+              message: 'Proteção desativada',
+              backgroundColor: Colors.orange,
+            );
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+          child: const Text('Desativar', style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    _showPasswordDialog(useBiometric: null, isChanging: true);
   }
 
   void _initializeImageControllers() {
@@ -674,190 +791,145 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
   }
 
   Widget _buildSecuritySection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.security, color: Colors.red),
-              const SizedBox(width: 8),
-              Text(
-                'Segurança',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Switch para ativar/desativar senha
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Senha do Aplicativo',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _passwordEnabled
-                          ? 'App protegido com senha ao abrir'
-                          : 'App sem proteção por senha',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _passwordEnabled
-                            ? Colors.green.shade600
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                value: _passwordEnabled,
-                onChanged: (value) {
-                  if (value) {
-                    // Ativar senha - mostrar dialog para criar/configurar
-                    _showPasswordDialog();
-                  } else {
-                    // Desativar senha - mostrar confirmação
-                    _showDisablePasswordDialog();
-                  }
-                },
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Botão para criar/editar senha
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                _showPasswordDialog();
-              },
-              icon: const Icon(Icons.key),
-              label: Text(_passwordEnabled ? 'Alterar Senha' : 'Criar Senha'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
-              ),
+    return FutureBuilder(
+      future: _loadSecuritySettings(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.withOpacity(0.2)),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDisablePasswordDialog() {
-    Get.defaultDialog(
-      title: 'Desativar Senha',
-      content: const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.warning, color: Colors.orange, size: 48),
-          SizedBox(height: 16),
-          Text(
-            'Tem certeza que deseja desativar a proteção por senha?',
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 8),
-          Text(
-            'O app ficará acessível sem senha.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _passwordEnabled = false;
-            });
-            Get.back();
-            Get.rawSnackbar(
-              message: 'Proteção por senha desativada',
-              backgroundColor: Colors.orange,
-            );
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          child: const Text('Desativar', style: TextStyle(color: Colors.white)),
-        ),
-      ],
-    );
-  }
-
-  void _savePassword(String password) async {
-    try {
-      Get.defaultDialog(
-        title: 'Configurando Senha',
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Configurando proteção por senha...'),
-          ],
-        ),
-        barrierDismissible: false,
-      );
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Se o usuário não tem senha (login social), criar uma
-        bool hasPassword = user.providerData
-            .any((provider) => provider.providerId == 'password');
-
-        if (!hasPassword) {
-          // Usuário logou com Google/Apple, precisa criar senha
-          await user.updatePassword(password);
-        } else {
-          // Usuário já tem senha, apenas atualizar
-          await user.updatePassword(password);
+            child: const Center(child: CircularProgressIndicator()),
+          );
         }
 
-        setState(() {
-          _passwordEnabled = true;
-        });
+        final securityData = snapshot.data as Map<String, dynamic>;
+        final isEnabled = securityData['isEnabled'] as bool;
+        final authMethod = securityData['authMethod'] as String;
+        final biometricInfo = securityData['biometricInfo'] as String;
+        final biometricIcon = securityData['biometricIcon'] as IconData;
 
-        Get.back(); // Fechar dialog de loading
-        Get.rawSnackbar(
-          message: 'Senha configurada com sucesso!',
-          backgroundColor: Colors.green,
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red.withOpacity(0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.security, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Segurança',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Switch para ativar/desativar proteção
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Proteção do Aplicativo',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          isEnabled ? authMethod : 'App sem proteção',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isEnabled
+                                ? Colors.green.shade600
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: isEnabled,
+                    onChanged: (value) {
+                      if (value) {
+                        _showEnableSecurityDialog(biometricInfo);
+                      } else {
+                        _showDisableSecurityDialog();
+                      }
+                    },
+                  ),
+                ],
+              ),
+
+              // Informações sobre biometria disponível
+              if (biometricInfo.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(biometricIcon, color: Colors.blue, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          biometricInfo,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // Botões de configuração (apenas se proteção estiver ativada)
+              if (isEnabled) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showChangePasswordDialog(),
+                    icon: const Icon(Icons.key),
+                    label: const Text('Alterar Senha'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         );
-      }
-    } catch (e) {
-      Get.back(); // Fechar dialog de loading
-      Get.rawSnackbar(
-        message: 'Erro ao configurar senha: $e',
-        backgroundColor: Colors.red,
-      );
-    }
+      },
+    );
   }
 
-  void _showPasswordDialog() {
+  void _showPasswordDialog({bool? useBiometric, bool isChanging = false}) {
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     bool obscurePassword = true;
@@ -953,14 +1025,70 @@ class _UsernameSettingsViewState extends State<UsernameSettingsView> {
               return;
             }
 
-            // Salvar senha usando o sistema existente do Firebase
-            _savePassword(passwordController.text);
+            // Salvar senha usando o novo serviço
+            _savePasswordWithBiometric(
+              passwordController.text,
+              useBiometric,
+              isChanging,
+            );
             Get.back();
           },
-          child: const Text('Salvar'),
+          child: Text(isChanging ? 'Alterar' : 'Salvar'),
         ),
       ],
     );
+  }
+
+  void _savePasswordWithBiometric(
+    String password,
+    bool? useBiometric,
+    bool isChanging,
+  ) async {
+    try {
+      Get.defaultDialog(
+        title: isChanging ? 'Alterando Senha' : 'Configurando Proteção',
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Configurando...'),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+
+      if (isChanging) {
+        // Apenas alterar a senha
+        await _authService.setPassword(password);
+      } else {
+        // Ativar proteção com método escolhido
+        final method = useBiometric == true
+            ? AuthMethod.biometricWithPasswordFallback
+            : AuthMethod.password;
+
+        await _authService.enableAppLock(
+          method: method,
+          password: password,
+        );
+      }
+
+      Get.back(); // Fechar loading
+      setState(() {}); // Atualizar UI
+
+      Get.rawSnackbar(
+        message: isChanging
+            ? 'Senha alterada com sucesso!'
+            : 'Proteção ativada com sucesso!',
+        backgroundColor: Colors.green,
+      );
+    } catch (e) {
+      Get.back(); // Fechar loading
+      Get.rawSnackbar(
+        message: 'Erro: ${e.toString()}',
+        backgroundColor: Colors.red,
+      );
+    }
   }
 
   Widget _buildWallpaperSection() {
