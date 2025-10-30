@@ -11,6 +11,7 @@ import '../controllers/story_interactions_controller.dart';
 import '../controllers/story_auto_close_controller.dart';
 import '../components/story_interactions_component.dart';
 import '../components/story_comments_component.dart';
+import 'stories/community_comments_view.dart';
 import '../utils/enhanced_image_loader.dart';
 import '../utils/firebase_image_loader.dart';
 import '../utils/context_utils.dart';
@@ -565,9 +566,15 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   void _showComments() {
-    Get.bottomSheet(
-      StoryCommentsComponent(storyId: stories[currentIndex].id!),
-      isScrollControlled: true,
+    final story = stories[currentIndex];
+    
+    // Navegação tradicional para tela de comentários
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CommunityCommentsView(
+          story: story,
+        ),
+      ),
     );
   }
 

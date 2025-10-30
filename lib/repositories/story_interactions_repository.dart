@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../models/story_like_model.dart';
 import '../models/story_comment_model.dart';
 import '../models/story_favorite_model.dart';
+import '../models/community_comment_model.dart';
 import '../models/usuario_model.dart';
 import 'usuario_repository.dart';
 import '../utils/context_utils.dart';
@@ -648,6 +649,128 @@ class StoryInteractionsRepository {
             'DEBUG INTERACTIONS: Erro no fallback clipboard: $clipboardError');
         rethrow;
       }
+    }
+  }
+
+  // ============================================================================
+  // NOVA ARQUITETURA: COMUNIDADE VIVA
+  // ============================================================================
+
+  /// Query 1: Busca os comentários raiz MAIS COMENTADOS ("Chats em Alta")
+  /// Retorna os Top 5 comentários com mais respostas
+  Stream<List<CommunityCommentModel>> getHotChatsStream(String storyId) {
+    return _firestore
+        .collection('community_comments')
+        .where('storyId', isEqualTo: storyId)
+        .where('parentId', isNull: true) // Apenas comentários raiz
+        .where('replyCount', isGreaterThan: 0) // Que tenham respostas
+        .orderBy('replyCount', descending: true) // Ordena pelos mais populares
+        .limit(5) // Pega só o Top 5
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CommunityCommentModel.fromFirestore(doc))
+            .toList());
+  }
+
+  /// Query 2: Busca os comentários raiz MAIS RECENTES ("Chats Recentes")
+  /// Retorna os últimos 20 comentários para paginação
+  Stream<List<CommunityCommentModel>> getRecentChatsStream(
+      String storyId) {
+    return _firestore
+        .collection('community_comments')
+        .where('storyId', isEqualTo: storyId)
+        .where('parentId', isNull: true) // Apenas comentários raiz
+        .orderBy('createdAt', descending: true) // Ordena pelos mais novos
+        .limit(20) // Pega os últimos 20 (para paginação depois)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CommunityCommentModel.fromFirestore(doc))
+            .toList());
+  }
+
+  /// Query 3: Busca as RESPOSTAS de um Chat/Comentário específico
+  /// Retorna todas as respostas de um comentário raiz
+  Stream<List<CommunityCommentModel>> getChatRepliesStream(
+      String parentCommentId) {
+    return _firestore
+        .collection('community_comments')
+        .where('parentId', isEqualTo: parentCommentId) // Onde o parentId é o chat
+        .orderBy('createdAt', descending: false) // Ordena as respostas da mais antiga
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CommunityCommentModel.fromFirestore(doc))
+            .toList());
+  }
+
+  // ============================================================================
+  // MÉTODOS AUXILIARES PARA COMUNIDADE VIVA
+  // ============================================================================
+
+  /// Busca dados do usuário (nome e foto) da coleção spiritual_profiles
+  Future<Map<String, String>?> getUserDataForComment(String userId) async {
+    try {
+      final profileDoc = await _firestore
+          .collection('spiritual_profiles')
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (profileDoc.docs.isEmpty) {
+        print('❌ COMMUNITY: Perfil espiritual não encontrado para userId: $userId');
+        return null;
+      }
+
+      final data = profileDoc.docs.first.data();
+      
+      return {
+        'displayName': data['displayName'] as String? ?? 'Usuário',
+        'mainPhotoUrl': data['mainPhotoUrl'] as String? ?? data['photoUrl'] as String? ?? '',
+      };
+    } catch (e) {
+      print('❌ COMMUNITY: Erro ao buscar dados do usuário: $e');
+      return null;
+    }
+  }
+
+  /// Adiciona um comentário raiz (sem parentId)
+  Future<String?> addRootComment({
+    required String storyId,
+    required String userId,
+    required String userName,
+    required String userAvatarUrl,
+    required String text,
+  }) async {
+    try {
+      // Validações
+      if (storyId.isEmpty || userId.isEmpty || text.trim().isEmpty) {
+        throw Exception('Dados inválidos para criar comentário');
+      }
+
+      // Criar o comentário
+      final comment = CommunityCommentModel(
+        commentId: '', // Será preenchido pelo Firestore
+        storyId: storyId,
+        userId: userId,
+        userName: userName,
+        userAvatarUrl: userAvatarUrl,
+        text: text.trim(),
+        createdAt: Timestamp.fromDate(DateTime.now()),
+        parentId: null, // Comentário raiz
+        replyCount: 0,
+        reactionCount: 0,
+        isCurated: false,
+      );
+
+      // Salvar no Firestore
+      final docRef = await _firestore
+          .collection('community_comments')
+          .add(comment.toJson());
+
+      print('✅ COMMUNITY: Comentário raiz criado com ID: ${docRef.id}');
+      return docRef.id;
+    } catch (e) {
+      print('❌ COMMUNITY: Erro ao criar comentário raiz: $e');
+      rethrow;
     }
   }
 }
