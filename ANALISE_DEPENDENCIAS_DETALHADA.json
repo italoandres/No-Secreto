@@ -1,0 +1,1076 @@
+{
+  "summary": {
+    "total_files": 108,
+    "by_category": {
+      "debug": 17,
+      "test": 36,
+      "fix": 21,
+      "other": 34
+    },
+    "by_risk": {
+      "safe": 103,
+      "low": 0,
+      "medium": 5,
+      "high": 0,
+      "critical": 0
+    }
+  },
+  "files_by_risk": {
+    "SAFE": [
+      {
+        "path": "utils\\debug_accepted_matches.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\repositories\\simple_accepted_matches_repository.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_explore_profiles_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "populate_explore_profiles_test_data.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_favorites.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_interest_notifications_ui.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:get\\get.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\utils\\fix_firebase_index_interests.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_itala_search.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\utils\\unified_profile_search.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_logger.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\foundation.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_notification_flow.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_online_status_button.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\foundation.dart",
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "routes.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_profile_completion.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\services\\profile_completion_detector.dart",
+          "..\\repositories\\spiritual_profile_repository.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_profile_fields.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_real_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\services\\real_interest_notification_service.dart",
+          "..\\repositories\\real_interests_repository.dart",
+          "..\\services\\real_user_data_cache.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_received_interests.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_search_profiles.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\debug_vitrine_invites.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "views\\debug_test_profiles_view.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\create_test_profiles_sinais.dart",
+          "..\\utils\\create_test_interests_matches.dart",
+          "..\\utils\\update_test_profiles_purpose.dart",
+          "..\\utils\\update_profiles_deus_e_pai.dart",
+          "..\\utils\\update_profiles_hobbies.dart",
+          "..\\utils\\add_age_to_test_profiles.dart",
+          "..\\utils\\create_new_interest_notifications.dart"
+        ]
+      },
+      {
+        "path": "test_onboarding.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:flutter\\services.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_accepted_matches.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:flutter\\material.dart",
+          "package:get\\get.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_automatic_messages.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "services\\automatic_message_service.dart",
+          "repositories\\chat_repository.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_certification_approval_service.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\services\\certification_approval_service.dart",
+          "..\\models\\certification_request_model.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_certification_complete.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\services\\spiritual_certification_service.dart",
+          "..\\services\\certification_approval_service.dart",
+          "..\\models\\certification_request_model.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_chat_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\services\\match_chat_creator.dart",
+          "..\\services\\robust_notification_handler.dart",
+          "..\\services\\timestamp_sanitizer.dart",
+          "..\\components\\robust_conversar_button.dart",
+          "..\\components\\robust_interest_notification.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_complete_match_flow.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\services\\mutual_match_detector.dart",
+          "..\\services\\notification_orchestrator.dart",
+          "..\\services\\chat_system_manager.dart",
+          "..\\services\\real_time_notification_service.dart",
+          "..\\models\\notification_data.dart",
+          "..\\models\\message_data.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_complete_notification_system.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\services\\notification_system_integrator.dart",
+          "..\\services\\javascript_error_handler.dart",
+          "..\\services\\error_recovery_system.dart",
+          "..\\services\\real_time_sync_manager.dart",
+          "..\\services\\advanced_diagnostic_system.dart",
+          "..\\services\\real_time_monitoring_system.dart",
+          "..\\services\\fixed_notification_pipeline.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_current_notification_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\repositories\\interest_notification_repository.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_deep_investigation.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "deep_investigation_real_notifications.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_diagnostic_system.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "dart:math",
+          "..\\services\\diagnostic_logger.dart",
+          "..\\services\\unified_notification_interface.dart",
+          "..\\services\\data_recovery_service.dart",
+          "..\\services\\offline_sync_manager.dart",
+          "..\\services\\legacy_system_migrator.dart",
+          "..\\views\\notification_diagnostic_panel.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "package:flutter\\material.dart",
+          "package:get\\get.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_explore_profiles_data.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "populate_explore_profiles_test_data.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_integration_system.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\services\\unified_notification_interface.dart",
+          "..\\services\\conflict_resolver.dart",
+          "..\\services\\data_recovery_service.dart",
+          "..\\services\\notification_local_storage.dart",
+          "..\\services\\offline_sync_manager.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_interest_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\repositories\\interests_repository.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\utils\\fix_firebase_index_interests.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_interest_notifications_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "components\\interest_notifications_component.dart",
+          "components\\interest_button_component.dart",
+          "repositories\\interest_notification_repository.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_interest_notifications_v2.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:get\\get.dart",
+          "package:flutter\\material.dart",
+          "..\\services\\notification_service.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_matches_integration.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\repositories\\interest_notification_repository.dart",
+          "..\\models\\interest_notification_model.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_migration_system.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\services\\legacy_system_migrator.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_notification_display_system.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:math",
+          "package:get\\get.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_persistence_system.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\services\\notification_local_storage.dart",
+          "..\\services\\offline_sync_manager.dart",
+          "..\\services\\data_recovery_service.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_populate_widget.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "quick_populate_profiles.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_profile_completion.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\debug_profile_completion.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_profile_fix.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\utils\\fix_specific_profile.dart",
+          "..\\services\\data_migration_service.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_profile_navigation_fix.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\models\\spiritual_profile_model.dart",
+          "vitrine_profile_filter.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_real_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\debug_real_notifications.dart",
+          "..\\services\\real_interest_notification_service.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_search_now.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\repositories\\explore_profiles_repository.dart",
+          "debug_search_profiles.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_ui_state_manager.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "..\\services\\ui_state_manager.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_ultimate_fix.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\utils\\ultimate_real_notifications_fix.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_unified_notification_system.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "..\\services\\unified_notification_interface.dart",
+          "..\\models\\real_notification_model.dart",
+          "enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_unified_search.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\unified_profile_search.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_username_search_fix.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:flutter\\material.dart",
+          "..\\models\\spiritual_profile_model.dart",
+          "vitrine_profile_filter.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_vitrine_complete_search.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\utils\\vitrine_profile_filter.dart",
+          "..\\utils\\deep_vitrine_debug.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_vitrine_invites.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\models\\spiritual_profile_model.dart",
+          "..\\repositories\\spiritual_profile_repository.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_world_location_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\services\\location_data_provider.dart",
+          "..\\utils\\world_locations_data.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_admin_deusepai_final.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:flutter\\material.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_completed_profiles.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:flutter\\foundation.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_empty_fromUserName.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_existing_chat_system.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\services\\match_chat_creator.dart",
+          "..\\services\\robust_notification_handler.dart",
+          "..\\services\\timestamp_sanitizer.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_existing_profile_for_exploration.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_favorites_context.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\context_validator.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_firebase_index_interests.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_infinite_loop_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_profile_widget.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "fix_existing_profile_for_exploration.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_specific_missing_chat.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\services\\match_chat_creator.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_specific_profile.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_timestamp_chat_errors.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\fix_vitrine_images.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:flutter\\foundation.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_admin_deusepai.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_notifications_now.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_profile_migration.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\services\\data_migration_service.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_ui_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\controllers\\matches_controller.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_ui_refresh_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\utils\\enhanced_logger.dart",
+          "..\\utils\\fix_firebase_index_interests.dart"
+        ]
+      },
+      {
+        "path": "utils\\force_visual_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\controllers\\matches_controller.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "views\\fix_explore_profiles_test_view.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\execute_complete_fix_now.dart",
+          "..\\components\\profile_visibility_banner.dart",
+          "..\\components\\quick_fix_profile_button.dart"
+        ]
+      },
+      {
+        "path": "components\\quick_fix_profile_button.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\fix_existing_profile_for_exploration.dart"
+        ]
+      },
+      {
+        "path": "components\\simple_corrected_notification_component.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "components\\simple_interest_notification_component.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\views\\notifications_view.dart"
+        ]
+      },
+      {
+        "path": "components\\vitrine_quick_access_component.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\utils\\vitrine_navigation_helper.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "repositories\\simple_accepted_matches_repository.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:flutter\\foundation.dart",
+          "..\\models\\accepted_match_model.dart",
+          "..\\models\\interest_notification_model.dart"
+        ]
+      },
+      {
+        "path": "services\\auto_fix_service.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\auto_fix_on_startup.dart"
+        ]
+      },
+      {
+        "path": "utils\\add_age_to_test_profiles.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "dart:math"
+        ]
+      },
+      {
+        "path": "utils\\auto_fix_on_startup.dart",
+        "imported_by": [],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\quick_populate_profiles.dart",
+          "..\\utils\\fix_existing_profile_for_exploration.dart"
+        ]
+      },
+      {
+        "path": "utils\\context_debug_example.dart",
+        "imported_by": [],
+        "imports": [
+          "..\\models\\storie_file_model.dart",
+          "context_utils.dart",
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\create_test_interests.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\create_test_interests_matches.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\create_test_profiles_sinais.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\deep_investigation_real_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\deep_vitrine_debug.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\deep_vitrine_investigation.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\diagnose_interest_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\dual_collection_debug.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\emergency_chat_fix_button.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "fix_timestamp_chat_errors.dart"
+        ]
+      },
+      {
+        "path": "utils\\execute_complete_fix_now.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\services\\explore_profiles_initializer.dart",
+          "..\\utils\\quick_populate_profiles.dart",
+          "..\\utils\\fix_existing_profile_for_exploration.dart"
+        ]
+      },
+      {
+        "path": "utils\\execute_fix_now_direct.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart"
+        ]
+      },
+      {
+        "path": "utils\\navigate_to_fix_screen.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\views\\fix_explore_profiles_test_view.dart"
+        ]
+      },
+      {
+        "path": "utils\\notification_debug_tools.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "dart:convert",
+          "..\\services\\notification_sync_logger.dart",
+          "..\\services\\notification_alert_system.dart",
+          "..\\services\\unified_notification_interface.dart",
+          "..\\services\\ui_state_manager.dart",
+          "..\\services\\system_validator.dart",
+          "..\\services\\conflict_resolver.dart",
+          "..\\models\\real_notification_model.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\populate_explore_profiles_test_data.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\quick_populate_profiles.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\simple_interest_notifications.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:get\\get.dart",
+          "package:flutter\\material.dart"
+        ]
+      },
+      {
+        "path": "utils\\simple_vitrine_debug.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "utils\\simulate_itala_interest.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "utils\\update_test_profiles_purpose.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\utils\\enhanced_logger.dart"
+        ]
+      },
+      {
+        "path": "views\\chat_system_test_view.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\fix_existing_chat_system.dart",
+          "..\\utils\\fix_specific_missing_chat.dart",
+          "..\\utils\\fix_timestamp_chat_errors.dart",
+          "..\\services\\chat_system_integrator.dart"
+        ]
+      },
+      {
+        "path": "views\\home_with_fix_button.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\navigate_to_fix_screen.dart"
+        ]
+      },
+      {
+        "path": "views\\notification_test_dashboard.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:get\\get.dart",
+          "..\\utils\\test_current_notification_system.dart",
+          "..\\utils\\debug_notification_flow.dart",
+          "..\\views\\interest_dashboard_view.dart"
+        ]
+      },
+      {
+        "path": "views\\simple_accepted_matches_view.dart",
+        "imported_by": [],
+        "imports": [
+          "dart:async",
+          "package:flutter\\material.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "package:get\\get.dart",
+          "package:google_fonts\\google_fonts.dart",
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\models\\accepted_match_model.dart",
+          "..\\repositories\\simple_accepted_matches_repository.dart",
+          "..\\views\\romantic_match_chat_view.dart"
+        ]
+      },
+      {
+        "path": "views\\simple_certification_panel.dart",
+        "imported_by": [],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:cloud_firestore\\cloud_firestore.dart"
+        ]
+      },
+      {
+        "path": "services\\search_strategies\\firebase_simple_search_strategy.dart",
+        "imported_by": [],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "..\\..\\models\\spiritual_profile_model.dart",
+          "..\\..\\models\\search_filters.dart",
+          "..\\..\\models\\search_result.dart",
+          "..\\..\\utils\\enhanced_logger.dart",
+          "search_strategy.dart"
+        ]
+      }
+    ],
+    "LOW": [],
+    "MEDIUM": [
+      {
+        "path": "utils\\debug_user_state.dart",
+        "imported_by": [
+          "views\\chat_view.dart"
+        ],
+        "imports": [
+          "package:cloud_firestore\\cloud_firestore.dart",
+          "package:firebase_auth\\firebase_auth.dart",
+          "token_usuario.dart",
+          "models\\usuario_model.dart"
+        ]
+      },
+      {
+        "path": "views\\debug_online_status_view.dart",
+        "imported_by": [
+          "routes.dart"
+        ],
+        "imports": [
+          "package:flutter\\material.dart",
+          "package:google_fonts\\google_fonts.dart",
+          "utils\\add_last_seen_to_users.dart",
+          "services\\online_status_service.dart"
+        ]
+      },
+      {
+        "path": "utils\\test_notifications.dart",
+        "imported_by": [
+          "views\\notifications_view_backup.dart"
+        ],
+        "imports": [
+          "package:firebase_auth\\firebase_auth.dart",
+          "services\\notification_service.dart",
+          "models\\notification_model.dart",
+          "repositories\\notification_repository.dart",
+          "package:get\\get.dart",
+          "package:flutter\\material.dart"
+        ]
+      },
+      {
+        "path": "views\\test_notifications_button_view.dart",
+        "imported_by": [
+          "views\\home_view.dart"
+        ],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\create_test_interests.dart",
+          "..\\utils\\debug_real_notifications.dart"
+        ]
+      },
+      {
+        "path": "views\\fix_button_screen.dart",
+        "imported_by": [
+          "views\\chat_view.dart"
+        ],
+        "imports": [
+          "package:flutter\\material.dart",
+          "..\\utils\\execute_fix_now_direct.dart",
+          "..\\utils\\create_firebase_index.dart",
+          "..\\utils\\force_admin_deusepai.dart",
+          "..\\utils\\fix_admin_deusepai_final.dart"
+        ]
+      }
+    ],
+    "HIGH": [],
+    "CRITICAL": []
+  }
+}

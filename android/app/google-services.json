@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "490614568896",
+    "project_id": "app-no-secreto-com-o-pai",
+    "storage_bucket": "app-no-secreto-com-o-pai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490614568896:android:c78f28b633248168ff7a25",
+        "android_client_info": {
+          "package_name": "com.no.secreto.com.deus.pai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490614568896-v538glbnlkprgh014r9dtrofavdsj0go.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.no.secreto.com.deus.pai",
+            "certificate_hash": "18eaf9c12c614827c68ce630bc581724a0e57b53"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUA312OYkAeEfmcQKybNq0KN53HEGHyTU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

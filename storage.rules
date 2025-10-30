@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Regras para stories
+    match /stories_files/{fileName} {
+      // Permitir leitura para todos autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir upload apenas do proprio usuario
+      allow write: if request.auth != null &&
+                      fileName.matches('.*' + request.auth.uid + '.*');
+    }
+    
+    // Regras para fotos de perfil
+    match /profile_photos/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+                      fileName.matches('.*' + request.auth.uid + '.*');
+    }
+    
+    // Regras para outras pastas (catch-all)
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}
