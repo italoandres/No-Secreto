@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Para detectar Web
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import '../models/storie_file_model.dart';
 import '../repositories/story_interactions_repository.dart';
 import '../repositories/stories_repository.dart';
 import '../views/enhanced_stories_viewer_view.dart';
-import '../utils/enhanced_image_loader.dart';
 import '../utils/context_utils.dart';
 
+// Importação condicional - só importa no mobile
+import 'dart:typed_data';
+// NOTA: video_thumbnail não funciona na web, só no mobile
+// Se quiser usar, adicione: import 'package:video_thumbnail/video_thumbnail.dart';
+// Mas só funcionará em Android/iOS, não na Web
+
 class StoryFavoritesView extends StatefulWidget {
-  final String? contexto; // Contexto específico ou null para todos
+  final String? contexto;
 
   const StoryFavoritesView({super.key, this.contexto});
 
@@ -21,192 +28,132 @@ class StoryFavoritesView extends StatefulWidget {
 class _StoryFavoritesViewState extends State<StoryFavoritesView> {
   List<StorieFileModel> favoriteStories = [];
   bool isLoading = true;
+  StreamSubscription? _favoritesSubscription;
+  
+  // Cache para stories
+  final Map<String, StorieFileModel> _storiesCache = {};
+  
+  // Debouncer
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
-
-    // Validar contexto no início
-    if (widget.contexto != null) {
-      final normalizedContext =
-          ContextValidator.normalizeContext(widget.contexto);
-      if (!ContextValidator.validateAndLog(
-          widget.contexto, 'StoryFavoritesView_initState')) {
-        ContextDebug.logCriticalError('StoryFavoritesView',
-            'Contexto inválido no initState', normalizedContext);
-      }
-
-      ContextDebug.logSummary(
-          'StoryFavoritesView_initState', normalizedContext, {
-        'originalContext': widget.contexto,
-        'normalizedContext': normalizedContext,
-        'operation': 'INIT_FAVORITES_VIEW'
-      });
-    }
-
     _loadFavoriteStories();
+  }
+
+  @override
+  void dispose() {
+    _favoritesSubscription?.cancel();
+    _debounceTimer?.cancel();
+    _storiesCache.clear();
+    super.dispose();
   }
 
   Future<void> _loadFavoriteStories() async {
     try {
       if (mounted) {
-        setState(() {
-          isLoading = true;
-        });
+        setState(() => isLoading = true);
       }
 
-      // Validar e normalizar contexto
       final normalizedContext = widget.contexto != null
           ? ContextValidator.normalizeContext(widget.contexto!)
           : null;
 
-      if (widget.contexto != null &&
-          !ContextValidator.validateAndLog(
-              widget.contexto, 'StoryFavoritesView_loadFavorites')) {
-        ContextDebug.logCriticalError(
-            'StoryFavoritesView',
-            'Contexto inválido, usando contexto normalizado',
-            normalizedContext!);
-      }
+      print('📚 FAVORITES: Carregando para contexto: ${normalizedContext ?? "TODOS"}');
 
-      ContextDebug.logSummary(
-          'StoryFavoritesView_loadFavorites', normalizedContext ?? 'ALL', {
-        'originalContext': widget.contexto,
-        'normalizedContext': normalizedContext,
-        'operation': 'LOAD_FAVORITE_STORIES'
-      });
-
-      // Escutar mudanças nos favoritos do usuário
       final favoritesStream = normalizedContext != null
           ? StoryInteractionsRepository.getUserFavoritesStream(
               contexto: normalizedContext)
           : StoryInteractionsRepository.getAllUserFavoritesStream();
 
-      print(
-          '📚 FAVORITES VIEW: Usando stream para contexto: ${widget.contexto ?? "TODOS"}');
-
-      favoritesStream.listen((favoriteIds) async {
-        print(
-            '📚 FAVORITES VIEW: Recebidos ${favoriteIds.length} IDs de favoritos: $favoriteIds');
-
-        if (favoriteIds.isEmpty) {
-          print('📚 FAVORITES VIEW: Nenhum favorito encontrado');
-          if (mounted) {
-            setState(() {
-              favoriteStories = [];
-              isLoading = false;
-            });
-          }
-          return;
-        }
-
-        // Buscar os stories favoritos
-        List<StorieFileModel> stories = [];
-        for (String storyId in favoriteIds) {
-          ContextDebug.logSummary(
-              'StoryFavoritesView_fetchStory',
-              normalizedContext ?? 'ALL',
-              {'storyId': storyId, 'operation': 'FETCH_FAVORITE_STORY'});
-
-          final story = await StoriesRepository.getStoryById(storyId);
-          if (story != null) {
-            // VALIDAÇÃO CRÍTICA: Verificar se o story pertence ao contexto esperado
-            if (normalizedContext != null) {
-              if (!StoryContextFilter.validateStoryContext(
-                  story, normalizedContext)) {
-                ContextDebug.logCriticalError(
-                    'StoryFavoritesView',
-                    'VAZAMENTO CRÍTICO - Story favorito ${story.id} tem contexto "${story.contexto}" mas deveria ser "$normalizedContext"',
-                    normalizedContext);
-                continue; // Pular este story
-              }
-            }
-
-            ContextDebug.logSummary(
-                'StoryFavoritesView_storyFound', normalizedContext ?? 'ALL', {
-              'storyId': storyId,
-              'storyTitle': story.titulo ?? 'Sem título',
-              'storyContext': story.contexto
-            });
-
-            stories.add(story);
-          } else {
-            ContextDebug.logCriticalError(
-                'StoryFavoritesView',
-                'Story favorito não encontrado para ID: $storyId',
-                normalizedContext ?? 'ALL');
-          }
-        }
-
-        // VALIDAÇÃO ADICIONAL: Filtrar stories por contexto se especificado
-        if (normalizedContext != null) {
-          final originalCount = stories.length;
-          stories =
-              StoryContextFilter.filterByContext(stories, normalizedContext);
-
-          // Detectar vazamentos
-          final hasLeaks =
-              StoryContextFilter.detectContextLeaks(stories, normalizedContext);
-          if (hasLeaks) {
-            ContextDebug.logCriticalError(
-                'StoryFavoritesView',
-                'VAZAMENTOS DETECTADOS nos stories favoritos',
-                normalizedContext);
-          }
-
-          ContextDebug.logFilter(normalizedContext, originalCount,
-              stories.length, 'StoryFavoritesView_filterStories');
-        }
-
-        ContextDebug.logSummary(
-            'StoryFavoritesView_storiesLoaded', normalizedContext ?? 'ALL', {
-          'totalStories': stories.length,
-          'favoriteIds': favoriteIds.length
+      _favoritesSubscription = favoritesStream.listen((favoriteIds) {
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+          _loadStoriesFromIds(favoriteIds, normalizedContext);
         });
-
-        // Ordenar por data de favoritamento (mais recentes primeiro)
-        stories.sort((a, b) =>
-            (b.dataCadastro?.compareTo(a.dataCadastro ?? Timestamp.now()) ??
-                0));
-
-        if (mounted) {
-          setState(() {
-            favoriteStories = stories;
-            isLoading = false;
-          });
-        }
       });
     } catch (e) {
-      print('❌ FAVORITES VIEW: Erro ao carregar favoritos: $e');
+      print('❌ FAVORITES: Erro ao carregar: $e');
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  // Carregar stories em paralelo
+  Future<void> _loadStoriesFromIds(
+      List<String> favoriteIds, String? normalizedContext) async {
+    if (favoriteIds.isEmpty) {
       if (mounted) {
         setState(() {
+          favoriteStories = [];
           isLoading = false;
         });
+      }
+      return;
+    }
+
+    try {
+      // Buscar todos os stories em paralelo
+      final futures = favoriteIds.map((storyId) async {
+        if (_storiesCache.containsKey(storyId)) {
+          return _storiesCache[storyId];
+        }
+
+        final story = await StoriesRepository.getStoryById(storyId);
+        
+        if (story != null) {
+          _storiesCache[storyId] = story;
+          
+          if (normalizedContext != null) {
+            if (!StoryContextFilter.validateStoryContext(
+                story, normalizedContext)) {
+              print('⚠️ FAVORITES: Story ${story.id} não pertence ao contexto $normalizedContext');
+              return null;
+            }
+          }
+        }
+        
+        return story;
+      });
+
+      final results = await Future.wait(futures);
+      List<StorieFileModel> stories = results
+          .whereType<StorieFileModel>()
+          .toList();
+
+      if (normalizedContext != null) {
+        stories = StoryContextFilter.filterByContext(stories, normalizedContext);
+      }
+
+      // Ordenar por data (mais recentes primeiro)
+      stories.sort((a, b) {
+        final dateA = a.dataCadastro ?? Timestamp.now();
+        final dateB = b.dataCadastro ?? Timestamp.now();
+        return dateB.compareTo(dateA);
+      });
+
+      if (mounted) {
+        setState(() {
+          favoriteStories = stories;
+          isLoading = false;
+        });
+      }
+
+      print('✅ FAVORITES: ${stories.length} stories carregados e ordenados');
+    } catch (e) {
+      print('❌ FAVORITES: Erro ao carregar stories: $e');
+      if (mounted) {
+        setState(() => isLoading = false);
       }
     }
   }
 
   String _getTitleByContext() {
-    // Validar e normalizar contexto para o título
     final normalizedContext = widget.contexto != null
         ? ContextValidator.normalizeContext(widget.contexto!)
         : null;
-
-    if (widget.contexto != null &&
-        !ContextValidator.validateAndLog(
-            widget.contexto, 'StoryFavoritesView_getTitle')) {
-      ContextDebug.logCriticalError(
-          'StoryFavoritesView',
-          'Contexto inválido para título, usando contexto normalizado',
-          normalizedContext!);
-    }
-
-    ContextDebug.logSummary(
-        'StoryFavoritesView_getTitle', normalizedContext ?? 'ALL', {
-      'originalContext': widget.contexto,
-      'normalizedContext': normalizedContext,
-      'operation': 'GENERATE_TITLE'
-    });
 
     switch (normalizedContext) {
       case 'sinais_rebeca':
@@ -228,9 +175,13 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
+        elevation: 0,
         title: Text(
           _getTitleByContext(),
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -252,10 +203,10 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.bookmark_border,
-            color: Colors.white54,
+          Icon(
+            Icons.favorite_border,
             size: 64,
+            color: Colors.white.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -268,7 +219,7 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Salve stories tocando no ícone de salvar',
+            'Salve stories tocando no ícone de favorito\nEles ficarão salvos aqui permanentemente',
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 14,
@@ -280,14 +231,15 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
     );
   }
 
+  // Layout estilo TikTok - 3 colunas
   Widget _buildFavoritesList() {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(2),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 9 / 16, // Proporção de story
+        crossAxisCount: 3, // 3 colunas como TikTok
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
+        childAspectRatio: 9 / 16,
       ),
       itemCount: favoriteStories.length,
       itemBuilder: (context, index) {
@@ -298,203 +250,263 @@ class _StoryFavoritesViewState extends State<StoryFavoritesView> {
 
   Widget _buildStoryThumbnail(StorieFileModel story, int index) {
     return GestureDetector(
-      onTap: () {
-        // Validar contexto do story antes de abrir o viewer
-        final storyContext = ContextValidator.normalizeContext(story.contexto);
+      onTap: () => _openStoryViewer(story, index),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Thumbnail da mídia
+          _buildMediaThumbnail(story),
 
-        // VALIDAÇÃO ADICIONAL: Filtrar stories para garantir que apenas stories do contexto correto sejam passados
-        final contextToUse = widget.contexto != null
-            ? ContextValidator.normalizeContext(widget.contexto!)
-            : storyContext;
+          // Ícone de favorito
+          _buildFavoriteIcon(),
 
-        final validStories = widget.contexto != null
-            ? StoryContextFilter.filterByContext(favoriteStories, contextToUse)
-            : favoriteStories;
+          // Ícone de tipo de mídia
+          if (story.fileType == StorieFileType.video)
+            _buildVideoIcon(),
+        ],
+      ),
+    );
+  }
 
-        ContextDebug.logSummary('StoryFavoritesView_openViewer', contextToUse, {
-          'storyId': story.id,
-          'storyContext': story.contexto,
-          'normalizedStoryContext': storyContext,
-          'viewerContext': contextToUse,
-          'totalStories': favoriteStories.length,
-          'validStories': validStories.length,
-          'initialIndex': index
-        });
+  void _openStoryViewer(StorieFileModel story, int index) {
+    final storyContext = ContextValidator.normalizeContext(story.contexto);
+    final contextToUse = widget.contexto != null
+        ? ContextValidator.normalizeContext(widget.contexto!)
+        : storyContext;
 
-        // Detectar vazamentos antes de abrir o viewer
-        if (widget.contexto != null) {
-          final hasLeaks = StoryContextFilter.detectContextLeaks(
-              favoriteStories, contextToUse);
-          if (hasLeaks) {
-            ContextDebug.logCriticalError('StoryFavoritesView',
-                'VAZAMENTOS DETECTADOS antes de abrir viewer', contextToUse);
-          }
-        }
+    final validStories = widget.contexto != null
+        ? StoryContextFilter.filterByContext(favoriteStories, contextToUse)
+        : favoriteStories;
 
-        // Abrir story viewer começando do story selecionado
-        Get.to(() => EnhancedStoriesViewerView(
-              contexto: contextToUse, // USAR CONTEXTO VALIDADO
-              userSexo: null,
-              initialStories: validStories, // USAR STORIES VALIDADOS
-              initialIndex: index,
-            ));
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
+    Get.to(() => EnhancedStoriesViewerView(
+          contexto: contextToUse,
+          userSexo: null,
+          initialStories: validStories,
+          initialIndex: index,
+        ));
+  }
+
+  // CORRIGIDO: Tratamento de thumbnail que funciona na WEB e Mobile
+  Widget _buildMediaThumbnail(StorieFileModel story) {
+    // CASO 1: Vídeo com thumbnail salva (prioridade)
+    if (story.fileType == StorieFileType.video &&
+        story.videoThumbnail?.isNotEmpty == true) {
+      return _buildImageThumbnail(story.videoThumbnail!);
+    }
+    
+    // CASO 2: Vídeo SEM thumbnail
+    if (story.fileType == StorieFileType.video) {
+      // Na web, não podemos extrair thumbnail de vídeo
+      // Então mostramos um placeholder bonito
+      if (kIsWeb) {
+        return _buildVideoPlaceholderWeb(story);
+      }
+      
+      // No mobile, você PODERIA usar video_thumbnail aqui
+      // Mas por enquanto vamos usar placeholder também para evitar erros
+      return _buildVideoPlaceholder(story);
+    }
+    
+    // CASO 3: Imagem (CORRETO: usar .img, não .image)
+    if (story.fileType == StorieFileType.img &&
+        story.fileUrl?.isNotEmpty == true) {
+      return _buildImageThumbnail(story.fileUrl!);
+    }
+
+    // CASO 4: Fallback
+    return _buildPlaceholder(story.fileType == StorieFileType.video);
+  }
+
+  // Placeholder específico para vídeos na WEB
+  Widget _buildVideoPlaceholderWeb(StorieFileModel story) {
+    return Container(
+      color: Colors.grey.shade900,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Gradiente de fundo
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.grey.shade800,
+                  Colors.grey.shade900,
+                ],
+              ),
+            ),
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Thumbnail da mídia
-              _buildMediaThumbnail(story),
-
-              // Overlay com informações
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.8),
-                      ],
+          
+          // Ícone central
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.play_circle_outline,
+                  color: Colors.white.withOpacity(0.5),
+                  size: 40,
+                ),
+                const SizedBox(height: 8),
+                if (story.titulo?.isNotEmpty == true)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      story.titulo!,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (story.titulo?.isNotEmpty == true)
-                        Text(
-                          story.titulo!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      if (story.descricao?.isNotEmpty == true) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          story.descricao!,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 10,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Ícone de favorito
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.favorite,
-                    color: Colors.red,
-                    size: 16,
-                  ),
-                ),
+  // Placeholder para vídeos no mobile (também sem thumbnail por enquanto)
+  Widget _buildVideoPlaceholder(StorieFileModel story) {
+    return Container(
+      color: Colors.grey.shade900,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.grey.shade800,
+                  Colors.grey.shade900,
+                ],
               ),
+            ),
+          ),
+          Center(
+            child: Icon(
+              Icons.videocam,
+              color: Colors.white.withOpacity(0.4),
+              size: 32,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Ícone de tipo de mídia
-              if (story.fileType == StorieFileType.video)
-                const Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Icon(
-                    Icons.play_circle_filled,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-            ],
+  // Carregar imagens (funciona na web e mobile)
+  Widget _buildImageThumbnail(String imageUrl) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      fadeInDuration: const Duration(milliseconds: 150),
+      fadeOutDuration: const Duration(milliseconds: 150),
+      maxWidthDiskCache: 400,
+      maxHeightDiskCache: 700,
+      placeholder: (context, url) => _buildLoadingPlaceholder(),
+      errorWidget: (context, url, error) {
+        print('❌ THUMBNAIL ERROR: $error para URL: $url');
+        return _buildErrorPlaceholder();
+      },
+    );
+  }
+
+  Widget _buildPlaceholder(bool isVideo) {
+    return Container(
+      color: Colors.grey.shade900,
+      child: Center(
+        child: Icon(
+          isVideo ? Icons.videocam_off : Icons.image_not_supported,
+          color: Colors.white24,
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingPlaceholder() {
+    return Container(
+      color: Colors.grey.shade900,
+      child: const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            color: Colors.white38,
+            strokeWidth: 2,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMediaThumbnail(StorieFileModel story) {
-    if (story.fileType == StorieFileType.video &&
-        story.videoThumbnail?.isNotEmpty == true) {
-      // Usar thumbnail do vídeo
-      return EnhancedImageLoader.buildCachedImage(
-        imageUrl: story.videoThumbnail!,
-        fit: BoxFit.cover,
-        placeholder: Container(
-          color: Colors.grey.shade800,
-          child: const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          ),
-        ),
-        errorWidget: Container(
-          color: Colors.grey.shade800,
-          child: const Icon(
-            Icons.error,
-            color: Colors.white54,
-          ),
-        ),
-      );
-    } else if (story.fileUrl?.isNotEmpty == true) {
-      // Usar a própria imagem
-      return EnhancedImageLoader.buildCachedImage(
-        imageUrl: story.fileUrl!,
-        fit: BoxFit.cover,
-        placeholder: Container(
-          color: Colors.grey.shade800,
-          child: const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          ),
-        ),
-        errorWidget: Container(
-          color: Colors.grey.shade800,
-          child: const Icon(
-            Icons.error,
-            color: Colors.white54,
-          ),
-        ),
-      );
-    }
-
-    // Fallback
+  Widget _buildErrorPlaceholder() {
     return Container(
-      color: Colors.grey.shade800,
-      child: const Icon(
-        Icons.photo,
-        color: Colors.white54,
-        size: 32,
+      color: Colors.grey.shade900,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.broken_image,
+            color: Colors.white24,
+            size: 28,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Preview\nindisponível',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.2),
+              fontSize: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteIcon() {
+    return Positioned(
+      top: 4,
+      right: 4,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.favorite,
+          color: Colors.red,
+          size: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoIcon() {
+    return Positioned(
+      top: 4,
+      left: 4,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Icon(
+          Icons.play_arrow,
+          color: Colors.white,
+          size: 14,
+        ),
       ),
     );
   }

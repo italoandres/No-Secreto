@@ -15,6 +15,7 @@ class ChatModel {
   ChatType? tipo;
   bool? isLoading;
   LinkDescricaoModel? linkDescricaoModel;
+  Map<String, dynamic>? replyToStory; // 🙏 NOVO: Dados do story salvo
 
   ChatModel({
     this.id,
@@ -29,6 +30,7 @@ class ChatModel {
     this.tipo,
     this.isLoading,
     this.linkDescricaoModel,
+    this.replyToStory, // 🙏 NOVO
   });
 
   static ChatModel fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,9 @@ class ChatModel {
       linkDescricaoModel: json['linkDescricaoModel'] == null
           ? null
           : LinkDescricaoModel.fromJson(json['linkDescricaoModel']),
+      replyToStory: json['replyToStory'] != null // 🙏 NOVO
+          ? Map<String, dynamic>.from(json['replyToStory'])
+          : null,
     );
   }
 }

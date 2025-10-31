@@ -1,9 +1,16 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import '../utils/enhanced_image_loader.dart';
 import 'package:video_player/video_player.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+// Conditional import: only import dart:html when compiling for web
+import 'dart:html' as html show AnchorElement, document;
 import '../models/storie_file_model.dart';
 import '../models/usuario_model.dart';
 import '../repositories/stories_repository.dart';
@@ -11,11 +18,16 @@ import '../controllers/story_interactions_controller.dart';
 import '../controllers/story_auto_close_controller.dart';
 import '../components/story_interactions_component.dart';
 import '../components/story_comments_component.dart';
+import '../components/story_action_menu.dart';
 import 'stories/community_comments_view.dart';
 import '../utils/enhanced_image_loader.dart';
 import '../utils/firebase_image_loader.dart';
 import '../utils/context_utils.dart';
 import 'package:whatsapp_chat/utils/debug_utils.dart';
+import 'chat_view.dart'; // 🙏 NOVO: Para navegação direta
+import 'sinais_isaque_view.dart'; // 🙏 NOVO: Para navegação direta
+import 'sinais_rebeca_view.dart'; // 🙏 NOVO: Para navegação direta
+import 'nosso_proposito_view.dart'; // 🙏 NOVO: Para navegação direta
 
 class EnhancedStoriesViewerView extends StatefulWidget {
   final String contexto;
@@ -41,11 +53,25 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   List<StorieFileModel> stories = [];
   int currentIndex = 0;
   bool isLoading = true;
-  bool isPaused = false;
   Timer? autoAdvanceTimer;
   AnimationController? progressController;
   VideoPlayerController? videoController;
   PageController pageController = PageController();
+  
+  // Timer para sincronização manual de imagens (igual ao vídeo)
+  Timer? imageProgressTimer;
+  DateTime? imageStartTime;
+  Duration? imagePausedDuration;
+  
+  // 🆕 SISTEMA DE PRELOAD INSTANTÂNEO
+  // Cache de vídeos precarregados (índice → VideoPlayerController)
+  Map<int, VideoPlayerController> preloadedVideos = {};
+  
+  // Cache de status de preload de imagens (índices já precarregados)
+  Set<int> preloadedImages = {};
+  
+  // Índices sendo precarregados no momento (evitar duplicação)
+  Set<int> currentlyPreloading = {};
 
   // Interactions controller
   late StoryInteractionsController interactionsController;
@@ -59,6 +85,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   // Estado para controlar expansão da descrição
   bool isDescriptionExpanded = false;
+
+  // ValueNotifier para revelar menu de interações
+  ValueNotifier<bool> menuRevealNotifier = ValueNotifier<bool>(false);
+  
+  // ValueNotifier para estado de pause (evita rebuild completo)
+  ValueNotifier<bool> isPausedNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -102,6 +134,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   @override
+  @override
   void dispose() {
     print('DEBUG VIEWER: Disposing viewer');
 
@@ -110,6 +143,15 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
     // Limpa todos os recursos
     _cleanupPreviousStory();
+    
+    // 🧹 LIMPAR CACHE DE VÍDEOS PRECARREGADOS
+    print('🧹 DISPOSE: Limpando ${preloadedVideos.length} vídeos precarregados');
+    for (final controller in preloadedVideos.values) {
+      controller.dispose();
+    }
+    preloadedVideos.clear();
+    preloadedImages.clear();
+    currentlyPreloading.clear();
 
     // Dispose dos controladores
     try {
@@ -121,7 +163,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     likeAnimationController?.dispose();
     pageController.dispose();
     progressController?.dispose();
+    menuRevealNotifier.dispose();
+    isPausedNotifier.dispose();
 
+    // Remove listener de sincronização
+    videoController?.removeListener(_syncVideoProgress);
+    
     // Para e libera vídeo
     videoController?.pause();
     videoController?.dispose();
@@ -274,6 +321,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     // Limpa recursos do story anterior
     _cleanupPreviousStory();
 
+    // Resetar menu oculto para novo story
+    menuRevealNotifier.value = false;
+
     // Initialize interactions for current story
     interactionsController.initializeStory(currentStory.id!,
         contexto: widget.contexto);
@@ -285,18 +335,58 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     _startAutoCloseForCurrentStory(currentStory);
 
     if (currentStory.fileType == StorieFileType.video) {
-      _initializeVideo(currentStory.fileUrl!);
+      // 🚀 VERIFICAR SE JÁ FOI PRECARREGADO
+      if (preloadedVideos.containsKey(currentIndex)) {
+        print('⚡ VIEWER: Usando vídeo PRECARREGADO $currentIndex (INSTANTÂNEO!)');
+        videoController = preloadedVideos[currentIndex];
+        preloadedVideos.remove(currentIndex); // Remover do cache de preload
+        
+        // Adicionar listeners e configurar
+        videoController!.addListener(_syncVideoProgress);
+        progressController = AnimationController(
+          duration: videoController!.value.duration,
+          vsync: this,
+        );
+        progressController!.addListener(_checkProgressCompletion);
+        
+        // Iniciar reprodução
+        if (mounted) {
+          setState(() {}); // Atualizar UI
+          videoController!.play();
+          progressController!.forward();
+        }
+        
+        print('🎥 VIEWER: Vídeo iniciado INSTANTANEAMENTE! 🚀');
+      } else {
+        // Fallback: carregar normalmente se não estava precarregado
+        print('⏳ VIEWER: Vídeo não estava precarregado, carregando...');
+        _initializeVideo(currentStory.fileUrl!);
+      }
     } else {
+      // Para imagens, o cached_network_image já cuida do preload
       _startImageTimer();
     }
+    
+    // 🚀 PRECARREGAR STORIES ADJACENTES (próximos + anterior)
+    // Delay pequeno para não competir com o story atual
+    Future.delayed(Duration(milliseconds: 200), () {
+      if (mounted) {
+        _preloadAdjacentStories();
+      }
+    });
   }
 
   void _cleanupPreviousStory() {
     // Para timers
     autoAdvanceTimer?.cancel();
+    imageProgressTimer?.cancel();
     autoCloseController.cancelAutoClose();
     progressController?.dispose();
     progressController = null;
+    
+    // Limpar variáveis de imagem
+    imageStartTime = null;
+    imagePausedDuration = null;
 
     // Para e libera vídeo anterior
     videoController?.pause();
@@ -306,6 +396,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   void _initializeVideo(String videoUrl) {
     print('DEBUG VIDEO: Inicializando vídeo: $videoUrl');
+    
+    // Se já existe um controller de vídeo inicializado e está pausado, não recriar
+    if (videoController != null && 
+        videoController!.value.isInitialized && 
+        isPausedNotifier.value) {
+      print('⏸️ VIDEO: Controller já existe e está pausado, mantendo estado');
+      return;
+    }
 
     videoController = VideoPlayerController.networkUrl(
       Uri.parse(videoUrl),
@@ -325,12 +423,18 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         videoController!.play();
         // VSL: Sem looping - vídeo pausa no último frame
 
-        // Start progress animation apenas se necessário
+        // Criar progress controller
         progressController ??= AnimationController(
           duration: videoController!.value.duration,
           vsync: this,
         );
+        
+        // NOVO: Adicionar listener para sincronizar continuamente
+        videoController!.addListener(_syncVideoProgress);
+        progressController!.addListener(_checkProgressCompletion);
         progressController!.forward();
+        
+        print('🎥 VIDEO: Listeners adicionados - sincronização ativa');
       }
     }).catchError((error) {
       print('DEBUG VIDEO: Erro ao inicializar vídeo: $error');
@@ -338,18 +442,332 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   }
 
   void _startImageTimer() {
+    // PROTEÇÃO ABSOLUTA: Se progressController JÁ EXISTE, NÃO RECRIAR!
+    if (progressController != null) {
+      final currentProgress = (progressController!.value * 100).toStringAsFixed(1);
+      final isPaused = isPausedNotifier.value;
+      
+      print('⚠️ TIMER: Controller JÁ EXISTE! Progresso: $currentProgress%, Pausado: $isPaused');
+      print('⚠️ TIMER: BLOQUEANDO recriação do controller para evitar reset');
+      
+      // Se está pausado, não fazer nada
+      if (isPaused) {
+        print('⏸️ TIMER: Controller pausado, mantendo estado');
+        return;
+      }
+      
+      // Se já está animando ou tem progresso > 0, não recriar!
+      if (progressController!.value > 0.0) {
+        print('▶️ TIMER: Controller já tem progresso (${currentProgress}%), mantendo estado');
+        return;
+      }
+      
+      // Se chegou aqui, controller existe mas está em 0 e não pausado
+      // Pode ser que precise reiniciar
+      print('🔄 TIMER: Controller em 0%, permitindo reinício');
+    }
+    
+    print('🆕 TIMER: Criando novo controller e timer para imagem (15s)');
+    
+    // Limpar timer anterior se existir
+    imageProgressTimer?.cancel();
+    imageProgressTimer = null;
+    
+    // Marcar hora de início
+    imageStartTime = DateTime.now();
+    imagePausedDuration = Duration.zero;
+    
+    // Criar controller
     progressController?.dispose();
     progressController = AnimationController(
-      duration: const Duration(seconds: 10), // 10 segundos para imagens
+      duration: const Duration(seconds: 15),
       vsync: this,
     );
 
-    progressController!.forward();
+    progressController!.addListener(_checkProgressCompletion);
+    print('✅ TIMER: Listener _checkProgressCompletion adicionado ao controller');
+    
+    // NOVO: Usar Timer periódico para atualizar progresso manualmente
+    imageProgressTimer = Timer.periodic(Duration(milliseconds: 16), (timer) {
+      _syncImageProgress();
+    });
+    
+    print('✅ TIMER: Timer periódico iniciado - sincronização manual ativa');
 
     // VSL: Sem auto-advance - usuário controla o avanço manualmente
   }
 
+  /// Verifica se o progressController chegou a 100% para revelar menu
+  void _checkProgressCompletion() {
+    if (progressController != null) {
+      final currentValue = progressController!.value;
+      
+      // Log detalhado para debug
+      if (currentValue >= 0.95) {
+        print('📊 PROGRESS: ${(currentValue * 100).toStringAsFixed(1)}% (quase completando)');
+      }
+      
+      if (currentValue >= 1.0) {
+        // Story completado - revelar menu de interações
+        if (!menuRevealNotifier.value) {
+          menuRevealNotifier.value = true;
+          print('🎉 MENU: Revelando botões de interação (story completado a 100%)');
+        }
+      }
+    }
+  }
+
+  /// Sincroniza o progressController com a posição real do vídeo
+  /// USANDO CURVA VSL (80% da barra = 40% do tempo real)
+  void _syncVideoProgress() {
+    if (videoController != null && 
+        videoController!.value.isInitialized && 
+        progressController != null &&
+        !isPausedNotifier.value) {
+      final position = videoController!.value.position;
+      final duration = videoController!.value.duration;
+      
+      if (duration.inMilliseconds > 0) {
+        // Progresso REAL do vídeo (0.0 a 1.0)
+        final progressoReal = position.inMilliseconds / duration.inMilliseconds;
+        
+        // 🎯 APLICAR CURVA VSL (a mágica acontece aqui!)
+        final progressoFicticio = _calcularBarraFicticia(progressoReal);
+        
+        // Atualizar progressController com progresso FICTÍCIO
+        progressController!.value = progressoFicticio.clamp(0.0, 1.0);
+        
+        // Debug: Log quando estiver próximo do fim
+        if (progressoFicticio >= 0.95 && progressoFicticio < 1.0) {
+          print('🎥 VSL: Real: ${(progressoReal*100).toStringAsFixed(1)}% → Barra: ${(progressoFicticio*100).toStringAsFixed(1)}%');
+        }
+      }
+    }
+  }
+
+  /// Sincroniza o progressController com o tempo decorrido para imagens
+  void _syncImageProgress() {
+    if (progressController != null && 
+        imageStartTime != null &&
+        !isPausedNotifier.value) {
+      
+      const imageDuration = Duration(seconds: 15);
+      final elapsed = DateTime.now().difference(imageStartTime!);
+      final progress = elapsed.inMilliseconds / imageDuration.inMilliseconds;
+      
+      // Atualizar progressController para refletir o tempo decorrido
+      progressController!.value = progress.clamp(0.0, 1.0);
+      
+      // Debug: Log quando estiver próximo do fim
+      if (progress >= 0.95 && progress < 1.0) {
+        print('🖼️ IMAGE SYNC: ${(progress * 100).toStringAsFixed(1)}%');
+      }
+    }
+  }
+
+  /// 🎯 Calcula o progresso FICTÍCIO da barra VSL
+  /// 
+  /// **Regra VSL:**
+  /// - Primeiros 40% do vídeo = 80% da barra (FASE RÁPIDA ⚡)
+  /// - Últimos 60% do vídeo = 20% da barra (FASE LENTA 🐌)
+  /// 
+  /// **Por quê isso funciona?**
+  /// - Usuário vê barra em 80% aos 24s de um vídeo de 60s
+  /// - Pensa: "Quase acabando! Vou ver até o fim!"
+  /// - Resultado: Assiste o vídeo COMPLETO 🎯
+  double _calcularBarraFicticia(double progressoReal) {
+    // Garantir que está entre 0.0 e 1.0
+    progressoReal = progressoReal.clamp(0.0, 1.0);
+    
+    if (progressoReal <= 0.4) {
+      // 📊 FASE RÁPIDA (0% a 40% do vídeo = 0% a 80% da barra)
+      // Exemplo: 20% do vídeo → 40% da barra
+      //          40% do vídeo → 80% da barra
+      return progressoReal * 2.0;
+      
+    } else {
+      // 🐌 FASE LENTA (40% a 100% do vídeo = 80% a 100% da barra)
+      // Exemplo: 60% do vídeo → 87% da barra
+      //          80% do vídeo → 93% da barra
+      //         100% do vídeo → 100% da barra
+      
+      double progressoRestante = progressoReal - 0.4; // 0.0 a 0.6
+      double percentualRestante = progressoRestante / 0.6; // Normaliza (0.0 a 1.0)
+      double barraRestante = percentualRestante * 0.2; // 0.0 a 0.2 (20% da barra)
+      return 0.8 + barraRestante; // 0.8 a 1.0 (80% a 100%)
+    }
+  }
+
+  /// 🎉 Revela o menu de CTA quando a barra chegar em 100%
+  void _revelarMenu() {
+    if (!menuRevealNotifier.value) {
+      print('🎯 VSL: Barra chegou em 100% - Revelando menu de interações!');
+      menuRevealNotifier.value = true;
+    }
+  }
+
+  // ========================================
+  // 🚀 SISTEMA DE PRELOAD INSTANTÂNEO
+  // ========================================
+
+  /// 🎥 Precarrega um vídeo em background para carregamento instantâneo
+  Future<void> _preloadVideo(int index) async {
+    // Verificar se já está precarregando ou já foi precarregado
+    if (currentlyPreloading.contains(index) || 
+        preloadedVideos.containsKey(index)) {
+      return;
+    }
+    
+    // Verificar se índice é válido
+    if (index < 0 || index >= stories.length) return;
+    
+    final story = stories[index];
+    if (story.fileType != StorieFileType.video || story.fileUrl == null) {
+      return;
+    }
+    
+    print('🎥 PRELOAD: Iniciando preload do vídeo $index');
+    currentlyPreloading.add(index);
+    
+    try {
+      final controller = VideoPlayerController.networkUrl(
+        Uri.parse(story.fileUrl!),
+        videoPlayerOptions: VideoPlayerOptions(
+          mixWithOthers: true,
+          allowBackgroundPlayback: false,
+        ),
+      );
+      
+      await controller.initialize();
+      controller.setLooping(false);
+      
+      // Salvar no cache
+      if (mounted) {
+        preloadedVideos[index] = controller;
+        print('✅ PRELOAD: Vídeo $index precarregado com sucesso');
+      } else {
+        controller.dispose();
+      }
+      
+    } catch (e) {
+      print('❌ PRELOAD: Erro ao precarregar vídeo $index: $e');
+    } finally {
+      currentlyPreloading.remove(index);
+    }
+  }
+
+  /// 🖼️ Precarrega uma imagem em background para carregamento instantâneo
+  Future<void> _preloadImage(int index) async {
+    // Verificar se já foi precarregado
+    if (preloadedImages.contains(index)) return;
+    
+    // Verificar se índice é válido
+    if (index < 0 || index >= stories.length) return;
+    
+    final story = stories[index];
+    if (story.fileType == StorieFileType.video || story.fileUrl == null) {
+      return;
+    }
+    
+    print('🖼️ PRELOAD: Iniciando preload da imagem $index');
+    
+    try {
+      // Usar precacheImage do Flutter para forçar download
+      await precacheImage(
+        CachedNetworkImageProvider(story.fileUrl!),
+        context,
+      );
+      
+      if (mounted) {
+        preloadedImages.add(index);
+        print('✅ PRELOAD: Imagem $index precarregada com sucesso');
+      }
+      
+    } catch (e) {
+      print('❌ PRELOAD: Erro ao precarregar imagem $index: $e');
+    }
+  }
+
+  /// 🔄 Precarrega os stories adjacentes (anterior + próximos 2)
+  void _preloadAdjacentStories() {
+    print('🔄 PRELOAD: Iniciando preload dos stories adjacentes');
+    print('🔄 PRELOAD: Índice atual: $currentIndex');
+    
+    // Precarregar anterior (para voltar rápido)
+    if (currentIndex > 0) {
+      final prevIndex = currentIndex - 1;
+      final prevStory = stories[prevIndex];
+      
+      if (prevStory.fileType == StorieFileType.video) {
+        _preloadVideo(prevIndex);
+      } else {
+        _preloadImage(prevIndex);
+      }
+    }
+    
+    // Precarregar próximos 2 stories (para avançar instantâneo)
+    for (int i = 1; i <= 2; i++) {
+      final nextIndex = currentIndex + i;
+      if (nextIndex >= stories.length) break;
+      
+      final nextStory = stories[nextIndex];
+      
+      if (nextStory.fileType == StorieFileType.video) {
+        _preloadVideo(nextIndex);
+      } else {
+        _preloadImage(nextIndex);
+      }
+    }
+  }
+
+  /// 🧹 Limpa stories distantes da memória (gerenciamento de memória)
+  void _cleanupDistantStories() {
+    print('🧹 CLEANUP: Limpando stories distantes da memória');
+    
+    // Lista de índices a manter (buffer de 4 stories)
+    final indicesToKeep = <int>{};
+    
+    // Manter anterior
+    if (currentIndex > 0) {
+      indicesToKeep.add(currentIndex - 1);
+    }
+    
+    // Manter atual
+    indicesToKeep.add(currentIndex);
+    
+    // Manter próximos 2
+    for (int i = 1; i <= 2; i++) {
+      if (currentIndex + i < stories.length) {
+        indicesToKeep.add(currentIndex + i);
+      }
+    }
+    
+    // Limpar vídeos não utilizados
+    final videoIndicesToRemove = preloadedVideos.keys
+        .where((index) => !indicesToKeep.contains(index))
+        .toList();
+    
+    for (final index in videoIndicesToRemove) {
+      print('🗑️ CLEANUP: Removendo vídeo $index da memória');
+      preloadedVideos[index]?.dispose();
+      preloadedVideos.remove(index);
+    }
+    
+    // Limpar marcação de imagens precarregadas
+    // (o cached_network_image cuida da memória, só limpamos a marcação)
+    preloadedImages.removeWhere((index) => !indicesToKeep.contains(index));
+    
+    print('✅ CLEANUP: Memória otimizada - mantendo ${indicesToKeep.length} stories');
+  }
+
+  // ========================================
+  // FIM DO SISTEMA DE PRELOAD
+  // ========================================
+
   void _nextStory() {
+    // ESCONDE O MENU ANTES DE IR PARA O PRÓXIMO
+    menuRevealNotifier.value = false;
+
     // Marcar story atual como visto antes de avançar
     if (currentIndex < stories.length) {
       _markCurrentStoryAsViewed();
@@ -363,10 +781,30 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      
+      // 🧹 LIMPAR STORIES DISTANTES DA MEMÓRIA
+      _cleanupDistantStories();
     } else {
       // Fim dos stories - tentar carregar mais ou fechar
       _handleEndOfStories();
     }
+  }
+
+  void _replayStory() {
+    print('🔄 REPLAY: Reiniciando story atual');
+
+    // 1. Se for um vídeo, volte ao início e toque
+    if (videoController != null && videoController!.value.isInitialized) {
+      videoController?.seekTo(Duration.zero);
+      videoController?.play();
+    }
+
+    // 2. Reinicie a barra de progresso (a VSL de 15s ou do vídeo)
+    progressController?.reset();
+    progressController?.forward();
+
+    // 3. Esconda o menu de ações de novo
+    menuRevealNotifier.value = false;
   }
 
   /// Lida com o fim dos stories - carrega mais ou fecha
@@ -507,32 +945,63 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
   /// Alterna entre pause e play do story
   void _togglePause() {
-    print('🎮 PAUSE: Alternando estado - atual: $isPaused');
-    setState(() {
-      isPaused = !isPaused;
-    });
+    final wasPaused = isPausedNotifier.value;
+    print('🎮 PAUSE: Alternando estado - atual: $wasPaused');
+    
+    // IMPORTANTE: Salvar o valor atual do progressController ANTES de mudar o estado
+    final currentProgress = progressController?.value ?? 0.0;
+    
+    // Usar ValueNotifier ao invés de setState para evitar rebuild completo
+    isPausedNotifier.value = !wasPaused;
 
-    if (isPaused) {
-      print('⏸️ PAUSE: Pausando story');
+    if (isPausedNotifier.value) {
+      print('⏸️ PAUSE: Pausando story no progresso: ${(currentProgress * 100).toStringAsFixed(1)}%');
       // Pausa o timer de auto-advance
       autoAdvanceTimer?.cancel();
       // Pausa o auto-close controller
       autoCloseController.pauseAutoClose();
-      // Pausa o progress controller
+      // Pausa o progress controller (mantém posição atual)
       progressController?.stop();
       // Pausa vídeo se existir
       videoController?.pause();
+      // Pausa timer de sincronização de imagem
+      imageProgressTimer?.cancel();
+      // Salvar tempo pausado
+      if (imageStartTime != null) {
+        imagePausedDuration = (imagePausedDuration ?? Duration.zero) + DateTime.now().difference(imageStartTime!);
+        print('⏸️ PAUSE: Tempo pausado total: ${imagePausedDuration!.inSeconds}s');
+      }
     } else {
-      print('▶️ PLAY: Retomando story');
+      print('▶️ PLAY: Retomando story do progresso: ${(currentProgress * 100).toStringAsFixed(1)}%');
       // Retoma o auto-close controller
       autoCloseController.resumeAutoClose();
-      // Retoma o progress controller
-      progressController?.forward();
-      // Retoma vídeo se existir
-      videoController?.play();
+      
+      // Retoma vídeo se existir (o listener _syncVideoProgress vai cuidar do progressController)
+      if (videoController != null && videoController!.value.isInitialized) {
+        videoController!.play();
+        print('▶️ PLAY: Vídeo retomado - sync automático ativo');
+      } else {
+        // Para IMAGENS: Retomar timer de sincronização manual
+        if (progressController != null && imageStartTime != null) {
+          print('▶️ PLAY: Retomando sincronização manual de imagem');
+          
+          // Ajustar hora de início para compensar o tempo pausado
+          imageStartTime = DateTime.now().subtract(imagePausedDuration ?? Duration.zero);
+          
+          // Reiniciar timer periódico
+          imageProgressTimer?.cancel();
+          imageProgressTimer = Timer.periodic(Duration(milliseconds: 16), (timer) {
+            _syncImageProgress();
+          });
+          
+          print('✅ PLAY: Timer de sincronização retomado - progresso mantido em ${(currentProgress * 100).toStringAsFixed(1)}%');
+        } else {
+          print('⚠️ PLAY: Não há timer/controller para retomar');
+        }
+      }
     }
 
-    print('🎮 PAUSE: Novo estado: $isPaused');
+    print('🎮 PAUSE: Novo estado: ${isPausedNotifier.value}');
   }
 
   void _previousStory() {
@@ -567,17 +1036,217 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     });
   }
 
-  void _showComments() {
+  /// Faz download do story atual para a galeria do dispositivo
+  Future<void> _downloadStory() async {
     final story = stories[currentIndex];
     
-    // Navegação tradicional para tela de comentários
-    Navigator.of(context).push(
+    // Validar se tem URL
+    if (story.fileUrl == null || story.fileUrl!.isEmpty) {
+      Get.rawSnackbar(
+        message: 'Erro: Story sem URL válida',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    print('📥 DOWNLOAD: Iniciando download do story ${story.id}');
+    print('📥 DOWNLOAD: URL: ${story.fileUrl}');
+    print('📥 DOWNLOAD: Tipo: ${story.fileType?.name}');
+    print('📥 DOWNLOAD: Plataforma: ${kIsWeb ? "WEB" : "MOBILE"}');
+
+    if (kIsWeb) {
+      // =============================================
+      // LÓGICA PARA WEB (CHROME, FIREFOX, ETC)
+      // =============================================
+      try {
+        Get.rawSnackbar(
+          message: 'Iniciando download...',
+          backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 2),
+        );
+
+        // Definir extensão baseada no tipo
+        final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
+        final fileName = 'story_${story.id}$ext';
+
+        print('🌐 WEB DOWNLOAD: Criando link de download para: $fileName');
+
+        // Criar um elemento <a> invisível e clicar nele para disparar o download
+        final anchor = html.AnchorElement(href: story.fileUrl!)
+          ..setAttribute('download', fileName)
+          ..style.display = 'none';
+
+        // Adicionar ao DOM, clicar e remover
+        html.document.body?.append(anchor);
+        anchor.click();
+        anchor.remove();
+
+        print('✅ WEB DOWNLOAD: Download iniciado pelo navegador');
+
+        Get.rawSnackbar(
+          message: 'Download iniciado! Verifique a pasta de downloads. 🎉',
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        );
+      } catch (e) {
+        print('❌ WEB DOWNLOAD: Erro ao baixar: $e');
+        Get.rawSnackbar(
+          message: 'Erro ao iniciar download: $e',
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        );
+      }
+    } else {
+      // =============================================
+      // LÓGICA PARA MOBILE (ANDROID/IOS)
+      // =============================================
+      try {
+        Get.rawSnackbar(
+          message: 'Iniciando download...',
+          backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 2),
+        );
+
+        // 1. Pegar pasta temporária
+        final tempDir = await getTemporaryDirectory();
+        
+        // 2. Definir extensão baseada no tipo
+        final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
+        final tempPath = '${tempDir.path}/${story.id}$ext';
+        
+        print('📱 MOBILE DOWNLOAD: Salvando temporariamente em: $tempPath');
+
+        // 3. Baixar arquivo com Dio
+        await Dio().download(
+          story.fileUrl!,
+          tempPath,
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              final progress = (received / total * 100).toStringAsFixed(0);
+              print('📱 MOBILE DOWNLOAD: Progresso: $progress%');
+            }
+          },
+        );
+
+        print('✅ MOBILE DOWNLOAD: Arquivo baixado com sucesso');
+
+        // 4. Salvar na galeria
+        bool? result;
+        if (story.fileType == StorieFileType.video) {
+          print('📱 MOBILE DOWNLOAD: Salvando vídeo na galeria...');
+          result = await GallerySaver.saveVideo(tempPath);
+        } else {
+          print('📱 MOBILE DOWNLOAD: Salvando imagem na galeria...');
+          result = await GallerySaver.saveImage(tempPath);
+        }
+
+        // 5. Verificar resultado e mostrar feedback
+        if (result == true) {
+          print('✅ MOBILE DOWNLOAD: Salvo na galeria com sucesso!');
+          Get.rawSnackbar(
+            message: 'Salvo na galeria com sucesso! 🎉',
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          );
+        } else {
+          print('⚠️ MOBILE DOWNLOAD: Falha ao salvar na galeria');
+          Get.rawSnackbar(
+            message: 'Erro ao salvar na galeria',
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      } catch (e) {
+        print('❌ MOBILE DOWNLOAD: Erro ao baixar: $e');
+        Get.rawSnackbar(
+          message: 'Erro ao salvar o story: $e',
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        );
+      }
+    }
+  }
+
+  void _showComments() async {
+    final story = stories[currentIndex];
+
+    // PASSO 1: Pausar tudo antes de abrir comentários
+    _pauseAutoClose();
+    videoController?.pause();
+    progressController?.stop();
+
+    // PASSO 2: Navegar e ESPERAR o usuário voltar
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CommunityCommentsView(
           story: story,
         ),
       ),
     );
+
+    // PASSO 3: Retomar tudo quando o usuário voltar
+    _resumeAutoClose();
+    if (videoController != null && videoController!.value.isInitialized) {
+      videoController!.play();
+    }
+    // Retomar progressController de onde parou
+    if (progressController != null) {
+      progressController!.forward(from: progressController!.value);
+    }
+  }
+
+  void _showReplyOptions() {
+    final currentStory = stories[currentIndex];
+    
+    print('💬 RESPONDER: Iniciando resposta ao Pai');
+    print('💬 RESPONDER: Story ID: ${currentStory.id}');
+    print('💬 RESPONDER: Contexto: ${widget.contexto}');
+    
+    // Fechar o viewer de stories
+    Navigator.of(context).pop();
+    
+    // Preparar dados do story para resposta
+    final replyData = {
+      'replyToStory': {
+        'storyId': currentStory.id,
+        'storyTitle': currentStory.titulo,
+        'storyDescription': currentStory.descricao,
+        'storyUrl': currentStory.fileUrl,
+        'storyType': currentStory.fileType?.name ?? 'image',
+        'contexto': currentStory.contexto ?? widget.contexto, // 🔧 NOVO: Salvar contexto
+        'userMessage': '', // Será preenchido pelo usuário no chat
+        'timestamp': DateTime.now().toIso8601String(),
+      }
+    };
+    
+    // Navegar para o chat correto baseado no contexto
+    Widget chatWidget;
+    switch (widget.contexto) {
+      case 'sinais_isaque':
+        chatWidget = const SinaisIsaqueView();
+        break;
+      case 'sinais_rebeca':
+        chatWidget = const SinaisRebecaView();
+        break;
+      case 'nosso_proposito':
+        chatWidget = const NossoPropositoView();
+        break;
+      case 'principal':
+      default:
+        chatWidget = const ChatView();
+        break;
+    }
+    
+    print('💬 RESPONDER: Navegando para chat ${widget.contexto}');
+    
+    // Navegar para o chat com os dados do story
+    Get.to(
+      () => chatWidget,
+      arguments: replyData,
+    );
+    
+    print('💬 RESPONDER: Dados enviados: $replyData');
   }
 
   /// Mostra modal com descrição completa estilo TikTok
@@ -723,31 +1392,39 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
                     height: 3,
                     margin: EdgeInsets.only(
                         right: index < stories.length - 1 ? 4 : 0),
-                    decoration: BoxDecoration(
-                      color: index < currentIndex
-                          ? Colors.white
-                          : index == currentIndex
-                              ? (isPaused
-                                  ? Colors.orange
-                                  : Colors.white.withOpacity(0.5))
-                              : Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: isPausedNotifier,
+                      builder: (context, isPaused, child) {
+                        // Cor de fundo do container (não preenche quando é o story atual)
+                        final backgroundColor = index < currentIndex
+                            ? Colors.white
+                            : index == currentIndex
+                                ? Colors.white.withOpacity(0.5)
+                                : Colors.white.withOpacity(0.3);
+                        
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: backgroundColor,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: index == currentIndex &&
+                                  progressController != null
+                              ? AnimatedBuilder(
+                                  animation: progressController!,
+                                  builder: (context, child) {
+                                    return LinearProgressIndicator(
+                                      value: progressController!.value,
+                                      backgroundColor: Colors.transparent,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        isPaused ? Colors.orange : Colors.white
+                                      ),
+                                    );
+                                  },
+                                )
+                              : null,
+                        );
+                      },
                     ),
-                    child: index == currentIndex &&
-                            progressController != null &&
-                            !isPaused
-                        ? AnimatedBuilder(
-                            animation: progressController!,
-                            builder: (context, child) {
-                              return LinearProgressIndicator(
-                                value: progressController!.value,
-                                backgroundColor: Colors.transparent,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.white),
-                              );
-                            },
-                          )
-                        : null,
                   ),
                 ),
               ),
@@ -762,19 +1439,24 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Botão de pause/play
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    onPressed: _togglePause,
-                    icon: Icon(
-                      isPaused ? Icons.play_arrow : Icons.pause,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: isPausedNotifier,
+                  builder: (context, isPaused, child) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: _togglePause,
+                        icon: Icon(
+                          isPaused ? Icons.play_arrow : Icons.pause,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(width: 8),
                 // Botão de fechar
@@ -844,25 +1526,31 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
           ),
 
           // Botão de pause no centro (visível apenas quando pausado)
-          if (isPaused)
-            Center(
-              child: GestureDetector(
-                onTap: _togglePause,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                    size: 40,
+          ValueListenableBuilder<bool>(
+            valueListenable: isPausedNotifier,
+            builder: (context, isPaused, child) {
+              if (!isPaused) return const SizedBox.shrink();
+              
+              return Center(
+                child: GestureDetector(
+                  onTap: _togglePause,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 40,
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+          ),
 
           // Story info overlay removido para evitar duplicação
 
@@ -872,6 +1560,163 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               storyId: stories[currentIndex].id!,
               onCommentTap: _showComments,
             ),
+
+          // Modern Action Menu Overlay
+          ValueListenableBuilder<bool>(
+            valueListenable: menuRevealNotifier,
+            builder: (context, isMenuRevealed, child) {
+              return IgnorePointer(
+                ignoring: !isMenuRevealed,
+                child: AnimatedOpacity(
+                  opacity: isMenuRevealed ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  // GestureDetector para capturar swipes horizontais
+                  child: GestureDetector(
+                    // 1. LÓGICA DE SWIPE
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity! < 0) {
+                        // Deslizou para a ESQUERDA -> Próximo Story
+                        _nextStory();
+                      } else if (details.primaryVelocity! > 0) {
+                        // Deslizou para a DIREITA -> Replay
+                        _replayStory();
+                      }
+                    },
+                    // 2. FUNDO PRETO
+                    child: Container(
+                      color: Colors.black.withOpacity(0.5),
+                      width: double.infinity,
+                      height: double.infinity,
+                      // 3. ÁREAS DE TAP + MENU NO CENTRO
+                      child: Stack(
+                        children: [
+                          // Áreas de tap (esquerda e direita)
+                          Row(
+                            children: [
+                              // Área ESQUERDA - Voltar story
+                              Expanded(
+                                flex: 3,
+                                child: GestureDetector(
+                                  onTap: _previousStory,
+                                  child: Container(color: Colors.transparent),
+                                ),
+                              ),
+                              // Área CENTRAL - Sem ação (onde fica o menu)
+                              Expanded(
+                                flex: 4,
+                                child: Container(color: Colors.transparent),
+                              ),
+                              // Área DIREITA - Avançar story
+                              Expanded(
+                                flex: 3,
+                                child: GestureDetector(
+                                  onTap: _nextStory,
+                                  child: Container(color: Colors.transparent),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Menu centralizado (por cima das áreas de tap)
+                          Center(
+                            // GestureDetector interno para "consumir" gestos nos botões
+                            child: GestureDetector(
+                              onTap: () {
+                                // Consome o tap para não passar para as áreas abaixo
+                              },
+                              onHorizontalDragEnd: (details) {
+                                // Consome o swipe se começar em cima do menu
+                              },
+                              child: StoryActionMenu(
+                                onCommentTap: _showComments,
+                                onSaveTap: () {
+                                  final controller =
+                                      Get.find<StoryInteractionsController>();
+                                  controller.toggleFavorite();
+                                },
+                                onShareTap: () {
+                                  final controller =
+                                      Get.find<StoryInteractionsController>();
+                                  controller.shareStory();
+                                },
+                                onDownloadTap: _downloadStory,
+                                onReplyTap: _showReplyOptions,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // Botão FECHAR POR CIMA do overlay (quando menu está visível)
+          // APENAS FECHAR - sem botão PAUSE (não faz sentido pausar quando menu está aberto)
+          ValueListenableBuilder<bool>(
+            valueListenable: menuRevealNotifier,
+            builder: (context, isMenuRevealed, child) {
+              if (!isMenuRevealed) return const SizedBox.shrink();
+              
+              return Positioned(
+                top: 50,
+                right: 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      print('DEBUG: Botão fechar pressionado (overlay)');
+                      // Para todos os timers e controladores
+                      autoAdvanceTimer?.cancel();
+                      autoCloseController.dispose();
+                      videoController?.pause();
+                      progressController?.stop();
+                      // Fecha o viewer
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.close,
+                        color: Colors.white, size: 24),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // Botão de pause CENTRAL (quando pausado E menu visível)
+          ValueListenableBuilder<bool>(
+            valueListenable: isPausedNotifier,
+            builder: (context, isPaused, child) {
+              return ValueListenableBuilder<bool>(
+                valueListenable: menuRevealNotifier,
+                builder: (context, menuRevealed, child) {
+                  if (!isPaused || !menuRevealed) return const SizedBox.shrink();
+                  
+                  return Center(
+                    child: GestureDetector(
+                      onTap: _togglePause,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
 
           // Like animation overlay - APENAS quando animando (invisível por padrão)
           if (likeAnimation!.isAnimating)
@@ -1104,60 +1949,72 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
             ),
 
           // Botão de pause/play mais visível
-          if (isPaused)
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                    size: 64,
-                  ),
-                ),
-              ),
-            ),
-
-          // Indicador de pause sutil quando pausado
-          if (isPaused)
-            Positioned(
-              top: 100,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Pausado - Toque para continuar',
-                    style: TextStyle(
+          ValueListenableBuilder<bool>(
+            valueListenable: isPausedNotifier,
+            builder: (context, isPaused, child) {
+              if (!isPaused) return const SizedBox.shrink();
+              
+              return Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.play_arrow,
                       color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      size: 64,
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+          ),
+
+          // Indicador de pause sutil quando pausado
+          ValueListenableBuilder<bool>(
+            valueListenable: isPausedNotifier,
+            builder: (context, isPaused, child) {
+              if (!isPaused) return const SizedBox.shrink();
+              
+              return Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Pausado - Toque para continuar',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

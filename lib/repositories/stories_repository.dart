@@ -21,6 +21,21 @@ import 'package:whatsapp_chat/utils/debug_utils.dart';
 class StoriesRepository {
   static final StoriesHistoryService _historyService = StoriesHistoryService();
 
+  // 🔧 NOVO: Método helper para obter nome da coleção baseado no contexto
+  static String getCollectionNameFromContext(String contexto) {
+    switch (contexto) {
+      case 'sinais_isaque':
+        return 'stories_sinais_isaque';
+      case 'sinais_rebeca':
+        return 'stories_sinais_rebeca';
+      case 'nosso_proposito':
+        return 'stories_nosso_proposito';
+      case 'principal':
+      default:
+        return 'stories_files';
+    }
+  }
+
   // Método para testar autenticação
   static Future<bool> testAuthentication() async {
     try {
@@ -442,8 +457,24 @@ class StoriesRepository {
         content: const CircularProgressIndicator(),
         barrierDismissible: false);
 
-    // Validação simplificada do vídeo usando video_thumbnail
+    // Validação do vídeo usando video_thumbnail
+    print('🎬 VIDEO: Iniciando validação do vídeo');
+    print('🎬 VIDEO: Caminho: ${video.path}');
+    print('🎬 VIDEO: Arquivo existe: ${await video.exists()}');
+    
+    // Verificar se o arquivo existe
+    if (!await video.exists()) {
+      Get.back();
+      Get.rawSnackbar(
+        message: 'Erro: Arquivo de vídeo não encontrado no caminho: ${video.path}',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      );
+      return false;
+    }
+    
     try {
+      print('🎬 VIDEO: Gerando thumbnail de validação (128px)...');
       final thumbnail = await VideoThumbnail.thumbnailData(
         video: video.path,
         imageFormat: ImageFormat.JPEG,
@@ -453,15 +484,28 @@ class StoriesRepository {
 
       if (thumbnail == null) {
         Get.back();
-        Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_video'));
+        print('❌ VIDEO: Thumbnail de validação retornou null');
+        Get.rawSnackbar(
+          message: 'Erro ao gerar thumbnail do vídeo. Formato pode não ser suportado.',
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        );
         return false;
       }
+      
+      print('✅ VIDEO: Thumbnail de validação gerado com sucesso (${thumbnail.length} bytes)');
     } catch (e) {
       Get.back();
-      Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_video'));
+      print('❌ VIDEO: Erro ao gerar thumbnail de validação: $e');
+      Get.rawSnackbar(
+        message: 'Erro ao validar vídeo: $e',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      );
       return false;
     }
 
+    print('🎬 VIDEO: Gerando thumbnail final (480px)...');
     Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
       video: video.path,
       imageFormat: ImageFormat.JPEG,
@@ -470,9 +514,17 @@ class StoriesRepository {
     );
 
     if (thumbnail == null) {
-      Get.rawSnackbar(message: AppLanguage.lang('falha_ao_validar_video'));
+      Get.back();
+      print('❌ VIDEO: Thumbnail final retornou null');
+      Get.rawSnackbar(
+        message: 'Erro ao gerar thumbnail final do vídeo',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      );
       return false;
     }
+    
+    print('✅ VIDEO: Thumbnail final gerado com sucesso (${thumbnail.length} bytes)');
 
     String thumbnailImg = await _uploadImg(thumbnail);
 
@@ -535,6 +587,194 @@ class StoriesRepository {
       );
 
       return false;
+    }
+  }
+
+  /// Método para upload de vídeo na WEB (usando bytes ao invés de File)
+  static Future<bool> addVideoWeb({
+    required String link,
+    required Uint8List videoBytes,
+    required String fileName,
+    required String? idioma,
+    String? contexto,
+    String? titulo,
+    String? descricao,
+    String? tituloNotificacaoMasculino,
+    String? tituloNotificacaoFeminino,
+    String? notificacaoMasculino,
+    String? notificacaoFeminino,
+    bool? enviarNotificacao,
+  }) async {
+    print('🎬 WEB REPO: Iniciando upload de vídeo web');
+    print('🎬 WEB REPO: Tamanho: ${(videoBytes.length / 1024 / 1024).toStringAsFixed(2)}MB');
+    
+    Get.defaultDialog(
+        title: 'Salvando Vídeo',
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Fazendo upload do vídeo...'),
+          ],
+        ),
+        barrierDismissible: false);
+
+    try {
+      // Para web, não conseguimos gerar thumbnail facilmente
+      // Vamos usar uma imagem placeholder ou pular a validação
+      print('🎬 WEB REPO: Pulando validação de thumbnail (web)');
+      
+      // Upload do vídeo direto usando bytes
+      print('🎬 WEB REPO: Fazendo upload do vídeo...');
+      String fileUrl = await _uploadVideoBytes(videoBytes, fileName);
+      print('🎬 WEB REPO: Upload concluído. URL: $fileUrl');
+
+      // Usar uma thumbnail padrão ou null
+      String? thumbnailImg;
+      
+      var body = {
+        'link': link,
+        'fileUrl': fileUrl,
+        'videoThumbnail': thumbnailImg,
+        'dataCadastro': Timestamp.now(),
+        'videoDuration': 0,
+        'fileType': StorieFileType.video.name,
+        'contexto': contexto ?? 'principal',
+        'publicoAlvo': null,
+        'titulo': titulo,
+        'descricao': descricao,
+        'tituloNotificacaoMasculino': tituloNotificacaoMasculino,
+        'tituloNotificacaoFeminino': tituloNotificacaoFeminino,
+        'notificacaoMasculino': notificacaoMasculino,
+        'notificacaoFeminino': notificacaoFeminino,
+        'enviarNotificacao': enviarNotificacao ?? false,
+      };
+
+      if (idioma != null && idioma.isNotEmpty) {
+        body['idioma'] = idioma;
+      }
+
+      // Escolhe a coleção baseada no contexto
+      String colecao;
+      switch (contexto) {
+        case 'sinais_isaque':
+          colecao = 'stories_sinais_isaque';
+          break;
+        case 'sinais_rebeca':
+          colecao = 'stories_sinais_rebeca';
+          break;
+        case 'nosso_proposito':
+          colecao = 'stories_nosso_proposito';
+          break;
+        default:
+          colecao = 'stories_files';
+      }
+      
+      print('🎬 WEB REPO: Salvando no Firestore (coleção: $colecao)');
+      await FirebaseFirestore.instance.collection(colecao).add(body);
+      
+      Get.back();
+      print('🎬 WEB REPO: Vídeo salvo com sucesso!');
+      
+      Get.rawSnackbar(
+        message: 'Vídeo publicado com sucesso!',
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      );
+      
+      return true;
+    } catch (e, stackTrace) {
+      print('❌ WEB REPO: Erro ao salvar vídeo: $e');
+      print('❌ WEB REPO: Stack trace: $stackTrace');
+      Get.back();
+
+      Get.rawSnackbar(
+        title: 'Erro ao salvar vídeo',
+        message: 'Erro: $e',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+        snackPosition: SnackPosition.TOP,
+      );
+
+      return false;
+    }
+  }
+
+  /// Upload de vídeo usando bytes (para web)
+  static Future<String> _uploadVideoBytes(Uint8List videoBytes, String fileName) async {
+    print('🎬 WEB UPLOAD: Iniciando upload de vídeo com bytes');
+    print('🎬 WEB UPLOAD: Tamanho: ${videoBytes.length} bytes');
+    print('🎬 WEB UPLOAD: Nome do arquivo: $fileName');
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('Usuário não autenticado');
+      }
+
+      // Gerar nome único para o arquivo
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final userId = user.uid;
+      final extension = fileName.split('.').last;
+      final storagePath = 'stories_files/${userId}_${timestamp}.$extension';
+
+      print('🎬 WEB UPLOAD: Caminho no storage: $storagePath');
+
+      // Criar referência do Firebase Storage
+      Reference ref = FirebaseStorage.instance.ref().child(storagePath);
+
+      // Configurar metadados
+      SettableMetadata metadata = SettableMetadata(
+        contentType: 'video/$extension',
+        customMetadata: {
+          'uploadedBy': userId,
+          'uploadedAt': timestamp.toString(),
+          'fileType': 'story_video',
+          'fileSize': videoBytes.length.toString(),
+          'platform': 'web',
+        },
+      );
+
+      print('🎬 WEB UPLOAD: Iniciando upload...');
+
+      // Fazer upload com monitoramento
+      final uploadTask = ref.putData(videoBytes, metadata);
+
+      // Monitorar progresso
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        double progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        print('🎬 WEB UPLOAD: Progresso: ${progress.toStringAsFixed(1)}%');
+      });
+
+      // Aguardar conclusão
+      final snapshot = await uploadTask.timeout(
+        const Duration(minutes: 10),
+        onTimeout: () {
+          uploadTask.cancel();
+          throw Exception('Upload cancelado por timeout (10 minutos)');
+        },
+      );
+
+      print('🎬 WEB UPLOAD: Upload concluído. Estado: ${snapshot.state}');
+
+      // Verificar se o upload foi bem-sucedido
+      if (snapshot.state != TaskState.success) {
+        throw Exception('Upload falhou. Estado: ${snapshot.state}');
+      }
+
+      // Obter URL de download
+      String downloadUrl = await ref.getDownloadURL();
+      print('🎬 WEB UPLOAD: URL de download: $downloadUrl');
+
+      return downloadUrl;
+    } on FirebaseException catch (e) {
+      print('❌ WEB UPLOAD: Firebase Exception: ${e.code} - ${e.message}');
+      throw Exception('Erro no Firebase Storage: ${e.message}');
+    } catch (e) {
+      print('❌ WEB UPLOAD: Erro: $e');
+      rethrow;
     }
   }
 
@@ -1107,8 +1347,17 @@ class StoriesRepository {
 
           if (doc.exists) {
             print('✅ STORIES: Story encontrado na coleção: $collection');
-            StorieFileModel story = StorieFileModel.fromJson(doc.data()!);
-            story.id = doc.id;
+            
+            // 🔧 CORRIGIDO: Usar o mesmo padrão que corrigimos antes
+            final storyData = doc.data()! as Map<String, dynamic>;
+            final storyDataWithId = <String, dynamic>{
+              ...storyData,
+              'id': doc.id, // ✅ Injetar ID corretamente
+            };
+            
+            final story = StorieFileModel.fromJson(storyDataWithId);
+            print('✅ STORIES: Story ID injetado: ${story.id}');
+            
             return story;
           }
         } catch (e) {

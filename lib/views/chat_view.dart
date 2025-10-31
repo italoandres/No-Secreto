@@ -58,12 +58,27 @@ class ChatView extends StatefulWidget {
 class _ChatViewState extends State<ChatView> {
   int totMsgs = 0;
   Timer? _onlineTimer; // ✨ NOVO: Timer para tracking de status online
+  Map<String, dynamic>? replyToStoryData; // 🙏 NOVO: Dados do story para responder ao Pai
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
     _startOnlineTracking(); // ✨ NOVO: Iniciar tracking
+    _checkReplyToStory(); // 🙏 NOVO: Verificar se veio de "Responder ao Pai"
+  }
+
+  // 🙏 NOVO: Verifica se há dados de story para responder
+  void _checkReplyToStory() {
+    final arguments = Get.arguments;
+    if (arguments != null && arguments is Map<String, dynamic>) {
+      if (arguments.containsKey('replyToStory')) {
+        setState(() {
+          replyToStoryData = arguments['replyToStory'] as Map<String, dynamic>;
+        });
+        print('🙏 CHAT: Recebeu dados de reply to story: $replyToStoryData');
+      }
+    }
   }
 
   Future<void> initPlatformState() async {
@@ -757,6 +772,9 @@ class _ChatViewState extends State<ChatView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        // 🙏 NOVO: Widget de pré-publicação "Responder ao Pai"
+                        if (replyToStoryData != null)
+                          _buildReplyToStoryPreview(),
                         Obx(() =>
                             ChatController.linkDescricaoModel.value == null
                                 ? const SizedBox()
@@ -1116,6 +1134,259 @@ class _ChatViewState extends State<ChatView> {
             );
           }),
     );
+  }
+
+  // 🙏 NOVO: Widget elegante de pré-publicação "Responder ao Pai"
+  Widget _buildReplyToStoryPreview() {
+    final storyUrl = replyToStoryData!['storyUrl'] as String?;
+    final storyType = replyToStoryData!['storyType'] as String?;
+    final storyTitle = replyToStoryData!['storyTitle'] as String?;
+    final storyDescription = replyToStoryData!['storyDescription'] as String?;
+
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      child: Material(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        elevation: 4,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header com título e botão fechar
+              Row(
+                children: [
+                  Icon(Icons.reply, color: Colors.blue.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Resposta ao Pai',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        replyToStoryData = null;
+                      });
+                    },
+                    icon: const Icon(Icons.close, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // Preview da mídia e informações
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail da mídia
+                  if (storyUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey.shade200,
+                        child: storyType == 'video'
+                            ? Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: storyUrl,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      color: Colors.grey.shade300,
+                                      child: const Icon(Icons.video_library,
+                                          size: 32),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Icon(
+                                        Icons.play_arrow,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : CachedNetworkImage(
+                                imageUrl: storyUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey.shade300,
+                                  child: const Icon(Icons.image, size: 32),
+                                ),
+                              ),
+                      ),
+                    ),
+                  
+                  const SizedBox(width: 12),
+                  
+                  // Informações do story
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (storyTitle != null && storyTitle.isNotEmpty)
+                          Text(
+                            storyTitle.length > 40
+                                ? '${storyTitle.substring(0, 40)}...'
+                                : storyTitle,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        if (storyDescription != null &&
+                            storyDescription.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              storyDescription.length > 60
+                                  ? '${storyDescription.substring(0, 60)}...'
+                                  : storyDescription,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              // Campo de mensagem
+              const SizedBox(height: 12),
+              TextField(
+                controller: ChatController.msgController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Escreva sua resposta ao Pai...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
+                ),
+              ),
+              
+              // Botão de enviar
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _sendReplyToStory(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade600,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.send, size: 18, color: Colors.white),
+                  label: const Text(
+                    'Enviar Resposta ao Pai',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🙏 NOVO: Envia a resposta ao Pai como mensagem no chat
+  void _sendReplyToStory() async {
+    if (replyToStoryData == null) return;
+
+    // Pegar mensagem do TextField
+    final userMessage = ChatController.msgController.text.trim();
+    if (userMessage.isEmpty) {
+      Get.rawSnackbar(
+        message: 'Por favor, escreva uma mensagem',
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 2),
+      );
+      return;
+    }
+
+    final storyUrl = replyToStoryData!['storyUrl'] as String?;
+    final storyType = replyToStoryData!['storyType'] as String?;
+    final storyTitle = replyToStoryData!['storyTitle'] as String?;
+    final storyId = replyToStoryData!['storyId'] as String?;
+
+    print('🙏 CHAT: Enviando resposta ao Pai');
+    print('🙏 CHAT: Story ID: $storyId');
+    print('🙏 CHAT: Mensagem: $userMessage');
+
+    // Construir mensagem com referência ao story
+    String mensagemCompleta = '';
+    
+    if (storyTitle != null && storyTitle.isNotEmpty) {
+      mensagemCompleta += '📖 $storyTitle\n\n';
+    }
+    
+    mensagemCompleta += userMessage;
+
+    // Enviar como mensagem de texto com metadados do story
+    try {
+      await ChatRepository.addText(
+        msg: mensagemCompleta,
+        replyToStoryId: storyId,
+        replyToStoryUrl: storyUrl,
+        replyToStoryType: storyType,
+      );
+
+      // Limpar o TextField e a pré-publicação
+      ChatController.msgController.clear();
+      setState(() {
+        replyToStoryData = null;
+      });
+
+      // Mostrar confirmação
+      Get.rawSnackbar(
+        message: 'Resposta enviada ao Pai! 🙏',
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      );
+
+      print('🙏 CHAT: Resposta enviada com sucesso!');
+    } catch (e) {
+      print('❌ CHAT: Erro ao enviar resposta: $e');
+      Get.rawSnackbar(
+        message: 'Erro ao enviar resposta',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   Widget _emoji() {

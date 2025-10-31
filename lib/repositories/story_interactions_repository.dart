@@ -8,6 +8,7 @@ import '../models/story_favorite_model.dart';
 import '../models/community_comment_model.dart';
 import '../models/usuario_model.dart';
 import 'usuario_repository.dart';
+import 'stories_repository.dart'; // 🔧 NOVO: Para getCollectionNameFromContext
 import '../utils/context_utils.dart';
 
 class StoryInteractionsRepository {
@@ -327,6 +328,9 @@ class StoryInteractionsRepository {
           'storyId': storyId,
           'savedData': favorite.toJson()
         });
+
+        // 🔧 NOVO: Marcar o story como tendo favoritos para não ser deletado
+        await _markStoryAsFavorited(storyId, normalizedContext);
 
         return true;
       }
@@ -739,6 +743,7 @@ class StoryInteractionsRepository {
     required String userName,
     required String userAvatarUrl,
     required String text,
+    String contexto = 'principal',
   }) async {
     try {
       // Validações
@@ -767,10 +772,41 @@ class StoryInteractionsRepository {
           .add(comment.toJson());
 
       print('✅ COMMUNITY: Comentário raiz criado com ID: ${docRef.id}');
+
+      // 🔒 PROTEÇÃO: Marcar o story como favoritado para não ser deletado
+      // Quando alguém responde ao Pai, o story deve ser preservado permanentemente
+      await _markStoryAsFavorited(storyId, contexto);
+      print('⭐ COMMUNITY: Story marcado como favoritado (resposta ao Pai)');
+
       return docRef.id;
     } catch (e) {
       print('❌ COMMUNITY: Erro ao criar comentário raiz: $e');
       rethrow;
+    }
+  }
+
+  // 🔧 NOVO: Marca o story como tendo favoritos para não ser deletado
+  static Future<void> _markStoryAsFavorited(
+      String storyId, String contexto) async {
+    try {
+      print('💾 FAVORITO: Marcando story $storyId como favoritado');
+
+      // Obter nome da coleção baseado no contexto
+      final collectionName =
+          StoriesRepository.getCollectionNameFromContext(contexto);
+
+      print('💾 FAVORITO: Atualizando na coleção: $collectionName');
+
+      // Atualizar o story no Firestore
+      await _firestore.collection(collectionName).doc(storyId).update({
+        'hasFavorites': true,
+        'lastFavoritedAt': FieldValue.serverTimestamp(),
+      });
+
+      print('✅ FAVORITO: Story marcado como favoritado com sucesso!');
+    } catch (e) {
+      print('⚠️ FAVORITO: Erro ao marcar story como favoritado: $e');
+      // Não falhar a operação de favoritar se não conseguir marcar
     }
   }
 }

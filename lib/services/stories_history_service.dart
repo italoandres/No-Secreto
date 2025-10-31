@@ -48,9 +48,27 @@ class StoriesHistoryService {
       safePrint(
           '📊 HISTORY: Encontrados ${query.docs.length} stories expirados em $collection');
 
+      int movedCount = 0;
+      int skippedCount = 0;
+
       for (var doc in query.docs) {
-        await moveStoryToHistory(doc.id, collection, doc.data());
+        final data = doc.data();
+        
+        // 🔒 PROTEÇÃO: NÃO deletar stories com favoritos
+        final hasFavorites = data['hasFavorites'] ?? false;
+        
+        if (hasFavorites) {
+          safePrint('⭐ HISTORY: Story ${doc.id} tem favoritos - PRESERVADO');
+          skippedCount++;
+          continue;
+        }
+        
+        await moveStoryToHistory(doc.id, collection, data);
+        movedCount++;
       }
+
+      safePrint(
+          '✅ HISTORY: $collection - Movidos: $movedCount | Preservados (favoritos): $skippedCount');
     } catch (e) {
       safePrint('❌ HISTORY ERROR: Erro ao processar coleção $collection: $e');
     }

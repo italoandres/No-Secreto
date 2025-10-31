@@ -7,7 +7,7 @@ import '../repositories/stories_repository.dart';
 import '../models/storie_file_model.dart';
 import '../utils/enhanced_image_loader.dart';
 
-class StoryInteractionsComponent extends StatelessWidget {
+class StoryInteractionsComponent extends StatefulWidget {
   final String storyId;
   final VoidCallback? onCommentTap;
 
@@ -16,6 +16,18 @@ class StoryInteractionsComponent extends StatelessWidget {
     required this.storyId,
     this.onCommentTap,
   });
+
+  @override
+  State<StoryInteractionsComponent> createState() =>
+      _StoryInteractionsComponentState();
+}
+
+class _StoryInteractionsComponentState
+    extends State<StoryInteractionsComponent> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   /// Mostra opções de resposta baseadas no gênero do usuário
   void _showReplyOptions() {
@@ -167,7 +179,7 @@ class StoryInteractionsComponent extends StatelessWidget {
     Get.back(); // Fecha o modal
 
     // Navegar para o chat com story pré-carregado
-    _navigateToChatWithStory(chatType, storyId);
+    _navigateToChatWithStory(chatType, widget.storyId);
   }
 
   /// Navega para o chat especificado com story pré-carregado
@@ -528,7 +540,7 @@ class StoryInteractionsComponent extends StatelessWidget {
       bottom: 100,
       child: Column(
         children: [
-          // Botão de Curtir (Oração) - Emoji 🙏 com animação de tremor
+          // Botão de Curtir (Oração) - ÚNICO BOTÃO VISÍVEL
           _buildInteractionButton(
             icon: Obx(() => TweenAnimationBuilder<double>(
                   duration: const Duration(milliseconds: 300),
@@ -587,90 +599,6 @@ class StoryInteractionsComponent extends StatelessWidget {
                   ),
                 )),
             onTap: controller.toggleLike,
-          ),
-
-          const SizedBox(height: 20),
-
-          // Botão de Comentar
-          _buildInteractionButton(
-            icon: const Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.white,
-              size: 32,
-            ),
-            label: Obx(() => Text(
-                  controller.comments.length.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
-            onTap: onCommentTap ?? () {},
-          ),
-
-          const SizedBox(height: 20),
-
-          // Botão de Favoritar
-          _buildInteractionButton(
-            icon: Obx(() => Icon(
-                  controller.isFavorited.value
-                      ? Icons.bookmark
-                      : Icons.bookmark_border,
-                  color: controller.isFavorited.value
-                      ? Colors.yellow
-                      : Colors.white,
-                  size: 32,
-                )),
-            label: const Text(
-              'Salvar',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: controller.toggleFavorite,
-          ),
-
-          const SizedBox(height: 20),
-
-          // Botão de Compartilhar
-          _buildInteractionButton(
-            icon: const Icon(
-              Icons.share,
-              color: Colors.white,
-              size: 32,
-            ),
-            label: const Text(
-              'Compartilhar',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () => controller.shareStory(),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Botão de Responder
-          _buildInteractionButton(
-            icon: const Icon(
-              Icons.reply,
-              color: Colors.white,
-              size: 32,
-            ),
-            label: const Text(
-              'Responder',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () => _showReplyOptions(),
           ),
         ],
       ),

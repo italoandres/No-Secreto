@@ -66,6 +66,8 @@
 	<string>Este app precisa de acesso ao seu microphone para gravar audio para salvar no chat</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Este aplicativo requer acesso à biblioteca de fotos para atualizar a imagem do seu perfil.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Este aplicativo precisa de permissão para salvar stories na sua galeria.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>speech</string>
 	<key>NSFaceIDUsageDescription</key>

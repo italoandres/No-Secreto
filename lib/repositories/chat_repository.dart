@@ -40,6 +40,9 @@ class ChatRepository {
     bool? orginemAdmin,
     LinkDescricaoModel? linkDescricaoModel,
     String? contexto,
+    String? replyToStoryId, // 🙏 NOVO: ID do story sendo respondido
+    String? replyToStoryUrl, // 🙏 NOVO: URL da mídia do story
+    String? replyToStoryType, // 🙏 NOVO: Tipo da mídia (image/video)
   }) async {
     Map<String, dynamic> data = {
       'dataCadastro': DateTime.now(),
@@ -52,6 +55,16 @@ class ChatRepository {
     if (linkDescricaoModel != null) {
       data['linkDescricaoModel'] =
           LinkDescricaoModel.toJson(linkDescricaoModel);
+    }
+
+    // 🙏 NOVO: Adicionar dados do story se for uma resposta ao Pai
+    if (replyToStoryId != null) {
+      data['replyToStory'] = {
+        'storyId': replyToStoryId,
+        'storyUrl': replyToStoryUrl,
+        'storyType': replyToStoryType,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
     }
 
     // Escolher coleção baseada no contexto

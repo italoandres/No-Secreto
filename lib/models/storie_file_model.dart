@@ -68,6 +68,7 @@ class StorieFileModel {
 
   static StorieFileModel fromJson(Map<String, dynamic> json) {
     return StorieFileModel(
+      id: json['id'], // 🔧 CRÍTICO: Ler o ID do JSON
       link: json['link'] ?? '',
       fileUrl: json['fileUrl'],
       videoThumbnail: json['videoThumbnail'] ?? '',

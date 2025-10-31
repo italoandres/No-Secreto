@@ -60,6 +60,7 @@ class _CommunityCommentsViewState extends State<CommunityCommentsView> {
         userName: userData['displayName'] ?? 'Usuário',
         userAvatarUrl: userData['mainPhotoUrl'] ?? '',
         text: _commentController.text.trim(),
+        contexto: widget.story.contexto ?? 'principal', // 🔧 Passar contexto do story
       );
 
       // Limpar campo

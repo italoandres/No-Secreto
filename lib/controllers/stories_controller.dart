@@ -12,6 +12,7 @@ import '../repositories/stories_repository.dart';
 import '../theme.dart';
 import '../token_usuario.dart';
 import '../utils/debug_logger.dart';
+import 'dart:html' as html show Blob, Url;
 
 class FileValidationResult {
   final bool isValid;
@@ -59,23 +60,28 @@ class StoriesController {
 
       FilePickerResult? result;
 
-      // Tentar diferentes tipos de seleção
+      // Tentar diferentes tipos de seleção - ACEITAR IMAGENS E VÍDEOS
       try {
         result = await FilePicker.platform.pickFiles(
           allowMultiple: false,
           type: FileType.custom,
-          allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
+          allowedExtensions: [
+            // Imagens
+            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',
+            // Vídeos
+            'mp4', 'mov', 'avi', '3gp', 'webm', 'mkv'
+          ],
           allowCompression: true,
         );
       } catch (e) {
-        print('DEBUG: Erro com FileType.custom, tentando FileType.image: $e');
+        print('DEBUG: Erro com FileType.custom, tentando FileType.media: $e');
         try {
           result = await FilePicker.platform.pickFiles(
             allowMultiple: false,
-            type: FileType.image,
+            type: FileType.media, // Aceita imagens E vídeos
           );
         } catch (e2) {
-          print('DEBUG: Erro com FileType.image, tentando FileType.any: $e2');
+          print('DEBUG: Erro com FileType.media, tentando FileType.any: $e2');
           result = await FilePicker.platform.pickFiles(
             allowMultiple: false,
             type: FileType.any,
@@ -94,28 +100,39 @@ class StoriesController {
         print(
             'DEBUG: Arquivo selecionado: ${file.name}, tamanho: ${file.size} bytes');
 
-        // Verificar se é uma imagem válida
+        // Verificar se é uma imagem ou vídeo válido
         final extension = file.name.split('.').last.toLowerCase();
-        final validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        final validImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        final validVideoExtensions = ['mp4', 'mov', 'avi', '3gp', 'webm', 'mkv'];
+        final allValidExtensions = [...validImageExtensions, ...validVideoExtensions];
 
-        if (!validExtensions.contains(extension)) {
+        if (!allValidExtensions.contains(extension)) {
           Get.rawSnackbar(
             message:
-                'Formato não suportado! Use: ${validExtensions.join(', ')}',
+                'Formato não suportado!\n\nImagens: ${validImageExtensions.join(', ')}\nVídeos: ${validVideoExtensions.join(', ')}',
             backgroundColor: Colors.red,
           );
           return;
         }
 
-        // Verificar tamanho
+        final isVideo = validVideoExtensions.contains(extension);
+        print('📁 UPLOAD: Tipo detectado: ${isVideo ? "VÍDEO" : "IMAGEM"} (.$extension)');
+
+        // Verificar tamanho - Admin sem limite
+        final isAdmin = TokenUsuario().isAdmin == true;
         final mb = file.size / 1024 / 1024;
-        if (mb > 16) {
+        
+        if (!isAdmin && mb > 16) {
           Get.rawSnackbar(
             message:
                 'Arquivo muito grande! Máximo 16MB (atual: ${mb.toStringAsFixed(1)}MB)',
             backgroundColor: Colors.red,
           );
           return;
+        }
+        
+        if (isAdmin) {
+          print('📁 UPLOAD ADMIN: Arquivo de ${mb.toStringAsFixed(2)}MB (sem limite)');
         }
 
         // Obter bytes
@@ -138,14 +155,48 @@ class StoriesController {
           return;
         }
 
-        if (bytes != null && bytes.isNotEmpty) {
-          print('DEBUG: Processando imagem com ${bytes.length} bytes');
-          _preImg(bytes, contexto: contexto);
+        // Processar baseado no tipo de arquivo
+        if (isVideo) {
+          print('🎬 DEBUG: Processando vídeo');
+          print('🎬 DEBUG: Platform: ${GetPlatform.isWeb ? "WEB" : "MOBILE"}');
+          print('🎬 DEBUG: file.path: ${file.path}');
+          print('🎬 DEBUG: file.bytes disponível: ${file.bytes != null}');
+          
+          // WEB: Usar bytes (path é blob URL)
+          // MOBILE: Usar path (bytes pode ser null)
+          if (GetPlatform.isWeb) {
+            if (bytes != null && bytes.isNotEmpty) {
+              print('🎬 DEBUG WEB: Processando vídeo com bytes (${bytes.length} bytes)');
+              _preVideoWeb(bytes, file.name, contexto: contexto);
+            } else {
+              Get.rawSnackbar(
+                message: 'Erro: Não foi possível obter os dados do vídeo.',
+                backgroundColor: Colors.red,
+              );
+            }
+          } else {
+            // MOBILE: Usar path
+            if (file.path != null) {
+              print('🎬 DEBUG MOBILE: Processando vídeo do caminho: ${file.path}');
+              _preVideo(file.path!, contexto: contexto);
+            } else {
+              Get.rawSnackbar(
+                message: 'Erro: Caminho do vídeo não disponível.',
+                backgroundColor: Colors.red,
+              );
+            }
+          }
         } else {
-          Get.rawSnackbar(
-            message: 'Erro: Não foi possível processar a imagem.',
-            backgroundColor: Colors.red,
-          );
+          // Para imagens, usar bytes
+          if (bytes != null && bytes.isNotEmpty) {
+            print('DEBUG: Processando imagem com ${bytes.length} bytes');
+            _preImg(bytes, contexto: contexto);
+          } else {
+            Get.rawSnackbar(
+              message: 'Erro: Não foi possível processar a imagem.',
+              backgroundColor: Colors.red,
+            );
+          }
         }
       } else {
         print('DEBUG: Nenhum arquivo selecionado');
@@ -362,22 +413,29 @@ class StoriesController {
 
   static FileValidationResult _validateFileSize(int sizeBytes, bool isAdmin) {
     final mb = sizeBytes / 1024 / 1024;
-    final maxSizeMB = isAdmin ? 50 : 16;
+    final maxSizeMB = isAdmin ? null : 16; // Admin sem limite
 
     if (sizeBytes <= 0) {
       return FileValidationResult(
           isValid: false, errorMessage: 'Arquivo vazio ou corrompido');
     }
 
-    if (mb > maxSizeMB) {
+    // Admin não tem limite de tamanho
+    if (isAdmin) {
+      print('📁 UPLOAD ADMIN: Arquivo de ${mb.toStringAsFixed(2)}MB (sem limite)');
+      return FileValidationResult(isValid: true, maxSizeMB: null);
+    }
+
+    // Usuários normais têm limite de 16MB
+    if (mb > 16) {
       return FileValidationResult(
           isValid: false,
           errorMessage:
-              'Arquivo muito grande!\n\nTamanho atual: ${mb.toStringAsFixed(1)}MB\nTamanho máximo: ${maxSizeMB}MB',
-          maxSizeMB: maxSizeMB.toDouble());
+              'Arquivo muito grande!\n\nTamanho atual: ${mb.toStringAsFixed(1)}MB\nTamanho máximo: 16MB',
+          maxSizeMB: 16.0);
     }
 
-    return FileValidationResult(isValid: true, maxSizeMB: maxSizeMB.toDouble());
+    return FileValidationResult(isValid: true, maxSizeMB: 16.0);
   }
 
   static Future<FileValidationResult> _validateFileBytes(
@@ -551,6 +609,89 @@ class StoriesController {
       },
       title: 'Nova Imagem',
       isVideo: false,
+      contextoFornecido: contexto,
+    );
+  }
+
+  static _preVideo(String videoPath, {String? contexto}) {
+    final videoFile = File(videoPath);
+    
+    _showStoryForm(
+      mediaWidget: VideoPlayer(
+        url: videoPath,
+        isLoacal: true,
+        width: ((Get.width - 96) / 3),
+        height: ((Get.width - 96) / 3) * (16 / 9),
+      ),
+      onSave: (data) async {
+        // Testar autenticação antes do upload
+        final isAuthenticated = await StoriesRepository.testAuthentication();
+        if (!isAuthenticated) {
+          throw Exception('Usuário não autenticado. Faça login novamente.');
+        }
+
+        return await StoriesRepository.addVideo(
+          link: data['link'],
+          video: videoFile,
+          idioma: data['idioma'],
+          contexto: data['contexto'],
+          titulo: data['titulo'],
+          descricao: data['descricao'],
+          tituloNotificacaoMasculino: data['tituloNotifMasculino'],
+          tituloNotificacaoFeminino: data['tituloNotifFeminino'],
+          notificacaoMasculino: data['notifMasculino'],
+          notificacaoFeminino: data['notifFeminino'],
+          enviarNotificacao: data['enviarNotificacao'],
+        );
+      },
+      title: 'Novo Vídeo',
+      isVideo: true,
+      contextoFornecido: contexto,
+    );
+  }
+
+  static _preVideoWeb(Uint8List videoBytes, String fileName, {String? contexto}) {
+    print('🎬 WEB: Preparando preview do vídeo (${videoBytes.length} bytes)');
+    
+    // Para web, criar um blob URL para preview
+    final blob = html.Blob([videoBytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    
+    _showStoryForm(
+      mediaWidget: VideoPlayer(
+        url: url,
+        isLoacal: false, // URL blob não é local
+        width: ((Get.width - 96) / 3),
+        height: ((Get.width - 96) / 3) * (16 / 9),
+      ),
+      onSave: (data) async {
+        print('🎬 WEB: Iniciando upload do vídeo');
+        
+        // Testar autenticação antes do upload
+        final isAuthenticated = await StoriesRepository.testAuthentication();
+        if (!isAuthenticated) {
+          throw Exception('Usuário não autenticado. Faça login novamente.');
+        }
+
+        // Para web, precisamos criar um arquivo temporário
+        // Usar o método addVideoWeb que aceita bytes
+        return await StoriesRepository.addVideoWeb(
+          link: data['link'],
+          videoBytes: videoBytes,
+          fileName: fileName,
+          idioma: data['idioma'],
+          contexto: data['contexto'],
+          titulo: data['titulo'],
+          descricao: data['descricao'],
+          tituloNotificacaoMasculino: data['tituloNotifMasculino'],
+          tituloNotificacaoFeminino: data['tituloNotifFeminino'],
+          notificacaoMasculino: data['notifMasculino'],
+          notificacaoFeminino: data['notifFeminino'],
+          enviarNotificacao: data['enviarNotificacao'],
+        );
+      },
+      title: 'Novo Vídeo',
+      isVideo: true,
       contextoFornecido: contexto,
     );
   }
@@ -1078,30 +1219,4 @@ class StoriesController {
     }
   }
 
-  static _preVideo(String videoPath) {
-    _showStoryForm(
-      mediaWidget: VideoPlayer(
-          url: videoPath,
-          isLoacal: true,
-          width: ((Get.width - 96) / 3),
-          height: ((Get.width - 96) / 3) * (16 / 9)),
-      onSave: (data) async {
-        return await StoriesRepository.addVideo(
-          link: data['link'],
-          video: File(videoPath),
-          idioma: data['idioma'],
-          contexto: data['contexto'],
-          titulo: data['titulo'],
-          descricao: data['descricao'],
-          tituloNotificacaoMasculino: data['tituloNotifMasculino'],
-          tituloNotificacaoFeminino: data['tituloNotifFeminino'],
-          notificacaoMasculino: data['notifMasculino'],
-          notificacaoFeminino: data['notifFeminino'],
-          enviarNotificacao: data['enviarNotificacao'],
-        );
-      },
-      title: 'Novo Vídeo',
-      isVideo: true,
-    );
-  }
 }
