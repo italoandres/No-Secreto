@@ -25,11 +25,32 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(':app')
-}
-subprojects {
+    
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            android {
+                if (namespace == null) {
+                    namespace = project.group ?: "com.example.${project.name.replace('-', '_')}"
+                }
+                
+                // Forçar compatibilidade Java 11 para todos os módulos
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_11
+                    targetCompatibility JavaVersion.VERSION_11
+                }
+            }
+        }
+        
+        // Configurar Kotlin JVM target para todos os projetos
+        if (project.hasProperty("kotlin")) {
+            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = "11"
+                }
+            }
+        }
+    }
+    
     project.configurations.all {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'com.android.support'
@@ -42,9 +63,4 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
-}
-
-// Configuração para Java 17+
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ["--release", "17"]
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -8,9 +9,11 @@ import 'package:video_player/video_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-// Conditional import: only import dart:html when compiling for web
-import 'dart:html' as html show AnchorElement, document;
+import 'package:gal/gal.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:permission_handler/permission_handler.dart';
+// Conditional import for web downloads
+import '../utils/download_helper.dart' if (dart.library.html) '../utils/download_helper_web.dart' if (dart.library.io) '../utils/download_helper_mobile.dart';
 import '../models/storie_file_model.dart';
 import '../models/usuario_model.dart';
 import '../repositories/stories_repository.dart';
@@ -28,6 +31,7 @@ import 'chat_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_isaque_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_rebeca_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'nosso_proposito_view.dart'; // 🙏 NOVO: Para navegação direta
+import '../utils/watermark_processor.dart'; // 🎬 NOVO: Processador de marca d'água
 
 class EnhancedStoriesViewerView extends StatefulWidget {
   final String contexto;
@@ -57,6 +61,10 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   AnimationController? progressController;
   VideoPlayerController? videoController;
   PageController pageController = PageController();
+  
+  // 🎵 FASE 2: Animação e Áudio de Download
+  ValueNotifier<bool> isDownloading = ValueNotifier<bool>(false);
+  final AudioPlayer _audioPlayer = AudioPlayer();
   
   // Timer para sincronização manual de imagens (igual ao vídeo)
   Timer? imageProgressTimer;
@@ -91,6 +99,10 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   
   // ValueNotifier para estado de pause (evita rebuild completo)
   ValueNotifier<bool> isPausedNotifier = ValueNotifier<bool>(false);
+
+  // 🎬 CONTROLE DE PROGRESSO DO PROCESSAMENTO
+  ValueNotifier<double> processingProgress = ValueNotifier<double>(0.0);
+  ValueNotifier<String> processingStatus = ValueNotifier<String>('');
 
   @override
   void initState() {
@@ -138,6 +150,10 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   void dispose() {
     print('DEBUG VIEWER: Disposing viewer');
 
+    // 🎵 FASE 2: Limpar recursos de áudio e animação
+    _audioPlayer.dispose();
+    isDownloading.dispose();
+
     // Para todos os timers primeiro
     autoAdvanceTimer?.cancel();
 
@@ -177,6 +193,9 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     if (Get.isRegistered<StoryInteractionsController>()) {
       Get.delete<StoryInteractionsController>();
     }
+
+    processingProgress.dispose();
+    processingStatus.dispose();
 
     super.dispose();
   }
@@ -1036,7 +1055,8 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     });
   }
 
-  /// Faz download do story atual para a galeria do dispositivo
+  /// Faz download do story atual com marca d'água
+  /// 🎬 VERSÃO FINAL: Com marca d'água aplicada no arquivo baixado
   Future<void> _downloadStory() async {
     final story = stories[currentIndex];
     
@@ -1050,121 +1070,189 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       return;
     }
 
-    print('📥 DOWNLOAD: Iniciando download do story ${story.id}');
+    print('📥 DOWNLOAD: Iniciando download com marca d\'água do story ${story.id}');
     print('📥 DOWNLOAD: URL: ${story.fileUrl}');
     print('📥 DOWNLOAD: Tipo: ${story.fileType?.name}');
     print('📥 DOWNLOAD: Plataforma: ${kIsWeb ? "WEB" : "MOBILE"}');
 
-    if (kIsWeb) {
-      // =============================================
-      // LÓGICA PARA WEB (CHROME, FIREFOX, ETC)
-      // =============================================
-      try {
-        Get.rawSnackbar(
-          message: 'Iniciando download...',
-          backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 2),
-        );
+    // 🔐 Verificar permissões no Mobile
+    if (!kIsWeb) {
+      // Verificar versão do Android para decidir qual permissão usar
+      PermissionStatus status;
+      
+      // Tentar Permission.photos primeiro (Android 13+)
+      status = await Permission.photos.status;
+      
+      if (status.isDenied) {
+        // Pedir permissão
+        status = await Permission.photos.request();
+      }
+      
+      // Se photos não funcionar, tentar storage (Android < 13)
+      if (!status.isGranted) {
+        status = await Permission.storage.status;
+        
+        if (status.isDenied) {
+          status = await Permission.storage.request();
+        }
+      }
+      
+      // Se ainda não tiver permissão, verificar se foi negada permanentemente
+      if (!status.isGranted) {
+        if (status.isPermanentlyDenied) {
+          // Usuário negou permanentemente, precisa ir nas configurações
+          Get.rawSnackbar(
+            message: 'Permissão negada. Vá em Configurações → Permissões para habilitar.',
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+            mainButton: TextButton(
+              onPressed: () => openAppSettings(),
+              child: const Text('Abrir Configurações', style: TextStyle(color: Colors.white)),
+            ),
+          );
+        } else {
+          Get.rawSnackbar(
+            message: 'Permissão de armazenamento necessária para salvar stories.',
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          );
+        }
+        print('⚠️ DOWNLOAD: Permissão negada (status: ${status.name})');
+        return;
+      }
+      print('✅ DOWNLOAD: Permissão concedida');
+    }
 
-        // Definir extensão baseada no tipo
+    // 🎵 Ativar animação e áudio
+    isDownloading.value = true;
+
+    try {
+      if (kIsWeb) {
+        // =============================================
+        // WEB: Download direto (sem processamento)
+        // =============================================
         final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
         final fileName = 'story_${story.id}$ext';
 
-        print('🌐 WEB DOWNLOAD: Criando link de download para: $fileName');
-
-        // Criar um elemento <a> invisível e clicar nele para disparar o download
-        final anchor = html.AnchorElement(href: story.fileUrl!)
-          ..setAttribute('download', fileName)
-          ..style.display = 'none';
-
-        // Adicionar ao DOM, clicar e remover
-        html.document.body?.append(anchor);
-        anchor.click();
-        anchor.remove();
-
-        print('✅ WEB DOWNLOAD: Download iniciado pelo navegador');
+        print('🌐 WEB: Baixando arquivo original: $fileName');
+        downloadFileWeb(story.fileUrl!, fileName);
 
         Get.rawSnackbar(
-          message: 'Download iniciado! Verifique a pasta de downloads. 🎉',
-          backgroundColor: Colors.green,
+          message: 'Download iniciado! (Web não suporta marca d\'água)',
+          backgroundColor: Colors.blue,
           duration: const Duration(seconds: 3),
         );
-      } catch (e) {
-        print('❌ WEB DOWNLOAD: Erro ao baixar: $e');
-        Get.rawSnackbar(
-          message: 'Erro ao iniciar download: $e',
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        );
-      }
-    } else {
-      // =============================================
-      // LÓGICA PARA MOBILE (ANDROID/IOS)
-      // =============================================
-      try {
-        Get.rawSnackbar(
-          message: 'Iniciando download...',
-          backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 2),
-        );
+      } else {
+        // =============================================
+        // MOBILE: Download com processamento de marca d'água
+        // =============================================
+        // 🦁 Tocar rugido
+        _audioPlayer.play(AssetSource('audios/rugido_leao.mp3'));
+        print('🦁 MOBILE: Rugido tocando!');
 
-        // 1. Pegar pasta temporária
+        // 1. Baixar arquivo original
         final tempDir = await getTemporaryDirectory();
-        
-        // 2. Definir extensão baseada no tipo
         final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
-        final tempPath = '${tempDir.path}/${story.id}$ext';
-        
-        print('📱 MOBILE DOWNLOAD: Salvando temporariamente em: $tempPath');
+        final tempPath = '${tempDir.path}/original_${story.id}$ext';
 
-        // 3. Baixar arquivo com Dio
+        print('📱 MOBILE: Baixando arquivo original...');
+        processingStatus.value = 'Baixando...';
+
         await Dio().download(
           story.fileUrl!,
           tempPath,
           onReceiveProgress: (received, total) {
             if (total != -1) {
-              final progress = (received / total * 100).toStringAsFixed(0);
-              print('📱 MOBILE DOWNLOAD: Progresso: $progress%');
+              final progress = received / total * 0.3; // 30% do progresso total
+              processingProgress.value = progress;
+              print('📱 DOWNLOAD: ${(progress * 100).toStringAsFixed(0)}%');
             }
           },
         );
 
-        print('✅ MOBILE DOWNLOAD: Arquivo baixado com sucesso');
+        print('✅ MOBILE: Arquivo baixado, iniciando processamento...');
 
-        // 4. Salvar na galeria
-        bool? result;
+        // 2. Processar com marca d'água
+        String? processedPath;
+
         if (story.fileType == StorieFileType.video) {
-          print('📱 MOBILE DOWNLOAD: Salvando vídeo na galeria...');
-          result = await GallerySaver.saveVideo(tempPath);
+          // PROCESSAR VÍDEO
+          final videoDuration = story.videoDuration?.toDouble() ?? 15.0;
+          print('🎬 MOBILE: Processando vídeo (duração: $videoDuration s)...');
+
+          processedPath = await WatermarkProcessor.processVideoWithWatermark(
+            inputVideoPath: tempPath,
+            videoDuration: videoDuration,
+            onProgress: (progress, status) {
+              // Progresso de 30% a 100%
+              processingProgress.value = 0.3 + (progress * 0.7);
+              processingStatus.value = status;
+              print('🎬 PROCESSAMENTO: ${(processingProgress.value * 100).toStringAsFixed(0)}% - $status');
+            },
+          );
+
+          if (processedPath != null) {
+            print('✅ MOBILE: Vídeo processado com sucesso!');
+            await Gal.putVideo(processedPath);
+            print('✅ MOBILE: Vídeo salvo na galeria!');
+          }
         } else {
-          print('📱 MOBILE DOWNLOAD: Salvando imagem na galeria...');
-          result = await GallerySaver.saveImage(tempPath);
+          // PROCESSAR IMAGEM
+          print('📸 MOBILE: Processando imagem...');
+
+          processedPath = await WatermarkProcessor.processImageWithWatermark(
+            inputImagePath: tempPath,
+            onProgress: (progress, status) {
+              // Progresso de 30% a 100%
+              processingProgress.value = 0.3 + (progress * 0.7);
+              processingStatus.value = status;
+              print('📸 PROCESSAMENTO: ${(processingProgress.value * 100).toStringAsFixed(0)}% - $status');
+            },
+          );
+
+          if (processedPath != null) {
+            print('✅ MOBILE: Imagem processada com sucesso!');
+            await Gal.putImage(processedPath);
+            print('✅ MOBILE: Imagem salva na galeria!');
+          }
         }
 
-        // 5. Verificar resultado e mostrar feedback
-        if (result == true) {
-          print('✅ MOBILE DOWNLOAD: Salvo na galeria com sucesso!');
-          Get.rawSnackbar(
-            message: 'Salvo na galeria com sucesso! 🎉',
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          );
-        } else {
-          print('⚠️ MOBILE DOWNLOAD: Falha ao salvar na galeria');
-          Get.rawSnackbar(
-            message: 'Erro ao salvar na galeria',
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 3),
-          );
+        // 3. Verificar sucesso
+        if (processedPath == null) {
+          throw Exception('Falha no processamento da marca d\'água');
         }
-      } catch (e) {
-        print('❌ MOBILE DOWNLOAD: Erro ao baixar: $e');
-        Get.rawSnackbar(
-          message: 'Erro ao salvar o story: $e',
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        );
+
+        // 4. Limpar arquivo temporário original
+        try {
+          await File(tempPath).delete();
+        } catch (e) {
+          print('⚠️ Erro ao deletar arquivo temporário: $e');
+        }
       }
+
+      // Feedback de SUCESSO
+      Get.rawSnackbar(
+        message: 'Salvo com sucesso! 🎉',
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      );
+      print('✅ DOWNLOAD: Concluído com sucesso!');
+    } catch (e, stackTrace) {
+      // Feedback de ERRO
+      print('❌ DOWNLOAD: Erro: $e');
+      print('📋 Stack: $stackTrace');
+      Get.rawSnackbar(
+        message: 'Erro ao salvar o story: $e',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 4),
+      );
+    } finally {
+      // Desligar animação após 1 segundo
+      await Future.delayed(const Duration(milliseconds: 1000));
+      isDownloading.value = false;
+      processingProgress.value = 0.0;
+      processingStatus.value = '';
+      print('🎬 DOWNLOAD: Animação finalizada');
     }
   }
 
@@ -1554,12 +1642,126 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
           // Story info overlay removido para evitar duplicação
 
-          // Interactions panel
+          // 🎵 FASE 2: Interactions panel OU Animação de Download
           if (stories.isNotEmpty)
-            StoryInteractionsComponent(
-              storyId: stories[currentIndex].id!,
-              onCommentTap: _showComments,
+            ValueListenableBuilder<bool>(
+              valueListenable: isDownloading,
+              builder: (context, isDownloadingNow, child) {
+                if (isDownloadingNow) {
+                  // 1. SE ESTIVER BAIXANDO: Mostra a ANIMAÇÃO DA LOGO
+                  return Positioned(
+                    bottom: 120, // Posição do antigo botão de download
+                    right: 16,
+                    child: DownloadAnimationWidget(
+                      logoWidget: Image.asset(
+                        'lib/assets/img/logo_leao.png',
+                        width: 60,
+                        height: 60,
+                      ),
+                    ),
+                  );
+                } else {
+                  // 2. SE NÃO ESTIVER BAIXANDO: Mostra o MENU LATERAL normal
+                  return StoryInteractionsComponent(
+                    storyId: stories[currentIndex].id!,
+                    onCommentTap: _showComments,
+                  );
+                }
+              },
             ),
+
+          // 🎬 Indicador de progresso do processamento
+          ValueListenableBuilder<bool>(
+            valueListenable: isDownloading,
+            builder: (context, downloading, child) {
+              if (!downloading) return const SizedBox.shrink();
+              
+              return Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  color: Colors.black.withOpacity(0.8),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo animada (mesma do widget existente)
+                        DownloadAnimationWidget(
+                          logoWidget: Image.asset(
+                            'lib/assets/img/logo_leao.png',
+                            width: 150,
+                            height: 150,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        
+                        // Barra de progresso
+                        ValueListenableBuilder<double>(
+                          valueListenable: processingProgress,
+                          builder: (context, progress, child) {
+                            return Container(
+                              width: 280,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[800],
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: progress,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Colors.orange, Colors.deepOrange],
+                                    ),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Status do processamento
+                        ValueListenableBuilder<String>(
+                          valueListenable: processingStatus,
+                          builder: (context, status, child) {
+                            if (status.isEmpty) return const SizedBox.shrink();
+                            return Text(
+                              status,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        
+                        // Porcentagem
+                        ValueListenableBuilder<double>(
+                          valueListenable: processingProgress,
+                          builder: (context, progress, child) {
+                            return Text(
+                              '${(progress * 100).toStringAsFixed(0)}%',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
 
           // Modern Action Menu Overlay
           ValueListenableBuilder<bool>(
@@ -2119,3 +2321,76 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     );
   }
 }
+
+
+// #################################################
+// 🎵 FASE 2: WIDGET DA ANIMAÇÃO DE DOWNLOAD
+// #################################################
+class DownloadAnimationWidget extends StatefulWidget {
+  final Widget logoWidget; // Para passar a logo como um widget
+
+  const DownloadAnimationWidget({
+    super.key,
+    required this.logoWidget,
+  });
+
+  @override
+  _DownloadAnimationWidgetState createState() =>
+      _DownloadAnimationWidgetState();
+}
+
+class _DownloadAnimationWidgetState extends State<DownloadAnimationWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _rotationAnimation; // Para o efeito de "tremer"
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..repeat(reverse: true); // Faz a animação "ir e voltar"
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -0.5), // Desliza para cima
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _rotationAnimation = Tween<double>(
+      begin: -0.05, // Pequena rotação para a esquerda
+      end: 0.05, // Pequena rotação para a direita
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOutSine, // Curva suave para o tremor
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _slideAnimation,
+      child: RotationTransition(
+        // Adiciona a rotação para o tremor
+        turns: _rotationAnimation,
+        child: widget.logoWidget, // Usa a logo passada
+      ),
+    );
+  }
+}
+// FIM DO WIDGET DA ANIMAÇÃO

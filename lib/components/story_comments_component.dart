@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/story_interactions_controller.dart';
 import '../models/story_comment_model.dart';
 import '../models/usuario_model.dart';
@@ -137,10 +138,10 @@ class StoryCommentsComponent extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.blue.withOpacity(0.1),
-            backgroundImage: comment.userPhotoUrl != null
-                ? NetworkImage(comment.userPhotoUrl!)
+            backgroundImage: comment.userPhotoUrl != null && comment.userPhotoUrl!.isNotEmpty
+                ? CachedNetworkImageProvider(comment.userPhotoUrl!)
                 : null,
-            child: comment.userPhotoUrl == null
+            child: comment.userPhotoUrl == null || comment.userPhotoUrl!.isEmpty
                 ? const Icon(Icons.person, color: Colors.blue)
                 : null,
           ),
@@ -324,8 +325,8 @@ class StoryCommentsComponent extends StatelessWidget {
         radius: 16,
         backgroundColor: Colors.blue.withOpacity(0.1),
         backgroundImage:
-            user.imgUrl != null ? NetworkImage(user.imgUrl!) : null,
-        child: user.imgUrl == null
+            user.imgUrl != null && user.imgUrl!.isNotEmpty ? CachedNetworkImageProvider(user.imgUrl!) : null,
+        child: user.imgUrl == null || user.imgUrl!.isEmpty
             ? const Icon(Icons.person, size: 16, color: Colors.blue)
             : null,
       ),

@@ -12,7 +12,7 @@ import '../repositories/stories_repository.dart';
 import '../theme.dart';
 import '../token_usuario.dart';
 import '../utils/debug_logger.dart';
-import 'dart:html' as html show Blob, Url;
+import '../utils/blob_helper.dart';
 
 class FileValidationResult {
   final bool isValid;
@@ -654,8 +654,7 @@ class StoriesController {
     print('🎬 WEB: Preparando preview do vídeo (${videoBytes.length} bytes)');
     
     // Para web, criar um blob URL para preview
-    final blob = html.Blob([videoBytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
+    final url = createBlobUrl(videoBytes);
     
     _showStoryForm(
       mediaWidget: VideoPlayer(
