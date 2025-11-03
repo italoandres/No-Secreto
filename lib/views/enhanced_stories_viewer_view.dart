@@ -1119,31 +1119,32 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     }
   }
   
-  /// Mostra notificação quando download concluir
-  Future<void> _showDownloadCompleteNotification(bool isVideo) async {
+  /// Mostra alerta superior de INÍCIO do download (3 segundos)
+  Future<void> _showDownloadStartAlert() async {
     if (kIsWeb) return;
     
     try {
       final notifications = await _getNotificationsPlugin();
       
-      // Cancelar notificação de progresso
-      await notifications.cancel(999);
-      
-      // Mostrar notificação de conclusão
+      // Alerta superior (heads-up) de início
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'download_channel',
-        'Downloads',
-        channelDescription: 'Notificações de download de stories',
-        importance: Importance.high,
-        priority: Priority.high,
-        showWhen: true,
+        'download_alerts',
+        'Alertas de Download',
+        channelDescription: 'Alertas de início e conclusão de download',
+        importance: Importance.max,        // Máxima importância
+        priority: Priority.max,            // Máxima prioridade
+        showWhen: false,
         autoCancel: true,
+        timeoutAfter: 3000,                // 3 segundos
+        fullScreenIntent: false,
+        category: AndroidNotificationCategory.status,
+        visibility: NotificationVisibility.public,
         icon: '@mipmap/ic_launcher',
       );
       
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
-        presentBadge: true,
+        presentBadge: false,
         presentSound: true,
       );
       
@@ -1153,15 +1154,65 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       );
       
       await notifications.show(
-        0,
-        'Download concluído! 🎉',
+        1,
+        '📥 Iniciando download...',
+        'Aguarde enquanto baixamos o story',
+        details,
+      );
+      
+      print('✅ ALERTA: Download iniciado');
+    } catch (e) {
+      print('⚠️ ALERTA: Erro: $e');
+    }
+  }
+  
+  /// Mostra alerta superior de CONCLUSÃO do download (3 segundos)
+  Future<void> _showDownloadCompleteAlert(bool isVideo) async {
+    if (kIsWeb) return;
+    
+    try {
+      final notifications = await _getNotificationsPlugin();
+      
+      // Cancelar notificação de progresso
+      await notifications.cancel(999);
+      
+      // Alerta superior (heads-up) de conclusão
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'download_alerts',
+        'Alertas de Download',
+        channelDescription: 'Alertas de início e conclusão de download',
+        importance: Importance.max,        // Máxima importância
+        priority: Priority.max,            // Máxima prioridade
+        showWhen: false,
+        autoCancel: true,
+        timeoutAfter: 3000,                // 3 segundos
+        fullScreenIntent: false,
+        category: AndroidNotificationCategory.status,
+        visibility: NotificationVisibility.public,
+        icon: '@mipmap/ic_launcher',
+      );
+      
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: false,
+        presentSound: true,
+      );
+      
+      final NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+      
+      await notifications.show(
+        2,
+        '✅ Download concluído! 🎉',
         isVideo ? 'Vídeo salvo na galeria' : 'Imagem salva na galeria',
         details,
       );
       
-      print('✅ NOTIFICAÇÃO: Download concluído');
+      print('✅ ALERTA: Download concluído');
     } catch (e) {
-      print('⚠️ NOTIFICAÇÃO: Erro: $e');
+      print('⚠️ ALERTA: Erro: $e');
     }
   }
 
@@ -1186,7 +1237,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
 
     // 🔐 Verificar permissões no Mobile
     if (!kIsWeb) {
-      // Verificar versão do Android para decidir qual permissão usar
+      // 1. Verificar permissão de armazenamento
       PermissionStatus status;
       
       // Tentar Permission.photos primeiro (Android 13+)
@@ -1226,10 +1277,56 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
             duration: const Duration(seconds: 3),
           );
         }
-        print('⚠️ DOWNLOAD: Permissão negada (status: ${status.name})');
+        print('⚠️ DOWNLOAD: Permissão de armazenamento negada (status: ${status.name})');
         return;
       }
-      print('✅ DOWNLOAD: Permissão concedida');
+      print('✅ DOWNLOAD: Permissão de armazenamento concedida');
+      
+      // 2. Verificar permissão de sobrepor outras apps (para alertas heads-up)
+      final systemAlertStatus = await Permission.systemAlertWindow.status;
+      
+      if (!systemAlertStatus.isGranted) {
+        print('⚠️ NOTIFICAÇÃO: Permissão de sobrepor apps não concedida');
+        
+        // Perguntar ao usuário se quer habilitar
+        final shouldRequest = await Get.dialog<bool>(
+          AlertDialog(
+            title: const Text('Habilitar Alertas'),
+            content: const Text(
+              'Para mostrar alertas de download sobre outras telas, '
+              'precisamos de permissão para sobrepor apps.\n\n'
+              'Isso permitirá que você veja o progresso do download '
+              'mesmo usando outros aplicativos.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Agora Não'),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Habilitar'),
+              ),
+            ],
+          ),
+        );
+        
+        if (shouldRequest == true) {
+          final requested = await Permission.systemAlertWindow.request();
+          if (requested.isGranted) {
+            print('✅ NOTIFICAÇÃO: Permissão de sobrepor apps concedida');
+            Get.rawSnackbar(
+              message: 'Alertas habilitados! Você verá notificações sobre outras telas.',
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            );
+          } else {
+            print('⚠️ NOTIFICAÇÃO: Permissão de sobrepor apps negada pelo usuário');
+          }
+        }
+      } else {
+        print('✅ NOTIFICAÇÃO: Permissão de sobrepor apps já concedida');
+      }
     }
 
     try {
@@ -1250,9 +1347,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         );
       } else {
         // =============================================
-        // MOBILE: Download com notificações do sistema
+        // MOBILE: Download com alertas do sistema
         // =============================================
         print('📱 MOBILE: Iniciando download...');
+
+        // 🔔 ALERTA SUPERIOR: Iniciando download (3 segundos)
+        await _showDownloadStartAlert();
 
         // Pegar pasta temporária
         final tempDir = await getTemporaryDirectory();
@@ -1266,7 +1366,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
           sendTimeout: const Duration(seconds: 30),
         ));
 
-        // Mostrar notificação inicial
+        // Mostrar notificação de progresso na lista
         await _showDownloadProgressNotification(0);
 
         // Baixar arquivo com progresso
@@ -1282,7 +1382,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
               // Atualizar notificação a cada 10%
               if (progress - lastNotifiedProgress >= 10 || progress == 100) {
                 lastNotifiedProgress = progress;
-                _showDownloadProgressNotification(progress);
+                _showDownloadProgressNotification(progress); // Fire and forget
               }
             }
           },
@@ -1299,16 +1399,10 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
           print('✅ MOBILE: Imagem salva na galeria!');
         }
 
-        // Mostrar notificação de conclusão
-        await _showDownloadCompleteNotification(story.fileType == StorieFileType.video);
+        // 🔔 ALERTA SUPERIOR: Download concluído (3 segundos)
+        await _showDownloadCompleteAlert(story.fileType == StorieFileType.video);
       }
 
-      // Feedback de SUCESSO
-      Get.rawSnackbar(
-        message: 'Salvo com sucesso! 🎉',
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      );
       print('✅ DOWNLOAD: Concluído com sucesso!');
     } catch (e, stackTrace) {
       // Feedback de ERRO
