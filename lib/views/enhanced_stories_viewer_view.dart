@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // Conditional import for web downloads
 import '../utils/download_helper.dart' if (dart.library.html) '../utils/download_helper_web.dart' if (dart.library.io) '../utils/download_helper_mobile.dart';
 import '../models/storie_file_model.dart';
@@ -31,7 +32,6 @@ import 'chat_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_isaque_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_rebeca_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'nosso_proposito_view.dart'; // 🙏 NOVO: Para navegação direta
-import '../utils/watermark_processor.dart'; // 🎬 NOVO: Processador de marca d'água
 
 class EnhancedStoriesViewerView extends StatefulWidget {
   final String contexto;
@@ -62,9 +62,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   VideoPlayerController? videoController;
   PageController pageController = PageController();
   
-  // 🎵 FASE 2: Animação e Áudio de Download
-  ValueNotifier<bool> isDownloading = ValueNotifier<bool>(false);
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  // Removido: isDownloading e _audioPlayer (não são mais necessários)
   
   // Timer para sincronização manual de imagens (igual ao vídeo)
   Timer? imageProgressTimer;
@@ -150,9 +148,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
   void dispose() {
     print('DEBUG VIEWER: Disposing viewer');
 
-    // 🎵 FASE 2: Limpar recursos de áudio e animação
-    _audioPlayer.dispose();
-    isDownloading.dispose();
+    // Removido: dispose de _audioPlayer e isDownloading
 
     // Para todos os timers primeiro
     autoAdvanceTimer?.cancel();
@@ -1055,8 +1051,121 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     });
   }
 
-  /// Faz download do story atual com marca d'água
-  /// 🎬 VERSÃO FINAL: Com marca d'água aplicada no arquivo baixado
+  // Plugin de notificações (singleton)
+  static FlutterLocalNotificationsPlugin? _notificationsPlugin;
+  
+  /// Inicializa o plugin de notificações
+  Future<FlutterLocalNotificationsPlugin> _getNotificationsPlugin() async {
+    if (_notificationsPlugin != null) return _notificationsPlugin!;
+    
+    _notificationsPlugin = FlutterLocalNotificationsPlugin();
+    
+    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    
+    const InitializationSettings initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+    
+    await _notificationsPlugin!.initialize(initSettings);
+    return _notificationsPlugin!;
+  }
+  
+  /// Mostra notificação de progresso do download
+  Future<void> _showDownloadProgressNotification(int progress) async {
+    if (kIsWeb) return;
+    
+    try {
+      final notifications = await _getNotificationsPlugin();
+      
+      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'Downloads',
+        channelDescription: 'Progresso de download de stories',
+        importance: Importance.low,
+        priority: Priority.low,
+        showProgress: true,
+        maxProgress: 100,
+        progress: progress,
+        ongoing: true,
+        autoCancel: false,
+        icon: '@mipmap/ic_launcher',
+      );
+      
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: false,
+        presentBadge: false,
+        presentSound: false,
+      );
+      
+      final NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+      
+      await notifications.show(
+        999, // ID fixo para atualizar a mesma notificação
+        'Baixando story...',
+        '$progress% concluído',
+        details,
+      );
+    } catch (e) {
+      print('⚠️ NOTIFICAÇÃO PROGRESSO: Erro: $e');
+    }
+  }
+  
+  /// Mostra notificação quando download concluir
+  Future<void> _showDownloadCompleteNotification(bool isVideo) async {
+    if (kIsWeb) return;
+    
+    try {
+      final notifications = await _getNotificationsPlugin();
+      
+      // Cancelar notificação de progresso
+      await notifications.cancel(999);
+      
+      // Mostrar notificação de conclusão
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'Downloads',
+        channelDescription: 'Notificações de download de stories',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+        autoCancel: true,
+        icon: '@mipmap/ic_launcher',
+      );
+      
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+      
+      final NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+      
+      await notifications.show(
+        0,
+        'Download concluído! 🎉',
+        isVideo ? 'Vídeo salvo na galeria' : 'Imagem salva na galeria',
+        details,
+      );
+      
+      print('✅ NOTIFICAÇÃO: Download concluído');
+    } catch (e) {
+      print('⚠️ NOTIFICAÇÃO: Erro: $e');
+    }
+  }
+
+  /// Faz download do story atual
   Future<void> _downloadStory() async {
     final story = stories[currentIndex];
     
@@ -1123,118 +1232,82 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       print('✅ DOWNLOAD: Permissão concedida');
     }
 
-    // 🎵 Ativar animação e áudio
-    isDownloading.value = true;
-
     try {
       if (kIsWeb) {
         // =============================================
-        // WEB: Download direto (sem processamento)
+        // WEB: Download direto
         // =============================================
         final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
         final fileName = 'story_${story.id}$ext';
 
-        print('🌐 WEB: Baixando arquivo original: $fileName');
+        print('🌐 WEB: Baixando arquivo: $fileName');
         downloadFileWeb(story.fileUrl!, fileName);
 
         Get.rawSnackbar(
-          message: 'Download iniciado! (Web não suporta marca d\'água)',
+          message: 'Download iniciado!',
           backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         );
       } else {
         // =============================================
-        // MOBILE: Download com processamento de marca d'água
+        // MOBILE: Download com notificações do sistema
         // =============================================
-        // 🦁 Tocar rugido
-        _audioPlayer.play(AssetSource('audios/rugido_leao.mp3'));
-        print('🦁 MOBILE: Rugido tocando!');
+        print('📱 MOBILE: Iniciando download...');
 
-        // 1. Baixar arquivo original
+        // Pegar pasta temporária
         final tempDir = await getTemporaryDirectory();
         final ext = (story.fileType == StorieFileType.video) ? '.mp4' : '.jpg';
-        final tempPath = '${tempDir.path}/original_${story.id}$ext';
+        final tempPath = '${tempDir.path}/${story.id}$ext';
 
-        print('📱 MOBILE: Baixando arquivo original...');
-        processingStatus.value = 'Baixando...';
+        // Configurar Dio com timeout
+        final dio = Dio(BaseOptions(
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(minutes: 5), // 5 minutos para vídeos grandes
+          sendTimeout: const Duration(seconds: 30),
+        ));
 
-        await Dio().download(
+        // Mostrar notificação inicial
+        await _showDownloadProgressNotification(0);
+
+        // Baixar arquivo com progresso
+        int lastNotifiedProgress = 0;
+        await dio.download(
           story.fileUrl!,
           tempPath,
           onReceiveProgress: (received, total) {
             if (total != -1) {
-              final progress = received / total * 0.3; // 30% do progresso total
-              processingProgress.value = progress;
-              print('📱 DOWNLOAD: ${(progress * 100).toStringAsFixed(0)}%');
+              final progress = ((received / total) * 100).toInt();
+              print('📥 DOWNLOAD: $progress%');
+              
+              // Atualizar notificação a cada 10%
+              if (progress - lastNotifiedProgress >= 10 || progress == 100) {
+                lastNotifiedProgress = progress;
+                _showDownloadProgressNotification(progress);
+              }
             }
           },
         );
 
-        print('✅ MOBILE: Arquivo baixado, iniciando processamento...');
+        print('💾 MOBILE: Salvando na galeria...');
 
-        // 2. Processar com marca d'água
-        String? processedPath;
-
+        // Salvar na galeria
         if (story.fileType == StorieFileType.video) {
-          // PROCESSAR VÍDEO
-          final videoDuration = story.videoDuration?.toDouble() ?? 15.0;
-          print('🎬 MOBILE: Processando vídeo (duração: $videoDuration s)...');
-
-          processedPath = await WatermarkProcessor.processVideoWithWatermark(
-            inputVideoPath: tempPath,
-            videoDuration: videoDuration,
-            onProgress: (progress, status) {
-              // Progresso de 30% a 100%
-              processingProgress.value = 0.3 + (progress * 0.7);
-              processingStatus.value = status;
-              print('🎬 PROCESSAMENTO: ${(processingProgress.value * 100).toStringAsFixed(0)}% - $status');
-            },
-          );
-
-          if (processedPath != null) {
-            print('✅ MOBILE: Vídeo processado com sucesso!');
-            await Gal.putVideo(processedPath);
-            print('✅ MOBILE: Vídeo salvo na galeria!');
-          }
+          await Gal.putVideo(tempPath);
+          print('✅ MOBILE: Vídeo salvo na galeria!');
         } else {
-          // PROCESSAR IMAGEM
-          print('📸 MOBILE: Processando imagem...');
-
-          processedPath = await WatermarkProcessor.processImageWithWatermark(
-            inputImagePath: tempPath,
-            onProgress: (progress, status) {
-              // Progresso de 30% a 100%
-              processingProgress.value = 0.3 + (progress * 0.7);
-              processingStatus.value = status;
-              print('📸 PROCESSAMENTO: ${(processingProgress.value * 100).toStringAsFixed(0)}% - $status');
-            },
-          );
-
-          if (processedPath != null) {
-            print('✅ MOBILE: Imagem processada com sucesso!');
-            await Gal.putImage(processedPath);
-            print('✅ MOBILE: Imagem salva na galeria!');
-          }
+          await Gal.putImage(tempPath);
+          print('✅ MOBILE: Imagem salva na galeria!');
         }
 
-        // 3. Verificar sucesso
-        if (processedPath == null) {
-          throw Exception('Falha no processamento da marca d\'água');
-        }
-
-        // 4. Limpar arquivo temporário original
-        try {
-          await File(tempPath).delete();
-        } catch (e) {
-          print('⚠️ Erro ao deletar arquivo temporário: $e');
-        }
+        // Mostrar notificação de conclusão
+        await _showDownloadCompleteNotification(story.fileType == StorieFileType.video);
       }
 
       // Feedback de SUCESSO
       Get.rawSnackbar(
         message: 'Salvo com sucesso! 🎉',
         backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
       );
       print('✅ DOWNLOAD: Concluído com sucesso!');
     } catch (e, stackTrace) {
@@ -1242,17 +1315,12 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       print('❌ DOWNLOAD: Erro: $e');
       print('📋 Stack: $stackTrace');
       Get.rawSnackbar(
-        message: 'Erro ao salvar o story: $e',
+        message: 'Erro ao salvar: $e',
         backgroundColor: Colors.red,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 3),
       );
     } finally {
-      // Desligar animação após 1 segundo
-      await Future.delayed(const Duration(milliseconds: 1000));
-      isDownloading.value = false;
-      processingProgress.value = 0.0;
-      processingStatus.value = '';
-      print('🎬 DOWNLOAD: Animação finalizada');
+      print('✅ DOWNLOAD: Finalizado');
     }
   }
 
@@ -1643,125 +1711,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
           // Story info overlay removido para evitar duplicação
 
           // 🎵 FASE 2: Interactions panel OU Animação de Download
+          // Menu lateral de interações (sempre visível)
           if (stories.isNotEmpty)
-            ValueListenableBuilder<bool>(
-              valueListenable: isDownloading,
-              builder: (context, isDownloadingNow, child) {
-                if (isDownloadingNow) {
-                  // 1. SE ESTIVER BAIXANDO: Mostra a ANIMAÇÃO DA LOGO
-                  return Positioned(
-                    bottom: 120, // Posição do antigo botão de download
-                    right: 16,
-                    child: DownloadAnimationWidget(
-                      logoWidget: Image.asset(
-                        'lib/assets/img/logo_leao.png',
-                        width: 60,
-                        height: 60,
-                      ),
-                    ),
-                  );
-                } else {
-                  // 2. SE NÃO ESTIVER BAIXANDO: Mostra o MENU LATERAL normal
-                  return StoryInteractionsComponent(
-                    storyId: stories[currentIndex].id!,
-                    onCommentTap: _showComments,
-                  );
-                }
-              },
+            StoryInteractionsComponent(
+              storyId: stories[currentIndex].id!,
+              onCommentTap: _showComments,
             ),
 
-          // 🎬 Indicador de progresso do processamento
-          ValueListenableBuilder<bool>(
-            valueListenable: isDownloading,
-            builder: (context, downloading, child) {
-              if (!downloading) return const SizedBox.shrink();
-              
-              return Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  color: Colors.black.withOpacity(0.8),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo animada (mesma do widget existente)
-                        DownloadAnimationWidget(
-                          logoWidget: Image.asset(
-                            'lib/assets/img/logo_leao.png',
-                            width: 150,
-                            height: 150,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        
-                        // Barra de progresso
-                        ValueListenableBuilder<double>(
-                          valueListenable: processingProgress,
-                          builder: (context, progress, child) {
-                            return Container(
-                              width: 280,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[800],
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: FractionallySizedBox(
-                                alignment: Alignment.centerLeft,
-                                widthFactor: progress,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Colors.orange, Colors.deepOrange],
-                                    ),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Status do processamento
-                        ValueListenableBuilder<String>(
-                          valueListenable: processingStatus,
-                          builder: (context, status, child) {
-                            if (status.isEmpty) return const SizedBox.shrink();
-                            return Text(
-                              status,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        
-                        // Porcentagem
-                        ValueListenableBuilder<double>(
-                          valueListenable: processingProgress,
-                          builder: (context, progress, child) {
-                            return Text(
-                              '${(progress * 100).toStringAsFixed(0)}%',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+          // Removido: Card de progresso (agora usa notificações do sistema)
 
           // Modern Action Menu Overlay
           ValueListenableBuilder<bool>(
