@@ -28,6 +28,7 @@ import '../utils/enhanced_image_loader.dart';
 import '../utils/firebase_image_loader.dart';
 import '../utils/context_utils.dart';
 import 'package:whatsapp_chat/utils/debug_utils.dart';
+import '../utils/permission_tracker.dart'; // 🔧 NOVO: Para rastreamento de permissões
 import 'chat_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_isaque_view.dart'; // 🙏 NOVO: Para navegação direta
 import 'sinais_rebeca_view.dart'; // 🙏 NOVO: Para navegação direta
@@ -1083,6 +1084,13 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     try {
       final notifications = await _getNotificationsPlugin();
       
+      // 🔧 MUDANÇA: ongoing dinâmico - false quando 100% para permitir descarte
+      final isOngoing = progress < 100;
+      
+      // 🔧 MUDANÇA: Título e corpo dinâmicos baseados no progresso
+      final title = progress < 100 ? 'Baixando story...' : 'Download concluído';
+      final body = progress < 100 ? '$progress% concluído' : 'Story salvo na galeria';
+      
       final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'download_channel',
         'Downloads',
@@ -1092,7 +1100,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         showProgress: true,
         maxProgress: 100,
         progress: progress,
-        ongoing: true,
+        ongoing: isOngoing, // 🔧 Dinâmico: true durante download, false ao concluir
         autoCancel: false,
         icon: '@mipmap/ic_launcher',
       );
@@ -1110,10 +1118,14 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       
       await notifications.show(
         999, // ID fixo para atualizar a mesma notificação
-        'Baixando story...',
-        '$progress% concluído',
+        title,
+        body,
         details,
       );
+      
+      if (progress >= 100) {
+        print('✅ NOTIFICAÇÃO PROGRESSO: 100% - notificação persistirá até descarte manual');
+      }
     } catch (e) {
       print('⚠️ NOTIFICAÇÃO PROGRESSO: Erro: $e');
     }
@@ -1173,8 +1185,8 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
     try {
       final notifications = await _getNotificationsPlugin();
       
-      // Cancelar notificação de progresso
-      await notifications.cancel(999);
+      // 🔧 REMOVIDO: notifications.cancel(999) - notificação de progresso persiste
+      print('📊 NOTIFICAÇÃO: Mantendo notificação de progresso visível (não cancelada)');
       
       // Alerta superior (heads-up) de conclusão
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -1262,7 +1274,7 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
         if (status.isPermanentlyDenied) {
           // Usuário negou permanentemente, precisa ir nas configurações
           Get.rawSnackbar(
-            message: 'Permissão negada. Vá em Configurações → Permissões para habilitar.',
+            message: 'Permissão negada. Abra Configurações → Permissões → Armazenamento para habilitar.',
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 5),
             mainButton: TextButton(
@@ -1288,40 +1300,55 @@ class _EnhancedStoriesViewerViewState extends State<EnhancedStoriesViewerView>
       if (!systemAlertStatus.isGranted) {
         print('⚠️ NOTIFICAÇÃO: Permissão de sobrepor apps não concedida');
         
-        // Perguntar ao usuário se quer habilitar
-        final shouldRequest = await Get.dialog<bool>(
-          AlertDialog(
-            title: const Text('Habilitar Alertas'),
-            content: const Text(
-              'Para mostrar alertas de download sobre outras telas, '
-              'precisamos de permissão para sobrepor apps.\n\n'
-              'Isso permitirá que você veja o progresso do download '
-              'mesmo usando outros aplicativos.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                child: const Text('Agora Não'),
-              ),
-              TextButton(
-                onPressed: () => Get.back(result: true),
-                child: const Text('Habilitar'),
-              ),
-            ],
-          ),
-        );
+        // 🔧 NOVO: Verificar se deve perguntar novamente (sistema de 7 dias)
+        final tracker = PermissionTracker();
+        final shouldAsk = await tracker.shouldAskAgain();
         
-        if (shouldRequest == true) {
-          final requested = await Permission.systemAlertWindow.request();
-          if (requested.isGranted) {
-            print('✅ NOTIFICAÇÃO: Permissão de sobrepor apps concedida');
-            Get.rawSnackbar(
-              message: 'Alertas habilitados! Você verá notificações sobre outras telas.',
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            );
+        if (!shouldAsk) {
+          final daysSince = await tracker.daysSinceLastDenial();
+          print('⏳ PERMISSÃO: Aguardando ${7 - daysSince} dias para perguntar novamente');
+          // Não perguntar, continuar com download sem alertas heads-up
+        } else {
+          // Perguntar ao usuário se quer habilitar
+          final shouldRequest = await Get.dialog<bool>(
+            AlertDialog(
+              title: const Text('Habilitar Alertas'),
+              content: const Text(
+                'Para mostrar alertas de download sobre outras telas, '
+                'precisamos de permissão para sobrepor apps.\n\n'
+                'Isso permitirá que você veja o progresso do download '
+                'mesmo usando outros aplicativos.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(result: false),
+                  child: const Text('Agora Não'),
+                ),
+                TextButton(
+                  onPressed: () => Get.back(result: true),
+                  child: const Text('Habilitar'),
+                ),
+              ],
+            ),
+          );
+          
+          if (shouldRequest == true) {
+            final requested = await Permission.systemAlertWindow.request();
+            if (requested.isGranted) {
+              await tracker.clearDenial(); // 🔧 Limpar registro de negação
+              print('✅ PERMISSÃO: Concedida - registro limpo');
+              Get.rawSnackbar(
+                message: 'Alertas habilitados! Você verá notificações sobre outras telas.',
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              );
+            } else {
+              await tracker.recordDenial(); // 🔧 Registrar negação
+              print('⚠️ PERMISSÃO: Negada - aguardar 7 dias');
+            }
           } else {
-            print('⚠️ NOTIFICAÇÃO: Permissão de sobrepor apps negada pelo usuário');
+            await tracker.recordDenial(); // 🔧 Registrar quando usuário clica "Agora Não"
+            print('⚠️ PERMISSÃO: Usuário escolheu "Agora Não" - aguardar 7 dias');
           }
         }
       } else {
