@@ -48,11 +48,37 @@ class StoriesView extends StatelessWidget {
                           ),
                         ),
                       )
-                    : VideoPlayer(
-                        url: item.fileUrl!,
-                        isLoacal: false,
-                        width: ((Get.width - 56) / 3),
-                        height: ((Get.width - 56) / 3) * (16 / 9)),
+                    : Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 🆕 Exibir thumbnail ao invés de vídeo
+                          EnhancedImageLoader.buildCachedImage(
+                            imageUrl: item.videoThumbnail ?? item.fileUrl!,
+                            fit: BoxFit.cover,
+                            placeholder: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: const Center(
+                              child: Icon(Icons.videocam, size: 48, color: Colors.white54),
+                            ),
+                          ),
+                          // 🆕 Ícone de play sobreposto
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
             Positioned.fill(

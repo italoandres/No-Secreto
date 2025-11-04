@@ -451,6 +451,7 @@ class StoriesRepository {
     String? notificacaoMasculino,
     String? notificacaoFeminino,
     bool? enviarNotificacao,
+    File? customThumbnail, // 🆕 Thumbnail personalizada (opcional)
   }) async {
     Get.defaultDialog(
         title: AppLanguage.lang('validando'),
@@ -505,26 +506,35 @@ class StoriesRepository {
       return false;
     }
 
-    print('🎬 VIDEO: Gerando thumbnail final (480px)...');
-    Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
-      video: video.path,
-      imageFormat: ImageFormat.JPEG,
-      maxWidth: 480,
-      quality: 25,
-    );
-
-    if (thumbnail == null) {
-      Get.back();
-      print('❌ VIDEO: Thumbnail final retornou null');
-      Get.rawSnackbar(
-        message: 'Erro ao gerar thumbnail final do vídeo',
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-      );
-      return false;
-    }
+    // 🆕 Usar thumbnail personalizada se fornecida, senão gerar automaticamente
+    Uint8List? thumbnail;
     
-    print('✅ VIDEO: Thumbnail final gerado com sucesso (${thumbnail.length} bytes)');
+    if (customThumbnail != null) {
+      print('🎬 VIDEO: Usando thumbnail personalizada fornecida');
+      thumbnail = await customThumbnail.readAsBytes();
+      print('✅ VIDEO: Thumbnail personalizada carregada (${thumbnail.length} bytes)');
+    } else {
+      print('🎬 VIDEO: Gerando thumbnail automática (primeiro frame, 480px)...');
+      thumbnail = await VideoThumbnail.thumbnailData(
+        video: video.path,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 480,
+        quality: 25,
+      );
+
+      if (thumbnail == null) {
+        Get.back();
+        print('❌ VIDEO: Thumbnail automática retornou null');
+        Get.rawSnackbar(
+          message: 'Erro ao gerar thumbnail automática do vídeo',
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        );
+        return false;
+      }
+      
+      print('✅ VIDEO: Thumbnail automática gerada com sucesso (${thumbnail.length} bytes)');
+    }
 
     String thumbnailImg = await _uploadImg(thumbnail);
 

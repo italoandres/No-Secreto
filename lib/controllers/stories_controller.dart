@@ -13,6 +13,7 @@ import '../theme.dart';
 import '../token_usuario.dart';
 import '../utils/debug_logger.dart';
 import '../utils/blob_helper.dart';
+import '../views/video_thumbnail_editor_view.dart'; // 🆕 Editor de thumbnail
 
 class FileValidationResult {
   final bool isValid;
@@ -613,9 +614,31 @@ class StoriesController {
     );
   }
 
-  static _preVideo(String videoPath, {String? contexto}) {
+  static _preVideo(String videoPath, {String? contexto}) async {
     final videoFile = File(videoPath);
     
+    print('🎬 STORIES: Navegando para editor de thumbnail');
+    
+    // 🆕 Navegar para editor de thumbnail
+    final result = await Get.to(() => VideoThumbnailEditorView(
+      videoFile: videoFile,
+      contexto: contexto,
+    ));
+    
+    // Se usuário cancelou, não fazer nada
+    if (result == null) {
+      print('⚠️ STORIES: Usuário cancelou seleção de thumbnail');
+      return;
+    }
+    
+    // Extrair dados retornados do editor
+    final thumbnailFile = result['thumbnailFile'] as File?;
+    final videoFileFromEditor = result['videoFile'] as File?;
+    final contextoFromEditor = result['contexto'] as String?;
+    
+    print('✅ STORIES: Thumbnail selecionada, abrindo formulário');
+    
+    // Abrir formulário com thumbnail escolhida
     _showStoryForm(
       mediaWidget: VideoPlayer(
         url: videoPath,
@@ -632,7 +655,7 @@ class StoriesController {
 
         return await StoriesRepository.addVideo(
           link: data['link'],
-          video: videoFile,
+          video: videoFileFromEditor ?? videoFile,
           idioma: data['idioma'],
           contexto: data['contexto'],
           titulo: data['titulo'],
@@ -642,16 +665,21 @@ class StoriesController {
           notificacaoMasculino: data['notifMasculino'],
           notificacaoFeminino: data['notifFeminino'],
           enviarNotificacao: data['enviarNotificacao'],
+          customThumbnail: thumbnailFile, // 🆕 Passar thumbnail personalizada
         );
       },
       title: 'Novo Vídeo',
       isVideo: true,
-      contextoFornecido: contexto,
+      contextoFornecido: contextoFromEditor ?? contexto,
     );
   }
 
   static _preVideoWeb(Uint8List videoBytes, String fileName, {String? contexto}) {
     print('🎬 WEB: Preparando preview do vídeo (${videoBytes.length} bytes)');
+    
+    // TODO: Implementar editor de thumbnail para Web
+    // Por enquanto, Web usa thumbnail automática (primeiro frame)
+    // Mobile já tem editor completo funcionando
     
     // Para web, criar um blob URL para preview
     final url = createBlobUrl(videoBytes);
